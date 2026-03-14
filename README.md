@@ -1,6 +1,6 @@
 # Biomech Retro Horror
 
-A 1990s-inspired retro video game project with oppressive biomechanical horror aesthetics, built for a GitHub + Codex workflow.
+A 1990s-inspired retro horror game project with oppressive biomechanical aesthetics, built for a GitHub + Codex workflow.
 
 ## Objective
 Create a playable vertical slice first:
@@ -13,28 +13,64 @@ Create a playable vertical slice first:
 - 1 death / restart loop
 - 1 coherent visual biome
 
-## Recommended Stack
+## Tech Stack (Current Scaffold)
 - Engine: Phaser 3
-- Language: JavaScript or TypeScript
-- Repo host: GitHub
-- Implementation agent: Codex
-- Planning / art direction: GPT-5.4 Thinking
+- Runtime: Node.js (npm)
+- Dev server / bundler: Vite
+- Language: JavaScript (ES modules)
 
-## Suggested Repo Structure
+## Project Structure
 
+```text
 /assets
-  /sprites
-  /backgrounds
-  /ui
   /audio
+  /backgrounds
+  /sprites
+  /ui
 /docs
 /prompts
 /src
-  /scenes
+  /data
+    gameConfig.js
   /entities
+  /scenes
+    BootScene.js
   /systems
   /ui
-  /data
+  main.js
+index.html
+package.json
+```
+
+## Local Development
+
+### 1) Install dependencies
+
+```bash
+npm install
+```
+
+### 2) Run the dev server
+
+```bash
+npm run dev
+```
+
+Vite will print a local URL (usually `http://localhost:5173`). Open it in your browser.
+
+### 3) Build for production
+
+```bash
+npm run build
+```
+
+Build output is generated in `dist/`.
+
+### 4) (Optional) Preview the production build
+
+```bash
+npm run preview
+```
 
 ## Workflow
 1. Read `AGENTS.md`.
