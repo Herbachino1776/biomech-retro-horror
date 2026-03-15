@@ -39,29 +39,37 @@ export const DIALOGUE = {
 export const CONCEPT_PRESENTATION = {
   player: {
     crop: { x: 560, y: 170, width: 430, height: 800 },
-    display: { width: 92, height: 136 },
-    origin: { x: 0.5, y: 0.88 }
+    display: { width: 126, height: 184 },
+    origin: { x: 0.5, y: 0.9 }
   },
   skitter: {
     crop: { x: 510, y: 520, width: 540, height: 360 },
-    display: { width: 112, height: 74 },
-    origin: { x: 0.5, y: 0.72 }
+    display: { width: 148, height: 104 },
+    origin: { x: 0.5, y: 0.76 }
   },
   sentinel: {
-    crop: { x: 560, y: 140, width: 430, height: 820 },
-    display: { width: 148, height: 238 },
-    origin: { x: 0.5, y: 0.88 }
+    crop: { x: 520, y: 120, width: 520, height: 860 },
+    display: { width: 186, height: 304 },
+    origin: { x: 0.5, y: 0.9 },
+    alpha: 0.66,
+    tint: 0xc2b398
   },
   laughingEngine: {
-    crop: { x: 400, y: 180, width: 780, height: 700 },
-    display: { width: 330, height: 240 },
-    origin: { x: 0.5, y: 0.5 }
+    crop: { x: 360, y: 140, width: 860, height: 770 },
+    display: { width: 620, height: 440 },
+    origin: { x: 0.5, y: 0.56 },
+    alpha: 1,
+    tint: 0xffd8c2
   },
   chamberBackdrop: {
-    panelWidth: 810,
+    panelWidth: 840,
     panelHeight: 540,
-    panelAlpha: 0.3,
-    panelTint: 0xb8aa92,
+    panelAlpha: 0.86,
+    panelTint: 0xffffff,
+    slabAlphaWithConcept: 0.14,
+    slabAlphaFallbackOnly: 0.9,
+    slabTintWithConcept: 0x3b2e29,
+    slabTintFallbackOnly: 0x1f1714,
     anchorXs: [405, 1215, 2025]
   },
   uiFrame: {

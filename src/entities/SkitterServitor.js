@@ -22,7 +22,8 @@ export class SkitterServitor {
             CONCEPT_PRESENTATION.skitter.crop.width,
             CONCEPT_PRESENTATION.skitter.crop.height
           )
-      : scene.add.rectangle(x, y, 48, 34, 0x64453a).setOrigin(0.5);
+          .setDepth(6)
+      : scene.add.rectangle(x, y, 48, 34, 0x64453a).setOrigin(0.5).setDepth(6);
     scene.physics.add.existing(this.sprite);
 
     this.body = this.sprite.body;
@@ -86,7 +87,17 @@ export class SkitterServitor {
 
   setVisualTint(color) {
     if (this.usingConceptSprite) {
-      this.sprite.setTint(color);
+      if (color === 0x6f8c59) {
+        this.sprite.setTint(0xb5cb8b);
+        return;
+      }
+
+      if (color === 0x1f1714) {
+        this.sprite.setTint(0x5b4a44);
+        return;
+      }
+
+      this.sprite.clearTint();
       return;
     }
 
