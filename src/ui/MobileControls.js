@@ -10,6 +10,7 @@ const CONTROL_COLORS = {
 
 const GAMEPLAY_RING_ALPHA = 0.75;
 const FOCUSED_RING_ALPHA = 0.9;
+const SHOW_MOBILE_FIXED_DEBUG_LABEL = true;
 
 export class MobileControls {
   constructor(scene) {
@@ -39,6 +40,7 @@ export class MobileControls {
       interact: new Set()
     };
 
+    this.pointerActionById = new Map();
     this.controls = [];
     this.uiElements = [];
 
@@ -51,6 +53,7 @@ export class MobileControls {
     scene.scale.on('resize', this.layout, this);
     scene.events.on('shutdown', this.destroy, this);
     scene.input.on('gameout', this.releaseAll, this);
+    scene.input.on('pointerup', this.handlePointerUpAnywhere, this);
   }
 
   createControls() {
@@ -69,13 +72,31 @@ export class MobileControls {
     this.attackControl = this.createButton('ATTACK', 'attack', 42);
     this.interactControl = this.createButton('RITE', 'interact', 34);
 
+    if (SHOW_MOBILE_FIXED_DEBUG_LABEL) {
+      this.fixedModeLabel = this.scene.add
+        .text(8, 8, 'MOBILE HUD: FIXED SCREEN-SPACE', {
+          fontFamily: 'monospace',
+          fontSize: '10px',
+          color: '#8a9f79',
+          backgroundColor: '#140f0dcc',
+          padding: { x: 4, y: 3 }
+        })
+        .setDepth(125)
+        .setScrollFactor(0);
+      this.uiElements.push(this.fixedModeLabel);
+    }
+
     this.layout();
     this.setMode('gameplay');
   }
 
   createButton(label, action, radius, alpha = GAMEPLAY_RING_ALPHA) {
-    const button = this.scene.add.container(0, 0).setDepth(60).setScrollFactor(0);
-    const ring = this.scene.add.circle(0, 0, radius, CONTROL_COLORS.inner, alpha).setStrokeStyle(2, CONTROL_COLORS.stroke, 0.95);
+    const ring = this.scene.add
+      .circle(0, 0, radius, CONTROL_COLORS.inner, alpha)
+      .setStrokeStyle(2, CONTROL_COLORS.stroke, 0.95)
+      .setDepth(60)
+      .setScrollFactor(0);
+
     const text = this.scene.add
       .text(0, 1, label, {
         fontFamily: 'monospace',
@@ -83,43 +104,88 @@ export class MobileControls {
         color: CONTROL_COLORS.glyph,
         fontStyle: 'bold'
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setDepth(61)
+      .setScrollFactor(0);
 
-    button.add([ring, text]);
-    button.ring = ring;
-    button.action = action;
+    const hitArea = this.scene.add
+      .zone(0, 0, radius * 2.5, radius * 2.5)
+      .setOrigin(0.5)
+      .setDepth(62)
+      .setScrollFactor(0);
+
+    const control = {
+      action,
+      radius,
+      ring,
+      text,
+      hitArea,
+      setPosition: (x, y) => {
+        ring.setPosition(x, y);
+        text.setPosition(x, y + 1);
+        hitArea.setPosition(x, y);
+      },
+      setVisible: (visible) => {
+        ring.setVisible(visible);
+        text.setVisible(visible);
+        hitArea.setVisible(visible);
+        if (!visible) {
+          hitArea.disableInteractive();
+        } else if (action !== 'none') {
+          hitArea.setInteractive({ useHandCursor: false });
+        }
+      }
+    };
 
     if (action !== 'none') {
-      ring
+      hitArea
         .setInteractive({ useHandCursor: false })
-        .on('pointerdown', (pointer) => this.onPress(action, pointer.id, ring))
-        .on('pointerup', (pointer) => this.onRelease(action, pointer.id, ring))
-        .on('pointerout', (pointer) => this.onRelease(action, pointer.id, ring));
+        .on('pointerdown', (pointer) => this.onPress(action, pointer.id, control))
+        .on('pointerup', (pointer) => this.onRelease(action, pointer.id, control))
+        .on('pointerout', (pointer) => this.onRelease(action, pointer.id, control));
 
-      this.controls.push(button);
+      this.controls.push(control);
     }
 
-    this.uiElements.push(button);
-    return button;
+    this.uiElements.push(ring, text, hitArea);
+    return control;
   }
 
-  onPress(action, pointerId, ring) {
+  onPress(action, pointerId, control) {
+    this.pointerActionById.set(pointerId, action);
     this.activePointers[action].add(pointerId);
+
     if (!this.state[action] && (action === 'jump' || action === 'attack' || action === 'interact')) {
       this.justPressed[action] = true;
     }
 
     this.state[action] = true;
-    ring.setFillStyle(CONTROL_COLORS.active, FOCUSED_RING_ALPHA);
+    control.ring.setFillStyle(CONTROL_COLORS.active, FOCUSED_RING_ALPHA);
   }
 
-  onRelease(action, pointerId, ring) {
+  onRelease(action, pointerId, control) {
+    if (this.pointerActionById.get(pointerId) === action) {
+      this.pointerActionById.delete(pointerId);
+    }
+
     this.activePointers[action].delete(pointerId);
     const stillActive = this.activePointers[action].size > 0;
     this.state[action] = stillActive;
 
     if (!stillActive) {
-      ring.setFillStyle(CONTROL_COLORS.inner, GAMEPLAY_RING_ALPHA);
+      control.ring.setFillStyle(CONTROL_COLORS.inner, GAMEPLAY_RING_ALPHA);
+    }
+  }
+
+  handlePointerUpAnywhere(pointer) {
+    const action = this.pointerActionById.get(pointer.id);
+    if (!action) {
+      return;
+    }
+
+    const control = this.controls.find((item) => item.action === action);
+    if (control) {
+      this.onRelease(action, pointer.id, control);
     }
   }
 
@@ -128,6 +194,8 @@ export class MobileControls {
       this.activePointers[action].clear();
       this.state[action] = false;
     });
+
+    this.pointerActionById.clear();
 
     this.controls.forEach((control) => {
       control.ring.setFillStyle(CONTROL_COLORS.inner, GAMEPLAY_RING_ALPHA);
@@ -158,9 +226,9 @@ export class MobileControls {
     const width = this.scene.scale.width;
     const height = this.scene.scale.height;
 
-    const leftAnchorX = Math.max(92, width * 0.17);
-    const lowerAnchorY = Math.max(106, height - 96);
-    const rightAnchorX = Math.min(width - 92, width * 0.83);
+    const leftAnchorX = Math.max(86, width * 0.18);
+    const lowerAnchorY = Math.max(100, height - 86);
+    const rightAnchorX = Math.min(width - 86, width * 0.82);
 
     this.dpadBase.setPosition(leftAnchorX, lowerAnchorY);
     this.leftControl.setPosition(leftAnchorX - 50, lowerAnchorY);
@@ -168,8 +236,8 @@ export class MobileControls {
     this.upControl.setPosition(leftAnchorX, lowerAnchorY - 50);
     this.downControl.setPosition(leftAnchorX, lowerAnchorY + 50);
 
-    this.attackControl.setPosition(rightAnchorX, lowerAnchorY - 10);
-    this.interactControl.setPosition(rightAnchorX - 80, lowerAnchorY + 40);
+    this.attackControl.setPosition(rightAnchorX, lowerAnchorY - 12);
+    this.interactControl.setPosition(rightAnchorX - 82, lowerAnchorY + 38);
 
     this.scene.input.setPollAlways();
   }
@@ -203,6 +271,7 @@ export class MobileControls {
   destroy() {
     this.scene.scale.off('resize', this.layout, this);
     this.scene.input.off('gameout', this.releaseAll, this);
+    this.scene.input.off('pointerup', this.handlePointerUpAnywhere, this);
     this.releaseAll();
     this.uiElements.forEach((element) => element.destroy());
     this.uiElements.length = 0;

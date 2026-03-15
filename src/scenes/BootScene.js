@@ -1,8 +1,7 @@
 import Phaser from 'phaser';
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
-
-const toAssetUrl = (relativePath) => new URL(relativePath, import.meta.url).href;
+import { ASSET_URLS } from '../data/assetUrls.js';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -13,12 +12,12 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image(ASSET_KEYS.chamberBackground, toAssetUrl('../../assets/concepts/chamber01-background-01.png'));
-    this.load.image(ASSET_KEYS.player, toAssetUrl('../../assets/concepts/player-concept-01.png'));
-    this.load.image(ASSET_KEYS.skitter, toAssetUrl('../../assets/concepts/skitter-concept-01.png'));
-    this.load.image(ASSET_KEYS.sentinel, toAssetUrl('../../assets/concepts/sentinel-concept-01.png'));
-    this.load.image(ASSET_KEYS.laughingEngine, toAssetUrl('../../assets/concepts/laughing-engine-concept-01.png'));
-    this.load.image(ASSET_KEYS.uiFrame, toAssetUrl('../../assets/ui/biomech-ui-frame-01.png'));
+    this.load.image(ASSET_KEYS.chamberBackground, ASSET_URLS[ASSET_KEYS.chamberBackground]);
+    this.load.image(ASSET_KEYS.player, ASSET_URLS[ASSET_KEYS.player]);
+    this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
+    this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
+    this.load.image(ASSET_KEYS.laughingEngine, ASSET_URLS[ASSET_KEYS.laughingEngine]);
+    this.load.image(ASSET_KEYS.uiFrame, ASSET_URLS[ASSET_KEYS.uiFrame]);
   }
 
   create() {
