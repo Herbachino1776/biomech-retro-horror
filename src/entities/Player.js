@@ -8,6 +8,7 @@ export class Player {
     this.health = config.maxHealth;
     this.facing = 1;
     this.attackActive = false;
+    this.attackId = 0;
     this.lastAttackTime = -Infinity;
     this.lastHitTime = -Infinity;
     this.isDead = false;
@@ -79,6 +80,7 @@ export class Player {
   startAttack(time) {
     this.lastAttackTime = time;
     this.attackActive = true;
+    this.attackId += 1;
     this.attackHitbox.body.enable = true;
     this.setVisualTint(0x6f8c59);
   }
@@ -133,6 +135,7 @@ export class Player {
   updateAttackHitbox() {
     const offsetX = this.facing * 34;
     this.attackHitbox.setPosition(this.sprite.x + offsetX, this.sprite.y - 2);
+    this.attackHitbox.body.updateFromGameObject();
   }
 
   setVisualTint(color) {
