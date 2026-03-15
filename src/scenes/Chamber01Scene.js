@@ -35,6 +35,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.physics.add.collider(this.player.sprite, this.platforms);
 
     this.enemy = new SkitterServitor(this, SKITTER.startX, SKITTER.startY, SKITTER);
+    this.enemyLastAttackHitId = -1;
     this.physics.add.collider(this.enemy.sprite, this.platforms);
 
     this.physics.add.overlap(this.player.attackHitbox, this.enemy.sprite, this.handlePlayerHitEnemy, null, this);
@@ -245,7 +246,16 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    this.enemy.takeDamage(1);
+    if (this.enemyLastAttackHitId === this.player.attackId) {
+      return;
+    }
+
+    this.enemyLastAttackHitId = this.player.attackId;
+    this.enemy.takeDamage(1, this.time.now);
+
+    const knockDirection = Math.sign(this.enemy.sprite.x - this.player.sprite.x) || this.player.facing;
+    this.enemy.body.setVelocityX(knockDirection * 160);
+    this.enemy.body.setVelocityY(-120);
   }
 
   handleEnemyContactPlayer(playerSprite, enemySprite) {

@@ -10,6 +10,7 @@ export class SkitterServitor {
     this.originX = x;
     this.direction = -1;
     this.lastAttackTime = -Infinity;
+    this.lastDamageFlashTime = -Infinity;
 
     this.usingConceptSprite = scene.textures.exists(ASSET_KEYS.skitter);
     this.sprite = this.usingConceptSprite
@@ -34,6 +35,8 @@ export class SkitterServitor {
   }
 
   update(time, playerX) {
+    this.updateVisuals(time);
+
     if (this.dead) {
       this.body.setVelocityX(0);
       return;
@@ -66,12 +69,13 @@ export class SkitterServitor {
     }
   }
 
-  takeDamage(amount) {
+  takeDamage(amount, time = this.scene.time.now) {
     if (this.dead) {
       return;
     }
 
     this.health -= amount;
+    this.lastDamageFlashTime = time;
     this.setVisualTint(0x6f8c59);
 
     if (this.health <= 0) {
@@ -84,6 +88,20 @@ export class SkitterServitor {
         duration: 380
       });
     }
+  }
+
+
+  updateVisuals(time) {
+    if (this.dead) {
+      return;
+    }
+
+    if (time < this.lastDamageFlashTime + 120) {
+      this.setVisualTint(0x6f8c59);
+      return;
+    }
+
+    this.setVisualTint(0x64453a);
   }
 
   setVisualTint(color) {
