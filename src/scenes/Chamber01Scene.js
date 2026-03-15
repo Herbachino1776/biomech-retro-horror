@@ -14,14 +14,11 @@ import {
   SKITTER,
   WORLD
 } from '../data/milestone1Config.js';
-import { ASSET_KEYS, REQUIRED_TEXTURE_KEYS } from '../data/assetKeys.js';
-
-const SHOW_RUNTIME_DEBUG_OVERLAY = true;
+import { ASSET_KEYS } from '../data/assetKeys.js';
 
 export class Chamber01Scene extends Phaser.Scene {
   constructor() {
     super('Chamber01Scene');
-    this.debugOverlay = null;
   }
 
   create() {
@@ -72,7 +69,6 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
     this.hud.update(this.player.health, PLAYER.maxHealth);
-    this.createDebugOverlay();
   }
 
   update(time) {
@@ -100,7 +96,6 @@ export class Chamber01Scene extends Phaser.Scene {
     this.player.update(time, this.getCombinedInput(mobileInput));
     this.enemy.update(time, this.player.sprite.x);
     this.hud.update(this.player.health, PLAYER.maxHealth);
-    this.refreshDebugOverlay();
   }
 
   getCombinedInput(mobileInput) {
@@ -115,42 +110,6 @@ export class Chamber01Scene extends Phaser.Scene {
     };
   }
 
-
-  createDebugOverlay() {
-    if (!SHOW_RUNTIME_DEBUG_OVERLAY || this.debugOverlay) {
-      return;
-    }
-
-    this.debugOverlay = this.add
-      .text(12, 12, '', {
-        fontFamily: 'monospace',
-        fontSize: '11px',
-        color: '#d2c2ac',
-        lineSpacing: 4,
-        backgroundColor: '#140f0dcc',
-        padding: { x: 8, y: 6 }
-      })
-      .setDepth(120)
-      .setScrollFactor(0);
-
-    this.refreshDebugOverlay();
-  }
-
-  refreshDebugOverlay() {
-    if (!this.debugOverlay) {
-      return;
-    }
-
-    const loadedState = REQUIRED_TEXTURE_KEYS.map((key) => `${key}: ${this.textures.exists(key) ? 'LOADED' : 'MISSING'}`);
-    const renderState = [
-      `background: ${this.textures.exists(ASSET_KEYS.chamberBackground) ? 'ART' : 'FALLBACK'}`,
-      `player: ${this.player?.usingConceptSprite ? 'ART' : 'FALLBACK'}`,
-      `enemy: ${this.enemy?.usingConceptSprite ? 'ART' : 'FALLBACK'}`,
-      `ui: ${this.textures.exists(ASSET_KEYS.uiFrame) ? 'ART' : 'FALLBACK'}`
-    ];
-
-    this.debugOverlay.setText(['RUNTIME ASSET DEBUG', ...loadedState, ...renderState].join('\n'));
-  }
 
   createPlatforms() {
     const hasBackdropConcept = this.textures.exists(ASSET_KEYS.chamberBackground);
