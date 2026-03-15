@@ -110,46 +110,68 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   createPlatforms() {
-    const floor = this.add.rectangle(WORLD.width / 2, WORLD.floorY + 36, WORLD.width, 72, COLORS.foreground).setOrigin(0.5);
+    const hasBackdropConcept = this.textures.exists('chamberConceptBg');
+    const floorAlpha = hasBackdropConcept ? 0.62 : 1;
+    const platformAlpha = hasBackdropConcept ? 0.58 : 1;
+    const gateAlpha = hasBackdropConcept ? 0.66 : 1;
+
+    const floor = this.add
+      .rectangle(WORLD.width / 2, WORLD.floorY + 36, WORLD.width, 72, COLORS.foreground, floorAlpha)
+      .setOrigin(0.5);
     this.physics.add.existing(floor, true);
     this.platforms.add(floor);
 
     CHAMBER_PLATFORM_LAYOUT.forEach((platform) => {
-      const block = this.add.rectangle(platform.x, platform.y, platform.width, platform.height, COLORS.bloodMetal).setOrigin(0.5);
+      const block = this.add
+        .rectangle(platform.x, platform.y, platform.width, platform.height, COLORS.bloodMetal, platformAlpha)
+        .setOrigin(0.5);
       this.physics.add.existing(block, true);
       this.platforms.add(block);
     });
 
-    const gate = this.add.rectangle(2100, 390, 34, 160, COLORS.rust).setOrigin(0.5);
+    const gate = this.add.rectangle(2100, 390, 34, 160, COLORS.rust, gateAlpha).setOrigin(0.5);
     this.add.text(2060, 300, 'SEALED', {
       fontFamily: 'monospace',
       fontSize: '13px',
       color: '#8f7d72'
-    });
+    }).setDepth(-7).setAlpha(hasBackdropConcept ? 0.32 : 1);
     this.physics.add.existing(gate, true);
     this.platforms.add(gate);
   }
 
   renderGrayboxBackdrop() {
-    this.add.rectangle(WORLD.width / 2, WORLD.height / 2, WORLD.width, WORLD.height, COLORS.backdrop).setOrigin(0.5);
+    this.add
+      .rectangle(WORLD.width / 2, WORLD.height / 2, WORLD.width, WORLD.height, COLORS.backdrop)
+      .setOrigin(0.5)
+      .setDepth(-12);
 
-    if (this.textures.exists('chamberConceptBg')) {
+    const hasBackdropConcept = this.textures.exists('chamberConceptBg');
+
+    if (hasBackdropConcept) {
       CONCEPT_PRESENTATION.chamberBackdrop.anchorXs.forEach((anchorX) => {
         this.add
           .image(anchorX, WORLD.height / 2, 'chamberConceptBg')
           .setDisplaySize(CONCEPT_PRESENTATION.chamberBackdrop.panelWidth, CONCEPT_PRESENTATION.chamberBackdrop.panelHeight)
           .setAlpha(CONCEPT_PRESENTATION.chamberBackdrop.panelAlpha)
-          .setTint(CONCEPT_PRESENTATION.chamberBackdrop.panelTint);
+          .setTint(CONCEPT_PRESENTATION.chamberBackdrop.panelTint)
+          .setDepth(-11);
       });
     }
 
-    this.add.rectangle(420, 190, 760, 230, COLORS.architecture).setOrigin(0.5);
-    this.add.rectangle(1200, 170, 900, 240, COLORS.architecture).setOrigin(0.5);
+    const slabAlpha = hasBackdropConcept
+      ? CONCEPT_PRESENTATION.chamberBackdrop.slabAlphaWithConcept
+      : CONCEPT_PRESENTATION.chamberBackdrop.slabAlphaFallbackOnly;
+    const slabTint = hasBackdropConcept
+      ? CONCEPT_PRESENTATION.chamberBackdrop.slabTintWithConcept
+      : CONCEPT_PRESENTATION.chamberBackdrop.slabTintFallbackOnly;
 
-    this.add.ellipse(1120, 255, 340, 210, COLORS.oil).setStrokeStyle(5, COLORS.rust, 0.8);
-    this.add.rectangle(1120, 255, 18, 160, COLORS.bone);
-    this.add.rectangle(1030, 255, 10, 130, COLORS.bone, 0.7);
-    this.add.rectangle(1210, 255, 10, 130, COLORS.bone, 0.7);
+    this.add.rectangle(420, 190, 760, 230, slabTint, slabAlpha).setOrigin(0.5).setDepth(-10);
+    this.add.rectangle(1200, 170, 900, 240, slabTint, slabAlpha).setOrigin(0.5).setDepth(-10);
+
+    this.add.ellipse(1120, 255, 340, 210, COLORS.oil, hasBackdropConcept ? 0.1 : 1).setStrokeStyle(3, COLORS.rust, hasBackdropConcept ? 0.2 : 0.8).setDepth(-9);
+    this.add.rectangle(1120, 255, 18, 160, COLORS.bone, hasBackdropConcept ? 0.08 : 0.9).setDepth(-9);
+    this.add.rectangle(1030, 255, 10, 130, COLORS.bone, hasBackdropConcept ? 0.07 : 0.7).setDepth(-9);
+    this.add.rectangle(1210, 255, 10, 130, COLORS.bone, hasBackdropConcept ? 0.07 : 0.7).setDepth(-9);
 
     if (this.textures.exists('laughingEngineConceptSprite')) {
       this.add
@@ -162,9 +184,9 @@ export class Chamber01Scene extends Phaser.Scene {
           CONCEPT_PRESENTATION.laughingEngine.crop.width,
           CONCEPT_PRESENTATION.laughingEngine.crop.height
         )
-        .setAlpha(0.34)
-        .setTint(0xb8aa92)
-        .setDepth(1);
+        .setAlpha(CONCEPT_PRESENTATION.laughingEngine.alpha)
+        .setTint(CONCEPT_PRESENTATION.laughingEngine.tint)
+        .setDepth(-8);
     }
 
     if (this.textures.exists('sentinelConceptSprite')) {
@@ -178,15 +200,16 @@ export class Chamber01Scene extends Phaser.Scene {
           CONCEPT_PRESENTATION.sentinel.crop.width,
           CONCEPT_PRESENTATION.sentinel.crop.height
         )
-        .setAlpha(0.22)
-        .setTint(0x8f7d72);
+        .setAlpha(CONCEPT_PRESENTATION.sentinel.alpha)
+        .setTint(CONCEPT_PRESENTATION.sentinel.tint)
+        .setDepth(-8);
     }
 
-    this.add.text(1032, 355, 'ALTAR ENGINE // FALLBACK SHAPE', {
+    this.add.text(1032, 355, 'ALTAR ENGINE // FALLBACK SAFETY', {
       fontFamily: 'monospace',
       fontSize: '12px',
       color: '#8f7d72'
-    });
+    }).setDepth(-7).setAlpha(hasBackdropConcept ? 0.32 : 1);
   }
 
   createLoreZones() {

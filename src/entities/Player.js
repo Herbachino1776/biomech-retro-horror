@@ -23,7 +23,8 @@ export class Player {
             CONCEPT_PRESENTATION.player.crop.width,
             CONCEPT_PRESENTATION.player.crop.height
           )
-      : scene.add.rectangle(x, y, 48, 60, 0xb8aa92).setOrigin(0.5);
+          .setDepth(6)
+      : scene.add.rectangle(x, y, 48, 60, 0xb8aa92).setOrigin(0.5).setDepth(6);
     scene.physics.add.existing(this.sprite);
 
     this.body = this.sprite.body;
@@ -135,6 +136,26 @@ export class Player {
 
   setVisualTint(color) {
     if (this.usingConceptSprite) {
+      if (color === 0xb8aa92) {
+        this.sprite.clearTint();
+        return;
+      }
+
+      if (color === 0x6f8c59) {
+        this.sprite.setTint(0xb4c78f);
+        return;
+      }
+
+      if (color === 0x64453a) {
+        this.sprite.setTint(0xff9f8b);
+        return;
+      }
+
+      if (color === 0x392926) {
+        this.sprite.setTint(0x6a4b44);
+        return;
+      }
+
       this.sprite.setTint(color);
       return;
     }
