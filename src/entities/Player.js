@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 
 export class Player {
   constructor(scene, x, y, config) {
@@ -13,7 +14,16 @@ export class Player {
 
     this.usingConceptSprite = scene.textures.exists('playerConceptSprite');
     this.sprite = this.usingConceptSprite
-      ? scene.add.image(x, y, 'playerConceptSprite').setOrigin(0.5).setDisplaySize(66, 76)
+      ? scene.add
+          .image(x, y, 'playerConceptSprite')
+          .setOrigin(CONCEPT_PRESENTATION.player.origin.x, CONCEPT_PRESENTATION.player.origin.y)
+          .setDisplaySize(CONCEPT_PRESENTATION.player.display.width, CONCEPT_PRESENTATION.player.display.height)
+          .setCrop(
+            CONCEPT_PRESENTATION.player.crop.x,
+            CONCEPT_PRESENTATION.player.crop.y,
+            CONCEPT_PRESENTATION.player.crop.width,
+            CONCEPT_PRESENTATION.player.crop.height
+          )
       : scene.add.rectangle(x, y, 48, 60, 0xb8aa92).setOrigin(0.5);
     scene.physics.add.existing(this.sprite);
 

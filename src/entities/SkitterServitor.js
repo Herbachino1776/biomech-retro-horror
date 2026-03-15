@@ -1,3 +1,5 @@
+import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
+
 export class SkitterServitor {
   constructor(scene, x, y, config) {
     this.scene = scene;
@@ -10,7 +12,16 @@ export class SkitterServitor {
 
     this.usingConceptSprite = scene.textures.exists('skitterConceptSprite');
     this.sprite = this.usingConceptSprite
-      ? scene.add.image(x, y, 'skitterConceptSprite').setOrigin(0.5).setDisplaySize(72, 48)
+      ? scene.add
+          .image(x, y, 'skitterConceptSprite')
+          .setOrigin(CONCEPT_PRESENTATION.skitter.origin.x, CONCEPT_PRESENTATION.skitter.origin.y)
+          .setDisplaySize(CONCEPT_PRESENTATION.skitter.display.width, CONCEPT_PRESENTATION.skitter.display.height)
+          .setCrop(
+            CONCEPT_PRESENTATION.skitter.crop.x,
+            CONCEPT_PRESENTATION.skitter.crop.y,
+            CONCEPT_PRESENTATION.skitter.crop.width,
+            CONCEPT_PRESENTATION.skitter.crop.height
+          )
       : scene.add.rectangle(x, y, 48, 34, 0x64453a).setOrigin(0.5);
     scene.physics.add.existing(this.sprite);
 
