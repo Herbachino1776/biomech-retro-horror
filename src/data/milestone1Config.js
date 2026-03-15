@@ -1,7 +1,7 @@
 export const WORLD = {
   width: 2200,
   height: 540,
-  floorY: 470,
+  floorY: 476,
   gravityY: 1000
 };
 
@@ -9,13 +9,13 @@ export const PLAYER = {
   maxHealth: 5,
   moveSpeed: 190,
   jumpVelocity: -430,
-  body: { width: 30, height: 54, offsetX: 9, offsetY: 6 },
+  body: { width: 30, height: 54, offsetX: 9, offsetY: 4 },
   attackCooldownMs: 400,
   attackDurationMs: 130,
   invulnMs: 550,
   contactDamage: 1,
   startX: 120,
-  startY: 390
+  startY: 368
 };
 
 export const SKITTER = {
@@ -24,10 +24,10 @@ export const SKITTER = {
   aggroRange: 240,
   contactDamage: 1,
   attackCooldownMs: 1000,
-  body: { width: 40, height: 24, offsetX: 4, offsetY: 12 },
+  body: { width: 42, height: 26, offsetX: 4, offsetY: 14 },
   patrolDistance: 120,
   startX: 980,
-  startY: 430
+  startY: 402
 };
 
 export const DIALOGUE = {
@@ -40,12 +40,12 @@ export const CONCEPT_PRESENTATION = {
   player: {
     crop: { x: 560, y: 170, width: 430, height: 800 },
     display: { width: 126, height: 184 },
-    origin: { x: 0.5, y: 0.9 }
+    origin: { x: 0.5, y: 0.94 }
   },
   skitter: {
     crop: { x: 510, y: 520, width: 540, height: 360 },
     display: { width: 148, height: 104 },
-    origin: { x: 0.5, y: 0.76 }
+    origin: { x: 0.5, y: 0.88 }
   },
   sentinel: {
     crop: { x: 520, y: 120, width: 520, height: 860 },

@@ -16,6 +16,12 @@ import {
 } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 
+const PORTRAIT_WORLD_BAND_RATIO = 0.72;
+const PORTRAIT_WORLD_BAND_MAX = 470;
+const PORTRAIT_WORLD_BAND_MIN = 320;
+const PORTRAIT_CAMERA_ZOOM = 1.36;
+const DESKTOP_CAMERA_ZOOM = 1;
+
 export class Chamber01Scene extends Phaser.Scene {
   constructor() {
     super('Chamber01Scene');
@@ -69,6 +75,12 @@ export class Chamber01Scene extends Phaser.Scene {
     this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
+    this.scale.on('resize', this.applyResponsiveLayout, this);
+    this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.scale.off('resize', this.applyResponsiveLayout, this);
+    });
+
+    this.applyResponsiveLayout();
     this.hud.update(this.player.health, PLAYER.maxHealth);
   }
 
@@ -119,7 +131,7 @@ export class Chamber01Scene extends Phaser.Scene {
     const gateAlpha = hasBackdropConcept ? 0.66 : 1;
 
     const floor = this.add
-      .rectangle(WORLD.width / 2, WORLD.floorY + 36, WORLD.width, 72, COLORS.foreground, floorAlpha)
+      .rectangle(WORLD.width / 2, WORLD.floorY + 32, WORLD.width, 64, COLORS.foreground, floorAlpha)
       .setOrigin(0.5);
     this.physics.add.existing(floor, true);
     this.platforms.add(floor);
@@ -213,6 +225,34 @@ export class Chamber01Scene extends Phaser.Scene {
       fontSize: '12px',
       color: '#8f7d72'
     }).setDepth(-7).setAlpha(hasBackdropConcept ? 0.32 : 1);
+  }
+
+
+  applyResponsiveLayout() {
+    const camera = this.cameras.main;
+    const width = this.scale.width;
+    const height = this.scale.height;
+    const parentWidth = this.scale.parentSize.width;
+    const parentHeight = this.scale.parentSize.height;
+    const isPortraitMobile = this.sys.game.device.input.touch && parentWidth < parentHeight;
+
+    if (isPortraitMobile) {
+      const worldBandHeight = Phaser.Math.Clamp(
+        Math.floor(height * PORTRAIT_WORLD_BAND_RATIO),
+        PORTRAIT_WORLD_BAND_MIN,
+        Math.min(PORTRAIT_WORLD_BAND_MAX, height - 120)
+      );
+      camera.setViewport(0, 0, width, worldBandHeight);
+      camera.setZoom(PORTRAIT_CAMERA_ZOOM);
+      this.mobileControls.setReservedBottomPx(height - worldBandHeight);
+      this.restartText.setPosition(width / 2, Math.max(72, worldBandHeight * 0.2));
+      return;
+    }
+
+    camera.setViewport(0, 0, width, height);
+    camera.setZoom(DESKTOP_CAMERA_ZOOM);
+    this.mobileControls.setReservedBottomPx(0);
+    this.restartText.setPosition(width / 2, 90);
   }
 
   createLoreZones() {
