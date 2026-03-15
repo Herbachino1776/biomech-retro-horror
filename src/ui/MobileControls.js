@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { MOBILE_CONTROLS_LAYOUT } from '../data/layoutConfig.js';
 
 const CONTROL_COLORS = {
   outer: 0x261d19,
@@ -11,7 +12,6 @@ const CONTROL_COLORS = {
 const GAMEPLAY_RING_ALPHA = 0.75;
 const FOCUSED_RING_ALPHA = 0.9;
 const SHOW_MOBILE_FIXED_DEBUG_LABEL = true;
-const PORTRAIT_BOTTOM_CONTROL_BAND = 158;
 
 export class MobileControls {
   constructor(scene) {
@@ -225,6 +225,17 @@ export class MobileControls {
     return snapshot;
   }
 
+  getSafeAreaInsetPx(edge = 'bottom') {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return 0;
+    }
+
+    const cssVar = `--safe-area-inset-${edge}`;
+    const rawValue = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+    const parsed = Number.parseFloat(rawValue);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
   layout() {
     if (!this.enabled) {
       return;
@@ -233,22 +244,40 @@ export class MobileControls {
     const width = this.scene.scale.width;
     const height = this.scene.scale.height;
 
-    const leftAnchorX = Math.max(86, width * 0.18);
+    const leftAnchorX = Math.max(
+      MOBILE_CONTROLS_LAYOUT.horizontalEdgeInset,
+      width * MOBILE_CONTROLS_LAYOUT.leftAnchorRatio
+    );
     const hasPortraitBand = this.scene.scale.parentSize.width < this.scene.scale.parentSize.height;
-    const defaultReservedBottom = hasPortraitBand ? PORTRAIT_BOTTOM_CONTROL_BAND : 0;
+    const safeAreaBottom = this.getSafeAreaInsetPx('bottom');
+
+    const defaultReservedBottom = hasPortraitBand
+      ? MOBILE_CONTROLS_LAYOUT.portraitBaseBand + safeAreaBottom + MOBILE_CONTROLS_LAYOUT.safeAreaBottomPadding
+      : 0;
+
     const reservedBottom = Math.max(this.reservedBottomPx, defaultReservedBottom);
     const controlsTopY = height - reservedBottom;
-    const lowerAnchorY = Phaser.Math.Clamp(controlsTopY + reservedBottom * 0.52, 100, height - 70);
-    const rightAnchorX = Math.min(width - 86, width * 0.82);
+    const lowerAnchorY = Phaser.Math.Clamp(
+      controlsTopY + reservedBottom * 0.56,
+      MOBILE_CONTROLS_LAYOUT.minAnchorY,
+      height - safeAreaBottom - 72
+    );
+    const rightAnchorX = Math.min(
+      width - MOBILE_CONTROLS_LAYOUT.horizontalEdgeInset,
+      width * MOBILE_CONTROLS_LAYOUT.rightAnchorRatio
+    );
 
     this.dpadBase.setPosition(leftAnchorX, lowerAnchorY);
-    this.leftControl.setPosition(leftAnchorX - 50, lowerAnchorY);
-    this.rightControl.setPosition(leftAnchorX + 50, lowerAnchorY);
-    this.upControl.setPosition(leftAnchorX, lowerAnchorY - 50);
-    this.downControl.setPosition(leftAnchorX, lowerAnchorY + 50);
+    this.leftControl.setPosition(leftAnchorX - MOBILE_CONTROLS_LAYOUT.dpadStep, lowerAnchorY);
+    this.rightControl.setPosition(leftAnchorX + MOBILE_CONTROLS_LAYOUT.dpadStep, lowerAnchorY);
+    this.upControl.setPosition(leftAnchorX, lowerAnchorY - MOBILE_CONTROLS_LAYOUT.dpadStep);
+    this.downControl.setPosition(leftAnchorX, lowerAnchorY + MOBILE_CONTROLS_LAYOUT.dpadStep);
 
-    this.attackControl.setPosition(rightAnchorX, lowerAnchorY - 12);
-    this.interactControl.setPosition(rightAnchorX - 82, lowerAnchorY + 38);
+    this.attackControl.setPosition(rightAnchorX, lowerAnchorY - MOBILE_CONTROLS_LAYOUT.actionYOffset);
+    this.interactControl.setPosition(
+      rightAnchorX - MOBILE_CONTROLS_LAYOUT.interactOffsetX,
+      lowerAnchorY + MOBILE_CONTROLS_LAYOUT.interactOffsetY
+    );
 
     this.scene.input.setPollAlways();
   }
@@ -272,7 +301,8 @@ export class MobileControls {
     this.releaseAll();
 
     if (mode === 'dialogue' || mode === 'dead') {
-      this.interactControl.setPosition(this.scene.scale.width - 92, 88);
+      const safeAreaTop = this.getSafeAreaInsetPx('top');
+      this.interactControl.setPosition(this.scene.scale.width - 92, 88 + safeAreaTop + MOBILE_CONTROLS_LAYOUT.safeAreaTopPadding);
       this.interactControl.ring.setFillStyle(CONTROL_COLORS.inner, FOCUSED_RING_ALPHA);
     } else {
       this.layout();

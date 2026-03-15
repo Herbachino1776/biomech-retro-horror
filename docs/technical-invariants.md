@@ -1,33 +1,37 @@
 # Technical Invariants
 
-Short source-of-truth checklist. Do not casually break these.
+Do-not-break checklist for milestone and deployment stability.
 
-## Deployment / Build
-- [ ] Vite production base path remains `/biomech-retro-horror/`.
-- [ ] Dev base remains `/` for local workflow.
-- [ ] Every meaningful task ends with a build verification (`npm run build`).
+## Deployment / Build Invariants
+- Production base path remains `/biomech-retro-horror/`.
+- Local development base remains `/`.
+- Every meaningful task ends with `npm run build` verification.
 
-## Input / Platform Support
-- [ ] Mobile touch controls remain iPhone-usable and fixed to screen space (not world space).
-- [ ] Mobile controls re-layout correctly on viewport resize/orientation changes.
-- [ ] Desktop keyboard support remains available for movement, attack, interact, and restart.
+## Input / Platform Invariants
+- Mobile touch controls remain visible and usable on iPhone portrait layouts.
+- Mobile controls are screen-space anchored and must not drift with world/camera movement.
+- Mobile control visuals and hit areas remain aligned.
+- Desktop keyboard support remains intact (move/jump/attack/interact/restart).
 
-## Rendering / Asset Safety
-- [ ] Asset keys + URL mapping stay centralized.
-- [ ] Loaded textures are primary visual path.
-- [ ] Fallback shapes remain resilience-only when textures are missing/fail.
+## Rendering / Asset Invariants
+- Asset key + URL mapping stays centralized.
+- Loaded textures remain primary rendering path.
+- Fallback visuals are resilience-only when texture load fails.
+- Do not silently invert fallback-vs-art priority.
 
-## Gameplay Stability
-- [ ] Scene flow remains stable (boot/start → chamber → death/restart).
-- [ ] Core combat timing contracts are not changed without explicit retuning.
+## Gameplay Stability Invariants
+- Chamber 01 playable loop remains stable.
+- Scene flow contract remains stable: start/boot → chamber → death/restart.
+- Combat timing contracts are not changed casually.
+- Floor grounding adjustments must preserve collision behavior.
 
 ## Lore Presentation Invariants
-- [ ] Lore moments are implemented as **discrete scene/state transitions**, not only ordinary HUD overlays.
-- [ ] Lore flow supports fade-to-black and fade-in presentation.
-- [ ] Lore screens support slow pan/zoom drift where appropriate.
-- [ ] Lore screens support dedicated music/sound treatment distinct from gameplay ambience.
-- [ ] Lore writing remains cryptic, area-specific, and foreshadowing-oriented.
+- Lore moments should evolve toward **discrete scene/state transitions**.
+- Lore flow should support fade-to-black then fade-in cadence.
+- Lore screens should support subtle pan/zoom drift.
+- Lore screens should support distinct music/sound treatment from active gameplay.
+- Lore writing remains cryptic, area-specific, and foreshadowing-oriented.
 
 ## Change-Type Discipline
-- [ ] Prefer text-only/code-only changes unless binary edits are explicitly required.
-- [ ] If a regression appears, diagnose/fix root cause instead of reimplementing blindly.
+- Prefer text/code changes unless binary changes are explicitly required.
+- Treat regressions as issues to diagnose/fix, not blindly reimplement.

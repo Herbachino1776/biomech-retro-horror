@@ -15,12 +15,7 @@ import {
   WORLD
 } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
-
-const PORTRAIT_WORLD_BAND_RATIO = 0.72;
-const PORTRAIT_WORLD_BAND_MAX = 470;
-const PORTRAIT_WORLD_BAND_MIN = 320;
-const PORTRAIT_CAMERA_ZOOM = 1.36;
-const DESKTOP_CAMERA_ZOOM = 1;
+import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 
 export class Chamber01Scene extends Phaser.Scene {
   constructor() {
@@ -237,20 +232,29 @@ export class Chamber01Scene extends Phaser.Scene {
     const isPortraitMobile = this.sys.game.device.input.touch && parentWidth < parentHeight;
 
     if (isPortraitMobile) {
+      const safeAreaBottom = this.mobileControls.getSafeAreaInsetPx('bottom');
+      const maxWorldBandFromControlNeeds = height - PORTRAIT_LAYOUT.minControlBand - safeAreaBottom;
+      const worldBandMax = Math.max(
+        PORTRAIT_LAYOUT.worldBandMin,
+        Math.min(PORTRAIT_LAYOUT.worldBandMax, maxWorldBandFromControlNeeds)
+      );
       const worldBandHeight = Phaser.Math.Clamp(
-        Math.floor(height * PORTRAIT_WORLD_BAND_RATIO),
-        PORTRAIT_WORLD_BAND_MIN,
-        Math.min(PORTRAIT_WORLD_BAND_MAX, height - 120)
+        Math.floor(height * PORTRAIT_LAYOUT.worldBandRatio),
+        PORTRAIT_LAYOUT.worldBandMin,
+        worldBandMax
       );
       camera.setViewport(0, 0, width, worldBandHeight);
-      camera.setZoom(PORTRAIT_CAMERA_ZOOM);
+      camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
       this.mobileControls.setReservedBottomPx(height - worldBandHeight);
-      this.restartText.setPosition(width / 2, Math.max(72, worldBandHeight * 0.2));
+      this.restartText.setPosition(
+        width / 2,
+        Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY)
+      );
       return;
     }
 
     camera.setViewport(0, 0, width, height);
-    camera.setZoom(DESKTOP_CAMERA_ZOOM);
+    camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
     this.mobileControls.setReservedBottomPx(0);
     this.restartText.setPosition(width / 2, 90);
   }
