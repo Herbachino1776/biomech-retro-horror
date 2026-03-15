@@ -1,37 +1,42 @@
 # Decisions
 
-Concise source of decisions already in force.
+Concise record of technical/design decisions currently in force.
 
-## Engine / Runtime
-- Use **Phaser 3** with modular ES modules; avoid unnecessary framework expansion.
-- Use **Vite** for local dev/build; keep browser-first playability as default.
+## Engine + Runtime
+- Phaser 3 + ES modules is the game runtime baseline.
+- Vite is the dev/build toolchain.
+- Browser play is the primary target (mobile-first without dropping desktop keyboard).
 
 ## Deployment
-- Deploy as a GitHub Pages **project site**, not root site.
-- Vite production build must use base path: `/biomech-retro-horror/`.
-- Local dev base remains `/`.
+- Deploy as GitHub Pages **project site**.
+- Vite production base path stays `/biomech-retro-horror/`.
+- Local dev base path stays `/`.
+- Scene/asset paths must remain base-path-safe (no ad-hoc absolute URL regressions).
 
-## Controls / Input
-- Maintain dual input support: desktop keyboard + mobile touch.
-- Mobile controls are fixed in screen space (`scrollFactor(0)`), never world-anchored.
-- Mobile interaction control is context-switched (gameplay vs dialogue/death).
+## Controls + Input
+- Maintain dual input: mobile touch + desktop keyboard.
+- Mobile controls are always fixed to screen space (`scrollFactor(0)`), never world-space.
+- Portrait layout may reserve a lower control band to keep touch UI visible/reliable.
+- Mobile interact button can context-switch for dialogue/death confirm flows.
 
-## Art Loading / Fallback
-- Assets are referenced through centralized keys and URL mapping, not hardcoded scene paths.
-- Concept art can be used as temporary runtime imagery via crop/display config.
-- Fallback primitives (rectangles/shapes) exist for resilience and should only dominate when texture loading fails.
+## Asset Loading + Fallback
+- Use centralized asset keys and URL mapping.
+- Loaded textures/concept assets are the primary visual path.
+- Fallback primitives are resilience-only when textures fail/miss.
+- Do not let fallback presentation silently become the default art path.
 
-## Gameplay / Scope
-- Vertical-slice-first delivery remains mandatory; no speculative systems beyond milestone needs.
-- Readability and oppressive pacing take precedence over content volume.
-- Keep render/presentation concerns separate from gameplay logic.
+## Gameplay Scope + Milestone Flow
+- Vertical-slice-first development is mandatory.
+- Prefer small reliable fixes over architecture expansion.
+- Regressions must be diagnosed/fixed at root cause, not “reimplemented differently” without reason.
+
+## Lore Presentation Direction
+- Lore is a core identity system, not optional garnish.
+- Presentation direction is toward **discrete cinematic ritual/cutscene-style screens**.
+- Avoid generic always-on in-world overlay/dialogue as the long-term primary lore format.
+- Lore writing remains cryptic, symbolic, and area-specific.
 
 ## Workflow Constraints
-- Read AGENTS and docs before meaningful implementation changes.
-- Keep changes scoped, modular, and reviewable.
+- Before touching gameplay/controls/deployment/asset loading/UI/art/lore, read the doctrine docs.
 - Prefer text/code changes unless binary edits are explicitly required.
-- End meaningful tasks with a build verification step.
-
-## Lore Presentation
-- Lore delivery direction is **discrete cutscene-like screens/states**, not ordinary in-world text overlays alone.
-- Lore text tone should stay cryptic, area-specific, and foreshadow immediate threat/objective.
+- End meaningful tasks with build verification (`npm run build`).

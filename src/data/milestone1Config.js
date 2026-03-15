@@ -40,12 +40,12 @@ export const CONCEPT_PRESENTATION = {
   player: {
     crop: { x: 560, y: 170, width: 430, height: 800 },
     display: { width: 126, height: 184 },
-    origin: { x: 0.5, y: 0.94 }
+    origin: { x: 0.5, y: 0.975 }
   },
   skitter: {
     crop: { x: 510, y: 520, width: 540, height: 360 },
     display: { width: 148, height: 104 },
-    origin: { x: 0.5, y: 0.88 }
+    origin: { x: 0.5, y: 0.93 }
   },
   sentinel: {
     crop: { x: 520, y: 120, width: 520, height: 860 },
