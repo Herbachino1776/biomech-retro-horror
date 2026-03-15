@@ -5,8 +5,24 @@ export class BootScene extends Phaser.Scene {
     super('BootScene');
   }
 
+  preload() {
+    this.load.image('chamberConceptBg', 'assets/concepts/chamber01-background-01.png');
+    this.load.image('playerConceptSprite', 'assets/concepts/player-concept-01.png');
+    this.load.image('skitterConceptSprite', 'assets/concepts/skitter-concept-01.png');
+    this.load.image('sentinelConceptSprite', 'assets/concepts/sentinel-concept-01.png');
+    this.load.image('laughingEngineConceptSprite', 'assets/concepts/laughing-engine-concept-01.png');
+    this.load.image('uiBiomechFrame', 'assets/ui/biomech-ui-frame-01.png');
+  }
+
   create() {
     this.cameras.main.setBackgroundColor('#110d0c');
+
+    if (this.textures.exists('chamberConceptBg')) {
+      this.add
+        .image(this.scale.width / 2, this.scale.height / 2, 'chamberConceptBg')
+        .setDisplaySize(this.scale.width, this.scale.height)
+        .setAlpha(0.2);
+    }
 
     this.add
       .text(this.scale.width / 2, this.scale.height / 2 - 42, 'BIOMECH RETRO HORROR', {

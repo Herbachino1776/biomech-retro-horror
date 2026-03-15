@@ -2,8 +2,20 @@ export class HudOverlay {
   constructor(scene) {
     this.scene = scene;
 
-    const frame = scene.add.rectangle(16, 16, 220, 62, 0x0f1313).setOrigin(0).setScrollFactor(0).setDepth(30);
-    frame.setStrokeStyle(2, 0x64453a, 1);
+    const hasUiFrame = scene.textures.exists('uiBiomechFrame');
+    const frame = hasUiFrame
+      ? scene.add
+          .image(16, 16, 'uiBiomechFrame')
+          .setOrigin(0)
+          .setDisplaySize(220, 62)
+          .setScrollFactor(0)
+          .setDepth(30)
+          .setTint(0xd2c2ac)
+      : scene.add.rectangle(16, 16, 220, 62, 0x0f1313).setOrigin(0).setScrollFactor(0).setDepth(30);
+
+    if (!hasUiFrame) {
+      frame.setStrokeStyle(2, 0x64453a, 1);
+    }
 
     this.healthLabel = scene.add
       .text(30, 28, 'VESSEL INTEGRITY', {

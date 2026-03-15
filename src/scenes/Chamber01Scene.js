@@ -113,6 +113,14 @@ export class Chamber01Scene extends Phaser.Scene {
   renderGrayboxBackdrop() {
     this.add.rectangle(WORLD.width / 2, WORLD.height / 2, WORLD.width, WORLD.height, COLORS.backdrop).setOrigin(0.5);
 
+    if (this.textures.exists('chamberConceptBg')) {
+      this.add
+        .image(WORLD.width / 2, WORLD.height / 2, 'chamberConceptBg')
+        .setDisplaySize(WORLD.width, WORLD.height)
+        .setAlpha(0.22)
+        .setTint(0xb8aa92);
+    }
+
     this.add.rectangle(420, 190, 760, 230, COLORS.architecture).setOrigin(0.5);
     this.add.rectangle(1200, 170, 900, 240, COLORS.architecture).setOrigin(0.5);
 
@@ -121,7 +129,23 @@ export class Chamber01Scene extends Phaser.Scene {
     this.add.rectangle(1030, 255, 10, 130, COLORS.bone, 0.7);
     this.add.rectangle(1210, 255, 10, 130, COLORS.bone, 0.7);
 
-    this.add.text(1032, 355, 'ALTAR ENGINE // PLACEHOLDER FORM', {
+    if (this.textures.exists('laughingEngineConceptSprite')) {
+      this.add
+        .image(1120, 255, 'laughingEngineConceptSprite')
+        .setDisplaySize(310, 220)
+        .setAlpha(0.28)
+        .setTint(0xb8aa92);
+    }
+
+    if (this.textures.exists('sentinelConceptSprite')) {
+      this.add
+        .image(1720, 355, 'sentinelConceptSprite')
+        .setDisplaySize(168, 200)
+        .setAlpha(0.25)
+        .setTint(0x8f7d72);
+    }
+
+    this.add.text(1032, 355, 'ALTAR ENGINE // FALLBACK SHAPE', {
       fontFamily: 'monospace',
       fontSize: '12px',
       color: '#8f7d72'
