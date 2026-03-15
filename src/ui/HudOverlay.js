@@ -1,13 +1,14 @@
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
+import { ASSET_KEYS } from '../data/assetKeys.js';
 
 export class HudOverlay {
   constructor(scene) {
     this.scene = scene;
 
-    const hasUiFrame = scene.textures.exists('uiBiomechFrame');
+    const hasUiFrame = scene.textures.exists(ASSET_KEYS.uiFrame);
     const frame = hasUiFrame
       ? scene.add
-          .image(16, 16, 'uiBiomechFrame')
+          .image(16, 16, ASSET_KEYS.uiFrame)
           .setOrigin(0)
           .setCrop(
             CONCEPT_PRESENTATION.uiFrame.crop.x,

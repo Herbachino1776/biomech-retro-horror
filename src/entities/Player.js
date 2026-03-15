@@ -1,4 +1,5 @@
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
+import { ASSET_KEYS } from '../data/assetKeys.js';
 
 export class Player {
   constructor(scene, x, y, config) {
@@ -11,10 +12,10 @@ export class Player {
     this.lastHitTime = -Infinity;
     this.isDead = false;
 
-    this.usingConceptSprite = scene.textures.exists('playerConceptSprite');
+    this.usingConceptSprite = scene.textures.exists(ASSET_KEYS.player);
     this.sprite = this.usingConceptSprite
       ? scene.add
-          .image(x, y, 'playerConceptSprite')
+          .image(x, y, ASSET_KEYS.player)
           .setOrigin(CONCEPT_PRESENTATION.player.origin.x, CONCEPT_PRESENTATION.player.origin.y)
           .setDisplaySize(CONCEPT_PRESENTATION.player.display.width, CONCEPT_PRESENTATION.player.display.height)
           .setCrop(

@@ -14,10 +14,14 @@ import {
   SKITTER,
   WORLD
 } from '../data/milestone1Config.js';
+import { ASSET_KEYS, REQUIRED_TEXTURE_KEYS } from '../data/assetKeys.js';
+
+const SHOW_RUNTIME_DEBUG_OVERLAY = true;
 
 export class Chamber01Scene extends Phaser.Scene {
   constructor() {
     super('Chamber01Scene');
+    this.debugOverlay = null;
   }
 
   create() {
@@ -68,6 +72,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
     this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.createDebugOverlay();
   }
 
   update(time) {
@@ -95,6 +100,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.player.update(time, this.getCombinedInput(mobileInput));
     this.enemy.update(time, this.player.sprite.x);
     this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.refreshDebugOverlay();
   }
 
   getCombinedInput(mobileInput) {
@@ -109,8 +115,45 @@ export class Chamber01Scene extends Phaser.Scene {
     };
   }
 
+
+  createDebugOverlay() {
+    if (!SHOW_RUNTIME_DEBUG_OVERLAY || this.debugOverlay) {
+      return;
+    }
+
+    this.debugOverlay = this.add
+      .text(12, 12, '', {
+        fontFamily: 'monospace',
+        fontSize: '11px',
+        color: '#d2c2ac',
+        lineSpacing: 4,
+        backgroundColor: '#140f0dcc',
+        padding: { x: 8, y: 6 }
+      })
+      .setDepth(120)
+      .setScrollFactor(0);
+
+    this.refreshDebugOverlay();
+  }
+
+  refreshDebugOverlay() {
+    if (!this.debugOverlay) {
+      return;
+    }
+
+    const loadedState = REQUIRED_TEXTURE_KEYS.map((key) => `${key}: ${this.textures.exists(key) ? 'LOADED' : 'MISSING'}`);
+    const renderState = [
+      `background: ${this.textures.exists(ASSET_KEYS.chamberBackground) ? 'ART' : 'FALLBACK'}`,
+      `player: ${this.player?.usingConceptSprite ? 'ART' : 'FALLBACK'}`,
+      `enemy: ${this.enemy?.usingConceptSprite ? 'ART' : 'FALLBACK'}`,
+      `ui: ${this.textures.exists(ASSET_KEYS.uiFrame) ? 'ART' : 'FALLBACK'}`
+    ];
+
+    this.debugOverlay.setText(['RUNTIME ASSET DEBUG', ...loadedState, ...renderState].join('\n'));
+  }
+
   createPlatforms() {
-    const hasBackdropConcept = this.textures.exists('chamberConceptBg');
+    const hasBackdropConcept = this.textures.exists(ASSET_KEYS.chamberBackground);
     const floorAlpha = hasBackdropConcept ? 0.62 : 1;
     const platformAlpha = hasBackdropConcept ? 0.58 : 1;
     const gateAlpha = hasBackdropConcept ? 0.66 : 1;
@@ -145,12 +188,12 @@ export class Chamber01Scene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(-12);
 
-    const hasBackdropConcept = this.textures.exists('chamberConceptBg');
+    const hasBackdropConcept = this.textures.exists(ASSET_KEYS.chamberBackground);
 
     if (hasBackdropConcept) {
       CONCEPT_PRESENTATION.chamberBackdrop.anchorXs.forEach((anchorX) => {
         this.add
-          .image(anchorX, WORLD.height / 2, 'chamberConceptBg')
+          .image(anchorX, WORLD.height / 2, ASSET_KEYS.chamberBackground)
           .setDisplaySize(CONCEPT_PRESENTATION.chamberBackdrop.panelWidth, CONCEPT_PRESENTATION.chamberBackdrop.panelHeight)
           .setAlpha(CONCEPT_PRESENTATION.chamberBackdrop.panelAlpha)
           .setTint(CONCEPT_PRESENTATION.chamberBackdrop.panelTint)
@@ -173,9 +216,9 @@ export class Chamber01Scene extends Phaser.Scene {
     this.add.rectangle(1030, 255, 10, 130, COLORS.bone, hasBackdropConcept ? 0.07 : 0.7).setDepth(-9);
     this.add.rectangle(1210, 255, 10, 130, COLORS.bone, hasBackdropConcept ? 0.07 : 0.7).setDepth(-9);
 
-    if (this.textures.exists('laughingEngineConceptSprite')) {
+    if (this.textures.exists(ASSET_KEYS.laughingEngine)) {
       this.add
-        .image(1120, 255, 'laughingEngineConceptSprite')
+        .image(1120, 255, ASSET_KEYS.laughingEngine)
         .setOrigin(CONCEPT_PRESENTATION.laughingEngine.origin.x, CONCEPT_PRESENTATION.laughingEngine.origin.y)
         .setDisplaySize(CONCEPT_PRESENTATION.laughingEngine.display.width, CONCEPT_PRESENTATION.laughingEngine.display.height)
         .setCrop(
@@ -189,9 +232,9 @@ export class Chamber01Scene extends Phaser.Scene {
         .setDepth(-8);
     }
 
-    if (this.textures.exists('sentinelConceptSprite')) {
+    if (this.textures.exists(ASSET_KEYS.sentinel)) {
       this.add
-        .image(1720, 410, 'sentinelConceptSprite')
+        .image(1720, 410, ASSET_KEYS.sentinel)
         .setOrigin(CONCEPT_PRESENTATION.sentinel.origin.x, CONCEPT_PRESENTATION.sentinel.origin.y)
         .setDisplaySize(CONCEPT_PRESENTATION.sentinel.display.width, CONCEPT_PRESENTATION.sentinel.display.height)
         .setCrop(
