@@ -3,6 +3,14 @@
 ## Project Role
 You are implementing a retro horror game with a strict visual and gameplay identity. You must preserve tone, scope, and readability.
 
+## Mandatory Pre-Change Context Read
+Before changing gameplay, controls, deployment, asset loading, UI presentation, art integration, or lore presentation, you must read:
+- `docs/current-milestone.md`
+- `docs/decisions.md`
+- `docs/regressions-to-avoid.md`
+- `docs/art-direction-lock.md`
+- `docs/technical-invariants.md`
+
 ## Non-Negotiable Rules
 1. Build the vertical slice before expanding scope.
 2. Do not replace the art style with generic sci-fi, cyberpunk, zombie, or fantasy tropes.
@@ -14,6 +22,15 @@ You are implementing a retro horror game with a strict visual and gameplay ident
 8. Do not silently rewrite unrelated files.
 9. If a design choice is ambiguous, follow the docs rather than inventing a new direction.
 10. Maintain oppressive pacing: avoid arcade chaos unless the milestone explicitly asks for it.
+11. Preserve mobile playability on iPhone-sized browsers.
+12. Preserve desktop keyboard support.
+13. Fallback visuals should only be primary when textures truly fail to load.
+14. GitHub Pages / Vite base-path behavior must not regress.
+15. Prefer text/code changes unless binary changes are explicitly required.
+16. Every meaningful task must end with a build verification step.
+17. Treat regressions as failures to diagnose and fix, not as features to reimplement blindly.
+18. Future art generation and integration must respect the locked palette and readability doctrine in `docs/art-direction-lock.md`.
+19. Lore presentation is a major identity feature and should be discrete, cinematic, ritualized presentation rather than generic dialogue UI.
 
 ## Aesthetic Rules
 - The world is biomechanical, ritualized, oppressive, and alien.
