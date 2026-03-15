@@ -10,6 +10,12 @@ export const gameConfig = {
   height: GAME_HEIGHT,
   backgroundColor: '#1a1412',
   pixelArt: true,
+  input: {
+    activePointers: 3,
+    touch: {
+      capture: true
+    }
+  },
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH

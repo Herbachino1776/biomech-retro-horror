@@ -4,6 +4,9 @@ import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 export class BootScene extends Phaser.Scene {
   constructor() {
     super('BootScene');
+    this.hasStarted = false;
+    this.domEnterHandler = null;
+    this.domPointerHandler = null;
   }
 
   preload() {
@@ -16,27 +19,32 @@ export class BootScene extends Phaser.Scene {
   }
 
   create() {
+    this.hasStarted = false;
     this.cameras.main.setBackgroundColor('#110d0c');
+
+    const centerX = this.scale.width / 2;
+    const centerY = this.scale.height / 2;
+    const smallViewport = this.scale.width < 760;
 
     if (this.textures.exists('chamberConceptBg')) {
       this.add
-        .image(this.scale.width / 2, this.scale.height / 2, 'chamberConceptBg')
+        .image(centerX, centerY, 'chamberConceptBg')
         .setDisplaySize(CONCEPT_PRESENTATION.chamberBackdrop.panelWidth, CONCEPT_PRESENTATION.chamberBackdrop.panelHeight)
         .setAlpha(0.2)
         .setTint(CONCEPT_PRESENTATION.chamberBackdrop.panelTint);
     }
 
     this.add
-      .text(this.scale.width / 2, this.scale.height / 2 - 42, 'BIOMECH RETRO HORROR', {
+      .text(centerX, centerY - (smallViewport ? 88 : 42), 'BIOMECH RETRO HORROR', {
         fontFamily: 'monospace',
-        fontSize: '32px',
+        fontSize: smallViewport ? '24px' : '32px',
         color: '#d4c8ba',
         align: 'center'
       })
       .setOrigin(0.5);
 
     this.add
-      .text(this.scale.width / 2, this.scale.height / 2 + 2, 'CHAMBER 01 // GRAYBOX SLICE', {
+      .text(centerX, centerY - (smallViewport ? 44 : 2), 'CHAMBER 01 // GRAYBOX SLICE', {
         fontFamily: 'monospace',
         fontSize: '16px',
         color: '#8f7d72',
@@ -44,18 +52,94 @@ export class BootScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
+    const interactionPrompt = smallViewport ? 'Tap to Begin' : 'Tap or Press Enter';
+    const instructionText = smallViewport
+      ? `Move: Arrow Keys\nAttack: X\nLore: E\nRestart: R\n\n${interactionPrompt}`
+      : `Move: Arrow Keys\nAttack: X\nLore: E\nRestart after death: R\n\n${interactionPrompt}`;
+
     this.add
-      .text(this.scale.width / 2, this.scale.height / 2 + 48, 'Move: Arrow Keys\nAttack: X\nLore: E\nRestart after death: R\n\nPress Enter', {
+      .text(centerX, centerY + (smallViewport ? 48 : 54), instructionText, {
         fontFamily: 'monospace',
-        fontSize: '14px',
+        fontSize: smallViewport ? '13px' : '14px',
         color: '#8a9f79',
         align: 'center'
       })
       .setOrigin(0.5);
 
-    const enter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-    enter.once('down', () => {
-      this.scene.start('Chamber01Scene');
+    const buttonWidth = smallViewport ? 280 : 320;
+    const buttonHeight = 74;
+    const buttonY = centerY + (smallViewport ? 136 : 158);
+
+    const tapRegion = this.add
+      .rectangle(centerX, buttonY, buttonWidth, buttonHeight, 0x181211, 0.55)
+      .setStrokeStyle(2, 0x8f7d72, 0.9)
+      .setInteractive({ useHandCursor: true });
+
+    this.add
+      .text(centerX, buttonY, interactionPrompt.toUpperCase(), {
+        fontFamily: 'monospace',
+        fontSize: smallViewport ? '20px' : '22px',
+        color: '#d2c2ac',
+        align: 'center'
+      })
+      .setOrigin(0.5);
+
+    this.tweens.add({
+      targets: tapRegion,
+      alpha: { from: 0.5, to: 0.85 },
+      duration: 900,
+      yoyo: true,
+      repeat: -1
     });
+
+    const enter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+    enter.once('down', () => this.beginChamber());
+    tapRegion.once('pointerdown', () => this.beginChamber());
+
+    this.input.once('pointerdown', () => {
+      this.beginChamber();
+    });
+
+    if (typeof window !== 'undefined') {
+      this.domEnterHandler = (event) => {
+        if (event.code === 'Enter') {
+          this.beginChamber();
+        }
+      };
+      this.domPointerHandler = () => {
+        this.beginChamber();
+      };
+      window.addEventListener('keydown', this.domEnterHandler);
+      window.addEventListener('pointerdown', this.domPointerHandler, { passive: true });
+    }
+
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      if (typeof window !== 'undefined') {
+        if (this.domEnterHandler) {
+          window.removeEventListener('keydown', this.domEnterHandler);
+          this.domEnterHandler = null;
+        }
+        if (this.domPointerHandler) {
+          window.removeEventListener('pointerdown', this.domPointerHandler);
+          this.domPointerHandler = null;
+        }
+      }
+    });
+  }
+
+  beginChamber() {
+    if (this.hasStarted) {
+      return;
+    }
+
+    this.hasStarted = true;
+
+    if (this.sound?.context?.state === 'suspended') {
+      this.sound.context.resume().catch(() => {
+        // Audio unlock must never block scene transition on mobile browsers.
+      });
+    }
+
+    this.scene.start('Chamber01Scene');
   }
 }
