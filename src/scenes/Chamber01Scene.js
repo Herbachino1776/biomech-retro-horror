@@ -242,7 +242,7 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   handlePlayerHitEnemy(attackZone, enemySprite) {
-    if (!this.player.attackActive || this.enemy.dead || enemySprite !== this.enemy.sprite) {
+    if (!this.player.attackActive || this.enemy.dead || !this.isEnemyOverlapTarget(enemySprite)) {
       return;
     }
 
@@ -259,7 +259,7 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   handleEnemyContactPlayer(playerSprite, enemySprite) {
-    if (this.enemy.dead || enemySprite !== this.enemy.sprite) {
+    if (this.enemy.dead || !this.isEnemyOverlapTarget(enemySprite)) {
       return;
     }
 
@@ -269,5 +269,9 @@ export class Chamber01Scene extends Phaser.Scene {
       this.player.body.setVelocityX(knockDirection * 220);
       this.player.body.setVelocityY(-220);
     }
+  }
+
+  isEnemyOverlapTarget(target) {
+    return target === this.enemy.sprite || target?.gameObject === this.enemy.sprite;
   }
 }
