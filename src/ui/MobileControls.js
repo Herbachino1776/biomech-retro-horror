@@ -8,6 +8,9 @@ const CONTROL_COLORS = {
   glyph: '#d2c2ac'
 };
 
+const GAMEPLAY_RING_ALPHA = 0.75;
+const FOCUSED_RING_ALPHA = 0.9;
+
 export class MobileControls {
   constructor(scene) {
     this.scene = scene;
@@ -37,7 +40,7 @@ export class MobileControls {
     };
 
     this.controls = [];
-    this.container = scene.add.container(0, 0).setDepth(60).setScrollFactor(0).setVisible(this.enabled);
+    this.uiElements = [];
 
     if (!this.enabled) {
       return;
@@ -51,23 +54,27 @@ export class MobileControls {
   }
 
   createControls() {
-    this.dpadBase = this.scene.add.circle(0, 0, 72, CONTROL_COLORS.outer, 0.68).setStrokeStyle(3, CONTROL_COLORS.stroke, 0.8);
-    this.container.add(this.dpadBase);
+    this.dpadBase = this.scene.add
+      .circle(0, 0, 72, CONTROL_COLORS.outer, 0.68)
+      .setStrokeStyle(3, CONTROL_COLORS.stroke, 0.8)
+      .setDepth(60)
+      .setScrollFactor(0);
+    this.uiElements.push(this.dpadBase);
 
-    this.leftControl = this.createButton('◀', 'left', 0, 0, 34);
-    this.rightControl = this.createButton('▶', 'right', 0, 0, 34);
-    this.upControl = this.createButton('▲', 'jump', 0, 0, 30);
-    this.downControl = this.createButton('▼', 'none', 0, 0, 30, 0.45);
+    this.leftControl = this.createButton('◀', 'left', 34);
+    this.rightControl = this.createButton('▶', 'right', 34);
+    this.upControl = this.createButton('▲', 'jump', 30);
+    this.downControl = this.createButton('▼', 'none', 30, 0.45);
 
-    this.attackControl = this.createButton('ATTACK', 'attack', 0, 0, 42);
-    this.interactControl = this.createButton('RITE', 'interact', 0, 0, 34);
+    this.attackControl = this.createButton('ATTACK', 'attack', 42);
+    this.interactControl = this.createButton('RITE', 'interact', 34);
 
     this.layout();
     this.setMode('gameplay');
   }
 
-  createButton(label, action, x, y, radius, alpha = 0.75) {
-    const button = this.scene.add.container(x, y);
+  createButton(label, action, radius, alpha = GAMEPLAY_RING_ALPHA) {
+    const button = this.scene.add.container(0, 0).setDepth(60).setScrollFactor(0);
     const ring = this.scene.add.circle(0, 0, radius, CONTROL_COLORS.inner, alpha).setStrokeStyle(2, CONTROL_COLORS.stroke, 0.95);
     const text = this.scene.add
       .text(0, 1, label, {
@@ -92,20 +99,18 @@ export class MobileControls {
       this.controls.push(button);
     }
 
-    this.container.add(button);
+    this.uiElements.push(button);
     return button;
   }
 
   onPress(action, pointerId, ring) {
     this.activePointers[action].add(pointerId);
-    if (!this.state[action]) {
-      if (action === 'jump' || action === 'attack' || action === 'interact') {
-        this.justPressed[action] = true;
-      }
+    if (!this.state[action] && (action === 'jump' || action === 'attack' || action === 'interact')) {
+      this.justPressed[action] = true;
     }
 
     this.state[action] = true;
-    ring.setFillStyle(CONTROL_COLORS.active, 0.9);
+    ring.setFillStyle(CONTROL_COLORS.active, FOCUSED_RING_ALPHA);
   }
 
   onRelease(action, pointerId, ring) {
@@ -114,20 +119,18 @@ export class MobileControls {
     this.state[action] = stillActive;
 
     if (!stillActive) {
-      ring.setFillStyle(CONTROL_COLORS.inner, 0.75);
+      ring.setFillStyle(CONTROL_COLORS.inner, GAMEPLAY_RING_ALPHA);
     }
   }
 
   releaseAll() {
     Object.keys(this.activePointers).forEach((action) => {
       this.activePointers[action].clear();
-      if (this.state[action]) {
-        this.state[action] = false;
-      }
+      this.state[action] = false;
     });
 
     this.controls.forEach((control) => {
-      control.ring.setFillStyle(CONTROL_COLORS.inner, 0.75);
+      control.ring.setFillStyle(CONTROL_COLORS.inner, GAMEPLAY_RING_ALPHA);
     });
   }
 
@@ -167,6 +170,8 @@ export class MobileControls {
 
     this.attackControl.setPosition(rightAnchorX, lowerAnchorY - 10);
     this.interactControl.setPosition(rightAnchorX - 80, lowerAnchorY + 40);
+
+    this.scene.input.setPollAlways();
   }
 
   setMode(mode) {
@@ -189,7 +194,7 @@ export class MobileControls {
 
     if (mode === 'dialogue' || mode === 'dead') {
       this.interactControl.setPosition(this.scene.scale.width - 92, 88);
-      this.interactControl.ring.setFillStyle(CONTROL_COLORS.inner, 0.9);
+      this.interactControl.ring.setFillStyle(CONTROL_COLORS.inner, FOCUSED_RING_ALPHA);
     } else {
       this.layout();
     }
@@ -199,6 +204,7 @@ export class MobileControls {
     this.scene.scale.off('resize', this.layout, this);
     this.scene.input.off('gameout', this.releaseAll, this);
     this.releaseAll();
-    this.container.destroy(true);
+    this.uiElements.forEach((element) => element.destroy());
+    this.uiElements.length = 0;
   }
 }

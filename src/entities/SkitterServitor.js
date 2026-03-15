@@ -1,4 +1,5 @@
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
+import { ASSET_KEYS } from '../data/assetKeys.js';
 
 export class SkitterServitor {
   constructor(scene, x, y, config) {
@@ -10,10 +11,10 @@ export class SkitterServitor {
     this.direction = -1;
     this.lastAttackTime = -Infinity;
 
-    this.usingConceptSprite = scene.textures.exists('skitterConceptSprite');
+    this.usingConceptSprite = scene.textures.exists(ASSET_KEYS.skitter);
     this.sprite = this.usingConceptSprite
       ? scene.add
-          .image(x, y, 'skitterConceptSprite')
+          .image(x, y, ASSET_KEYS.skitter)
           .setOrigin(CONCEPT_PRESENTATION.skitter.origin.x, CONCEPT_PRESENTATION.skitter.origin.y)
           .setDisplaySize(CONCEPT_PRESENTATION.skitter.display.width, CONCEPT_PRESENTATION.skitter.display.height)
           .setCrop(

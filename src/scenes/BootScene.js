@@ -1,5 +1,8 @@
 import Phaser from 'phaser';
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
+import { ASSET_KEYS } from '../data/assetKeys.js';
+
+const toAssetUrl = (relativePath) => new URL(relativePath, import.meta.url).href;
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -10,12 +13,12 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('chamberConceptBg', 'assets/concepts/chamber01-background-01.png');
-    this.load.image('playerConceptSprite', 'assets/concepts/player-concept-01.png');
-    this.load.image('skitterConceptSprite', 'assets/concepts/skitter-concept-01.png');
-    this.load.image('sentinelConceptSprite', 'assets/concepts/sentinel-concept-01.png');
-    this.load.image('laughingEngineConceptSprite', 'assets/concepts/laughing-engine-concept-01.png');
-    this.load.image('uiBiomechFrame', 'assets/ui/biomech-ui-frame-01.png');
+    this.load.image(ASSET_KEYS.chamberBackground, toAssetUrl('../../assets/concepts/chamber01-background-01.png'));
+    this.load.image(ASSET_KEYS.player, toAssetUrl('../../assets/concepts/player-concept-01.png'));
+    this.load.image(ASSET_KEYS.skitter, toAssetUrl('../../assets/concepts/skitter-concept-01.png'));
+    this.load.image(ASSET_KEYS.sentinel, toAssetUrl('../../assets/concepts/sentinel-concept-01.png'));
+    this.load.image(ASSET_KEYS.laughingEngine, toAssetUrl('../../assets/concepts/laughing-engine-concept-01.png'));
+    this.load.image(ASSET_KEYS.uiFrame, toAssetUrl('../../assets/ui/biomech-ui-frame-01.png'));
   }
 
   create() {
@@ -26,9 +29,9 @@ export class BootScene extends Phaser.Scene {
     const centerY = this.scale.height / 2;
     const smallViewport = this.scale.width < 760;
 
-    if (this.textures.exists('chamberConceptBg')) {
+    if (this.textures.exists(ASSET_KEYS.chamberBackground)) {
       this.add
-        .image(centerX, centerY, 'chamberConceptBg')
+        .image(centerX, centerY, ASSET_KEYS.chamberBackground)
         .setDisplaySize(CONCEPT_PRESENTATION.chamberBackdrop.panelWidth, CONCEPT_PRESENTATION.chamberBackdrop.panelHeight)
         .setAlpha(0.2)
         .setTint(CONCEPT_PRESENTATION.chamberBackdrop.panelTint);

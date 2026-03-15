@@ -1,4 +1,5 @@
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
+import { ASSET_KEYS } from '../data/assetKeys.js';
 
 export class DialogueSystem {
   constructor(scene, config) {
@@ -6,15 +7,15 @@ export class DialogueSystem {
     this.config = config;
     this.active = false;
 
-    this.container = scene.add.container(0, 0).setDepth(40).setVisible(false);
+    this.container = scene.add.container(0, 0).setDepth(40).setScrollFactor(0).setVisible(false);
 
     const insetX = (scene.scale.width - config.width) / 2;
     const insetY = scene.scale.height - config.height - 18;
 
-    const hasUiFrame = scene.textures.exists('uiBiomechFrame');
+    const hasUiFrame = scene.textures.exists(ASSET_KEYS.uiFrame);
     const outer = hasUiFrame
       ? scene.add
-          .image(insetX, insetY, 'uiBiomechFrame')
+          .image(insetX, insetY, ASSET_KEYS.uiFrame)
           .setOrigin(0)
           .setCrop(
             CONCEPT_PRESENTATION.uiFrame.crop.x,
