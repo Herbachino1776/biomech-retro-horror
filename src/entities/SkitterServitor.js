@@ -8,7 +8,10 @@ export class SkitterServitor {
     this.direction = -1;
     this.lastAttackTime = -Infinity;
 
-    this.sprite = scene.add.rectangle(x, y, 48, 34, 0x64453a).setOrigin(0.5);
+    this.usingConceptSprite = scene.textures.exists('skitterConceptSprite');
+    this.sprite = this.usingConceptSprite
+      ? scene.add.image(x, y, 'skitterConceptSprite').setOrigin(0.5).setDisplaySize(72, 48)
+      : scene.add.rectangle(x, y, 48, 34, 0x64453a).setOrigin(0.5);
     scene.physics.add.existing(this.sprite);
 
     this.body = this.sprite.body;
@@ -56,17 +59,26 @@ export class SkitterServitor {
     }
 
     this.health -= amount;
-    this.sprite.fillColor = 0x6f8c59;
+    this.setVisualTint(0x6f8c59);
 
     if (this.health <= 0) {
       this.dead = true;
       this.body.enable = false;
-      this.sprite.fillColor = 0x1f1714;
+      this.setVisualTint(0x1f1714);
       this.scene.tweens.add({
         targets: this.sprite,
         alpha: 0.2,
         duration: 380
       });
     }
+  }
+
+  setVisualTint(color) {
+    if (this.usingConceptSprite) {
+      this.sprite.setTint(color);
+      return;
+    }
+
+    this.sprite.fillColor = color;
   }
 }

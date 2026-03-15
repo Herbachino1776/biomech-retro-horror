@@ -11,7 +11,10 @@ export class Player {
     this.lastHitTime = -Infinity;
     this.isDead = false;
 
-    this.sprite = scene.add.rectangle(x, y, 48, 60, 0xb8aa92).setOrigin(0.5);
+    this.usingConceptSprite = scene.textures.exists('playerConceptSprite');
+    this.sprite = this.usingConceptSprite
+      ? scene.add.image(x, y, 'playerConceptSprite').setOrigin(0.5).setDisplaySize(66, 76)
+      : scene.add.rectangle(x, y, 48, 60, 0xb8aa92).setOrigin(0.5);
     scene.physics.add.existing(this.sprite);
 
     this.body = this.sprite.body;
@@ -66,7 +69,7 @@ export class Player {
     this.lastAttackTime = time;
     this.attackActive = true;
     this.attackHitbox.body.enable = true;
-    this.sprite.fillColor = 0x6f8c59;
+    this.setVisualTint(0x6f8c59);
   }
 
   endAttack() {
@@ -94,30 +97,39 @@ export class Player {
     this.endAttack();
     this.body.setVelocity(0, 0);
     this.body.enable = false;
-    this.sprite.fillColor = 0x392926;
+    this.setVisualTint(0x392926);
   }
 
   updateVisuals(time) {
     if (this.isDead) {
-      this.sprite.fillColor = 0x392926;
+      this.setVisualTint(0x392926);
       return;
     }
 
     if (this.attackActive) {
-      this.sprite.fillColor = 0x6f8c59;
+      this.setVisualTint(0x6f8c59);
       return;
     }
 
     if (time < this.lastHitTime + 140) {
-      this.sprite.fillColor = 0x64453a;
+      this.setVisualTint(0x64453a);
       return;
     }
 
-    this.sprite.fillColor = 0xb8aa92;
+    this.setVisualTint(0xb8aa92);
   }
 
   updateAttackHitbox() {
     const offsetX = this.facing * 34;
     this.attackHitbox.setPosition(this.sprite.x + offsetX, this.sprite.y - 2);
+  }
+
+  setVisualTint(color) {
+    if (this.usingConceptSprite) {
+      this.sprite.setTint(color);
+      return;
+    }
+
+    this.sprite.fillColor = color;
   }
 }
