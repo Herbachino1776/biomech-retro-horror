@@ -11,6 +11,7 @@ const CONTROL_COLORS = {
 const GAMEPLAY_RING_ALPHA = 0.75;
 const FOCUSED_RING_ALPHA = 0.9;
 const SHOW_MOBILE_FIXED_DEBUG_LABEL = true;
+const PORTRAIT_BOTTOM_CONTROL_BAND = 158;
 
 export class MobileControls {
   constructor(scene) {
@@ -43,6 +44,7 @@ export class MobileControls {
     this.pointerActionById = new Map();
     this.controls = [];
     this.uiElements = [];
+    this.reservedBottomPx = 0;
 
     if (!this.enabled) {
       return;
@@ -202,6 +204,11 @@ export class MobileControls {
     });
   }
 
+  setReservedBottomPx(heightPx) {
+    this.reservedBottomPx = Math.max(0, heightPx);
+    this.layout();
+  }
+
   getInputState() {
     const snapshot = {
       left: this.state.left,
@@ -227,7 +234,11 @@ export class MobileControls {
     const height = this.scene.scale.height;
 
     const leftAnchorX = Math.max(86, width * 0.18);
-    const lowerAnchorY = Math.max(100, height - 86);
+    const hasPortraitBand = this.scene.scale.parentSize.width < this.scene.scale.parentSize.height;
+    const defaultReservedBottom = hasPortraitBand ? PORTRAIT_BOTTOM_CONTROL_BAND : 0;
+    const reservedBottom = Math.max(this.reservedBottomPx, defaultReservedBottom);
+    const controlsTopY = height - reservedBottom;
+    const lowerAnchorY = Phaser.Math.Clamp(controlsTopY + reservedBottom * 0.52, 100, height - 70);
     const rightAnchorX = Math.min(width - 86, width * 0.82);
 
     this.dpadBase.setPosition(leftAnchorX, lowerAnchorY);

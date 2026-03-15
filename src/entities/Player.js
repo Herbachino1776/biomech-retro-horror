@@ -32,8 +32,11 @@ export class Player {
     this.body = this.sprite.body;
     this.body.setCollideWorldBounds(true);
     this.body.setGravityY(0);
-    this.body.setSize(config.body.width, config.body.height);
-    this.body.setOffset(config.body.offsetX, config.body.offsetY);
+
+    const scaleX = Math.abs(this.sprite.scaleX) || 1;
+    const scaleY = Math.abs(this.sprite.scaleY) || 1;
+    this.body.setSize(config.body.width / scaleX, config.body.height / scaleY);
+    this.body.setOffset(config.body.offsetX / scaleX, config.body.offsetY / scaleY);
 
     this.attackHitbox = scene.add.zone(x + 26, y, 38, 30);
     scene.physics.add.existing(this.attackHitbox);
@@ -133,8 +136,9 @@ export class Player {
   }
 
   updateAttackHitbox() {
-    const offsetX = this.facing * 34;
-    this.attackHitbox.setPosition(this.sprite.x + offsetX, this.sprite.y - 2);
+    const strikeY = this.body.y + this.body.height - 14;
+    const offsetX = this.facing * 28;
+    this.attackHitbox.setPosition(this.sprite.x + offsetX, strikeY);
     this.attackHitbox.body.updateFromGameObject();
   }
 
