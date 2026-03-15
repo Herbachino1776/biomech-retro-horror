@@ -72,6 +72,47 @@ Build output is generated in `dist/`.
 npm run preview
 ```
 
+## GitHub Pages Deployment
+
+This project is deployed as a **project site** (not a user/org root site), so the production base path must be:
+
+`/biomech-retro-horror/`
+
+Expected live URL:
+
+`https://herbachino1776.github.io/biomech-retro-horror/`
+
+### Deployment setup
+
+1. In GitHub, open **Settings → Pages**.
+2. Set **Source** to **GitHub Actions**.
+3. Ensure your default branch is `main` (or update `.github/workflows/deploy-pages.yml` if different).
+
+### Deploy
+
+Every push to `main` triggers `.github/workflows/deploy-pages.yml` to:
+
+1. install dependencies with `npm ci`
+2. run `npm run build`
+3. upload `dist/` as the Pages artifact
+4. deploy to GitHub Pages
+
+### Play the deployed build
+
+Open:
+
+`https://herbachino1776.github.io/biomech-retro-horror/`
+
+### Local dev remains unchanged
+
+Use:
+
+```bash
+npm run dev
+```
+
+This still serves the game locally from `/`.
+
 ## Workflow
 1. Read `AGENTS.md`.
 2. Read all files in `/docs`.
