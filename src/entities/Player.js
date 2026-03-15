@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 
 export class Player {
@@ -40,16 +39,16 @@ export class Player {
     this.attackHitbox.body.enable = false;
   }
 
-  update(time, cursors, keyAttack) {
+  update(time, input) {
     if (this.isDead) {
       this.body.setVelocityX(0);
       return;
     }
 
     let direction = 0;
-    if (cursors.left.isDown) {
+    if (input.left) {
       direction = -1;
-    } else if (cursors.right.isDown) {
+    } else if (input.right) {
       direction = 1;
     }
 
@@ -59,11 +58,11 @@ export class Player {
 
     this.body.setVelocityX(direction * this.config.moveSpeed);
 
-    if ((Phaser.Input.Keyboard.JustDown(cursors.up) || Phaser.Input.Keyboard.JustDown(cursors.space)) && this.body.blocked.down) {
+    if (input.jumpPressed && this.body.blocked.down) {
       this.body.setVelocityY(this.config.jumpVelocity);
     }
 
-    if (Phaser.Input.Keyboard.JustDown(keyAttack) && time > this.lastAttackTime + this.config.attackCooldownMs) {
+    if (input.attackPressed && time > this.lastAttackTime + this.config.attackCooldownMs) {
       this.startAttack(time);
     }
 
