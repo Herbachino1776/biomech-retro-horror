@@ -3,6 +3,7 @@ import { Player } from '../entities/Player.js';
 import { SkitterServitor } from '../entities/SkitterServitor.js';
 import { DialogueSystem } from '../systems/DialogueSystem.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
+import { MobileControls } from '../ui/MobileControls.js';
 import {
   CHAMBER_PLATFORM_LAYOUT,
   CONCEPT_PRESENTATION,
@@ -40,6 +41,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.dialogue = new DialogueSystem(this, DIALOGUE);
     this.hud = new HudOverlay(this);
+    this.mobileControls = new MobileControls(this);
 
     this.loreZones = this.physics.add.staticGroup();
     this.triggeredLoreIds = new Set();
@@ -69,25 +71,42 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   update(time) {
+    const mobileInput = this.mobileControls.getInputState();
+
     if (this.player.isDead) {
+      this.mobileControls.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
-      if (Phaser.Input.Keyboard.JustDown(this.keyRestart)) {
+      if (Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) {
         this.scene.restart();
       }
       return;
     }
 
     if (this.dialogue.active) {
+      this.mobileControls.setMode('dialogue');
       this.player.body.setVelocityX(0);
-      if (Phaser.Input.Keyboard.JustDown(this.keyInteract)) {
+      if (Phaser.Input.Keyboard.JustDown(this.keyInteract) || mobileInput.interactPressed) {
         this.dialogue.hide();
       }
       return;
     }
 
-    this.player.update(time, this.cursors, this.keyAttack);
+    this.mobileControls.setMode('gameplay');
+    this.player.update(time, this.getCombinedInput(mobileInput));
     this.enemy.update(time, this.player.sprite.x);
     this.hud.update(this.player.health, PLAYER.maxHealth);
+  }
+
+  getCombinedInput(mobileInput) {
+    return {
+      left: this.cursors.left.isDown || mobileInput.left,
+      right: this.cursors.right.isDown || mobileInput.right,
+      jumpPressed:
+        Phaser.Input.Keyboard.JustDown(this.cursors.up) ||
+        Phaser.Input.Keyboard.JustDown(this.cursors.space) ||
+        mobileInput.jumpPressed,
+      attackPressed: Phaser.Input.Keyboard.JustDown(this.keyAttack) || mobileInput.attackPressed
+    };
   }
 
   createPlatforms() {
