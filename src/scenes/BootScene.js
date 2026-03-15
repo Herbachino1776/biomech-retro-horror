@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -20,8 +21,9 @@ export class BootScene extends Phaser.Scene {
     if (this.textures.exists('chamberConceptBg')) {
       this.add
         .image(this.scale.width / 2, this.scale.height / 2, 'chamberConceptBg')
-        .setDisplaySize(this.scale.width, this.scale.height)
-        .setAlpha(0.2);
+        .setDisplaySize(CONCEPT_PRESENTATION.chamberBackdrop.panelWidth, CONCEPT_PRESENTATION.chamberBackdrop.panelHeight)
+        .setAlpha(0.2)
+        .setTint(CONCEPT_PRESENTATION.chamberBackdrop.panelTint);
     }
 
     this.add

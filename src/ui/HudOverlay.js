@@ -1,3 +1,5 @@
+import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
+
 export class HudOverlay {
   constructor(scene) {
     this.scene = scene;
@@ -7,6 +9,12 @@ export class HudOverlay {
       ? scene.add
           .image(16, 16, 'uiBiomechFrame')
           .setOrigin(0)
+          .setCrop(
+            CONCEPT_PRESENTATION.uiFrame.crop.x,
+            CONCEPT_PRESENTATION.uiFrame.crop.y,
+            CONCEPT_PRESENTATION.uiFrame.crop.width,
+            CONCEPT_PRESENTATION.uiFrame.crop.height
+          )
           .setDisplaySize(220, 62)
           .setScrollFactor(0)
           .setDepth(30)

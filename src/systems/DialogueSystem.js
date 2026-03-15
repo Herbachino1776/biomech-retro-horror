@@ -1,3 +1,5 @@
+import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
+
 export class DialogueSystem {
   constructor(scene, config) {
     this.scene = scene;
@@ -9,10 +11,26 @@ export class DialogueSystem {
     const insetX = (scene.scale.width - config.width) / 2;
     const insetY = scene.scale.height - config.height - 18;
 
-    const outer = scene.add.rectangle(insetX, insetY, config.width, config.height, 0x0f1313).setOrigin(0);
-    outer.setStrokeStyle(3, 0x64453a, 1);
+    const hasUiFrame = scene.textures.exists('uiBiomechFrame');
+    const outer = hasUiFrame
+      ? scene.add
+          .image(insetX, insetY, 'uiBiomechFrame')
+          .setOrigin(0)
+          .setCrop(
+            CONCEPT_PRESENTATION.uiFrame.crop.x,
+            CONCEPT_PRESENTATION.uiFrame.crop.y,
+            CONCEPT_PRESENTATION.uiFrame.crop.width,
+            CONCEPT_PRESENTATION.uiFrame.crop.height
+          )
+          .setDisplaySize(config.width, config.height)
+          .setTint(0xd2c2ac)
+      : scene.add.rectangle(insetX, insetY, config.width, config.height, 0x0f1313).setOrigin(0);
 
-    const inner = scene.add.rectangle(insetX + 8, insetY + 8, config.width - 16, config.height - 16, 0x1f1714).setOrigin(0);
+    if (!hasUiFrame) {
+      outer.setStrokeStyle(3, 0x64453a, 1);
+    }
+
+    const inner = scene.add.rectangle(insetX + 8, insetY + 8, config.width - 16, config.height - 16, 0x1f1714, 0.94).setOrigin(0);
     inner.setStrokeStyle(1, 0x6f8c59, 0.6);
 
     this.text = scene.add.text(insetX + config.textPadding, insetY + config.textPadding, '', {

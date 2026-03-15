@@ -5,6 +5,7 @@ import { DialogueSystem } from '../systems/DialogueSystem.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import {
   CHAMBER_PLATFORM_LAYOUT,
+  CONCEPT_PRESENTATION,
   COLORS,
   DIALOGUE,
   LORE_ENTRIES,
@@ -114,11 +115,13 @@ export class Chamber01Scene extends Phaser.Scene {
     this.add.rectangle(WORLD.width / 2, WORLD.height / 2, WORLD.width, WORLD.height, COLORS.backdrop).setOrigin(0.5);
 
     if (this.textures.exists('chamberConceptBg')) {
-      this.add
-        .image(WORLD.width / 2, WORLD.height / 2, 'chamberConceptBg')
-        .setDisplaySize(WORLD.width, WORLD.height)
-        .setAlpha(0.22)
-        .setTint(0xb8aa92);
+      CONCEPT_PRESENTATION.chamberBackdrop.anchorXs.forEach((anchorX) => {
+        this.add
+          .image(anchorX, WORLD.height / 2, 'chamberConceptBg')
+          .setDisplaySize(CONCEPT_PRESENTATION.chamberBackdrop.panelWidth, CONCEPT_PRESENTATION.chamberBackdrop.panelHeight)
+          .setAlpha(CONCEPT_PRESENTATION.chamberBackdrop.panelAlpha)
+          .setTint(CONCEPT_PRESENTATION.chamberBackdrop.panelTint);
+      });
     }
 
     this.add.rectangle(420, 190, 760, 230, COLORS.architecture).setOrigin(0.5);
@@ -132,16 +135,31 @@ export class Chamber01Scene extends Phaser.Scene {
     if (this.textures.exists('laughingEngineConceptSprite')) {
       this.add
         .image(1120, 255, 'laughingEngineConceptSprite')
-        .setDisplaySize(310, 220)
-        .setAlpha(0.28)
-        .setTint(0xb8aa92);
+        .setOrigin(CONCEPT_PRESENTATION.laughingEngine.origin.x, CONCEPT_PRESENTATION.laughingEngine.origin.y)
+        .setDisplaySize(CONCEPT_PRESENTATION.laughingEngine.display.width, CONCEPT_PRESENTATION.laughingEngine.display.height)
+        .setCrop(
+          CONCEPT_PRESENTATION.laughingEngine.crop.x,
+          CONCEPT_PRESENTATION.laughingEngine.crop.y,
+          CONCEPT_PRESENTATION.laughingEngine.crop.width,
+          CONCEPT_PRESENTATION.laughingEngine.crop.height
+        )
+        .setAlpha(0.34)
+        .setTint(0xb8aa92)
+        .setDepth(1);
     }
 
     if (this.textures.exists('sentinelConceptSprite')) {
       this.add
-        .image(1720, 355, 'sentinelConceptSprite')
-        .setDisplaySize(168, 200)
-        .setAlpha(0.25)
+        .image(1720, 410, 'sentinelConceptSprite')
+        .setOrigin(CONCEPT_PRESENTATION.sentinel.origin.x, CONCEPT_PRESENTATION.sentinel.origin.y)
+        .setDisplaySize(CONCEPT_PRESENTATION.sentinel.display.width, CONCEPT_PRESENTATION.sentinel.display.height)
+        .setCrop(
+          CONCEPT_PRESENTATION.sentinel.crop.x,
+          CONCEPT_PRESENTATION.sentinel.crop.y,
+          CONCEPT_PRESENTATION.sentinel.crop.width,
+          CONCEPT_PRESENTATION.sentinel.crop.height
+        )
+        .setAlpha(0.22)
         .setTint(0x8f7d72);
     }
 

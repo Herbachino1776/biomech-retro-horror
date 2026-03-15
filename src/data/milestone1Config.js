@@ -36,6 +36,39 @@ export const DIALOGUE = {
   textPadding: 18
 };
 
+export const CONCEPT_PRESENTATION = {
+  player: {
+    crop: { x: 560, y: 170, width: 430, height: 800 },
+    display: { width: 92, height: 136 },
+    origin: { x: 0.5, y: 0.88 }
+  },
+  skitter: {
+    crop: { x: 510, y: 520, width: 540, height: 360 },
+    display: { width: 112, height: 74 },
+    origin: { x: 0.5, y: 0.72 }
+  },
+  sentinel: {
+    crop: { x: 560, y: 140, width: 430, height: 820 },
+    display: { width: 148, height: 238 },
+    origin: { x: 0.5, y: 0.88 }
+  },
+  laughingEngine: {
+    crop: { x: 400, y: 180, width: 780, height: 700 },
+    display: { width: 330, height: 240 },
+    origin: { x: 0.5, y: 0.5 }
+  },
+  chamberBackdrop: {
+    panelWidth: 810,
+    panelHeight: 540,
+    panelAlpha: 0.3,
+    panelTint: 0xb8aa92,
+    anchorXs: [405, 1215, 2025]
+  },
+  uiFrame: {
+    crop: { x: 276, y: 720, width: 984, height: 248 }
+  }
+};
+
 export const COLORS = {
   backdrop: 0x110d0c,
   architecture: 0x1f1714,
