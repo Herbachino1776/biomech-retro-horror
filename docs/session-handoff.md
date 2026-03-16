@@ -16,26 +16,30 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Start/boot into Chamber 01 and death/restart loop.
 - Player core loop (move/jump/attack/damage/death).
 - Skitter Servitor enemy loop (including kill loop).
-- Lore trigger/dialogue pause flow.
+- Mobile controls corrected for portrait and landscape playability.
+- Chamber 01 first lore beat uses a dedicated cinematic lore-screen transition.
+- Laughing Engine / furnace art is integrated as the first lore-screen prototype.
+- Chamber 01 lore trigger presentation is an in-world ritual shrine/ossuary-style prop.
 - Texture-first asset loading with fallback resilience.
 
 ## What Still Needs Work Now
 - Sentinel + Laughing Engine are not full encounter systems yet.
 - Chamber progression/seal logic remains partial.
-- Lore presentation still needs dedicated cinematic lore-screen state flow.
+- Chamber 01 lore-screen pattern should be generalized cleanly for additional beats.
 - Ongoing art normalization toward locked shared palette/readability doctrine.
 
 ## Active Milestone
-**Milestone 1 — Playable Mobile Vertical Slice (signoff hardening).**
+**Milestone 1 — Playable Mobile Vertical Slice: completed.**
 
 ## Exact Next Best Step After This Task
-Implement the first discrete lore-screen transition for Chamber 01 (fade out gameplay → lore screen/state with subtle drift and cryptic text → fade back to gameplay), while preserving mobile input parity and base-path/asset invariants.
+Implement **Milestone 2 visual production hardening in Chamber 01**: normalize current playable assets and interactable readability (including shrine/lore affordances) toward the locked palette + silhouette doctrine without expanding mechanics/scope.
 
 ## Most Important Constraints
 1. Do not regress GitHub Pages/Vite base-path behavior.
-2. Keep mobile controls visible, fixed, and aligned in iPhone portrait.
+2. Keep mobile controls visible, fixed, and aligned in portrait and landscape.
 3. Preserve desktop keyboard controls.
 4. Keep texture-first rendering; fallback only on load failure.
-5. Prefer text/code changes unless binary changes are explicitly required.
-6. End meaningful tasks with `npm run build`.
-7. Respect locked palette/readability doctrine and cinematic lore direction.
+5. Preserve dedicated cinematic lore-screen flow as the preferred lore delivery direction.
+6. Preserve in-world ritual shrine/ossuary lore trigger presentation direction.
+7. Prefer text/code changes unless binary changes are explicitly required.
+8. End meaningful tasks with `npm run build`.

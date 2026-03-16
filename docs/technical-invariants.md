@@ -11,6 +11,7 @@ Do-not-break checklist for milestone and deployment stability.
 - Mobile touch controls remain visible and usable on iPhone portrait layouts.
 - Mobile controls are screen-space anchored and must not drift with world/camera movement.
 - Mobile control visuals and hit areas remain aligned.
+- Mobile layout remains playable in both portrait and landscape orientations.
 - Desktop keyboard support remains intact (move/jump/attack/interact/restart).
 
 ## Rendering / Asset Invariants
@@ -26,11 +27,16 @@ Do-not-break checklist for milestone and deployment stability.
 - Floor grounding adjustments must preserve collision behavior.
 
 ## Lore Presentation Invariants
-- Lore moments should evolve toward **discrete scene/state transitions**.
+- Lore moments should use **discrete scene/state transitions**.
 - Lore flow should support fade-to-black then fade-in cadence.
 - Lore screens should support subtle pan/zoom drift.
 - Lore screens should support distinct music/sound treatment from active gameplay.
+- Chamber 01 first lore beat pattern (Laughing Engine/furnace art prototype) is the reference implementation for future lore-screen delivery.
 - Lore writing remains cryptic, area-specific, and foreshadowing-oriented.
+
+## Lore Trigger Invariants
+- Lore trigger affordances should remain diegetic in-world ritual/shrine forms.
+- Avoid reverting visible trigger presentation to debug-style “LORE” marker boxes.
 
 ## Change-Type Discipline
 - Prefer text/code changes unless binary changes are explicitly required.
