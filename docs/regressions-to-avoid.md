@@ -1,37 +1,46 @@
 # Regressions to Avoid
 
-Known failure patterns from project trajectory and current safeguards.
+Known failure patterns and what future tasks must protect.
 
-## Gameplay / Flow
-- **Broken restart loop after death**: if restart input handling drifts, the slice can soft-lock at failure state.
-  - Do not break death-state input polling and scene restart behavior.
-- **Hit registration drift**: attack overlap and enemy overlap contracts are tightly scoped.
-  - Do not alter attack hitbox enable/disable timing without retuning.
+## 1) GitHub Pages / Vite Base-Path Regressions
+**Observed risk:** builds work locally but fail on project-site deploy when base path drifts.
+- Keep production base `/biomech-retro-horror/` and dev base `/`.
+- Avoid hardcoded paths that bypass centralized URL mapping.
 
-## Controls
-- **Mobile controls drifting with camera/world**: this makes touch play unusable.
-  - Keep touch UI fixed in screen space and re-layout on resize.
-- **Desktop input parity loss**: mobile-focused edits can accidentally drop keyboard behavior.
-  - Preserve arrows + jump + attack + interact + restart support.
+## 2) Mobile Controls Off-Screen / Drift Regressions
+**Observed risk:** controls became clipped/off-screen in portrait, or drifted with world/camera edits.
+- Keep controls fixed to screen space.
+- Re-layout controls on resize/orientation changes.
+- Keep visible controls and hit areas aligned.
+- Respect iPhone portrait safe-area constraints.
 
-## Asset Loading / Fallback
-- **Texture-first rendering accidentally removed**: fallback shapes becoming always-on causes visual downgrade.
-  - Fallback visuals are safety only; concept/runtime textures should be primary when present.
-- **Hardcoded asset path edits**: direct scene imports can desync from asset key mapping.
-  - Keep centralized asset key/url mapping intact.
+## 3) Desktop Keyboard Parity Regressions
+**Observed risk:** mobile-centric edits can accidentally break keyboard control flow.
+- Preserve movement/jump/attack/interact/restart keyboard support.
+- Validate both input paths after control/UI work.
 
-## GitHub Pages Deployment
-- **Wrong Vite base path**: deployment works locally but fails on GitHub Pages subpath.
-  - Do not regress production base path `/biomech-retro-horror/`.
+## 4) Fallback-vs-Art Regressions
+**Observed risk:** fallback geometry accidentally became primary visuals.
+- Loaded textures remain primary.
+- Fallback visuals activate only when texture loading fails.
+- Keep fallback labels/readability aids without replacing art path.
 
-## Visual / Presentation
-- **Palette inconsistency amplification**: mixed concept hues can fragment the vertical-slice identity.
-  - Normalize future assets toward the locked palette doctrine, do not widen it casually.
-- **Fallback aesthetic becoming default art direction**: emergency placeholders can overwhelm intended look.
-  - Preserve fallback readability, but keep it secondary to loaded art.
+## 5) Floor / Sprite Grounding Regressions
+**Observed risk:** stand-ins looked sunk into floor or visually floating after origin/display tuning.
+- Keep collision behavior stable while tuning display origin/body offsets.
+- Validate grounding against floor reference at gameplay camera zoom.
 
-## Lore Presentation
-- **Lore reduced to generic HUD/dialog UI only**: weakens identity and pacing.
-  - Maintain movement toward discrete cinematic lore screens with transition grammar.
-- **Over-explained lore text**: removes dread and foreshadowing.
-  - Keep lore cryptic, area-specific, deliberately vague, and task/danger-foreshadowing.
+## 6) Combat Loop Timing Regressions
+**Observed risk:** hit registration drift when overlap windows/cooldowns change casually.
+- Do not change attack timing/hitbox enable windows without explicit retuning.
+- Preserve deterministic contact damage + invulnerability behavior.
+
+## 7) Restart / Scene Flow Regressions
+**Observed risk:** death/restart handling can soft-lock scene flow.
+- Preserve start → chamber → death/restart contract.
+- Verify restart input works on both desktop and mobile paths.
+
+## 8) Portrait Readability Overcorrection
+**Observed risk:** improving readability by enlarging world can hide controls, or making room for controls can shrink world to unreadable size.
+- Do not casually break portrait layout while improving readability.
+- Balance world viewport height and dedicated control space; validate both visually.

@@ -10,6 +10,8 @@ Before changing gameplay, controls, deployment, asset loading, UI presentation, 
 - `docs/regressions-to-avoid.md`
 - `docs/art-direction-lock.md`
 - `docs/technical-invariants.md`
+- `docs/session-handoff.md`
+- `docs/milestone-roadmap.md`
 
 ## Non-Negotiable Rules
 1. Build the vertical slice before expanding scope.
@@ -30,7 +32,7 @@ Before changing gameplay, controls, deployment, asset loading, UI presentation, 
 16. Every meaningful task must end with a build verification step.
 17. Treat regressions as failures to diagnose and fix, not as features to reimplement blindly.
 18. Future art generation and integration must respect the locked palette and readability doctrine in `docs/art-direction-lock.md`.
-19. Lore presentation is a major identity feature and should be discrete, cinematic, ritualized presentation rather than generic dialogue UI.
+19. Lore presentation is a major identity feature and should evolve toward discrete cinematic ritual presentation, not generic dialogue UI.
 
 ## Aesthetic Rules
 - The world is biomechanical, ritualized, oppressive, and alien.

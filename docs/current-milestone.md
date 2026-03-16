@@ -1,42 +1,40 @@
 # Current Milestone
 
 ## Current Project State
-The project is in a **playable Milestone 1→2 transition state**: a browser-playable Chamber 01 slice with graybox gameplay logic and concept-art-assisted presentation.
+The project is in **Milestone 1: Playable Mobile Vertical Slice hardening**.
+Chamber 01 is playable in-browser with Phaser 3 + Vite, concept-art-backed rendering, and a working player/enemy loop. This pass focuses on mobile portrait stability/readability and durable project doctrine.
 
-### Currently Working
-- Phaser 3 + Vite runtime boots into a title/start scene and transitions into Chamber 01.
-- Core player loop works: move, jump, attack, take damage, die, restart.
-- One active enemy loop works in-room (Skitter Servitor patrol/aggro/contact damage).
-- Lore trigger flow works via a pause-style panel system with resume input.
-- HUD and dialogue can render with diegetic UI frame assets when available, and rectangle fallback when not.
-- Mobile touch controls exist and are screen-space anchored; desktop keyboard controls also work.
-- Concept art is loaded through centralized asset keys/URLs; gameplay remains playable with fallback primitives.
-- Vite production base-path behavior is configured for GitHub Pages project-site deployment.
+## What Is Currently Working
+- Boot/start flow transitions into Chamber 01 and supports death/restart.
+- Core player loop works: movement, jump, attack, damage, death.
+- Skitter Servitor encounter loop is active and killable.
+- Chamber 01 collision/platform traversal is stable.
+- Dialogue/lore trigger exists and can pause/resume play.
+- Centralized asset key/URL mapping is in place.
+- Texture-first rendering works with fallback visuals when textures fail.
+- Vite/GitHub Pages deployment model is configured (`/biomech-retro-horror/` production base).
+- Desktop keyboard controls remain available.
 
-### Incomplete / Recently Regressed Risk Areas
-- Sentinel and Laughing Engine are currently presentation/set-dressing only, not complete encounter logic.
-- Chamber progression systems are still partial (sealed gate presentation exists, full progression flow is not complete).
-- Lore delivery is currently mostly dialogue-panel based and needs a stronger cinematic presentation layer.
-- Concept art palette consistency is uneven across sources, causing visual drift if not normalized.
+## Remaining Milestone 1 Final-Polish Items
+- Keep portrait controls stable/visible while preserving current readability wins.
+- Finalize slight player/enemy floor-grounding offset without collision regression.
+- Confirm chamber scale still feels monumental on portrait viewports (no cramped-room regression).
 
-## Active Milestone Definition (Concrete Acceptance Criteria)
-For the current vertical slice pass, treat the milestone as complete only when all are true:
-1. Start scene, chamber transition, and restart loop are stable in browser builds.
-2. Chamber 01 remains fully traversable with reliable collisions and camera follow.
-3. Player combat loop remains readable and deterministic (attack cooldown, hit detection, damage, death).
-4. At least one enemy encounter remains functional and balanced for tension over chaos.
-5. Mobile touch controls remain usable on iPhone-sized viewports without camera-space drift.
-6. Desktop keyboard support remains intact for movement, attack, interact, and restart.
-7. Build output works under GitHub Pages base path (`/biomech-retro-horror/`).
-8. Art/fallback behavior remains safe: fallback shapes are backup, not default replacement when textures load.
-9. Lore beats preserve oppressive pacing and begin evolving into **discrete cinematic lore screens** rather than only in-world overlay text.
+## Active Milestone Definition (Acceptance Criteria)
+Milestone 1 is signoff-ready only when all are true:
+1. Chamber 01 remains playable end-to-end in browser (start → combat/lore → death/restart).
+2. iPhone portrait mode has fully visible, usable touch controls (left/right/jump/attack/interact) in safe screen space.
+3. Mobile controls are fixed to screen-space (no world/camera drift) and hit areas align with visible buttons.
+4. Portrait gameplay view is meaningfully readable (not reduced to a tiny window).
+5. Desktop keyboard support remains intact.
+6. Player/enemy visuals appear grounded to the floor (not visually sunk).
+7. Texture-first rendering and fallback behavior remain correct.
+8. GitHub Pages/Vite base-path behavior remains correct.
+9. `npm run build` succeeds.
 
 ## Do Not Change Casually
-- Input mappings and control affordances (mobile + desktop parity).
-- Scene flow contract (BootScene → Chamber01Scene → restart).
-- Base-path deployment assumptions for GitHub Pages.
-- Asset key/url indirection and fallback safety logic.
-- Current readability-first collision/combat tuning constants.
-
-## Lore Presentation Trajectory
-Lore should remain cryptic, area-specific, and deliberately vague, often foreshadowing immediate danger or task intent. Presentation should evolve from basic overlay text toward **discrete cutscene-like lore screens** with stronger ritual/cinematic identity.
+- Base-path deployment contract (`/biomech-retro-horror/` prod, `/` dev).
+- Mobile/desktop input parity and screen-space anchoring rules.
+- Asset key/url indirection and fallback-only resilience behavior.
+- Chamber 01 scene flow and combat timing contracts unless intentionally retuned.
+- Portrait layout constants once validated on iPhone-sized viewports.

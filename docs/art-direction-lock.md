@@ -1,59 +1,51 @@
 # Art Direction Lock (Vertical Slice)
 
-Production lock for gameplay assets, UI, and lore-screen visuals.
+Production lock for gameplay visuals, UI integration, and lore-screen presentation.
 
 ## Identity Lock
-The project visual identity is: **biomechanical ritual horror** — oppressive, ceremonial, alien, and industrial-organic. Every asset must reinforce dread and clarity at gameplay distance.
+The game is **biomechanical ritual horror**: oppressive, ceremonial, alien, industrial-organic, and readable at gameplay scale.
 
-## Current Inconsistency Problem
-Current concept inputs are valuable but not fully harmonized: hue temperature, contrast behavior, and material rendering vary across pieces. Future generation/integration must normalize outputs into one controlled vertical-slice palette and readability doctrine.
+## Palette Lock (Current Vertical Slice)
+Use a constrained shared palette family:
+- Bone / ivory structural highlights
+- Rust / dried-blood metal masses
+- Oil-black / charcoal voids and depth
+- Bruised brown-purple metallic neutrals
+- Sickly green as sparse signal/accent only
 
-## Palette Doctrine (Controlled Core Set)
-Use a constrained family with minor value variation, not broad hue expansion.
+### Normalization Note
+Current concept-source assets are not fully palette-consistent. Future generation/integration must normalize toward this locked palette rather than widening style variance.
 
-### Core Families
-- **Bone / Ivory**: worn structural highlights, iconography, exposed rib forms.
-- **Rust / Dried blood metal**: aged joins, damage zones, hostile mass accents.
-- **Oil-black / Charcoal**: voids, depth cavities, internal machinery silhouette anchors.
-- **Bruised metal / brown-purple neutrals**: transitional body-metal surfaces.
-- **Sickly green accent (limited use)**: interactive signal, infection pressure, rite-state emphasis.
+## Silhouette + Readability Rules (Gameplay)
+- Silhouette clarity is priority one.
+- Mid-distance gameplay readability beats micro-detail fidelity.
+- Character/enemy forms must remain distinguishable during movement/combat.
+- Background/foreground detail must not obscure collision or interactable readability.
 
-### Practical Rule
-- 80–90% of pixels should remain in neutral bone/rust/oil families.
-- Sickly green is accent, not base tone.
-- Avoid neon, clean sci-fi whites, saturated rainbow hues, and glossy arcade contrast.
+## Texture + Material Rules
+- Materials should read as fused bone/metal/tendon systems.
+- Prefer broad value grouping with selective detail clusters.
+- Avoid noisy full-surface detail and neon-like high-saturation effects.
+- Distress/corrosion must support form logic (not random texture clutter).
 
-## Silhouette + Readability Rules (Gameplay Assets)
-- Primary read must be shape, not texture noise.
-- Enemy/player forms must remain distinguishable at gameplay scale and motion.
-- Background complexity must never erase collision/platform readability.
-- Foreground ornament can frame tension but cannot hide hazards or interactables.
-
-## Texture / Material Rules
-- Materials should read as fused: tendon-cable, bone-plate, scarred alloy, ritual-worn surfaces.
-- Prefer broad value masses + selective detail clusters.
-- Avoid uniformly noisy textures and over-sharpened micro-detail.
-- Distress, stains, and corrosion should support form logic (where/why they occur).
+## Environmental Scale Doctrine
+- Chamber composition should read as monumental: colossal remnants, ceremonial architecture, and deep spatial mass.
+- Preserve a stadium/cathedral-like sense of traversal through ancient alien infrastructure.
+- Readability tuning must not collapse the world into a cramped small-room feel.
 
 ## UI ↔ World Relationship Rules
-- UI should feel diegetic (forged/grown/ribbed) and belong to the same material universe.
-- UI contrast must remain legible without breaking palette discipline.
-- UI cues should suggest instrument panels/ritual apparatus, not modern flat app chrome.
-
-## Avoid These Traits
-- Generic cyberpunk glow language.
-- Clean military sci-fi plating aesthetics.
-- Cartoon exaggeration or comedic readability shortcuts.
-- High-saturation VFX clutter that undermines oppressive pacing.
+- UI should feel diegetic: grown, forged, ribbed, surgical, vertebral.
+- UI readability is required but should stay inside the same material universe.
+- Avoid generic flat app/modern sci-fi UI language.
 
 ## Lore-Screen Art Doctrine
-- Lore screens are **discrete from gameplay environments** in framing and intent.
-- Lore art may be more detailed/painterly than gameplay sprites/background layers.
-- Lore screens should feel ritualistic, menacing, symbolic, and area-specific.
-- Lore imagery should be compositionally striking and not just reuse room gameplay framing.
-- Lore text should be cryptic and foreshadow task/danger without explicit over-explanation.
+- Lore screens are **discrete from gameplay environments**.
+- Lore art may be more detailed and painterly than gameplay presentation.
+- Lore screens should feel ritualistic, menacing, symbolic, cryptic, and area-specific.
+- Lore imagery should not simply reuse gameplay room framing/composition.
 
-## Codex + Asset Integration Practical Use
-- When generating/selecting art, check palette family compliance first, then silhouette readability.
-- If an asset conflicts with this doctrine, retune grade/contrast/palette before integration.
-- Do not broaden style language to solve short-term asset gaps; maintain lock and use controlled fallback.
+## Visual Traits to Avoid
+- Generic cyberpunk neon language.
+- Clean sterile military sci-fi plating style.
+- Cartoon exaggeration that weakens oppressive pacing.
+- Saturation-heavy VFX clutter that harms readability.
