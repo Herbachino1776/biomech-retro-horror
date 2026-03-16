@@ -4,6 +4,7 @@ export const PORTRAIT_LAYOUT = {
   worldBandMax: 520,
   minControlBand: 212,
   portraitZoom: 1.34,
+  // Keep chamber scale monumental on portrait while preserving control usability.
   desktopZoom: 1,
   restartTextMinY: 72,
   restartTextRatioY: 0.2

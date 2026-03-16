@@ -25,6 +25,16 @@ Concise record of technical/design decisions currently in force.
 - Fallback primitives are resilience-only when textures fail/miss.
 - Do not let fallback presentation silently become the default art path.
 
+## Combat Feel Direction (Near-Term)
+- Combat direction is **slower, heavier, and more deliberate**, closer to a simplified Souls-like rhythm than a fast arcade brawler.
+- Future tuning should prioritize weighty attack commitment windows and readable recovery.
+- Future expansion should introduce stamina + evade timing carefully (without overcomplicated systems).
+- Target loop direction: attack → spend stamina → reposition/avoid enemy attack → regain stamina → attack again.
+
+## Environment Scale Direction
+- Chamber presentation should preserve a **massive, ancient, alien, ritual monument** feeling.
+- Do not casually compress camera/layout into cramped small-room framing during readability tweaks.
+
 ## Gameplay Scope + Milestone Flow
 - Vertical-slice-first development is mandatory.
 - Prefer small reliable fixes over architecture expansion.
@@ -35,6 +45,13 @@ Concise record of technical/design decisions currently in force.
 - Presentation direction is toward **discrete cinematic ritual/cutscene-style screens**.
 - Avoid generic always-on in-world overlay/dialogue as the long-term primary lore format.
 - Lore writing remains cryptic, symbolic, and area-specific.
+
+## Lore Planning Input Rule
+- When the user provides new lore/worldbuilding direction in planning chats, incorporate relevant points into doctrine docs before major implementation passes.
+- This is a continuity rule, not permission for random scope expansion.
+
+## Merged main + branch baseline
+- When branch/main guidance differs, preserve accepted deployment/mobile-control fixes from main and accepted milestone-polish tuning from the active branch.
 
 ## Workflow Constraints
 - Before touching gameplay/controls/deployment/asset loading/UI/art/lore, read the doctrine docs.
