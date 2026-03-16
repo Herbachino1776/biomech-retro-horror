@@ -11,6 +11,8 @@ export class SkitterServitor {
     this.direction = -1;
     this.lastAttackTime = -Infinity;
     this.lastDamageFlashTime = -Infinity;
+    this.awakened = config.awakenPlayerX === undefined;
+    this.awakenAtTime = null;
 
     this.usingConceptSprite = scene.textures.exists(ASSET_KEYS.skitter);
     this.sprite = this.usingConceptSprite
@@ -38,9 +40,15 @@ export class SkitterServitor {
   }
 
   update(time, playerX) {
+    this.updateAwakeningState(time, playerX);
     this.updateVisuals(time);
 
     if (this.dead) {
+      this.body.setVelocityX(0);
+      return;
+    }
+
+    if (!this.awakened) {
       this.body.setVelocityX(0);
       return;
     }
@@ -72,11 +80,35 @@ export class SkitterServitor {
     }
   }
 
+
+  updateAwakeningState(time, playerX) {
+    if (this.awakened || this.dead || this.config.awakenPlayerX === undefined) {
+      return;
+    }
+
+    if (playerX < this.config.awakenPlayerX) {
+      this.awakenAtTime = null;
+      return;
+    }
+
+    if (this.awakenAtTime === null) {
+      this.awakenAtTime = time + (this.config.wakeDelayMs ?? 0);
+      return;
+    }
+
+    if (time >= this.awakenAtTime) {
+      this.awakened = true;
+      this.awakenAtTime = null;
+    }
+  }
+
   takeDamage(amount, time = this.scene.time.now) {
     if (this.dead) {
       return;
     }
 
+    this.awakened = true;
+    this.awakenAtTime = null;
     this.health -= amount;
     this.lastDamageFlashTime = time;
     this.setVisualTint(0x6f8c59);
