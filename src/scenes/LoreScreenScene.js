@@ -10,6 +10,8 @@ const LORE_DEPTH = {
   prompt: 7
 };
 
+const MIN_COVER_VISIBLE_RATIO = 0.7;
+
 const LORE_LAYOUT = {
   portrait: {
     imageWidthRatio: 0.96,
@@ -91,17 +93,11 @@ export class LoreScreenScene extends Phaser.Scene {
       const imageTexture = this.textures.get(this.screenConfig.imageKey);
       const sourceImage = imageTexture.getSourceImage();
       const sourceAspect = sourceImage.width / sourceImage.height;
-      const frameAspect = imageWidth / imageHeight;
-      let imageDisplayWidth = imageWidth;
-      let imageDisplayHeight = imageHeight;
-
-      if (sourceAspect > frameAspect) {
-        imageDisplayHeight = imageHeight;
-        imageDisplayWidth = imageHeight * sourceAspect;
-      } else {
-        imageDisplayWidth = imageWidth;
-        imageDisplayHeight = imageWidth / sourceAspect;
-      }
+      const { imageDisplayWidth, imageDisplayHeight } = this.resolveLoreImageSize({
+        sourceAspect,
+        frameWidth: imageWidth,
+        frameHeight: imageHeight
+      });
 
       const image = this.add
         .image(0, layout.imageYOffset, this.screenConfig.imageKey)
@@ -200,6 +196,26 @@ export class LoreScreenScene extends Phaser.Scene {
       .rectangle(centerX, centerY + layout.imageYOffset, imageWidth + 14, imageHeight + 14, 0x000000, 0)
       .setStrokeStyle(2, this.screenConfig?.presentation?.frameColor ?? COLORS.bone, 0.8)
       .setDepth(LORE_DEPTH.frame);
+  }
+
+  resolveLoreImageSize({ sourceAspect, frameWidth, frameHeight }) {
+    const frameAspect = frameWidth / frameHeight;
+
+    const coverSize = sourceAspect > frameAspect
+      ? { imageDisplayWidth: frameHeight * sourceAspect, imageDisplayHeight: frameHeight }
+      : { imageDisplayWidth: frameWidth, imageDisplayHeight: frameWidth / sourceAspect };
+
+    const containSize = sourceAspect > frameAspect
+      ? { imageDisplayWidth: frameWidth, imageDisplayHeight: frameWidth / sourceAspect }
+      : { imageDisplayWidth: frameHeight * sourceAspect, imageDisplayHeight: frameHeight };
+
+    const visibleRatio = Math.min(frameWidth / coverSize.imageDisplayWidth, frameHeight / coverSize.imageDisplayHeight);
+
+    if (visibleRatio < MIN_COVER_VISIBLE_RATIO) {
+      return containSize;
+    }
+
+    return coverSize;
   }
 
   getActiveLayout(isPortrait) {
