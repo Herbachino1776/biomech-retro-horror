@@ -1,49 +1,47 @@
 # Current Milestone
 
 ## Current Project State
-The project has completed **Milestone 1: Playable Mobile Vertical Slice**.
-Chamber 01 remains the playable in-browser vertical-slice foundation with Phaser 3 + Vite, concept-art-backed rendering, and a working player/enemy loop.
+The project has completed **Milestone 2: Slice Art Cohesion + Lore Pattern Consolidation**.
+The playable baseline now spans Chamber 01 and Chamber 02 with a stable chamber transition, cinematic lore-screen beats in both chambers, and a conservative Chamber 02 post-lore reaction state.
 
 ## What Is Currently Working
 - Boot/start flow transitions into Chamber 01 and supports death/restart.
 - Core player loop works: movement, jump, attack, damage, death.
-- Skitter Servitor encounter loop is active and killable.
-- Chamber 01 collision/platform traversal is stable.
-- Mobile controls layout is corrected for both portrait and landscape playability while staying screen-space anchored.
-- Chamber 01 first lore beat now uses a dedicated cinematic lore-screen flow.
-- The Laughing Engine / furnace art is now used as the first lore-screen prototype image.
-- The visible lore trigger marker in Chamber 01 is now an in-world ritual shrine/ossuary-style prop (replacing debug-style presentation).
-- Centralized asset key/URL mapping is in place.
-- Texture-first rendering works with fallback visuals when textures fail.
-- Vite/GitHub Pages deployment model is configured (`/biomech-retro-horror/` production base).
+- Chamber 01 remains stable and playable with lore shrine interaction.
+- Chamber 01 -> Chamber 02 transition is live and stable.
+- Chamber 02 is playable with platform traversal and enemy pressure pacing.
+- Chamber 02 lore trigger uses in-world shrine/ossuary presentation.
+- Chamber 02 lore screen uses the Vertebral Horn Gate image with portrait-safe composition (no vertical flattening) while preserving landscape usability.
+- Lore presentation remains dedicated cinematic ritual screens rather than generic dialogue overlays.
+- Chamber 02 applies a conservative post-lore reaction state: ambient ritual shift + gate/sanctum visual change + delayed ritual-aligned enemy wake.
+- Mobile controls remain screen-space anchored and usable in portrait + landscape.
 - Desktop keyboard controls remain available.
+- Texture-first rendering with fallback-only resilience remains in place.
+- Vite/GitHub Pages deployment model is configured (`/biomech-retro-horror/` production base).
 
-## Milestone 1 Closeout Status
-Milestone 1 signoff blockers have been addressed in shipped implementation:
-- Portrait and landscape touch-control usability has been corrected.
-- Chamber 01 lore delivery has moved from basic trigger pause behavior to a dedicated first cinematic lore-screen beat.
-- Lore triggering now reads as in-world ritual interaction (shrine/ossuary prop) rather than a debug marker.
+## Milestone 2 Closeout Status
+Milestone 2 signoff blockers are addressed in shipped implementation:
+- Chamber 02 lore-screen portrait presentation no longer collapses into a thin/squashed strip.
+- Chamber 02 post-lore reaction state now clearly changes chamber state and increases threat conservatively.
+- Lore-screen pattern is now safely reusable with per-screen layout overrides while preserving Chamber 01 behavior.
 
-## Milestone 1 Acceptance Criteria (Completed)
-Milestone 1 is complete with the following criteria met:
-1. Chamber 01 remains playable end-to-end in browser (start → combat/lore → death/restart).
-2. iPhone portrait mode has fully visible, usable touch controls (left/right/jump/attack/interact) in safe screen space.
-3. Mobile controls are fixed to screen-space (no world/camera drift) and hit areas align with visible buttons.
-4. Portrait gameplay view is meaningfully readable (not reduced to a tiny window).
-5. Desktop keyboard support remains intact.
-6. Player/enemy visuals appear grounded to the floor (not visually sunk).
-7. Texture-first rendering and fallback behavior remain correct.
+## Milestone 2 Acceptance Criteria (Completed)
+1. Playable slice remains stable across Chamber 01 and Chamber 02.
+2. Chamber 01 behavior and lore-screen flow remain intact.
+3. Chamber 01 -> Chamber 02 transition remains stable.
+4. Chamber 02 lore screen is readable in portrait and landscape and uses correct art presentation.
+5. Chamber 02 returns from lore in a visibly changed state.
+6. Chamber 02 threat increases after lore without adding broad new systems.
+7. Mobile/desktop input parity remains intact.
 8. GitHub Pages/Vite base-path behavior remains correct.
-9. Chamber 01 first lore beat uses a dedicated cinematic lore-screen pattern with the Laughing Engine/furnace artwork prototype.
-10. Chamber 01 lore trigger presentation is an in-world ritual shrine/ossuary-style prop rather than a debug-style label.
-11. `npm run build` succeeds.
+9. `npm run build` succeeds.
 
 ## Exact Next Best Implementation Step
-Begin **Milestone 2 visual production hardening for Chamber 01**: normalize the current playable art set (player, enemy, chamber, shrine/lore affordances, and UI readability surfaces) toward the locked palette + silhouette doctrine while preserving current Milestone 1 behavior and input/deployment invariants.
+Begin **Milestone 3 encounter expansion** by deepening one threat loop (Sentinel or Laughing Engine) with readable telegraphing, without regressing mobile usability, lore cadence, or deployment invariants.
 
 ## Do Not Change Casually
 - Base-path deployment contract (`/biomech-retro-horror/` prod, `/` dev).
 - Mobile/desktop input parity and screen-space anchoring rules.
 - Asset key/url indirection and fallback-only resilience behavior.
-- Chamber 01 scene flow and combat timing contracts unless intentionally retuned.
-- Portrait layout constants once validated on iPhone-sized viewports.
+- Chamber 01 and Chamber 02 scene-flow contracts unless intentionally retuned.
+- Lore-screen readability constraints in portrait iPhone-sized viewports.

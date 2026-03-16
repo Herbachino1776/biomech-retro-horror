@@ -182,7 +182,7 @@ export class Chamber02Scene extends Phaser.Scene {
     });
 
     if (this.textures.exists(ASSET_KEYS.chamber02VertebralHornGate)) {
-      this.add
+      this.hornGateMonument = this.add
         .image(1970, 274, ASSET_KEYS.chamber02VertebralHornGate)
         .setDisplaySize(420, 452)
         .setCrop(194, 166, 640, 1140)
@@ -381,6 +381,11 @@ export class Chamber02Scene extends Phaser.Scene {
 
     if (this.shrineLandmark) {
       this.shrineLandmark.setTint(0x9bb87e).setAlpha(0.9);
+    }
+
+
+    if (this.hornGateMonument) {
+      this.hornGateMonument.setTint(0xa0bc82).setAlpha(0.9);
     }
 
     this.enemies.forEach((enemy) => {
