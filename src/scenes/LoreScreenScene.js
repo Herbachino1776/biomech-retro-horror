@@ -10,6 +10,35 @@ const LORE_DEPTH = {
   prompt: 7
 };
 
+const LORE_LAYOUT = {
+  portrait: {
+    imageWidthRatio: 0.94,
+    imageHeightRatio: 0.6,
+    imageYOffset: -32,
+    shadeHeight: 188,
+    titleFontSize: '16px',
+    bodyFontSize: '16px',
+    bodyLineSpacing: 6,
+    promptBottomPadding: 26,
+    textInsetX: 20,
+    titleRatioY: 0.13,
+    bodyRatioY: 0.2
+  },
+  landscape: {
+    imageWidthRatio: 0.88,
+    imageHeightRatio: 0.72,
+    imageYOffset: -20,
+    shadeHeight: 170,
+    titleFontSize: '17px',
+    bodyFontSize: '19px',
+    bodyLineSpacing: 8,
+    promptBottomPadding: 34,
+    textInsetX: 26,
+    titleRatioY: 0.09,
+    bodyRatioY: 0.16
+  }
+};
+
 export class LoreScreenScene extends Phaser.Scene {
   constructor() {
     super('LoreScreenScene');
@@ -39,15 +68,17 @@ export class LoreScreenScene extends Phaser.Scene {
   renderLoreComposition() {
     const centerX = this.scale.width / 2;
     const centerY = this.scale.height / 2;
-    const imageWidth = Math.floor(this.scale.width * 0.88);
-    const imageHeight = Math.floor(this.scale.height * 0.72);
+    const isPortrait = this.scale.height >= this.scale.width;
+    const layout = isPortrait ? LORE_LAYOUT.portrait : LORE_LAYOUT.landscape;
+    const imageWidth = Math.floor(this.scale.width * layout.imageWidthRatio);
+    const imageHeight = Math.floor(this.scale.height * layout.imageHeightRatio);
 
     this.imageContainer = this.add.container(centerX, centerY).setDepth(LORE_DEPTH.image);
 
     const hasLoreImage = this.screenConfig?.imageKey && this.textures.exists(this.screenConfig.imageKey);
     if (hasLoreImage) {
       const image = this.add
-        .image(0, -20, this.screenConfig.imageKey)
+        .image(0, layout.imageYOffset, this.screenConfig.imageKey)
         .setDisplaySize(imageWidth, imageHeight)
         .setTint(0xd4b9a5)
         .setAlpha(0.94);
@@ -63,9 +94,11 @@ export class LoreScreenScene extends Phaser.Scene {
 
       this.imageContainer.add(image);
     } else {
-      const fallback = this.add.rectangle(0, -20, imageWidth, imageHeight, COLORS.architecture, 0.95).setStrokeStyle(3, COLORS.rust, 0.95);
+      const fallback = this.add
+        .rectangle(0, layout.imageYOffset, imageWidth, imageHeight, COLORS.architecture, 0.95)
+        .setStrokeStyle(3, COLORS.rust, 0.95);
       const fallbackLabel = this.add
-        .text(0, -20, 'LORE IMAGE MISSING\nFALLBACK COMPOSITION ACTIVE', {
+        .text(0, layout.imageYOffset, 'LORE IMAGE MISSING\nFALLBACK COMPOSITION ACTIVE', {
           fontFamily: 'monospace',
           fontSize: '20px',
           color: '#d2c2ac',
@@ -75,7 +108,7 @@ export class LoreScreenScene extends Phaser.Scene {
       this.imageContainer.add([fallback, fallbackLabel]);
     }
 
-    const shade = this.add.rectangle(0, imageHeight * 0.24, imageWidth, 170, 0x000000, 0.58);
+    const shade = this.add.rectangle(0, imageHeight * 0.24, imageWidth, layout.shadeHeight, 0x000000, 0.58);
     this.imageContainer.add(shade);
 
     this.addSlowDrift();
@@ -84,25 +117,25 @@ export class LoreScreenScene extends Phaser.Scene {
     const body = this.screenConfig?.body?.join('\n') ?? 'The chamber keeps its own scripture.';
 
     this.titleText = this.add
-      .text(centerX - imageWidth / 2 + 26, centerY + imageHeight * 0.09, title, {
+      .text(centerX - imageWidth / 2 + layout.textInsetX, centerY + imageHeight * layout.titleRatioY, title, {
         fontFamily: 'monospace',
-        fontSize: '17px',
+        fontSize: layout.titleFontSize,
         color: '#9bb085'
       })
       .setDepth(LORE_DEPTH.text);
 
     this.bodyText = this.add
-      .text(centerX - imageWidth / 2 + 26, centerY + imageHeight * 0.16, body, {
+      .text(centerX - imageWidth / 2 + layout.textInsetX, centerY + imageHeight * layout.bodyRatioY, body, {
         fontFamily: 'monospace',
-        fontSize: '19px',
+        fontSize: layout.bodyFontSize,
         color: '#d2c2ac',
-        lineSpacing: 8,
-        wordWrap: { width: imageWidth - 50, useAdvancedWrap: true }
+        lineSpacing: layout.bodyLineSpacing,
+        wordWrap: { width: imageWidth - layout.textInsetX * 2, useAdvancedWrap: true }
       })
       .setDepth(LORE_DEPTH.text);
 
     this.promptText = this.add
-      .text(centerX, this.scale.height - 34, this.screenConfig?.prompt ?? 'Tap or press Enter to continue', {
+      .text(centerX, this.scale.height - layout.promptBottomPadding, this.screenConfig?.prompt ?? 'Tap or press Enter to continue', {
         fontFamily: 'monospace',
         fontSize: '14px',
         color: '#8a9f79',
@@ -112,7 +145,7 @@ export class LoreScreenScene extends Phaser.Scene {
       .setDepth(LORE_DEPTH.prompt);
 
     this.frame = this.add
-      .rectangle(centerX, centerY - 20, imageWidth + 14, imageHeight + 14, 0x000000, 0)
+      .rectangle(centerX, centerY + layout.imageYOffset, imageWidth + 14, imageHeight + 14, 0x000000, 0)
       .setStrokeStyle(2, COLORS.bone, 0.8)
       .setDepth(LORE_DEPTH.frame);
   }

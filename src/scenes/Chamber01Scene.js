@@ -49,18 +49,6 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.currentLoreZone = null;
 
-    this.lorePromptText = this.add
-      .text(this.scale.width / 2, this.scale.height - 132, 'Press [E] / [Enter] or tap INTERACT to commune', {
-        fontFamily: 'monospace',
-        fontSize: '14px',
-        color: '#c9ba9f',
-        align: 'center'
-      })
-      .setScrollFactor(0)
-      .setDepth(35)
-      .setOrigin(0.5)
-      .setVisible(false);
-
     this.restartText = this.add
       .text(this.scale.width / 2, 90, '', {
         fontFamily: 'monospace',
@@ -100,7 +88,6 @@ export class Chamber01Scene extends Phaser.Scene {
     if (this.player.isDead) {
       this.mobileControls.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
-      this.lorePromptText.setVisible(false);
       if (Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) {
         this.scene.restart();
       }
@@ -109,7 +96,6 @@ export class Chamber01Scene extends Phaser.Scene {
 
     if (this.isLoreTransitionActive) {
       this.mobileControls.setMode('dialogue');
-      this.lorePromptText.setVisible(false);
       this.player.body.setVelocity(0, 0);
       this.enemy.body.setVelocity(0, 0);
       return;
@@ -324,7 +310,6 @@ export class Chamber01Scene extends Phaser.Scene {
         width / 2,
         Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY)
       );
-      this.lorePromptText.setPosition(width / 2, height - this.mobileControls.getSafeAreaInsetPx('bottom') - 112);
       return;
     }
 
@@ -332,7 +317,6 @@ export class Chamber01Scene extends Phaser.Scene {
     camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
     this.mobileControls.setReservedBottomPx(0);
     this.restartText.setPosition(width / 2, 90);
-    this.lorePromptText.setPosition(width / 2, height - 88);
   }
 
   createLoreZones() {
@@ -394,11 +378,8 @@ export class Chamber01Scene extends Phaser.Scene {
 
   tryBeginLoreSequence(mobileInput) {
     if (!this.currentLoreZone) {
-      this.lorePromptText.setVisible(false);
       return;
     }
-
-    this.lorePromptText.setVisible(true);
 
     const interactPressed =
       Phaser.Input.Keyboard.JustDown(this.keyInteract) ||
