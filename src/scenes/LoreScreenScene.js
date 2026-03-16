@@ -77,11 +77,13 @@ export class LoreScreenScene extends Phaser.Scene {
 
     const hasLoreImage = this.screenConfig?.imageKey && this.textures.exists(this.screenConfig.imageKey);
     if (hasLoreImage) {
+      const imageTint = this.screenConfig?.presentation?.imageTint ?? 0xd4b9a5;
+      const imageAlpha = this.screenConfig?.presentation?.imageAlpha ?? 0.94;
       const image = this.add
         .image(0, layout.imageYOffset, this.screenConfig.imageKey)
         .setDisplaySize(imageWidth, imageHeight)
-        .setTint(0xd4b9a5)
-        .setAlpha(0.94);
+        .setTint(imageTint)
+        .setAlpha(imageAlpha);
 
       if (this.screenConfig.imageKey === ASSET_KEYS.laughingEngine) {
         image.setCrop(
@@ -120,7 +122,7 @@ export class LoreScreenScene extends Phaser.Scene {
       .text(centerX - imageWidth / 2 + layout.textInsetX, centerY + imageHeight * layout.titleRatioY, title, {
         fontFamily: 'monospace',
         fontSize: layout.titleFontSize,
-        color: '#9bb085'
+        color: this.screenConfig?.presentation?.titleColor ?? '#9bb085'
       })
       .setDepth(LORE_DEPTH.text);
 
@@ -146,7 +148,7 @@ export class LoreScreenScene extends Phaser.Scene {
 
     this.frame = this.add
       .rectangle(centerX, centerY + layout.imageYOffset, imageWidth + 14, imageHeight + 14, 0x000000, 0)
-      .setStrokeStyle(2, COLORS.bone, 0.8)
+      .setStrokeStyle(2, this.screenConfig?.presentation?.frameColor ?? COLORS.bone, 0.8)
       .setDepth(LORE_DEPTH.frame);
   }
 
