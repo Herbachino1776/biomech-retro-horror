@@ -45,9 +45,25 @@ export class HudOverlay {
       .setDepth(31);
 
     this.frame = frame;
+    this.elements = [this.frame, this.healthLabel, this.healthValue];
   }
 
   update(current, max) {
     this.healthValue.setText(`${Math.max(current, 0)} / ${max}`);
+  }
+
+  setVisible(visible) {
+    this.elements.forEach((element) => {
+      element.setVisible(visible);
+    });
+  }
+
+  destroy() {
+    this.elements.forEach((element) => {
+      if (element?.active) {
+        element.destroy();
+      }
+    });
+    this.elements.length = 0;
   }
 }

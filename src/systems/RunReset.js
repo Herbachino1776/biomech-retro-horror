@@ -9,5 +9,8 @@ export function restartRunFromDeath(scene) {
 
   scene.scene.stop(LORE_SCENE_KEY);
   scene.scene.stop(CHAMBER02_SCENE_KEY);
+  if (scene.scene.isActive(CHAMBER01_SCENE_KEY) || scene.scene.isPaused(CHAMBER01_SCENE_KEY)) {
+    scene.scene.stop(CHAMBER01_SCENE_KEY);
+  }
   scene.scene.start(CHAMBER01_SCENE_KEY);
 }
