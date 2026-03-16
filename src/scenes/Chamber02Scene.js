@@ -6,6 +6,7 @@ import { MobileControls } from '../ui/MobileControls.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
+import { restartRunFromDeath } from '../systems/RunReset.js';
 
 const CHAMBER02_WORLD_WIDTH = 3600;
 
@@ -76,8 +77,21 @@ export class Chamber02Scene extends Phaser.Scene {
     this.mobileControls = new MobileControls(this);
     this.setupMobileUiCamera();
 
+    this.restartText = this.add
+      .text(this.scale.width / 2, 90, '', {
+        fontFamily: 'monospace',
+        fontSize: '22px',
+        color: '#d2c2ac',
+        align: 'center'
+      })
+      .setScrollFactor(0)
+      .setDepth(35)
+      .setOrigin(0.5)
+      .setVisible(false);
+
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+    this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
     this.keyInteract = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
     this.keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
@@ -228,13 +242,19 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   update(time) {
+    const mobileInput = this.mobileControls.getInputState();
+
     if (this.player.isDead) {
       this.mobileControls.setMode('dead');
+      this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
+      if (Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) {
+        restartRunFromDeath(this);
+      }
       return;
     }
 
+    this.restartText.setVisible(false);
     this.mobileControls.setMode(this.isLoreTransitionActive ? 'dialogue' : 'gameplay');
-    const mobileInput = this.mobileControls.getInputState();
 
     if (!this.isLoreTransitionActive) {
       this.player.update(time, {
@@ -447,11 +467,16 @@ export class Chamber02Scene extends Phaser.Scene {
       camera.setViewport(0, 0, width, worldBandHeight);
       camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
       this.mobileControls.setReservedBottomPx(height - worldBandHeight);
+      this.restartText.setPosition(
+        width / 2,
+        Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY)
+      );
       return;
     }
 
     camera.setViewport(0, 0, width, height);
     camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
     this.mobileControls.setReservedBottomPx(0);
+    this.restartText.setPosition(width / 2, 90);
   }
 }
