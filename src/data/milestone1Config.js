@@ -73,6 +73,10 @@ export const CONCEPT_PRESENTATION = {
     alpha: 1,
     tint: 0xffd8c2
   },
+  chamber02VertebralHornGate: {
+    // Horizontal ritual slice to keep Chamber 02 lore framing aligned with Chamber 01 composition doctrine.
+    crop: { x: 0, y: 356, width: 1024, height: 820 }
+  },
   chamberBackdrop: {
     panelWidth: 840,
     panelHeight: 540,
@@ -147,10 +151,12 @@ export const LORE_SCREENS = {
     ],
     prompt: 'Press [E] / [Enter] or tap to continue',
     presentation: {
-      imageTint: 0xc1d5a7,
-      imageAlpha: 0.9,
-      frameColor: 0x8ea875,
-      titleColor: '#a6bf8d'
+      imageCrop: {
+        x: CONCEPT_PRESENTATION.chamber02VertebralHornGate.crop.x,
+        y: CONCEPT_PRESENTATION.chamber02VertebralHornGate.crop.y,
+        width: CONCEPT_PRESENTATION.chamber02VertebralHornGate.crop.width,
+        height: CONCEPT_PRESENTATION.chamber02VertebralHornGate.crop.height
+      }
     }
   }
 };
