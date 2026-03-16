@@ -37,6 +37,7 @@ export const DIALOGUE = {
 };
 
 export const CONCEPT_PRESENTATION = {
+  // Conservative grounding tuning: presentation-only origins; collision bodies remain authoritative.
   player: {
     crop: { x: 560, y: 170, width: 430, height: 800 },
     display: { width: 126, height: 184 },

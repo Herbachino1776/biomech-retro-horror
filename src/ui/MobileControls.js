@@ -302,7 +302,10 @@ export class MobileControls {
 
     if (mode === 'dialogue' || mode === 'dead') {
       const safeAreaTop = this.getSafeAreaInsetPx('top');
-      this.interactControl.setPosition(this.scene.scale.width - 92, 88 + safeAreaTop + MOBILE_CONTROLS_LAYOUT.safeAreaTopPadding);
+      this.interactControl.setPosition(
+        this.scene.scale.width - MOBILE_CONTROLS_LAYOUT.interactDialogRightInset,
+        88 + safeAreaTop + MOBILE_CONTROLS_LAYOUT.safeAreaTopPadding
+      );
       this.interactControl.ring.setFillStyle(CONTROL_COLORS.inner, FOCUSED_RING_ALPHA);
     } else {
       this.layout();

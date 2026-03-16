@@ -1,7 +1,7 @@
 # Current Milestone
 
 ## Current Project State
-The project is in **Milestone 1: Playable Mobile Vertical Slice hardening**.
+The project is in **Milestone 1: Playable Mobile Vertical Slice hardening** (final signoff polish phase).
 Chamber 01 is playable in-browser with Phaser 3 + Vite, concept-art-backed rendering, and a working player/enemy loop. This pass focuses on mobile portrait stability/readability and durable project doctrine.
 
 ## What Is Currently Working

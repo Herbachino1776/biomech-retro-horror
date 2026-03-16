@@ -32,6 +32,7 @@ Current concept-source assets are not fully palette-consistent. Future generatio
 - Chamber composition should read as monumental: colossal remnants, ceremonial architecture, and deep spatial mass.
 - Preserve a stadium/cathedral-like sense of traversal through ancient alien infrastructure.
 - Readability tuning must not collapse the world into a cramped small-room feel.
+- Portrait framing should retain monumental depth, not flatten chamber scale into a boxed vignette.
 
 ## UI ↔ World Relationship Rules
 - UI should feel diegetic: grown, forged, ribbed, surgical, vertebral.

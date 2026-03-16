@@ -50,6 +50,9 @@ Concise record of technical/design decisions currently in force.
 - When the user provides new lore/worldbuilding direction in planning chats, incorporate relevant points into doctrine docs before major implementation passes.
 - This is a continuity rule, not permission for random scope expansion.
 
+## Merged main + branch baseline
+- When branch/main guidance differs, preserve accepted deployment/mobile-control fixes from main and accepted milestone-polish tuning from the active branch.
+
 ## Workflow Constraints
 - Before touching gameplay/controls/deployment/asset loading/UI/art/lore, read the doctrine docs.
 - Prefer text/code changes unless binary edits are explicitly required.
