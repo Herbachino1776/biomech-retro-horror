@@ -31,6 +31,11 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 ## Active Milestone
 **Milestone 1 — Playable Mobile Vertical Slice: completed.**
 
+## Latest Completed Task
+- Chamber 02 conservative first integration/planning pass completed.
+- All five Chamber 02 raw source assets are now wired into centralized asset key/URL mapping and boot preload without activating Chamber 02 gameplay/scene flow.
+- Integration roles, production-facing naming targets, and defer notes are documented in `docs/chamber02-first-integration-pass.md` and `src/data/chamber02ArtPlan.js`.
+
 ## Exact Next Best Step After This Task
 Implement **Milestone 2 visual production hardening in Chamber 01**: normalize current playable assets and interactable readability (including shrine/lore affordances) toward the locked palette + silhouette doctrine without expanding mechanics/scope.
 
