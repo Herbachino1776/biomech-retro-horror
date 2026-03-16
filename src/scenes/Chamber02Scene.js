@@ -64,6 +64,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.currentLoreZone = null;
     this.isLoreTransitionActive = false;
     this.isRitualAlignmentActive = false;
+    this.isRestartingRun = false;
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
@@ -101,6 +102,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
       this.game.events.off('lore-screen-complete', this.handleLoreScreenComplete, this);
+      this.cleanupSceneUi();
     });
 
     this.applyResponsiveLayout();
@@ -247,7 +249,9 @@ export class Chamber02Scene extends Phaser.Scene {
     if (this.player.isDead) {
       this.mobileControls.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
-      if (Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) {
+      if ((Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) && !this.isRestartingRun) {
+        this.isRestartingRun = true;
+        this.cleanupSceneUi();
         restartRunFromDeath(this);
       }
       return;
@@ -447,6 +451,12 @@ export class Chamber02Scene extends Phaser.Scene {
     this.uiCamera.ignore(nonMobileObjects);
   }
 
+
+  cleanupSceneUi() {
+    this.restartText?.setVisible(false);
+    this.mobileControls?.setMode('init');
+    this.hud?.setVisible(false);
+  }
   applyResponsiveLayout() {
     const camera = this.cameras.main;
     const width = this.scale.width;
