@@ -91,7 +91,10 @@ export class LoreScreenScene extends Phaser.Scene {
       const imageAlpha = this.screenConfig?.presentation?.imageAlpha ?? 0.94;
       const imageTexture = this.textures.get(this.screenConfig.imageKey);
       const sourceImage = imageTexture.getSourceImage();
-      const sourceAspect = sourceImage.width / sourceImage.height;
+      const imageCrop = this.screenConfig?.presentation?.imageCrop;
+      const sourceAspect = imageCrop
+        ? imageCrop.width / imageCrop.height
+        : sourceImage.width / sourceImage.height;
       const { imageDisplayWidth, imageDisplayHeight } = this.resolveLoreImageSize({
         sourceAspect,
         frameWidth: imageWidth,
@@ -104,7 +107,6 @@ export class LoreScreenScene extends Phaser.Scene {
         .setTint(imageTint)
         .setAlpha(imageAlpha);
 
-      const imageCrop = this.screenConfig?.presentation?.imageCrop;
       if (imageCrop) {
         image.setCrop(imageCrop.x, imageCrop.y, imageCrop.width, imageCrop.height);
       }
