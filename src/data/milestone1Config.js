@@ -130,7 +130,7 @@ export const LORE_SCREENS = {
     prompt: 'Press [E] / [Enter] or tap to continue'
   },
   'chamber02-vertebral-memory': {
-    imageKey: ASSET_KEYS.laughingEngine,
+    imageKey: ASSET_KEYS.chamber02VertebralHornGate,
     title: 'CHAMBER 02 // VERTEBRAL MEMORY',
     body: [
       'The horn-gate does not open: it identifies.',
