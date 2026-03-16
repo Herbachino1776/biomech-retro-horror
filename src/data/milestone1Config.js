@@ -73,10 +73,6 @@ export const CONCEPT_PRESENTATION = {
     alpha: 1,
     tint: 0xffd8c2
   },
-  chamber02VertebralHornGate: {
-    // Horizontal ritual slice to keep Chamber 02 lore framing aligned with Chamber 01 composition doctrine.
-    crop: { x: 0, y: 356, width: 1024, height: 820 }
-  },
   chamberBackdrop: {
     panelWidth: 840,
     panelHeight: 540,
@@ -149,14 +145,6 @@ export const LORE_SCREENS = {
       'Each rib listens for lineage, then braids your marrow into its register.',
       'Passage is a verdict spoken by architecture, not by priests.'
     ],
-    prompt: 'Press [E] / [Enter] or tap to continue',
-    presentation: {
-      imageCrop: {
-        x: CONCEPT_PRESENTATION.chamber02VertebralHornGate.crop.x,
-        y: CONCEPT_PRESENTATION.chamber02VertebralHornGate.crop.y,
-        width: CONCEPT_PRESENTATION.chamber02VertebralHornGate.crop.width,
-        height: CONCEPT_PRESENTATION.chamber02VertebralHornGate.crop.height
-      }
-    }
+    prompt: 'Press [E] / [Enter] or tap to continue'
   }
 };
