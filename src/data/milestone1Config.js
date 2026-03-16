@@ -103,6 +103,19 @@ export const LORE_ENTRIES = [
     y: 410,
     width: 70,
     height: 70,
-    text: 'The altar exhales through ribbed vents. It remembers every trespass and names none forgiven.'
+    screenId: 'chamber01-laughing-engine'
   }
 ];
+
+export const LORE_SCREENS = {
+  'chamber01-laughing-engine': {
+    imageKey: 'laughing-engine-concept-01',
+    title: 'CHAMBER 01 // ALTAR ENGINE',
+    body: [
+      'The furnace laughs without sound.',
+      'Bone gears turn where priests once knelt, and the ash remembers your bloodline.',
+      'A seal stirs beneath the chamber floor, waiting for the next offering to breathe.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue'
+  }
+};
