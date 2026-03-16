@@ -25,15 +25,17 @@ export const PLAYER = {
 
 export const SKITTER = {
   health: 3,
-  speed: 64,
-  aggroRange: 240,
+  speed: 56,
+  aggroRange: 220,
   contactDamage: 1,
-  attackCooldownMs: 1200,
-  lungeSpeedBonus: 60,
+  attackCooldownMs: 1500,
+  lungeSpeedBonus: 50,
   lungeJumpVelocity: -165,
   body: { width: 42, height: 26, offsetX: 4, offsetY: 14 },
-  patrolDistance: 120,
-  startX: 980,
+  patrolDistance: 150,
+  awakenPlayerX: 760,
+  wakeDelayMs: 700,
+  startX: 1160,
   startY: 402
 };
 
@@ -97,17 +99,17 @@ export const COLORS = {
 };
 
 export const CHAMBER_PLATFORM_LAYOUT = [
-  { x: 340, y: 360, width: 140, height: 18 },
-  { x: 600, y: 322, width: 130, height: 18 },
-  { x: 1360, y: 388, width: 200, height: 18 },
-  { x: 1750, y: 330, width: 140, height: 18 }
+  { x: 330, y: 360, width: 140, height: 18 },
+  { x: 700, y: 330, width: 130, height: 18 },
+  { x: 1460, y: 384, width: 200, height: 18 },
+  { x: 1840, y: 334, width: 140, height: 18 }
 ];
 
 export const LORE_ENTRIES = [
   {
     id: 'entry-altar',
-    x: 460,
-    y: 410,
+    x: 540,
+    y: 406,
     width: 70,
     height: 70,
     screenId: 'chamber01-laughing-engine'
