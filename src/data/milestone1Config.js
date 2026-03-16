@@ -126,5 +126,21 @@ export const LORE_SCREENS = {
       'A seal stirs beneath the chamber floor, waiting for the next offering to breathe.'
     ],
     prompt: 'Press [E] / [Enter] or tap to continue'
+  },
+  'chamber02-vertebral-memory': {
+    imageKey: 'laughing-engine-concept-01',
+    title: 'CHAMBER 02 // VERTEBRAL MEMORY',
+    body: [
+      'The horn-gate does not open: it identifies.',
+      'Each rib listens for lineage, then braids your marrow into its register.',
+      'Passage is a verdict spoken by architecture, not by priests.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    presentation: {
+      imageTint: 0xc1d5a7,
+      imageAlpha: 0.9,
+      frameColor: 0x8ea875,
+      titleColor: '#a6bf8d'
+    }
   }
 };
