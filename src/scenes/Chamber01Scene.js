@@ -120,7 +120,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
   createPlatforms() {
     const hasBackdropConcept = this.textures.exists(ASSET_KEYS.chamberBackground);
-    const floorAlpha = hasBackdropConcept ? 0.62 : 1;
+    const floorAlpha = hasBackdropConcept ? 0.2 : 1;
     const platformAlpha = hasBackdropConcept ? 0.58 : 1;
     const gateAlpha = hasBackdropConcept ? 0.66 : 1;
 
@@ -136,7 +136,20 @@ export class Chamber01Scene extends Phaser.Scene {
         .setOrigin(0.5);
       this.physics.add.existing(block, true);
       this.platforms.add(block);
+
+      this.add
+        .rectangle(platform.x, platform.y - 4, platform.width, Math.max(10, platform.height + 4), COLORS.oil, hasBackdropConcept ? 0.2 : 0)
+        .setOrigin(0.5)
+        .setDepth(-5);
     });
+
+    if (this.textures.exists(ASSET_KEYS.chamber01FloorStrip)) {
+      this.add
+        .tileSprite(WORLD.width / 2, WORLD.floorY + 12, WORLD.width, 82, ASSET_KEYS.chamber01FloorStrip)
+        .setTint(0xe3d6bf)
+        .setAlpha(hasBackdropConcept ? 0.92 : 1)
+        .setDepth(-5);
+    }
 
     const gate = this.add.rectangle(2100, 390, 34, 160, COLORS.rust, gateAlpha).setOrigin(0.5);
     this.add.text(2060, 300, 'SEALED', {
@@ -157,6 +170,14 @@ export class Chamber01Scene extends Phaser.Scene {
     const hasBackdropConcept = this.textures.exists(ASSET_KEYS.chamberBackground);
 
     if (hasBackdropConcept) {
+      if (this.textures.exists(ASSET_KEYS.chamber01Wall)) {
+        this.add
+          .tileSprite(WORLD.width / 2, 220, WORLD.width, 360, ASSET_KEYS.chamber01Wall)
+          .setTint(0xdbc8af)
+          .setAlpha(0.52)
+          .setDepth(-11);
+      }
+
       CONCEPT_PRESENTATION.chamberBackdrop.anchorXs.forEach((anchorX) => {
         this.add
           .image(anchorX, WORLD.height / 2, ASSET_KEYS.chamberBackground)
@@ -198,6 +219,15 @@ export class Chamber01Scene extends Phaser.Scene {
         .setDepth(-8);
     }
 
+    if (this.textures.exists(ASSET_KEYS.chamber01LaughingEngineWorld)) {
+      this.add
+        .image(1130, 248, ASSET_KEYS.chamber01LaughingEngineWorld)
+        .setDisplaySize(640, 320)
+        .setTint(0xf0e3ca)
+        .setAlpha(0.66)
+        .setDepth(-8);
+    }
+
     if (this.textures.exists(ASSET_KEYS.sentinel)) {
       this.add
         .image(1720, 410, ASSET_KEYS.sentinel)
@@ -212,6 +242,15 @@ export class Chamber01Scene extends Phaser.Scene {
         .setAlpha(CONCEPT_PRESENTATION.sentinel.alpha)
         .setTint(CONCEPT_PRESENTATION.sentinel.tint)
         .setDepth(-8);
+    }
+
+    if (this.textures.exists(ASSET_KEYS.chamber01RibArch)) {
+      this.add
+        .image(1435, 202, ASSET_KEYS.chamber01RibArch)
+        .setDisplaySize(760, 360)
+        .setTint(0xd4c5af)
+        .setAlpha(0.5)
+        .setDepth(-6);
     }
 
     this.add.text(1032, 355, 'ALTAR ENGINE // FALLBACK SAFETY', {
@@ -309,6 +348,16 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.add.ellipse(entry.x - 18, baseY - 15, 10, 6, COLORS.sickly, fossilAlpha * 0.4).setDepth(-1);
     this.add.ellipse(entry.x + 18, baseY - 15, 10, 6, COLORS.sickly, fossilAlpha * 0.4).setDepth(-1);
+
+    if (this.textures.exists(ASSET_KEYS.chamber01Shrine)) {
+      this.add
+        .image(entry.x, baseY - 20, ASSET_KEYS.chamber01Shrine)
+        .setDisplaySize(140, 116)
+        .setCrop(420, 90, 700, 620)
+        .setTint(0xcabb9e)
+        .setAlpha(hasBackdropConcept ? 0.6 : 0.88)
+        .setDepth(0);
+    }
   }
 
   handleLoreTrigger(playerSprite, zone) {
