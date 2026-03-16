@@ -21,8 +21,9 @@ const LORE_LAYOUT = {
     bodyLineSpacing: 6,
     promptBottomPadding: 26,
     textInsetX: 20,
-    titleRatioY: 0.13,
-    bodyRatioY: 0.2
+    titleRatioY: 0.11,
+    bodyRatioY: 0.17,
+    textBoxBottomPadding: 18
   },
   landscape: {
     imageWidthRatio: 0.88,
@@ -34,8 +35,9 @@ const LORE_LAYOUT = {
     bodyLineSpacing: 8,
     promptBottomPadding: 34,
     textInsetX: 26,
-    titleRatioY: 0.09,
-    bodyRatioY: 0.16
+    titleRatioY: 0.08,
+    bodyRatioY: 0.14,
+    textBoxBottomPadding: 22
   }
 };
 
@@ -117,9 +119,13 @@ export class LoreScreenScene extends Phaser.Scene {
 
     const title = this.screenConfig?.title ?? 'RITUAL RECORD';
     const body = this.screenConfig?.body?.join('\n') ?? 'The chamber keeps its own scripture.';
+    const textLeft = centerX - imageWidth / 2 + layout.textInsetX;
+    const textTop = centerY + imageHeight * layout.titleRatioY;
+    const textWidth = imageWidth - layout.textInsetX * 2;
+    const textHeight = layout.shadeHeight - layout.textBoxBottomPadding;
 
     this.titleText = this.add
-      .text(centerX - imageWidth / 2 + layout.textInsetX, centerY + imageHeight * layout.titleRatioY, title, {
+      .text(textLeft, textTop, title, {
         fontFamily: 'monospace',
         fontSize: layout.titleFontSize,
         color: this.screenConfig?.presentation?.titleColor ?? '#9bb085'
@@ -127,14 +133,20 @@ export class LoreScreenScene extends Phaser.Scene {
       .setDepth(LORE_DEPTH.text);
 
     this.bodyText = this.add
-      .text(centerX - imageWidth / 2 + layout.textInsetX, centerY + imageHeight * layout.bodyRatioY, body, {
+      .text(textLeft, centerY + imageHeight * layout.bodyRatioY, body, {
         fontFamily: 'monospace',
         fontSize: layout.bodyFontSize,
         color: '#d2c2ac',
         lineSpacing: layout.bodyLineSpacing,
-        wordWrap: { width: imageWidth - layout.textInsetX * 2, useAdvancedWrap: true }
+        wordWrap: { width: textWidth, useAdvancedWrap: true }
       })
       .setDepth(LORE_DEPTH.text);
+
+    const textMaskGraphics = this.make.graphics({ x: 0, y: 0, add: false });
+    textMaskGraphics.fillRect(textLeft, textTop - 4, textWidth, textHeight);
+    const textMask = textMaskGraphics.createGeometryMask();
+    this.titleText.setMask(textMask);
+    this.bodyText.setMask(textMask);
 
     this.promptText = this.add
       .text(centerX, this.scale.height - layout.promptBottomPadding, this.screenConfig?.prompt ?? 'Tap or press Enter to continue', {

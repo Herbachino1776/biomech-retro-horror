@@ -1,3 +1,5 @@
+import { ASSET_KEYS } from './assetKeys.js';
+
 export const WORLD = {
   width: 2200,
   height: 540,
@@ -118,7 +120,7 @@ export const LORE_ENTRIES = [
 
 export const LORE_SCREENS = {
   'chamber01-laughing-engine': {
-    imageKey: 'laughing-engine-concept-01',
+    imageKey: ASSET_KEYS.laughingEngine,
     title: 'CHAMBER 01 // ALTAR ENGINE',
     body: [
       'The furnace laughs without sound.',
@@ -128,7 +130,7 @@ export const LORE_SCREENS = {
     prompt: 'Press [E] / [Enter] or tap to continue'
   },
   'chamber02-vertebral-memory': {
-    imageKey: 'laughing-engine-concept-01',
+    imageKey: ASSET_KEYS.laughingEngine,
     title: 'CHAMBER 02 // VERTEBRAL MEMORY',
     body: [
       'The horn-gate does not open: it identifies.',
