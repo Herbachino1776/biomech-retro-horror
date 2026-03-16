@@ -1,14 +1,12 @@
 import Phaser from 'phaser';
 import { Player } from '../entities/Player.js';
 import { SkitterServitor } from '../entities/SkitterServitor.js';
-import { DialogueSystem } from '../systems/DialogueSystem.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import {
   CHAMBER_PLATFORM_LAYOUT,
   CONCEPT_PRESENTATION,
   COLORS,
-  DIALOGUE,
   LORE_ENTRIES,
   PLAYER,
   SKITTER,
@@ -42,7 +40,6 @@ export class Chamber01Scene extends Phaser.Scene {
     this.physics.add.overlap(this.player.attackHitbox, this.enemy.sprite, this.handlePlayerHitEnemy, null, this);
     this.physics.add.overlap(this.player.sprite, this.enemy.sprite, this.handleEnemyContactPlayer, null, this);
 
-    this.dialogue = new DialogueSystem(this, DIALOGUE);
     this.hud = new HudOverlay(this);
     this.mobileControls = new MobileControls(this);
 
@@ -68,13 +65,15 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
-    this.keyInteract = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
     this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
     this.scale.on('resize', this.applyResponsiveLayout, this);
+    this.isLoreTransitionActive = false;
+    this.game.events.on('lore-screen-complete', this.handleLoreScreenComplete, this);
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
+      this.game.events.off('lore-screen-complete', this.handleLoreScreenComplete, this);
     });
 
     this.applyResponsiveLayout();
@@ -93,12 +92,10 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    if (this.dialogue.active) {
+    if (this.isLoreTransitionActive) {
       this.mobileControls.setMode('dialogue');
-      this.player.body.setVelocityX(0);
-      if (Phaser.Input.Keyboard.JustDown(this.keyInteract) || mobileInput.interactPressed) {
-        this.dialogue.hide();
-      }
+      this.player.body.setVelocity(0, 0);
+      this.enemy.body.setVelocity(0, 0);
       return;
     }
 
@@ -297,14 +294,42 @@ export class Chamber01Scene extends Phaser.Scene {
 
   handleLoreTrigger(playerSprite, zone) {
     const { loreEntry } = zone;
-    if (this.triggeredLoreIds.has(loreEntry.id) || this.dialogue.active) {
+    if (this.triggeredLoreIds.has(loreEntry.id) || this.isLoreTransitionActive) {
       return;
     }
 
     this.triggeredLoreIds.add(loreEntry.id);
-    this.dialogue.show(loreEntry.text);
+    this.beginLoreSequence(loreEntry);
   }
 
+
+
+  beginLoreSequence(loreEntry) {
+    if (!loreEntry?.screenId || this.isLoreTransitionActive) {
+      return;
+    }
+
+    this.isLoreTransitionActive = true;
+    this.mobileControls.setMode('dialogue');
+    this.player.body.setVelocity(0, 0);
+    this.enemy.body.setVelocity(0, 0);
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.pause();
+      this.scene.launch('LoreScreenScene', {
+        screenId: loreEntry.screenId,
+        returnSceneKey: this.scene.key
+      });
+    });
+
+    this.cameras.main.fadeOut(450, 0, 0, 0);
+  }
+
+  handleLoreScreenComplete() {
+    this.isLoreTransitionActive = false;
+    this.mobileControls.setMode('gameplay');
+    this.cameras.main.fadeIn(500, 0, 0, 0);
+  }
   handlePlayerHitEnemy(attackZone, enemySprite) {
     if (!this.player.attackActive || this.enemy.dead || !this.isEnemyOverlapTarget(enemySprite)) {
       return;
