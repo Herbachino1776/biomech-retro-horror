@@ -75,7 +75,7 @@ export class LoreScreenScene extends Phaser.Scene {
     const centerX = this.scale.width / 2;
     const centerY = this.scale.height / 2;
     const isPortrait = this.scale.height >= this.scale.width;
-    const layout = isPortrait ? LORE_LAYOUT.portrait : LORE_LAYOUT.landscape;
+    const layout = this.getActiveLayout(isPortrait);
     const imageWidth = Math.floor(this.scale.width * layout.imageWidthRatio);
     const imageHeight = Math.floor(this.scale.height * layout.imageHeightRatio);
     const shadeHeight = Math.floor(imageHeight * layout.shadeHeightRatio);
@@ -88,9 +88,24 @@ export class LoreScreenScene extends Phaser.Scene {
     if (hasLoreImage) {
       const imageTint = this.screenConfig?.presentation?.imageTint ?? 0xd4b9a5;
       const imageAlpha = this.screenConfig?.presentation?.imageAlpha ?? 0.94;
+      const imageTexture = this.textures.get(this.screenConfig.imageKey);
+      const sourceImage = imageTexture.getSourceImage();
+      const sourceAspect = sourceImage.width / sourceImage.height;
+      const frameAspect = imageWidth / imageHeight;
+      let imageDisplayWidth = imageWidth;
+      let imageDisplayHeight = imageHeight;
+
+      if (sourceAspect > frameAspect) {
+        imageDisplayHeight = imageHeight;
+        imageDisplayWidth = imageHeight * sourceAspect;
+      } else {
+        imageDisplayWidth = imageWidth;
+        imageDisplayHeight = imageWidth / sourceAspect;
+      }
+
       const image = this.add
         .image(0, layout.imageYOffset, this.screenConfig.imageKey)
-        .setDisplaySize(imageWidth, imageHeight)
+        .setDisplaySize(imageDisplayWidth, imageDisplayHeight)
         .setTint(imageTint)
         .setAlpha(imageAlpha);
 
@@ -104,6 +119,10 @@ export class LoreScreenScene extends Phaser.Scene {
       }
 
       this.imageContainer.add(image);
+
+      const imageMaskGraphics = this.make.graphics({ x: 0, y: 0, add: false });
+      imageMaskGraphics.fillRect(centerX - imageWidth / 2, centerY + layout.imageYOffset - imageHeight / 2, imageWidth, imageHeight);
+      image.setMask(imageMaskGraphics.createGeometryMask());
     } else {
       const fallback = this.add
         .rectangle(0, layout.imageYOffset, imageWidth, imageHeight, COLORS.architecture, 0.95)
@@ -181,6 +200,21 @@ export class LoreScreenScene extends Phaser.Scene {
       .rectangle(centerX, centerY + layout.imageYOffset, imageWidth + 14, imageHeight + 14, 0x000000, 0)
       .setStrokeStyle(2, this.screenConfig?.presentation?.frameColor ?? COLORS.bone, 0.8)
       .setDepth(LORE_DEPTH.frame);
+  }
+
+  getActiveLayout(isPortrait) {
+    const baseLayout = isPortrait ? LORE_LAYOUT.portrait : LORE_LAYOUT.landscape;
+    const orientationKey = isPortrait ? 'portrait' : 'landscape';
+    const overrides = this.screenConfig?.presentation?.layoutOverrides?.[orientationKey] ?? null;
+
+    if (!overrides) {
+      return baseLayout;
+    }
+
+    return {
+      ...baseLayout,
+      ...overrides
+    };
   }
 
   addSlowDrift() {

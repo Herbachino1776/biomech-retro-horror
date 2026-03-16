@@ -25,7 +25,8 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 **Acceptance Criteria:** current playable assets read clearly at play scale, align with locked palette/silhouette doctrine, and preserve established lore-screen/shrine interaction behavior without regressions.
 **Dependencies:** Milestone 1 complete.
 **Do Not Expand Prematurely:** new gameplay systems, new chambers, branching narrative architecture.
-**Status:** next.
+**Status:** completed.
+**Completion Notes:** lore-screen pattern now supports per-screen layout overrides + aspect-preserving image fit to prevent portrait flattening; Chamber 02 lore beat ships with a conservative post-lore ritual reaction state (environment shift + ritual-aligned enemy wake) without broad system expansion.
 
 ## Milestone 3 — Encounter Expansion (Sentinel / Laughing Engine)
 **Purpose:** extend threat depth using existing loop foundations.

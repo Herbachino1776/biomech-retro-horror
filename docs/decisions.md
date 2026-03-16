@@ -49,6 +49,9 @@ Concise record of technical/design decisions currently in force.
 - Chamber 01 first lore beat uses the Laughing Engine/furnace art as the first lore-screen prototype.
 - Avoid generic always-on in-world overlay/dialogue as the long-term primary lore format.
 - Lore writing remains cryptic, symbolic, and area-specific.
+- Lore screens must preserve source image aspect ratio; fit/crop in frame rather than stretching.
+- Per-screen layout overrides are allowed when one global composition harms portrait readability.
+- Chamber 02 post-lore doctrine is conservative state reaction: visible environmental shift + at least one threat activation, with no broad new system.
 
 ## Lore Trigger Presentation Direction
 - Preferred lore trigger affordance is an **in-world ritual shrine / ossuary-style interactable**.

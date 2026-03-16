@@ -14,30 +14,32 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 
 ## What Works Now
 - Start/boot into Chamber 01 and death/restart loop.
-- Player core loop (move/jump/attack/damage/death).
-- Skitter Servitor enemy loop (including kill loop).
-- Mobile controls corrected for portrait and landscape playability.
-- Chamber 01 first lore beat uses a dedicated cinematic lore-screen transition.
-- Laughing Engine / furnace art is integrated as the first lore-screen prototype.
-- Chamber 01 lore trigger presentation is an in-world ritual shrine/ossuary-style prop.
-- Texture-first asset loading with fallback resilience.
+- Chamber 01 core loop (move/jump/attack/damage/death) remains stable.
+- Chamber 01 lore shrine -> cinematic lore-screen flow remains stable.
+- Chamber 01 -> Chamber 02 transition is active.
+- Chamber 02 is playable with established platform/combat pacing.
+- Chamber 02 lore shrine triggers a dedicated cinematic lore-screen beat.
+- Chamber 02 lore-screen composition is now portrait-safe and landscape-safe using per-screen layout overrides + aspect-preserving image fit.
+- Chamber 02 post-lore reaction state is implemented: environmental ritual shift plus ritual-aligned enemy activation.
+- Mobile controls remain corrected for portrait and landscape playability.
+- Texture-first asset loading with fallback resilience remains stable.
 
 ## What Still Needs Work Now
 - Sentinel + Laughing Engine are not full encounter systems yet.
 - Chamber progression/seal logic remains partial.
-- Chamber 01 lore-screen pattern should be generalized cleanly for additional beats.
-- Ongoing art normalization toward locked shared palette/readability doctrine.
+- Audio identity pass (ambient + encounter + lore transitions) is still pending.
 
 ## Active Milestone
-**Milestone 1 — Playable Mobile Vertical Slice: completed.**
+**Milestone 2 — Slice Art Cohesion + Lore Pattern Consolidation: completed.**
 
 ## Latest Completed Task
-- Chamber 02 conservative first integration/planning pass completed.
-- All five Chamber 02 raw source assets are now wired into centralized asset key/URL mapping and boot preload without activating Chamber 02 gameplay/scene flow.
-- Integration roles, production-facing naming targets, and defer notes are documented in `docs/chamber02-first-integration-pass.md` and `src/data/chamber02ArtPlan.js`.
+- Milestone 2 closeout pass shipped.
+- Chamber 2 lore-screen portrait composition corrected (no flattened/smushed image strip; stronger filled composition with readable text containment).
+- Chamber 2 first post-lore reaction state established (ambient veil + gate/shrine ritual visual shift + deferred ritual-aligned enemy wake).
+- Milestone/docs status updated to match shipped behavior.
 
 ## Exact Next Best Step After This Task
-Implement **Milestone 2 visual production hardening in Chamber 01**: normalize current playable assets and interactable readability (including shrine/lore affordances) toward the locked palette + silhouette doctrine without expanding mechanics/scope.
+Begin **Milestone 3 encounter expansion** by deepening one existing threat loop with telegraphed behavior while preserving mobile readability, lore cadence, and deployment invariants.
 
 ## Most Important Constraints
 1. Do not regress GitHub Pages/Vite base-path behavior.
@@ -46,5 +48,5 @@ Implement **Milestone 2 visual production hardening in Chamber 01**: normalize c
 4. Keep texture-first rendering; fallback only on load failure.
 5. Preserve dedicated cinematic lore-screen flow as the preferred lore delivery direction.
 6. Preserve in-world ritual shrine/ossuary lore trigger presentation direction.
-7. Prefer text/code changes unless binary changes are explicitly required.
+7. Preserve Chamber 01 stability while expanding encounter depth.
 8. End meaningful tasks with `npm run build`.

@@ -142,7 +142,20 @@ export const LORE_SCREENS = {
       imageTint: 0xc1d5a7,
       imageAlpha: 0.9,
       frameColor: 0x8ea875,
-      titleColor: '#a6bf8d'
+      titleColor: '#a6bf8d',
+      layoutOverrides: {
+        portrait: {
+          imageWidthRatio: 0.98,
+          imageHeightRatio: 0.8,
+          imageYOffset: -8,
+          shadeHeightRatio: 0.4,
+          shadeBottomInset: 12,
+          titleFontSize: 14,
+          bodyFontMax: 14,
+          bodyFontMin: 10,
+          promptBottomPadding: 22
+        }
+      }
     }
   }
 };
