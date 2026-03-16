@@ -48,6 +48,10 @@ export class Chamber01Scene extends Phaser.Scene {
     this.createLoreZones();
 
     this.currentLoreZone = null;
+    this.currentGateZone = null;
+    this.completedLoreBeats = new Set();
+    this.isChamber02GateActive = false;
+    this.isGateTransitionActive = false;
 
     this.restartText = this.add
       .text(this.scale.width / 2, 90, '', {
@@ -94,7 +98,7 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    if (this.isLoreTransitionActive) {
+    if (this.isLoreTransitionActive || this.isGateTransitionActive) {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemy.body.setVelocity(0, 0);
@@ -103,7 +107,9 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.mobileControls.setMode('gameplay');
     this.refreshLoreZonePresence();
+    this.refreshGateZonePresence();
     this.tryBeginLoreSequence(mobileInput);
+    this.tryBeginGateTransition(mobileInput);
     this.player.update(time, this.getCombinedInput(mobileInput));
     this.enemy.update(time, this.player.sprite.x);
     this.hud.update(this.player.health, PLAYER.maxHealth);
@@ -155,14 +161,37 @@ export class Chamber01Scene extends Phaser.Scene {
         .setDepth(-5);
     }
 
-    const gate = this.add.rectangle(2100, 390, 34, 160, COLORS.rust, gateAlpha).setOrigin(0.5);
-    this.add.text(2060, 300, 'SEALED', {
+    const gateX = 2100;
+    const gateY = 390;
+    const gateHeight = 196;
+
+    this.gateBarrier = this.add.rectangle(gateX, gateY, 28, gateHeight, COLORS.rust, gateAlpha).setOrigin(0.5);
+
+    if (this.textures.exists(ASSET_KEYS.chamber02VertebralHornGate)) {
+      this.gateArt = this.add
+        .image(gateX - 24, gateY - 48, ASSET_KEYS.chamber02VertebralHornGate)
+        .setDisplaySize(200, 260)
+        .setCrop(336, 218, 356, 1012)
+        .setTint(0xc3b299)
+        .setAlpha(hasBackdropConcept ? 0.58 : 0.82)
+        .setDepth(-4);
+    }
+
+    this.gateSigil = this.add.ellipse(gateX - 26, gateY + 6, 34, 92, COLORS.sickly, 0.1).setDepth(-3);
+
+    this.gateStateText = this.add.text(2038, 300, 'DORMANT', {
       fontFamily: 'monospace',
       fontSize: '13px',
       color: '#8f7d72'
     }).setDepth(-7).setAlpha(hasBackdropConcept ? 0.32 : 1);
-    this.physics.add.existing(gate, true);
-    this.platforms.add(gate);
+
+    this.physics.add.existing(this.gateBarrier, true);
+    this.platforms.add(this.gateBarrier);
+
+    this.gateZone = this.add.zone(gateX - 96, gateY + 14, 108, 144).setOrigin(0.5);
+    this.physics.add.existing(this.gateZone, true);
+
+    this.updateGateActivationVisuals();
   }
 
   renderGrayboxBackdrop() {
@@ -376,6 +405,18 @@ export class Chamber01Scene extends Phaser.Scene {
     });
   }
 
+  refreshGateZonePresence() {
+    this.currentGateZone = null;
+
+    if (!this.gateZone || !this.isChamber02GateActive) {
+      return;
+    }
+
+    this.physics.overlap(this.player.sprite, this.gateZone, () => {
+      this.currentGateZone = this.gateZone;
+    });
+  }
+
   tryBeginLoreSequence(mobileInput) {
     if (!this.currentLoreZone) {
       return;
@@ -397,6 +438,23 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.triggeredLoreIds.add(loreEntry.id);
     this.beginLoreSequence(loreEntry);
+  }
+
+  tryBeginGateTransition(mobileInput) {
+    if (!this.currentGateZone || this.isGateTransitionActive) {
+      return;
+    }
+
+    const interactPressed =
+      Phaser.Input.Keyboard.JustDown(this.keyInteract) ||
+      Phaser.Input.Keyboard.JustDown(this.keyEnter) ||
+      mobileInput.interactPressed;
+
+    if (!interactPressed) {
+      return;
+    }
+
+    this.beginGateTransitionToChamber02();
   }
 
 
@@ -424,9 +482,50 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   handleLoreScreenComplete() {
+    if (!this.completedLoreBeats.has('entry-altar') && this.triggeredLoreIds.has('entry-altar')) {
+      this.completedLoreBeats.add('entry-altar');
+      this.isChamber02GateActive = true;
+      this.updateGateActivationVisuals();
+    }
+
     this.isLoreTransitionActive = false;
     this.mobileControls.setMode('gameplay');
     this.cameras.main.fadeIn(500, 0, 0, 0);
+  }
+
+  updateGateActivationVisuals() {
+    if (!this.gateStateText || !this.gateSigil) {
+      return;
+    }
+
+    if (this.isChamber02GateActive) {
+      this.gateStateText.setText('RESPONDING').setColor('#9bb085');
+      this.gateSigil.setAlpha(0.42);
+      return;
+    }
+
+    this.gateStateText.setText('DORMANT').setColor('#8f7d72');
+    this.gateSigil.setAlpha(0.1);
+  }
+
+  beginGateTransitionToChamber02() {
+    if (this.isGateTransitionActive) {
+      return;
+    }
+
+    this.isGateTransitionActive = true;
+    this.mobileControls.setMode('dialogue');
+    this.player.body.setVelocity(0, 0);
+    this.enemy.body.setVelocity(0, 0);
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.start('Chamber02Scene', {
+        enteredFrom: 'chamber01-vertebral-horn-gate',
+        progressionSource: 'entry-altar'
+      });
+    });
+
+    this.cameras.main.fadeOut(700, 0, 0, 0);
   }
   handlePlayerHitEnemy(attackZone, enemySprite) {
     if (!this.player.attackActive || this.enemy.dead || !this.isEnemyOverlapTarget(enemySprite)) {
