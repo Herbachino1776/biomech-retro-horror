@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 
@@ -8,6 +9,7 @@ export class Player {
     this.health = config.maxHealth;
     this.facing = 1;
     this.attackActive = false;
+    this.attackPhase = 'idle';
     this.attackId = 0;
     this.lastAttackTime = -Infinity;
     this.lastHitTime = -Infinity;
@@ -62,19 +64,26 @@ export class Player {
       this.facing = direction;
     }
 
-    this.body.setVelocityX(direction * this.config.moveSpeed);
+    const targetSpeed = direction * this.config.moveSpeed;
+    const inAttackCommit = this.attackPhase === 'startup' || this.attackPhase === 'active' || this.attackPhase === 'recovery';
+    const allowedMaxSpeed = inAttackCommit
+      ? this.config.moveSpeed * this.config.attackMoveSpeedMultiplier
+      : this.config.moveSpeed;
+    const cappedTargetSpeed = Phaser.Math.Clamp(targetSpeed, -allowedMaxSpeed, allowedMaxSpeed);
+    const acceleration = direction === 0 ? this.config.moveDeceleration : this.config.moveAcceleration;
+    const deltaSeconds = this.scene.game.loop.delta / 1000;
+    const nextVelocityX = Phaser.Math.MoveTowards(this.body.velocity.x, cappedTargetSpeed, acceleration * deltaSeconds);
+    this.body.setVelocityX(nextVelocityX);
 
     if (input.jumpPressed && this.body.blocked.down) {
       this.body.setVelocityY(this.config.jumpVelocity);
     }
 
-    if (input.attackPressed && time > this.lastAttackTime + this.config.attackCooldownMs) {
+    if (input.attackPressed && this.attackPhase === 'idle' && time > this.lastAttackTime + this.config.attackCooldownMs) {
       this.startAttack(time);
     }
 
-    if (this.attackActive && time > this.lastAttackTime + this.config.attackDurationMs) {
-      this.endAttack();
-    }
+    this.updateAttackState(time);
 
     this.updateVisuals(time);
     this.updateAttackHitbox();
@@ -82,13 +91,41 @@ export class Player {
 
   startAttack(time) {
     this.lastAttackTime = time;
-    this.attackActive = true;
-    this.attackId += 1;
-    this.attackHitbox.body.enable = true;
+    this.attackActive = false;
+    this.attackPhase = 'startup';
+    this.attackHitbox.body.enable = false;
     this.setVisualTint(0x6f8c59);
   }
 
+  updateAttackState(time) {
+    if (this.attackPhase === 'idle') {
+      return;
+    }
+
+    const attackElapsed = time - this.lastAttackTime;
+
+    if (this.attackPhase === 'startup' && attackElapsed >= this.config.attackStartupMs) {
+      this.attackPhase = 'active';
+      this.attackActive = true;
+      this.attackId += 1;
+      this.attackHitbox.body.enable = true;
+      return;
+    }
+
+    if (this.attackPhase === 'active' && attackElapsed >= this.config.attackStartupMs + this.config.attackActiveMs) {
+      this.attackPhase = 'recovery';
+      this.attackActive = false;
+      this.attackHitbox.body.enable = false;
+      return;
+    }
+
+    if (this.attackPhase === 'recovery' && attackElapsed >= this.config.attackStartupMs + this.config.attackActiveMs + this.config.attackRecoveryMs) {
+      this.endAttack();
+    }
+  }
+
   endAttack() {
+    this.attackPhase = 'idle';
     this.attackActive = false;
     this.attackHitbox.body.enable = false;
   }
@@ -122,7 +159,7 @@ export class Player {
       return;
     }
 
-    if (this.attackActive) {
+    if (this.attackPhase !== 'idle') {
       this.setVisualTint(0x6f8c59);
       return;
     }

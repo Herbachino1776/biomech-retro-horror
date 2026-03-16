@@ -54,8 +54,8 @@ export class SkitterServitor {
 
       if (Math.abs(dx) < 65 && time > this.lastAttackTime + this.config.attackCooldownMs) {
         this.lastAttackTime = time;
-        this.body.setVelocityX(this.direction * (this.config.speed + 90));
-        this.body.setVelocityY(-190);
+        this.body.setVelocityX(this.direction * (this.config.speed + this.config.lungeSpeedBonus));
+        this.body.setVelocityY(this.config.lungeJumpVelocity);
       }
     } else {
       const patrolMin = this.originX - this.config.patrolDistance;
