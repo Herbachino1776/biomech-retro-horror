@@ -150,13 +150,7 @@ export const LORE_SCREENS = {
       imageTint: 0xc1d5a7,
       imageAlpha: 0.9,
       frameColor: 0x8ea875,
-      titleColor: '#a6bf8d',
-      imageCrop: {
-        x: 132,
-        y: 278,
-        width: 760,
-        height: 620
-      }
+      titleColor: '#a6bf8d'
     }
   }
 };
