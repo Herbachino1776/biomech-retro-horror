@@ -16,29 +16,30 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 **Acceptance Criteria:** chamber playable with visible usable portrait controls, readable world view, grounded sprites, desktop parity, successful build.
 **Dependencies:** Milestone 0 complete.
 **Do Not Expand Prematurely:** extra levels, new mechanics, heavy refactors.
-**Status:** active (signoff hardening pass).
+**Status:** completed.
+**Completion Notes:** mobile controls are corrected for portrait + landscape usability; Chamber 01 first lore beat now uses dedicated cinematic lore-screen flow with Laughing Engine/furnace prototype art; lore trigger marker presentation is now an in-world ritual shrine/ossuary-style prop.
 
-## Milestone 2 — Sprite-Ready Slice Art Pass
-**Purpose:** improve in-game visual cohesion/readability using runtime-ready stand-ins and better integration.
-**Scope / Includes:** sprite extraction/integration pass, grounding/readability tuning, palette normalization.
-**Acceptance Criteria:** gameplay assets read clearly at play scale and align with art lock; fallback remains secondary.
-**Dependencies:** Milestone 1 gameplay stability.
-**Do Not Expand Prematurely:** full production animation pipeline.
+## Milestone 2 — Slice Art Cohesion + Lore Pattern Consolidation
+**Purpose:** harden visual cohesion/readability in the current playable slice while consolidating the newly established lore delivery pattern.
+**Scope / Includes:** Chamber 01 asset normalization toward art lock, interactable readability tuning, and cleanup/generalization of lore-screen + shrine trigger pattern for future beats.
+**Acceptance Criteria:** current playable assets read clearly at play scale, align with locked palette/silhouette doctrine, and preserve established lore-screen/shrine interaction behavior without regressions.
+**Dependencies:** Milestone 1 complete.
+**Do Not Expand Prematurely:** new gameplay systems, new chambers, branching narrative architecture.
+**Status:** next.
+
+## Milestone 3 — Encounter Expansion (Sentinel / Laughing Engine)
+**Purpose:** extend threat depth using existing loop foundations.
+**Scope / Includes:** evolve Sentinel/Laughing Engine into fuller encounter behavior with readable telegraphing and pacing.
+**Acceptance Criteria:** at least one expanded encounter loop lands without regressing input/readability/deployment invariants.
+**Dependencies:** Milestone 2 cohesion and presentation hardening.
+**Do Not Expand Prematurely:** multi-boss ecosystem or broad content volume expansion.
 **Status:** planned.
-
-## Milestone 3 — Lore Presentation System
-**Purpose:** upgrade lore from simple overlays to cinematic ritual presentation.
-**Scope / Includes:** discrete lore scene/state transitions, fade grammar, subtle camera drift, lore-specific pacing/audio hooks.
-**Acceptance Criteria:** at least one Chamber 01 lore beat delivered through dedicated cinematic flow.
-**Dependencies:** stable scene/state management from Milestone 1.
-**Do Not Expand Prematurely:** branching narrative trees or large dialogue UI systems.
-**Status:** planned (next major focus).
 
 ## Milestone 4 — Audio Identity Pass
 **Purpose:** establish oppressive audio identity without overwhelming readability.
 **Scope / Includes:** ambient bed, combat feedback SFX, lore transition audio treatment.
 **Acceptance Criteria:** functional audio layering for chamber/gameplay/lore states.
-**Dependencies:** Milestone 3 lore-state structure is helpful.
+**Dependencies:** stable lore-screen/state structure from Milestones 1–2.
 **Do Not Expand Prematurely:** full soundtrack production.
 **Status:** planned.
 
@@ -50,15 +51,7 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 **Do Not Expand Prematurely:** open-world structure or large branching map.
 **Status:** planned.
 
-## Milestone 6 — Mini-Boss / Threat Escalation
-**Purpose:** deliver a stronger threat escalation loop.
-**Scope / Includes:** Laughing Engine (or equivalent) upgraded to proper encounter behavior.
-**Acceptance Criteria:** encounter has readable telegraphing, pacing, and completion flow.
-**Dependencies:** combat/readability/audio groundwork from prior milestones.
-**Do Not Expand Prematurely:** multi-phase boss ecosystem across many arenas.
-**Status:** planned.
-
-## Milestone 7 — Polish, Testing, and Release Slice
+## Milestone 6 — Polish, Testing, and Release Slice
 **Purpose:** stabilize and package a coherent release-quality vertical slice.
 **Scope / Includes:** regression cleanup, performance/readability polish, deployment verification, final docs pass.
 **Acceptance Criteria:** reproducible build/deploy success, stable input parity, milestone docs aligned with shipped behavior.

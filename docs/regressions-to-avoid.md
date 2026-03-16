@@ -7,11 +7,12 @@ Known failure patterns and what future tasks must protect.
 - Keep production base `/biomech-retro-horror/` and dev base `/`.
 - Avoid hardcoded paths that bypass centralized URL mapping.
 
-## 2) Mobile Controls Off-Screen / Drift Regressions
-**Observed risk:** controls became clipped/off-screen in portrait, or drifted with world/camera edits.
+## 2) Mobile Controls Visibility / Alignment Regressions
+**Observed risk:** controls can become clipped/off-screen in portrait or misaligned after resize/orientation edits.
 - Keep controls fixed to screen space.
 - Re-layout controls on resize/orientation changes.
 - Keep visible controls and hit areas aligned.
+- Preserve both portrait and landscape playability.
 - Respect iPhone portrait safe-area constraints.
 
 ## 3) Desktop Keyboard Parity Regressions
@@ -40,7 +41,12 @@ Known failure patterns and what future tasks must protect.
 - Preserve start → chamber → death/restart contract.
 - Verify restart input works on both desktop and mobile paths.
 
-## 8) Portrait Readability Overcorrection
-**Observed risk:** improving readability by enlarging world can hide controls, or making room for controls can shrink world to unreadable size.
-- Do not casually break portrait layout while improving readability.
-- Balance world viewport height and dedicated control space; validate both visually.
+## 8) Lore Presentation Backslide Regressions
+**Observed risk:** lore can regress from cinematic screen transitions back to generic always-on dialogue overlays.
+- Preserve dedicated lore-screen transition cadence where implemented.
+- Keep lore pacing discrete and ritual/cinematic in tone.
+
+## 9) Lore Trigger Presentation Regressions
+**Observed risk:** interactable lore markers can drift back toward debug-style UI objects.
+- Preserve in-world ritual shrine/ossuary-style lore trigger presentation.
+- Keep placeholders diegetic and in-world readable, not debug-box literal.
