@@ -20,7 +20,8 @@ const CHAMBER02_PLATFORMS = [
 const CHAMBER02_ENEMY_SPAWNS = [
   { x: 1140, y: 402, awakenPlayerX: 830 },
   { x: 2410, y: 402, awakenPlayerX: 2050 },
-  { x: 3180, y: 402, awakenPlayerX: 2880 }
+  { x: 3180, y: 402, awakenPlayerX: 2880 },
+  { x: 2935, y: 402, awakenPlayerX: Number.POSITIVE_INFINITY, wakeDelayMs: 250, requireRitualAlignment: true }
 ];
 
 const CHAMBER02_LORE_TRIGGER = {
@@ -30,6 +31,13 @@ const CHAMBER02_LORE_TRIGGER = {
   width: 78,
   height: 76,
   screenId: 'chamber02-vertebral-memory'
+};
+
+const RITUAL_ALIGNMENT = {
+  ambientVeilColor: 0x17301f,
+  ambientVeilAlpha: 0.16,
+  pulseDurationMs: 2200,
+  pulseAlphaDelta: 0.08
 };
 
 export class Chamber02Scene extends Phaser.Scene {
@@ -54,6 +62,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.triggeredLoreIds = new Set();
     this.currentLoreZone = null;
     this.isLoreTransitionActive = false;
+    this.isRitualAlignmentActive = false;
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
@@ -132,6 +141,16 @@ export class Chamber02Scene extends Phaser.Scene {
     this.add
       .ellipse(1930, 404, 500, 96, COLORS.sickly, 0.16)
       .setDepth(-9);
+
+    this.ritualAmbientVeil = this.add
+      .rectangle(CHAMBER02_WORLD_WIDTH / 2, WORLD.height / 2, CHAMBER02_WORLD_WIDTH, WORLD.height, RITUAL_ALIGNMENT.ambientVeilColor, 0)
+      .setOrigin(0.5)
+      .setDepth(-8.5);
+
+    this.ritualPulseHalo = this.add
+      .ellipse(1970, 286, 660, 340, COLORS.sickly, 0.04)
+      .setDepth(-7.5)
+      .setScale(1, 1);
   }
 
   createPlatforms() {
@@ -166,12 +185,12 @@ export class Chamber02Scene extends Phaser.Scene {
     const baseY = entry.y + 12;
 
     this.add.ellipse(entry.x, baseY + 6, 142, 44, COLORS.oil, 0.32).setDepth(-5);
-    this.add.ellipse(entry.x, baseY + 3, 108, 30, COLORS.sickly, 0.24).setDepth(-5);
+    this.shrinePoolGlow = this.add.ellipse(entry.x, baseY + 3, 108, 30, COLORS.sickly, 0.24).setDepth(-5);
     this.add.rectangle(entry.x, baseY - 2, 122, 26, COLORS.bloodMetal, 0.9).setDepth(-5);
-    this.add.ellipse(entry.x, baseY - 22, 82, 36, COLORS.bone, 0.8).setDepth(-5);
+    this.shrineCrown = this.add.ellipse(entry.x, baseY - 22, 82, 36, COLORS.bone, 0.8).setDepth(-5);
 
     if (this.textures.exists(ASSET_KEYS.chamber02RitualAlignmentLandmark)) {
-      this.add
+      this.shrineLandmark = this.add
         .image(entry.x, baseY - 26, ASSET_KEYS.chamber02RitualAlignmentLandmark)
         .setDisplaySize(172, 152)
         .setTint(0xc0b093)
@@ -190,10 +209,11 @@ export class Chamber02Scene extends Phaser.Scene {
       const enemyConfig = {
         ...SKITTER,
         awakenPlayerX: spawn.awakenPlayerX,
-        wakeDelayMs: 500,
+        wakeDelayMs: spawn.wakeDelayMs ?? 500,
         patrolDistance: 180
       };
       const enemy = new SkitterServitor(this, spawn.x, spawn.y, enemyConfig);
+      enemy.requiresRitualAlignment = Boolean(spawn.requireRitualAlignment);
       this.physics.add.collider(enemy.sprite, this.platforms);
       this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (attackZone, enemySprite) => {
         this.handlePlayerHitEnemy(attackZone, enemySprite, enemy);
@@ -299,9 +319,58 @@ export class Chamber02Scene extends Phaser.Scene {
       return;
     }
 
+    this.activateRitualAlignmentState();
     this.isLoreTransitionActive = false;
     this.mobileControls.setMode('gameplay');
     this.cameras.main.fadeIn(500, 0, 0, 0);
+  }
+
+
+  activateRitualAlignmentState() {
+    if (this.isRitualAlignmentActive) {
+      return;
+    }
+
+    this.isRitualAlignmentActive = true;
+
+    this.tweens.add({
+      targets: this.ritualAmbientVeil,
+      alpha: RITUAL_ALIGNMENT.ambientVeilAlpha,
+      duration: 900,
+      ease: 'Sine.out'
+    });
+
+    this.tweens.add({
+      targets: this.ritualPulseHalo,
+      alpha: this.ritualPulseHalo.alpha + RITUAL_ALIGNMENT.pulseAlphaDelta,
+      scaleX: 1.05,
+      scaleY: 1.07,
+      duration: RITUAL_ALIGNMENT.pulseDurationMs,
+      ease: 'Sine.inOut',
+      yoyo: true,
+      repeat: -1
+    });
+
+    if (this.shrinePoolGlow) {
+      this.shrinePoolGlow.setFillStyle(COLORS.sickly, 0.36);
+    }
+
+    if (this.shrineCrown) {
+      this.shrineCrown.setFillStyle(COLORS.bone, 0.95);
+    }
+
+    if (this.shrineLandmark) {
+      this.shrineLandmark.setTint(0x9bb87e).setAlpha(0.9);
+    }
+
+    this.enemies.forEach((enemy) => {
+      if (!enemy.requiresRitualAlignment || enemy.dead) {
+        return;
+      }
+
+      enemy.config.awakenPlayerX = this.player.sprite.x - 10;
+      enemy.awakenAtTime = this.time.now + 220;
+    });
   }
 
   handlePlayerHitEnemy(_attackZone, enemySprite, enemy) {
