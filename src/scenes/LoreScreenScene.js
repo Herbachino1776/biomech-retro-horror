@@ -12,32 +12,36 @@ const LORE_DEPTH = {
 
 const LORE_LAYOUT = {
   portrait: {
-    imageWidthRatio: 0.94,
-    imageHeightRatio: 0.6,
-    imageYOffset: -32,
-    shadeHeight: 188,
-    titleFontSize: '16px',
-    bodyFontSize: '16px',
-    bodyLineSpacing: 6,
-    promptBottomPadding: 26,
-    textInsetX: 20,
-    titleRatioY: 0.11,
-    bodyRatioY: 0.17,
-    textBoxBottomPadding: 18
+    imageWidthRatio: 0.96,
+    imageHeightRatio: 0.58,
+    imageYOffset: -34,
+    shadeHeightRatio: 0.48,
+    shadeBottomInset: 10,
+    titleFontSize: 15,
+    bodyFontMax: 15,
+    bodyFontMin: 11,
+    bodyLineSpacingRatio: 0.24,
+    promptBottomPadding: 24,
+    textInsetX: 18,
+    textTopPadding: 14,
+    textBottomPadding: 14,
+    titleBodyGap: 8
   },
   landscape: {
-    imageWidthRatio: 0.88,
+    imageWidthRatio: 0.9,
     imageHeightRatio: 0.72,
     imageYOffset: -20,
-    shadeHeight: 170,
-    titleFontSize: '17px',
-    bodyFontSize: '19px',
-    bodyLineSpacing: 8,
+    shadeHeightRatio: 0.43,
+    shadeBottomInset: 8,
+    titleFontSize: 17,
+    bodyFontMax: 18,
+    bodyFontMin: 12,
+    bodyLineSpacingRatio: 0.26,
     promptBottomPadding: 34,
     textInsetX: 26,
-    titleRatioY: 0.08,
-    bodyRatioY: 0.14,
-    textBoxBottomPadding: 22
+    textTopPadding: 14,
+    textBottomPadding: 16,
+    titleBodyGap: 10
   }
 };
 
@@ -74,6 +78,9 @@ export class LoreScreenScene extends Phaser.Scene {
     const layout = isPortrait ? LORE_LAYOUT.portrait : LORE_LAYOUT.landscape;
     const imageWidth = Math.floor(this.scale.width * layout.imageWidthRatio);
     const imageHeight = Math.floor(this.scale.height * layout.imageHeightRatio);
+    const shadeHeight = Math.floor(imageHeight * layout.shadeHeightRatio);
+    const shadeCenterY = layout.imageYOffset + imageHeight / 2 - shadeHeight / 2 - layout.shadeBottomInset;
+    const shadeTopY = centerY + shadeCenterY - shadeHeight / 2;
 
     this.imageContainer = this.add.container(centerX, centerY).setDepth(LORE_DEPTH.image);
 
@@ -112,7 +119,7 @@ export class LoreScreenScene extends Phaser.Scene {
       this.imageContainer.add([fallback, fallbackLabel]);
     }
 
-    const shade = this.add.rectangle(0, imageHeight * 0.24, imageWidth, layout.shadeHeight, 0x000000, 0.58);
+    const shade = this.add.rectangle(0, shadeCenterY, imageWidth, shadeHeight, 0x000000, 0.6);
     this.imageContainer.add(shade);
 
     this.addSlowDrift();
@@ -120,30 +127,42 @@ export class LoreScreenScene extends Phaser.Scene {
     const title = this.screenConfig?.title ?? 'RITUAL RECORD';
     const body = this.screenConfig?.body?.join('\n') ?? 'The chamber keeps its own scripture.';
     const textLeft = centerX - imageWidth / 2 + layout.textInsetX;
-    const textTop = centerY + imageHeight * layout.titleRatioY;
+    const textTop = shadeTopY + layout.textTopPadding;
     const textWidth = imageWidth - layout.textInsetX * 2;
-    const textHeight = layout.shadeHeight - layout.textBoxBottomPadding;
+    const textHeight = shadeHeight - layout.textTopPadding - layout.textBottomPadding;
 
     this.titleText = this.add
       .text(textLeft, textTop, title, {
         fontFamily: 'monospace',
-        fontSize: layout.titleFontSize,
+        fontSize: `${layout.titleFontSize}px`,
         color: this.screenConfig?.presentation?.titleColor ?? '#9bb085'
       })
       .setDepth(LORE_DEPTH.text);
 
+    const availableBodyHeight = textHeight - this.titleText.height - layout.titleBodyGap;
+    const bodyLineSpacing = (fontSize) => Math.max(2, Math.round(fontSize * layout.bodyLineSpacingRatio));
+    let bodyFontSize = layout.bodyFontMax;
+
     this.bodyText = this.add
-      .text(textLeft, centerY + imageHeight * layout.bodyRatioY, body, {
+      .text(textLeft, textTop + this.titleText.height + layout.titleBodyGap, body, {
         fontFamily: 'monospace',
-        fontSize: layout.bodyFontSize,
+        fontSize: `${bodyFontSize}px`,
         color: '#d2c2ac',
-        lineSpacing: layout.bodyLineSpacing,
+        lineSpacing: bodyLineSpacing(bodyFontSize),
         wordWrap: { width: textWidth, useAdvancedWrap: true }
       })
       .setDepth(LORE_DEPTH.text);
 
+    while (this.bodyText.height > availableBodyHeight && bodyFontSize > layout.bodyFontMin) {
+      bodyFontSize -= 1;
+      this.bodyText
+        .setFontSize(bodyFontSize)
+        .setLineSpacing(bodyLineSpacing(bodyFontSize))
+        .setWordWrapWidth(textWidth, true);
+    }
+
     const textMaskGraphics = this.make.graphics({ x: 0, y: 0, add: false });
-    textMaskGraphics.fillRect(textLeft, textTop - 4, textWidth, textHeight);
+    textMaskGraphics.fillRect(textLeft, textTop, textWidth, textHeight);
     const textMask = textMaskGraphics.createGeometryMask();
     this.titleText.setMask(textMask);
     this.bodyText.setMask(textMask);
