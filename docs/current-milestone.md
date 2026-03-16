@@ -1,7 +1,7 @@
 # Current Milestone
 
 ## Current Project State
-The project is in **Milestone 1: Playable Mobile Vertical Slice hardening** (final signoff polish phase).
+The project is in **Milestone 1: Playable Mobile Vertical Slice hardening**.
 Chamber 01 is playable in-browser with Phaser 3 + Vite, concept-art-backed rendering, and a working player/enemy loop. This pass focuses on mobile portrait stability/readability and durable project doctrine.
 
 ## What Is Currently Working
@@ -15,10 +15,10 @@ Chamber 01 is playable in-browser with Phaser 3 + Vite, concept-art-backed rende
 - Vite/GitHub Pages deployment model is configured (`/biomech-retro-horror/` production base).
 - Desktop keyboard controls remain available.
 
-## Remaining Milestone 1 Final-Polish Items
-- Keep portrait controls stable/visible while preserving current readability wins.
-- Finalize slight player/enemy floor-grounding offset without collision regression.
-- Confirm chamber scale still feels monumental on portrait viewports (no cramped-room regression).
+## Remaining Milestone 1 Signoff Blockers (Before This Pass)
+- iPhone portrait controls regressed: controls could become clipped/off-screen or unreliable after portrait layout changes.
+- Portrait world/control band balance needed refinement to keep gameplay readable while preserving touch usability.
+- Player/enemy stand-ins needed tighter visual floor grounding (without breaking collision behavior).
 
 ## Active Milestone Definition (Acceptance Criteria)
 Milestone 1 is signoff-ready only when all are true:

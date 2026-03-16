@@ -244,42 +244,56 @@ export class MobileControls {
     const width = this.scene.scale.width;
     const height = this.scene.scale.height;
 
-    const leftAnchorX = Math.max(
-      MOBILE_CONTROLS_LAYOUT.horizontalEdgeInset,
-      width * MOBILE_CONTROLS_LAYOUT.leftAnchorRatio
-    );
-    const hasPortraitBand = this.scene.scale.parentSize.width < this.scene.scale.parentSize.height;
+    const isPortrait = height >= width;
     const safeAreaBottom = this.getSafeAreaInsetPx('bottom');
+    const orientationLayout = isPortrait ? MOBILE_CONTROLS_LAYOUT.portrait : MOBILE_CONTROLS_LAYOUT.landscape;
 
-    const defaultReservedBottom = hasPortraitBand
-      ? MOBILE_CONTROLS_LAYOUT.portraitBaseBand + safeAreaBottom + MOBILE_CONTROLS_LAYOUT.safeAreaBottomPadding
+    const leftAnchorX = Math.max(
+      orientationLayout.horizontalEdgeInset,
+      width * orientationLayout.leftAnchorRatio
+    );
+
+    const defaultReservedBottom = isPortrait
+      ? orientationLayout.baseBandHeight + safeAreaBottom + MOBILE_CONTROLS_LAYOUT.safeAreaBottomPadding
       : 0;
 
     const reservedBottom = Math.max(this.reservedBottomPx, defaultReservedBottom);
-    const controlsTopY = height - reservedBottom;
-    const lowerAnchorY = Phaser.Math.Clamp(
-      controlsTopY + reservedBottom * 0.56,
-      MOBILE_CONTROLS_LAYOUT.minAnchorY,
-      height - safeAreaBottom - 72
-    );
+    const controlsTopY = isPortrait ? height - reservedBottom : 0;
+    const lowerAnchorY = isPortrait
+      ? Phaser.Math.Clamp(
+          controlsTopY + reservedBottom * orientationLayout.anchorBandRatioY,
+          MOBILE_CONTROLS_LAYOUT.minAnchorY,
+          height - safeAreaBottom - orientationLayout.maxAnchorBottomPadding
+        )
+      : Phaser.Math.Clamp(
+          height * orientationLayout.anchorRatioY,
+          MOBILE_CONTROLS_LAYOUT.minAnchorY,
+          height - safeAreaBottom - orientationLayout.maxAnchorBottomPadding
+        );
+
     const rightAnchorX = Math.min(
-      width - MOBILE_CONTROLS_LAYOUT.horizontalEdgeInset,
-      width * MOBILE_CONTROLS_LAYOUT.rightAnchorRatio
+      width - orientationLayout.horizontalEdgeInset,
+      width * orientationLayout.rightAnchorRatio
     );
 
     this.dpadBase.setPosition(leftAnchorX, lowerAnchorY);
-    this.leftControl.setPosition(leftAnchorX - MOBILE_CONTROLS_LAYOUT.dpadStep, lowerAnchorY);
-    this.rightControl.setPosition(leftAnchorX + MOBILE_CONTROLS_LAYOUT.dpadStep, lowerAnchorY);
-    this.upControl.setPosition(leftAnchorX, lowerAnchorY - MOBILE_CONTROLS_LAYOUT.dpadStep);
-    this.downControl.setPosition(leftAnchorX, lowerAnchorY + MOBILE_CONTROLS_LAYOUT.dpadStep);
+    this.leftControl.setPosition(leftAnchorX - orientationLayout.dpadStep, lowerAnchorY);
+    this.rightControl.setPosition(leftAnchorX + orientationLayout.dpadStep, lowerAnchorY);
+    this.upControl.setPosition(leftAnchorX, lowerAnchorY - orientationLayout.dpadStep);
+    this.downControl.setPosition(leftAnchorX, lowerAnchorY + orientationLayout.dpadStep);
 
-    this.attackControl.setPosition(rightAnchorX, lowerAnchorY - MOBILE_CONTROLS_LAYOUT.actionYOffset);
+    this.attackControl.setPosition(rightAnchorX, lowerAnchorY - orientationLayout.actionYOffset);
     this.interactControl.setPosition(
-      rightAnchorX - MOBILE_CONTROLS_LAYOUT.interactOffsetX,
-      lowerAnchorY + MOBILE_CONTROLS_LAYOUT.interactOffsetY
+      rightAnchorX - orientationLayout.interactOffsetX,
+      lowerAnchorY + orientationLayout.interactOffsetY
     );
 
     this.scene.input.setPollAlways();
+  }
+
+
+  getUiElements() {
+    return this.uiElements;
   }
 
   setMode(mode) {
@@ -302,10 +316,7 @@ export class MobileControls {
 
     if (mode === 'dialogue' || mode === 'dead') {
       const safeAreaTop = this.getSafeAreaInsetPx('top');
-      this.interactControl.setPosition(
-        this.scene.scale.width - MOBILE_CONTROLS_LAYOUT.interactDialogRightInset,
-        88 + safeAreaTop + MOBILE_CONTROLS_LAYOUT.safeAreaTopPadding
-      );
+      this.interactControl.setPosition(this.scene.scale.width - 92, 88 + safeAreaTop + MOBILE_CONTROLS_LAYOUT.safeAreaTopPadding);
       this.interactControl.ring.setFillStyle(CONTROL_COLORS.inner, FOCUSED_RING_ALPHA);
     } else {
       this.layout();

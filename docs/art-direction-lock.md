@@ -28,12 +28,6 @@ Current concept-source assets are not fully palette-consistent. Future generatio
 - Avoid noisy full-surface detail and neon-like high-saturation effects.
 - Distress/corrosion must support form logic (not random texture clutter).
 
-## Environmental Scale Doctrine
-- Chamber composition should read as monumental: colossal remnants, ceremonial architecture, and deep spatial mass.
-- Preserve a stadium/cathedral-like sense of traversal through ancient alien infrastructure.
-- Readability tuning must not collapse the world into a cramped small-room feel.
-- Portrait framing should retain monumental depth, not flatten chamber scale into a boxed vignette.
-
 ## UI ↔ World Relationship Rules
 - UI should feel diegetic: grown, forged, ribbed, surgical, vertebral.
 - UI readability is required but should stay inside the same material universe.
