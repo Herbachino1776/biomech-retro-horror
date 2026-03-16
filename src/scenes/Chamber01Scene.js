@@ -132,7 +132,7 @@ export class Chamber01Scene extends Phaser.Scene {
     const hasBackdropConcept = this.textures.exists(ASSET_KEYS.chamberBackground);
     const floorAlpha = hasBackdropConcept ? 0.2 : 1;
     const platformAlpha = hasBackdropConcept ? 0.58 : 1;
-    const gateAlpha = hasBackdropConcept ? 0.66 : 1;
+    const gateAlpha = hasBackdropConcept ? 0.7 : 0.9;
 
     const floor = this.add
       .rectangle(WORLD.width / 2, WORLD.floorY + 32, WORLD.width, 64, COLORS.foreground, floorAlpha)
@@ -165,7 +165,7 @@ export class Chamber01Scene extends Phaser.Scene {
     const gateY = 390;
     const gateHeight = 196;
 
-    this.gateBarrier = this.add.rectangle(gateX, gateY, 28, gateHeight, COLORS.rust, gateAlpha).setOrigin(0.5);
+    this.gateBarrier = this.add.zone(gateX, gateY, 48, gateHeight).setOrigin(0.5);
 
     if (this.textures.exists(ASSET_KEYS.chamber02VertebralHornGate)) {
       this.gateArt = this.add
@@ -173,17 +173,11 @@ export class Chamber01Scene extends Phaser.Scene {
         .setDisplaySize(200, 260)
         .setCrop(336, 218, 356, 1012)
         .setTint(0xc3b299)
-        .setAlpha(hasBackdropConcept ? 0.58 : 0.82)
+        .setAlpha(gateAlpha)
         .setDepth(-4);
     }
 
-    this.gateSigil = this.add.ellipse(gateX - 26, gateY + 6, 34, 92, COLORS.sickly, 0.1).setDepth(-3);
-
-    this.gateStateText = this.add.text(2038, 300, 'DORMANT', {
-      fontFamily: 'monospace',
-      fontSize: '13px',
-      color: '#8f7d72'
-    }).setDepth(-7).setAlpha(hasBackdropConcept ? 0.32 : 1);
+    this.gateSigil = this.add.ellipse(gateX - 26, gateY + 6, 34, 92, COLORS.sickly, 0.12).setDepth(-3);
 
     this.physics.add.existing(this.gateBarrier, true);
     this.platforms.add(this.gateBarrier);
@@ -494,18 +488,22 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   updateGateActivationVisuals() {
-    if (!this.gateStateText || !this.gateSigil) {
+    if (!this.gateSigil) {
       return;
     }
 
     if (this.isChamber02GateActive) {
-      this.gateStateText.setText('RESPONDING').setColor('#9bb085');
       this.gateSigil.setAlpha(0.42);
+      if (this.gateArt) {
+        this.gateArt.setAlpha(0.82).setTint(0xd7c8af);
+      }
       return;
     }
 
-    this.gateStateText.setText('DORMANT').setColor('#8f7d72');
     this.gateSigil.setAlpha(0.1);
+    if (this.gateArt) {
+      this.gateArt.setAlpha(0.6).setTint(0xb8a88f);
+    }
   }
 
   beginGateTransitionToChamber02() {
