@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
-import { ASSET_KEYS } from '../data/assetKeys.js';
-import { COLORS, CONCEPT_PRESENTATION, LORE_SCREENS } from '../data/milestone1Config.js';
+import { COLORS, LORE_SCREENS } from '../data/milestone1Config.js';
 
 const LORE_DEPTH = {
   backdrop: 2,
@@ -105,13 +104,9 @@ export class LoreScreenScene extends Phaser.Scene {
         .setTint(imageTint)
         .setAlpha(imageAlpha);
 
-      if (this.screenConfig.imageKey === ASSET_KEYS.laughingEngine) {
-        image.setCrop(
-          CONCEPT_PRESENTATION.laughingEngine.crop.x,
-          CONCEPT_PRESENTATION.laughingEngine.crop.y,
-          CONCEPT_PRESENTATION.laughingEngine.crop.width,
-          CONCEPT_PRESENTATION.laughingEngine.crop.height
-        );
+      const imageCrop = this.screenConfig?.presentation?.imageCrop;
+      if (imageCrop) {
+        image.setCrop(imageCrop.x, imageCrop.y, imageCrop.width, imageCrop.height);
       }
 
       this.imageContainer.add(image);

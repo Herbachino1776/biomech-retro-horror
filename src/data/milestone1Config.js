@@ -127,7 +127,15 @@ export const LORE_SCREENS = {
       'Bone gears turn where priests once knelt, and the ash remembers your bloodline.',
       'A seal stirs beneath the chamber floor, waiting for the next offering to breathe.'
     ],
-    prompt: 'Press [E] / [Enter] or tap to continue'
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    presentation: {
+      imageCrop: {
+        x: CONCEPT_PRESENTATION.laughingEngine.crop.x,
+        y: CONCEPT_PRESENTATION.laughingEngine.crop.y,
+        width: CONCEPT_PRESENTATION.laughingEngine.crop.width,
+        height: CONCEPT_PRESENTATION.laughingEngine.crop.height
+      }
+    }
   },
   'chamber02-vertebral-memory': {
     imageKey: ASSET_KEYS.chamber02VertebralHornGate,
@@ -142,7 +150,13 @@ export const LORE_SCREENS = {
       imageTint: 0xc1d5a7,
       imageAlpha: 0.9,
       frameColor: 0x8ea875,
-      titleColor: '#a6bf8d'
+      titleColor: '#a6bf8d',
+      imageCrop: {
+        x: 132,
+        y: 278,
+        width: 760,
+        height: 620
+      }
     }
   }
 };
