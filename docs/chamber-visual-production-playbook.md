@@ -230,3 +230,10 @@ Use this checklist as a production template:
 10. Record pass notes in docs so Chamber 03+ can reuse proven decisions.
 
 Keep iteration oppressive, readable, and incremental. Expand mechanics only when milestone docs explicitly permit.
+
+## 10) Chamber 02 planning doctrine pointer
+
+Before implementation planning or art intake for Chamber 02, align to:
+- `docs/chamber-02-planning-doctrine.md`
+
+That document defines Chamber 02 gameplay purpose, visual identity, relationship to Chamber 01, focal setpiece, encounter rhythm, lore beat, introduced idea, and carry-over invariants.
