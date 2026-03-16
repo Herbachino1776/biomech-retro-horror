@@ -82,28 +82,6 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.applyResponsiveLayout();
     this.hud.update(this.player.health, PLAYER.maxHealth);
-
-    this.add
-      .text(this.scale.width / 2, 82, 'CHAMBER 02 // VERTEBRAL THRESHOLD', {
-        fontFamily: 'monospace',
-        fontSize: '20px',
-        color: '#d2c2ac',
-        align: 'center'
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(12);
-
-    this.add
-      .text(this.scale.width / 2, 122, 'The gate remembered your marrow and opened without witness.', {
-        fontFamily: 'monospace',
-        fontSize: '14px',
-        color: '#8a9f79',
-        align: 'center'
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(12);
   }
 
   renderProcessionalBackdrop() {
@@ -179,10 +157,6 @@ export class Chamber02Scene extends Phaser.Scene {
         .setAlpha(0.82)
         .setDepth(-6);
     }
-
-    this.gateBarrier = this.add.zone(1970, 346, 112, 214).setOrigin(0.5);
-    this.physics.add.existing(this.gateBarrier, true);
-    this.platforms.add(this.gateBarrier);
 
     this.createLoreShrine();
   }
@@ -321,7 +295,7 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   handleLoreScreenComplete({ screenId } = {}) {
-    if (screenId !== CHAMBER02_LORE_TRIGGER.screenId || !this.scene.isPaused()) {
+    if (screenId !== CHAMBER02_LORE_TRIGGER.screenId) {
       return;
     }
 
