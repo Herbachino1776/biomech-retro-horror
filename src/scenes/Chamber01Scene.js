@@ -283,13 +283,32 @@ export class Chamber01Scene extends Phaser.Scene {
       zone.loreEntry = entry;
       this.loreZones.add(zone);
 
-      this.add.rectangle(entry.x, entry.y, entry.width, entry.height, COLORS.sickly, 0.12);
-      this.add.text(entry.x - 30, entry.y - 44, 'LORE', {
-        fontFamily: 'monospace',
-        fontSize: '11px',
-        color: '#8a9f79'
-      });
+      this.createLoreShrineProp(entry);
     });
+  }
+
+  createLoreShrineProp(entry) {
+    const baseY = entry.y + 12;
+    const hasBackdropConcept = this.textures.exists(ASSET_KEYS.chamberBackground);
+    const fossilAlpha = hasBackdropConcept ? 0.65 : 0.95;
+
+    this.add.ellipse(entry.x, baseY + 6, 132, 42, COLORS.oil, fossilAlpha * 0.35).setDepth(-1);
+    this.add.ellipse(entry.x, baseY + 4, 98, 28, COLORS.sickly, fossilAlpha * 0.2).setDepth(-1);
+
+    this.add.rectangle(entry.x, baseY, 118, 24, COLORS.bloodMetal, fossilAlpha).setDepth(-1);
+    this.add.rectangle(entry.x, baseY - 4, 84, 18, COLORS.foreground, fossilAlpha * 0.9).setDepth(-1);
+
+    this.add.ellipse(entry.x, baseY - 20, 78, 34, COLORS.bone, fossilAlpha * 0.9).setDepth(-1);
+    this.add.ellipse(entry.x, baseY - 20, 50, 18, COLORS.oil, fossilAlpha * 0.8).setDepth(-1);
+
+    this.add.ellipse(entry.x - 30, baseY - 26, 30, 56, COLORS.bone, fossilAlpha * 0.7).setDepth(-1).setAngle(-24);
+    this.add.ellipse(entry.x + 30, baseY - 26, 30, 56, COLORS.bone, fossilAlpha * 0.7).setDepth(-1).setAngle(24);
+
+    this.add.rectangle(entry.x, baseY - 27, 10, 52, COLORS.rust, fossilAlpha * 0.75).setDepth(-1).setAngle(4);
+    this.add.triangle(entry.x, baseY - 44, 0, 20, 20, 0, 40, 20, COLORS.bone, fossilAlpha * 0.85).setDepth(-1).setOrigin(0.5);
+
+    this.add.ellipse(entry.x - 18, baseY - 15, 10, 6, COLORS.sickly, fossilAlpha * 0.4).setDepth(-1);
+    this.add.ellipse(entry.x + 18, baseY - 15, 10, 6, COLORS.sickly, fossilAlpha * 0.4).setDepth(-1);
   }
 
   handleLoreTrigger(playerSprite, zone) {
