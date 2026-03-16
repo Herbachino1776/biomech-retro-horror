@@ -72,7 +72,11 @@ export class Player {
     const cappedTargetSpeed = Phaser.Math.Clamp(targetSpeed, -allowedMaxSpeed, allowedMaxSpeed);
     const acceleration = direction === 0 ? this.config.moveDeceleration : this.config.moveAcceleration;
     const deltaSeconds = this.scene.game.loop.delta / 1000;
-    const nextVelocityX = Phaser.Math.MoveTowards(this.body.velocity.x, cappedTargetSpeed, acceleration * deltaSeconds);
+    const nextVelocityX = Phaser.Math.Clamp(
+      this.body.velocity.x + Phaser.Math.Clamp(cappedTargetSpeed - this.body.velocity.x, -acceleration * deltaSeconds, acceleration * deltaSeconds),
+      -allowedMaxSpeed,
+      allowedMaxSpeed
+    );
     this.body.setVelocityX(nextVelocityX);
 
     if (input.jumpPressed && this.body.blocked.down) {
