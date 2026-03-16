@@ -14,6 +14,7 @@ import {
 } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
+import { restartRunFromDeath } from '../systems/RunReset.js';
 
 export class Chamber01Scene extends Phaser.Scene {
   constructor() {
@@ -93,7 +94,7 @@ export class Chamber01Scene extends Phaser.Scene {
       this.mobileControls.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
       if (Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) {
-        this.scene.restart();
+        restartRunFromDeath(this);
       }
       return;
     }
