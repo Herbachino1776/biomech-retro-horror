@@ -10,15 +10,30 @@ export const PORTRAIT_LAYOUT = {
 };
 
 export const MOBILE_CONTROLS_LAYOUT = {
-  portraitBaseBand: 172,
   safeAreaBottomPadding: 20,
   safeAreaTopPadding: 8,
-  horizontalEdgeInset: 86,
-  leftAnchorRatio: 0.18,
-  rightAnchorRatio: 0.82,
-  dpadStep: 50,
-  actionYOffset: 12,
-  interactOffsetX: 82,
-  interactOffsetY: 38,
-  minAnchorY: 110
+  minAnchorY: 110,
+  portrait: {
+    baseBandHeight: 172,
+    horizontalEdgeInset: 86,
+    leftAnchorRatio: 0.18,
+    rightAnchorRatio: 0.82,
+    dpadStep: 50,
+    actionYOffset: 12,
+    interactOffsetX: 82,
+    interactOffsetY: 38,
+    anchorBandRatioY: 0.56,
+    maxAnchorBottomPadding: 72
+  },
+  landscape: {
+    horizontalEdgeInset: 74,
+    leftAnchorRatio: 0.14,
+    rightAnchorRatio: 0.88,
+    dpadStep: 46,
+    actionYOffset: 20,
+    interactOffsetX: 86,
+    interactOffsetY: 34,
+    anchorRatioY: 0.84,
+    maxAnchorBottomPadding: 58
+  }
 };

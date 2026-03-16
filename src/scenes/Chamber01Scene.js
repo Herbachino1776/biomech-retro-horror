@@ -64,6 +64,8 @@ export class Chamber01Scene extends Phaser.Scene {
       .setOrigin(0.5)
       .setVisible(false);
 
+    this.setupMobileUiCamera();
+
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
     this.keyInteract = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
@@ -223,13 +225,31 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
 
+
+  setupMobileUiCamera() {
+    if (!this.mobileControls.enabled) {
+      return;
+    }
+
+    this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height, false, 'MobileUiCamera');
+
+    const mobileUiElements = this.mobileControls.getUiElements();
+    const mobileUiSet = new Set(mobileUiElements);
+    const nonMobileObjects = this.children.list.filter((element) => !mobileUiSet.has(element));
+
+    this.cameras.main.ignore(mobileUiElements);
+    this.uiCamera.ignore(nonMobileObjects);
+  }
+
   applyResponsiveLayout() {
     const camera = this.cameras.main;
     const width = this.scale.width;
     const height = this.scale.height;
-    const parentWidth = this.scale.parentSize.width;
-    const parentHeight = this.scale.parentSize.height;
-    const isPortraitMobile = this.sys.game.device.input.touch && parentWidth < parentHeight;
+    const isPortraitMobile = this.mobileControls.enabled && height >= width;
+
+    if (this.uiCamera) {
+      this.uiCamera.setViewport(0, 0, width, height);
+    }
 
     if (isPortraitMobile) {
       const safeAreaBottom = this.mobileControls.getSafeAreaInsetPx('bottom');
