@@ -72,7 +72,7 @@ export class MobileControls {
     this.downControl = this.createButton('▼', 'none', 30, 0.45);
 
     this.attackControl = this.createButton('ATTACK', 'attack', 42);
-    this.interactControl = this.createButton('RITE', 'interact', 34);
+    this.interactControl = this.createButton('RITE', 'interact', 30, 0.62);
 
     if (SHOW_MOBILE_FIXED_DEBUG_LABEL) {
       this.fixedModeLabel = this.scene.add
@@ -285,7 +285,7 @@ export class MobileControls {
     this.attackControl.setPosition(rightAnchorX, lowerAnchorY - orientationLayout.actionYOffset);
     this.interactControl.setPosition(
       rightAnchorX - orientationLayout.interactOffsetX,
-      lowerAnchorY + orientationLayout.interactOffsetY
+      lowerAnchorY - orientationLayout.actionYOffset - orientationLayout.interactVerticalGap
     );
 
     this.scene.input.setPollAlways();
@@ -311,7 +311,7 @@ export class MobileControls {
     this.downControl.setVisible(gameplayVisible);
     this.attackControl.setVisible(gameplayVisible);
 
-    this.interactControl.setVisible(mode !== 'gameplay');
+    this.interactControl.setVisible(mode !== 'init');
     this.releaseAll();
 
     if (mode === 'dialogue' || mode === 'dead') {
