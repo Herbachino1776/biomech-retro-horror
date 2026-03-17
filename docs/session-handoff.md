@@ -18,7 +18,7 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Chamber 01 lore shrine -> cinematic lore-screen flow remains stable.
 - Chamber 01 -> Chamber 02 transition is active.
 - Chamber 02 is playable with established platform/combat pacing.
-- Chamber 02 lore shrine triggers a dedicated cinematic lore-screen beat.
+- Chamber 02 lore shrine triggers a dedicated cinematic lore-screen beat via reusable `LoreCutsceneScene` + cutscene config.
 - Chamber 02 lore-screen composition is now portrait-safe and landscape-safe using per-screen layout overrides + aspect-preserving image fit.
 - Chamber 02 post-lore reaction state is implemented: environmental ritual shift plus ritual-aligned enemy activation.
 - Mobile controls remain corrected for portrait and landscape playability.
@@ -35,7 +35,8 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 ## Latest Completed Task
 - Milestone 2 closeout pass shipped.
 - Chamber 2 lore-screen portrait composition corrected (no flattened/smushed image strip; stronger filled composition with readable text containment).
-- Chamber 2 first post-lore reaction state established (ambient veil + gate/shrine ritual visual shift + deferred ritual-aligned enemy wake).
+- Chamber 2 first post-lore reaction state established (ambient veil + gate ritual visual shift + one ritual-aligned enemy wake/activation).
+- Chamber 2 lore implementation is now the reusable cutscene baseline for future chambers (swap art/text/config, keep flow architecture).
 - Milestone/docs status updated to match shipped behavior.
 
 ## Exact Next Best Step After This Task
