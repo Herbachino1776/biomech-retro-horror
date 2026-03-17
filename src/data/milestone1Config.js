@@ -145,14 +145,6 @@ export const LORE_SCREENS = {
       'Each rib listens for lineage, then braids your marrow into its register.',
       'Passage is a verdict spoken by architecture, not by priests.'
     ],
-    prompt: 'Press [E] / [Enter] or tap to continue',
-    presentation: {
-      imageCrop: {
-        x: 40,
-        y: 360,
-        width: 944,
-        height: 720
-      }
-    }
+    prompt: 'Press [E] / [Enter] or tap to continue'
   }
 };
