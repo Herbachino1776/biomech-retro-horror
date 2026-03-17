@@ -8,7 +8,7 @@ import chamber02VertebralHornGateUrl from '../../art/raw/chamber02/vertebral_hor
 import chamber02BackgroundPlateUrl from '../../art/raw/chamber02/chamber02_background_plate_01_source.png';
 import chamber02FloorStripUrl from '../../art/raw/chamber02/chamber02_floor_strip_01_source.png';
 import chamber02ForegroundHornArchUrl from '../../art/raw/chamber02/foreground_vertebral_horn_arch_01_source.png';
-import playerConceptUrl from '../../assets/concepts/player-concept-01.png';
+import playerConceptUrl from '../../assets/concepts/player-concept-03-right-alpha.png';
 import skitterConceptUrl from '../../assets/concepts/skitter-concept-01.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
 import laughingEngineConceptUrl from '../../assets/concepts/laughing-engine-concept-01.png';
