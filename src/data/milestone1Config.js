@@ -136,15 +136,5 @@ export const LORE_SCREENS = {
         height: CONCEPT_PRESENTATION.laughingEngine.crop.height
       }
     }
-  },
-  'chamber02-vertebral-memory': {
-    imageKey: ASSET_KEYS.chamber02VertebralHornGate,
-    title: 'CHAMBER 02 // VERTEBRAL MEMORY',
-    body: [
-      'The horn-gate does not open: it identifies.',
-      'Each rib listens for lineage, then braids your marrow into its register.',
-      'Passage is a verdict spoken by architecture, not by priests.'
-    ],
-    prompt: 'Press [E] / [Enter] or tap to continue'
   }
 };
