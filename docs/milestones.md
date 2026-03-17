@@ -14,12 +14,13 @@
 - one active enemy archetype + death/restart
 - first cinematic lore-screen beat
 
-## Milestone 2 — Slice Art Cohesion + Lore Pattern Consolidation (Completed)
+## Milestone 2 — Slice Art Cohesion + Lore Pattern Consolidation (Completed / Closed Out)
 - preserve chamber 01 readability and shrine-driven lore affordance
 - activate chamber 01 -> chamber 02 continuity path
 - ship chamber 02 lore beat with dedicated cinematic lore screen
 - harden lore-screen composition for portrait + landscape readability
 - establish chamber 02 first post-lore reaction state (environmental shift + threat increase)
+- remove remaining temporary mobile HUD debug label from shipped gameplay UI
 
 ## Milestone 3 — Encounter Expansion (Next)
 - deepen sentinel and/or Laughing Engine threat behavior

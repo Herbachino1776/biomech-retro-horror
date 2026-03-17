@@ -21,6 +21,13 @@ The playable baseline now spans Chamber 01 and Chamber 02 with a stable chamber 
 - Vite/GitHub Pages deployment model is configured (`/biomech-retro-horror/` production base).
 
 ## Milestone 2 Closeout Status
+Milestone 2 is now considered **fully closed** for the shipped Chamber 01 + Chamber 02 slice.
+Stabilization pass notes:
+- Chamber 01/Chamber 02 flow and death/restart handoff remain intact.
+- Chamber 02 lore cutscene and post-lore reaction state remain active and readable.
+- Portrait + landscape control layout behavior remains in the mobile-safe path.
+- Leftover mobile debug overlay text has been removed from runtime UI.
+
 Milestone 2 signoff blockers are addressed in shipped implementation:
 - Chamber 02 lore-screen portrait presentation no longer collapses into a thin/squashed strip.
 - Chamber 02 post-lore reaction state now clearly changes chamber state and increases threat conservatively.

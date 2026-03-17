@@ -11,7 +11,6 @@ const CONTROL_COLORS = {
 
 const GAMEPLAY_RING_ALPHA = 0.75;
 const FOCUSED_RING_ALPHA = 0.9;
-const SHOW_MOBILE_FIXED_DEBUG_LABEL = true;
 
 export class MobileControls {
   constructor(scene) {
@@ -73,20 +72,6 @@ export class MobileControls {
 
     this.attackControl = this.createButton('ATTACK', 'attack', 42);
     this.interactControl = this.createButton('RITE', 'interact', 30, 0.62);
-
-    if (SHOW_MOBILE_FIXED_DEBUG_LABEL) {
-      this.fixedModeLabel = this.scene.add
-        .text(8, 8, 'MOBILE HUD: FIXED SCREEN-SPACE', {
-          fontFamily: 'monospace',
-          fontSize: '10px',
-          color: '#8a9f79',
-          backgroundColor: '#140f0dcc',
-          padding: { x: 4, y: 3 }
-        })
-        .setDepth(125)
-        .setScrollFactor(0);
-      this.uiElements.push(this.fixedModeLabel);
-    }
 
     this.layout();
     this.setMode('gameplay');
