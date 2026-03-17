@@ -31,7 +31,7 @@ const CHAMBER02_LORE_ENTRY = {
   y: 402,
   width: 170,
   height: 180,
-  screenId: 'chamber02-vertebral-horn-arch'
+  cutsceneId: 'chamber02-horn-arch'
 };
 
 export class Chamber02Scene extends Phaser.Scene {
@@ -91,10 +91,10 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
     this.scale.on('resize', this.applyResponsiveLayout, this);
-    this.game.events.on('lore-screen-complete', this.handleLoreScreenComplete, this);
+    this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
-      this.game.events.off('lore-screen-complete', this.handleLoreScreenComplete, this);
+      this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.cleanupSceneUi();
     });
 
@@ -321,7 +321,7 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   beginLoreSequence(loreEntry) {
-    if (!loreEntry?.screenId || this.isLoreTransitionActive) {
+    if (!loreEntry?.cutsceneId || this.isLoreTransitionActive) {
       return;
     }
 
@@ -332,8 +332,8 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.pause();
-      this.scene.launch('LoreScreenScene', {
-        screenId: loreEntry.screenId,
+      this.scene.launch('LoreCutsceneScene', {
+        cutsceneId: loreEntry.cutsceneId,
         returnSceneKey: this.scene.key
       });
     });
@@ -341,8 +341,8 @@ export class Chamber02Scene extends Phaser.Scene {
     this.cameras.main.fadeOut(450, 0, 0, 0);
   }
 
-  handleLoreScreenComplete({ screenId } = {}) {
-    if (screenId !== CHAMBER02_LORE_ENTRY.screenId) {
+  handleLoreCutsceneComplete({ cutsceneId } = {}) {
+    if (cutsceneId !== CHAMBER02_LORE_ENTRY.cutsceneId) {
       return;
     }
 
