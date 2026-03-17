@@ -22,24 +22,8 @@ const CHAMBER02_ENEMY_SPAWNS = [
   { x: 1140, y: 402, awakenPlayerX: 830 },
   { x: 2410, y: 402, awakenPlayerX: 2050 },
   { x: 3180, y: 402, awakenPlayerX: 2880 },
-  { x: 2935, y: 402, awakenPlayerX: Number.POSITIVE_INFINITY, wakeDelayMs: 250, requireRitualAlignment: true }
+  { x: 2935, y: 402, awakenPlayerX: 2860, wakeDelayMs: 250 }
 ];
-
-const CHAMBER02_LORE_TRIGGER = {
-  id: 'chamber02-horn-memory',
-  x: 2840,
-  y: 406,
-  width: 78,
-  height: 76,
-  screenId: 'chamber02-vertebral-memory'
-};
-
-const RITUAL_ALIGNMENT = {
-  ambientVeilColor: 0x17301f,
-  ambientVeilAlpha: 0.16,
-  pulseDurationMs: 2200,
-  pulseAlphaDelta: 0.08
-};
 
 export class Chamber02Scene extends Phaser.Scene {
   constructor() {
@@ -59,11 +43,6 @@ export class Chamber02Scene extends Phaser.Scene {
     this.cameras.main.fadeIn(700, 0, 0, 0);
 
     this.platforms = this.physics.add.staticGroup();
-    this.loreZones = this.physics.add.staticGroup();
-    this.triggeredLoreIds = new Set();
-    this.currentLoreZone = null;
-    this.isLoreTransitionActive = false;
-    this.isRitualAlignmentActive = false;
     this.isRestartingRun = false;
 
     this.renderProcessionalBackdrop();
@@ -93,15 +72,11 @@ export class Chamber02Scene extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
     this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-    this.keyInteract = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-    this.keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
     this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
     this.scale.on('resize', this.applyResponsiveLayout, this);
-    this.game.events.on('lore-screen-complete', this.handleLoreScreenComplete, this);
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
-      this.game.events.off('lore-screen-complete', this.handleLoreScreenComplete, this);
       this.cleanupSceneUi();
     });
 
@@ -158,15 +133,7 @@ export class Chamber02Scene extends Phaser.Scene {
       .ellipse(1930, 404, 500, 96, COLORS.sickly, 0.16)
       .setDepth(-9);
 
-    this.ritualAmbientVeil = this.add
-      .rectangle(CHAMBER02_WORLD_WIDTH / 2, WORLD.height / 2, CHAMBER02_WORLD_WIDTH, WORLD.height, RITUAL_ALIGNMENT.ambientVeilColor, 0)
-      .setOrigin(0.5)
-      .setDepth(-8.5);
-
-    this.ritualPulseHalo = this.add
-      .ellipse(1970, 286, 660, 340, COLORS.sickly, 0.04)
-      .setDepth(-7.5)
-      .setScale(1, 1);
+    this.add.ellipse(1970, 286, 660, 340, COLORS.sickly, 0.04).setDepth(-7.5).setScale(1, 1);
   }
 
   createPlatforms() {
@@ -193,31 +160,6 @@ export class Chamber02Scene extends Phaser.Scene {
         .setDepth(-6);
     }
 
-    this.createLoreShrine();
-  }
-
-  createLoreShrine() {
-    const entry = CHAMBER02_LORE_TRIGGER;
-    const baseY = entry.y + 12;
-
-    this.add.ellipse(entry.x, baseY + 6, 142, 44, COLORS.oil, 0.32).setDepth(-5);
-    this.shrinePoolGlow = this.add.ellipse(entry.x, baseY + 3, 108, 30, COLORS.sickly, 0.24).setDepth(-5);
-    this.add.rectangle(entry.x, baseY - 2, 122, 26, COLORS.bloodMetal, 0.9).setDepth(-5);
-    this.shrineCrown = this.add.ellipse(entry.x, baseY - 22, 82, 36, COLORS.bone, 0.8).setDepth(-5);
-
-    if (this.textures.exists(ASSET_KEYS.chamber02RitualAlignmentLandmark)) {
-      this.shrineLandmark = this.add
-        .image(entry.x, baseY - 26, ASSET_KEYS.chamber02RitualAlignmentLandmark)
-        .setDisplaySize(172, 152)
-        .setTint(0xc0b093)
-        .setAlpha(0.72)
-        .setDepth(-4);
-    }
-
-    const zone = this.add.zone(entry.x, entry.y, entry.width, entry.height).setOrigin(0.5);
-    this.physics.add.existing(zone, true);
-    zone.loreEntry = entry;
-    this.loreZones.add(zone);
   }
 
   createEnemyEncounter() {
@@ -229,7 +171,6 @@ export class Chamber02Scene extends Phaser.Scene {
         patrolDistance: 180
       };
       const enemy = new SkitterServitor(this, spawn.x, spawn.y, enemyConfig);
-      enemy.requiresRitualAlignment = Boolean(spawn.requireRitualAlignment);
       this.physics.add.collider(enemy.sprite, this.platforms);
       this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (attackZone, enemySprite) => {
         this.handlePlayerHitEnemy(attackZone, enemySprite, enemy);
@@ -258,148 +199,21 @@ export class Chamber02Scene extends Phaser.Scene {
     }
 
     this.restartText.setVisible(false);
-    this.mobileControls.setMode(this.isLoreTransitionActive ? 'dialogue' : 'gameplay');
+    this.mobileControls.setMode('gameplay');
 
-    if (!this.isLoreTransitionActive) {
-      this.player.update(time, {
-        left: this.cursors.left.isDown || mobileInput.left,
-        right: this.cursors.right.isDown || mobileInput.right,
-        jumpPressed:
-          Phaser.Input.Keyboard.JustDown(this.cursors.up) ||
-          Phaser.Input.Keyboard.JustDown(this.cursors.space) ||
-          mobileInput.jumpPressed,
-        attackPressed: Phaser.Input.Keyboard.JustDown(this.keyAttack) || mobileInput.attackPressed
-      });
+    this.player.update(time, {
+      left: this.cursors.left.isDown || mobileInput.left,
+      right: this.cursors.right.isDown || mobileInput.right,
+      jumpPressed:
+        Phaser.Input.Keyboard.JustDown(this.cursors.up) ||
+        Phaser.Input.Keyboard.JustDown(this.cursors.space) ||
+        mobileInput.jumpPressed,
+      attackPressed: Phaser.Input.Keyboard.JustDown(this.keyAttack) || mobileInput.attackPressed
+    });
 
-      this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
-
-      this.refreshLoreZonePresence();
-      this.tryBeginLoreSequence(mobileInput);
-    }
+    this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
 
     this.hud.update(this.player.health, PLAYER.maxHealth);
-  }
-
-  refreshLoreZonePresence() {
-    this.currentLoreZone = null;
-
-    this.physics.overlap(this.player.sprite, this.loreZones, (_, zone) => {
-      if (!zone?.loreEntry || this.triggeredLoreIds.has(zone.loreEntry.id)) {
-        return;
-      }
-
-      this.currentLoreZone = zone;
-    });
-  }
-
-  tryBeginLoreSequence(mobileInput) {
-    if (!this.currentLoreZone) {
-      return;
-    }
-
-    const interactPressed =
-      Phaser.Input.Keyboard.JustDown(this.keyInteract) ||
-      Phaser.Input.Keyboard.JustDown(this.keyEnter) ||
-      mobileInput.interactPressed;
-
-    if (!interactPressed) {
-      return;
-    }
-
-    const loreEntry = this.currentLoreZone.loreEntry;
-    if (!loreEntry || this.triggeredLoreIds.has(loreEntry.id)) {
-      return;
-    }
-
-    this.triggeredLoreIds.add(loreEntry.id);
-    this.beginLoreSequence(loreEntry);
-  }
-
-  beginLoreSequence(loreEntry) {
-    if (!loreEntry?.screenId || this.isLoreTransitionActive) {
-      return;
-    }
-
-    this.isLoreTransitionActive = true;
-    this.mobileControls.setMode('dialogue');
-    this.player.body.setVelocity(0, 0);
-    this.enemies.forEach((enemy) => {
-      enemy.body.setVelocity(0, 0);
-    });
-
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.pause();
-      this.scene.launch('LoreScreenScene', {
-        screenId: loreEntry.screenId,
-        returnSceneKey: this.scene.key
-      });
-    });
-
-    this.cameras.main.fadeOut(450, 0, 0, 0);
-  }
-
-  handleLoreScreenComplete({ screenId } = {}) {
-    if (screenId !== CHAMBER02_LORE_TRIGGER.screenId) {
-      return;
-    }
-
-    this.activateRitualAlignmentState();
-    this.isLoreTransitionActive = false;
-    this.mobileControls.setMode('gameplay');
-    this.cameras.main.fadeIn(500, 0, 0, 0);
-  }
-
-
-  activateRitualAlignmentState() {
-    if (this.isRitualAlignmentActive) {
-      return;
-    }
-
-    this.isRitualAlignmentActive = true;
-
-    this.tweens.add({
-      targets: this.ritualAmbientVeil,
-      alpha: RITUAL_ALIGNMENT.ambientVeilAlpha,
-      duration: 900,
-      ease: 'Sine.out'
-    });
-
-    this.tweens.add({
-      targets: this.ritualPulseHalo,
-      alpha: this.ritualPulseHalo.alpha + RITUAL_ALIGNMENT.pulseAlphaDelta,
-      scaleX: 1.05,
-      scaleY: 1.07,
-      duration: RITUAL_ALIGNMENT.pulseDurationMs,
-      ease: 'Sine.inOut',
-      yoyo: true,
-      repeat: -1
-    });
-
-    if (this.shrinePoolGlow) {
-      this.shrinePoolGlow.setFillStyle(COLORS.sickly, 0.36);
-    }
-
-    if (this.shrineCrown) {
-      this.shrineCrown.setFillStyle(COLORS.bone, 0.95);
-    }
-
-    if (this.shrineLandmark) {
-      this.shrineLandmark.setTint(0x9bb87e).setAlpha(0.9);
-    }
-
-
-    if (this.hornGateMonument) {
-      this.hornGateMonument.setTint(0xa0bc82).setAlpha(0.9);
-    }
-
-    this.enemies.forEach((enemy) => {
-      if (!enemy.requiresRitualAlignment || enemy.dead) {
-        return;
-      }
-
-      enemy.config.awakenPlayerX = this.player.sprite.x - 10;
-      enemy.awakenAtTime = this.time.now + 220;
-    });
   }
 
   handlePlayerHitEnemy(_attackZone, enemySprite, enemy) {

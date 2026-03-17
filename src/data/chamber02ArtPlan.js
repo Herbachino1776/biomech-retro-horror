@@ -43,17 +43,8 @@ export const CHAMBER02_ART_PLAN = {
       firstPassStatus: 'scaffolded-not-placed',
       integrationNotes:
         'Potentially too dominant if layered early; defer world placement until orientation surfaces and combat lanes are validated first.'
-    },
-    {
-      key: ASSET_KEYS.chamber02RitualAlignmentLandmark,
-      rawSourcePath: 'art/raw/chamber02/ritual_alignment_landmark_01_source.png',
-      intendedProductionPath: 'assets/chambers/chamber02/ritual-alignment-landmark-01.png',
-      role: 'Readable ritual landmark for doctrine signaling',
-      firstPassStatus: 'scaffolded-for-lore-affordance',
-      integrationNotes:
-        'Use as a constrained interactable or alignment cue; avoid overcommitting to centered beam language before gameplay route lock.'
     }
   ],
   nextStep:
-    'Create a minimal Chamber02Scene art-blockout using background + floor + gate first, then validate readability on iPhone portrait and desktop before adding foreground arch/landmark placement.'
+    'Create a minimal Chamber02Scene art-blockout using background + floor + gate first, then validate readability on iPhone portrait and desktop before adding foreground arch placement.'
 };

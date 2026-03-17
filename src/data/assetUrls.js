@@ -8,7 +8,6 @@ import chamber02VertebralHornGateUrl from '../../art/raw/chamber02/vertebral_hor
 import chamber02BackgroundPlateUrl from '../../art/raw/chamber02/chamber02_background_plate_01_source.png';
 import chamber02FloorStripUrl from '../../art/raw/chamber02/chamber02_floor_strip_01_source.png';
 import chamber02ForegroundHornArchUrl from '../../art/raw/chamber02/foreground_vertebral_horn_arch_01_source.png';
-import chamber02RitualAlignmentLandmarkUrl from '../../art/raw/chamber02/ritual_alignment_landmark_01_source.png';
 import playerConceptUrl from '../../assets/concepts/player-concept-01.png';
 import skitterConceptUrl from '../../assets/concepts/skitter-concept-01.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
@@ -28,7 +27,6 @@ export const ASSET_URLS = {
   [ASSET_KEYS.chamber02BackgroundPlate]: chamber02BackgroundPlateUrl,
   [ASSET_KEYS.chamber02FloorStrip]: chamber02FloorStripUrl,
   [ASSET_KEYS.chamber02ForegroundHornArch]: chamber02ForegroundHornArchUrl,
-  [ASSET_KEYS.chamber02RitualAlignmentLandmark]: chamber02RitualAlignmentLandmarkUrl,
   [ASSET_KEYS.player]: playerConceptUrl,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,
