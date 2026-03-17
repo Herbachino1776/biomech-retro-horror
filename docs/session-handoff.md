@@ -30,10 +30,10 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Audio identity pass (ambient + encounter + lore transitions) is still pending.
 
 ## Active Milestone
-**Milestone 2 — Slice Art Cohesion + Lore Pattern Consolidation: completed.**
+**Milestone 2 — Slice Art Cohesion + Lore Pattern Consolidation: completed and closed out.**
 
 ## Latest Completed Task
-- Milestone 2 closeout pass shipped.
+- Milestone 2 closeout pass shipped and stabilized for handoff.
 - Chamber 2 lore-screen portrait composition corrected (no flattened/smushed image strip; stronger filled composition with readable text containment).
 - Chamber 2 first post-lore reaction state established (ambient veil + gate ritual visual shift + one ritual-aligned enemy wake/activation).
 - Chamber 2 lore implementation is now the reusable cutscene baseline for future chambers (swap art/text/config, keep flow architecture).
