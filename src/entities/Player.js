@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
+import { getNormalizedDisplaySize, getNormalizedOrigin, getNormalizedYOffset } from '../systems/conceptSpriteNormalizer.js';
 
 export class Player {
   constructor(scene, x, y, config) {
@@ -16,16 +17,21 @@ export class Player {
     this.isDead = false;
 
     this.usingConceptSprite = scene.textures.exists(ASSET_KEYS.player);
+    const playerPresentation = CONCEPT_PRESENTATION.player;
+    const displaySize = getNormalizedDisplaySize(playerPresentation);
+    const origin = getNormalizedOrigin(playerPresentation);
+    const visualYOffset = getNormalizedYOffset(playerPresentation);
+
     this.sprite = this.usingConceptSprite
       ? scene.add
-          .image(x, y, ASSET_KEYS.player)
-          .setOrigin(CONCEPT_PRESENTATION.player.origin.x, CONCEPT_PRESENTATION.player.origin.y)
-          .setDisplaySize(CONCEPT_PRESENTATION.player.display.width, CONCEPT_PRESENTATION.player.display.height)
+          .image(x, y + visualYOffset, ASSET_KEYS.player)
+          .setOrigin(origin.x, origin.y)
+          .setDisplaySize(displaySize.width, displaySize.height)
           .setCrop(
-            CONCEPT_PRESENTATION.player.crop.x,
-            CONCEPT_PRESENTATION.player.crop.y,
-            CONCEPT_PRESENTATION.player.crop.width,
-            CONCEPT_PRESENTATION.player.crop.height
+            playerPresentation.crop.x,
+            playerPresentation.crop.y,
+            playerPresentation.crop.width,
+            playerPresentation.crop.height
           )
           .setDepth(6)
       : scene.add.rectangle(x, y, 48, 60, 0xb8aa92).setOrigin(0.5).setDepth(6);
