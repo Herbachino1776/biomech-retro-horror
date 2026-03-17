@@ -136,5 +136,15 @@ export const LORE_SCREENS = {
         height: CONCEPT_PRESENTATION.laughingEngine.crop.height
       }
     }
+  },
+  'chamber02-vertebral-horn-arch': {
+    imageKey: ASSET_KEYS.chamber02ForegroundHornArch,
+    title: 'CHAMBER 02 // VERTEBRAL HORN ARCH',
+    body: [
+      'The arch bends inward like a throat learning your shape.',
+      'Ivory spines drink the chamber heat and recite your marrow to the dark.',
+      'Beyond the horned ribs, the next seal waits for a name carved in living metal.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue'
   }
 };
