@@ -25,6 +25,15 @@ const CHAMBER02_ENEMY_SPAWNS = [
   { x: 2935, y: 402, awakenPlayerX: 2860, wakeDelayMs: 250 }
 ];
 
+const CHAMBER02_LORE_ENTRY = {
+  id: 'entry-chamber02-ossuary',
+  x: 1970,
+  y: 402,
+  width: 170,
+  height: 180,
+  screenId: 'chamber02-vertebral-horn-arch'
+};
+
 export class Chamber02Scene extends Phaser.Scene {
   constructor() {
     super('Chamber02Scene');
@@ -43,10 +52,15 @@ export class Chamber02Scene extends Phaser.Scene {
     this.cameras.main.fadeIn(700, 0, 0, 0);
 
     this.platforms = this.physics.add.staticGroup();
+    this.loreZones = this.physics.add.staticGroup();
+    this.triggeredLoreIds = new Set();
+    this.currentLoreZone = null;
+    this.isLoreTransitionActive = false;
     this.isRestartingRun = false;
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
+    this.createLoreZones();
 
     this.player = new Player(this, 150, 360, PLAYER);
     this.physics.add.collider(this.player.sprite, this.platforms);
@@ -71,12 +85,16 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+    this.keyInteract = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    this.keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
     this.scale.on('resize', this.applyResponsiveLayout, this);
+    this.game.events.on('lore-screen-complete', this.handleLoreScreenComplete, this);
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
+      this.game.events.off('lore-screen-complete', this.handleLoreScreenComplete, this);
       this.cleanupSceneUi();
     });
 
@@ -199,6 +217,12 @@ export class Chamber02Scene extends Phaser.Scene {
     }
 
     this.restartText.setVisible(false);
+
+    if (this.isLoreTransitionActive) {
+      this.mobileControls.setMode('dialogue');
+      return;
+    }
+
     this.mobileControls.setMode('gameplay');
 
     this.player.update(time, {
@@ -210,6 +234,9 @@ export class Chamber02Scene extends Phaser.Scene {
         mobileInput.jumpPressed,
       attackPressed: Phaser.Input.Keyboard.JustDown(this.keyAttack) || mobileInput.attackPressed
     });
+
+    this.refreshLoreZonePresence();
+    this.tryBeginLoreSequence(mobileInput);
 
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
 
@@ -248,6 +275,80 @@ export class Chamber02Scene extends Phaser.Scene {
 
   isEnemyOverlapTarget(target, enemy) {
     return target === enemy.sprite || target?.gameObject === enemy.sprite;
+  }
+
+  createLoreZones() {
+    const entry = CHAMBER02_LORE_ENTRY;
+    const zone = this.add.zone(entry.x, entry.y, entry.width, entry.height).setOrigin(0.5);
+    this.physics.add.existing(zone, true);
+    zone.loreEntry = entry;
+    this.loreZones.add(zone);
+  }
+
+  refreshLoreZonePresence() {
+    this.currentLoreZone = null;
+
+    this.physics.overlap(this.player.sprite, this.loreZones, (_, zone) => {
+      if (!zone?.loreEntry || this.triggeredLoreIds.has(zone.loreEntry.id)) {
+        return;
+      }
+
+      this.currentLoreZone = zone;
+    });
+  }
+
+  tryBeginLoreSequence(mobileInput) {
+    if (!this.currentLoreZone || this.isLoreTransitionActive) {
+      return;
+    }
+
+    const interactPressed =
+      Phaser.Input.Keyboard.JustDown(this.keyInteract) ||
+      Phaser.Input.Keyboard.JustDown(this.keyEnter) ||
+      mobileInput.interactPressed;
+
+    if (!interactPressed) {
+      return;
+    }
+
+    const { loreEntry } = this.currentLoreZone;
+    if (!loreEntry || this.triggeredLoreIds.has(loreEntry.id)) {
+      return;
+    }
+
+    this.triggeredLoreIds.add(loreEntry.id);
+    this.beginLoreSequence(loreEntry);
+  }
+
+  beginLoreSequence(loreEntry) {
+    if (!loreEntry?.screenId || this.isLoreTransitionActive) {
+      return;
+    }
+
+    this.isLoreTransitionActive = true;
+    this.mobileControls.setMode('dialogue');
+    this.player.body.setVelocity(0, 0);
+    this.enemies.forEach((enemy) => enemy.body.setVelocity(0, 0));
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.pause();
+      this.scene.launch('LoreScreenScene', {
+        screenId: loreEntry.screenId,
+        returnSceneKey: this.scene.key
+      });
+    });
+
+    this.cameras.main.fadeOut(450, 0, 0, 0);
+  }
+
+  handleLoreScreenComplete({ screenId } = {}) {
+    if (screenId !== CHAMBER02_LORE_ENTRY.screenId) {
+      return;
+    }
+
+    this.isLoreTransitionActive = false;
+    this.mobileControls.setMode('gameplay');
+    this.cameras.main.fadeIn(500, 0, 0, 0);
   }
 
   setupMobileUiCamera() {
