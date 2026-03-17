@@ -131,10 +131,11 @@ export class LoreScreenScene extends Phaser.Scene {
       this.imageContainer.add([fallback, fallbackLabel]);
     }
 
-    const shade = this.add.rectangle(0, shadeCenterY, imageWidth, shadeHeight, 0x000000, 0.6);
-    this.imageContainer.add(shade);
+    this.shade = this.add
+      .rectangle(centerX, centerY + shadeCenterY, imageWidth, shadeHeight, 0x000000, 0.6)
+      .setDepth(LORE_DEPTH.image + 0.5);
 
-    this.addSlowDrift();
+    this.addSlowDrift(this.imageContainer);
 
     const title = this.screenConfig?.title ?? 'RITUAL RECORD';
     const body = this.screenConfig?.body?.join('\n') ?? 'The chamber keeps its own scripture.';
@@ -230,11 +231,11 @@ export class LoreScreenScene extends Phaser.Scene {
     };
   }
 
-  addSlowDrift() {
+  addSlowDrift(target) {
     this.tweens.add({
-      targets: this.imageContainer,
-      x: this.imageContainer.x + 10,
-      y: this.imageContainer.y - 8,
+      targets: target,
+      x: target.x + 10,
+      y: target.y - 8,
       scaleX: 1.035,
       scaleY: 1.035,
       ease: 'Sine.inOut',
