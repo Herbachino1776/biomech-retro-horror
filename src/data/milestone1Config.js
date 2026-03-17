@@ -148,10 +148,10 @@ export const LORE_SCREENS = {
     prompt: 'Press [E] / [Enter] or tap to continue',
     presentation: {
       imageCrop: {
-        x: 194,
-        y: 166,
-        width: 640,
-        height: 1140
+        x: 82,
+        y: 250,
+        width: 860,
+        height: 820
       }
     }
   }
