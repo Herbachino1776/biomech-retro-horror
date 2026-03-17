@@ -31,7 +31,8 @@ Do-not-break checklist for milestone and deployment stability.
 - Lore flow should support fade-to-black then fade-in cadence.
 - Lore screens should support subtle pan/zoom drift.
 - Lore screens should support distinct music/sound treatment from active gameplay.
-- Chamber 01 first lore beat pattern (Laughing Engine/furnace art prototype) is the reference implementation for future lore-screen delivery.
+- Chamber 01 first lore beat pattern (Laughing Engine/furnace art prototype) remains stable; Chamber 02 now uses the reusable `LoreCutsceneScene` + `LORE_CUTSCENES` path.
+- New chamber lore beats should reuse that cutscene system by changing config/art/text/style values only.
 - Lore writing remains cryptic, area-specific, and foreshadowing-oriented.
 
 ## Lore Trigger Invariants

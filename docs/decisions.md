@@ -47,6 +47,8 @@ Concise record of technical/design decisions currently in force.
 - Lore is a core identity system, not optional garnish.
 - Preferred pattern is now established: **discrete cinematic ritual lore-screen transitions** from gameplay.
 - Chamber 01 first lore beat uses the Laughing Engine/furnace art as the first lore-screen prototype.
+- Chamber 02 lore now runs through the reusable `LoreCutsceneScene` + `LORE_CUTSCENES` configuration path.
+- Future chamber lore beats should plug into that same cutscene path by swapping art/text/style config only, not by adding new lore-scene architecture.
 - Avoid generic always-on in-world overlay/dialogue as the long-term primary lore format.
 - Lore writing remains cryptic, symbolic, and area-specific.
 - Lore screens must preserve source image aspect ratio; fit/crop in frame rather than stretching.

@@ -34,6 +34,13 @@ const CHAMBER02_LORE_ENTRY = {
   cutsceneId: 'chamber02-horn-arch'
 };
 
+const CHAMBER02_POST_LORE_REACTION = {
+  gateTint: 0xbca775,
+  gateAlpha: 0.94,
+  sanctumAuraAlpha: 0.2,
+  ambientVeilAlpha: 0.11,
+};
+
 export class Chamber02Scene extends Phaser.Scene {
   constructor() {
     super('Chamber02Scene');
@@ -57,6 +64,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.currentLoreZone = null;
     this.isLoreTransitionActive = false;
     this.isRestartingRun = false;
+    this.hasAppliedPostLoreReaction = false;
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
@@ -147,11 +155,11 @@ export class Chamber02Scene extends Phaser.Scene {
         .setDepth(-10);
     }
 
-    this.add
+    this.sanctumAura = this.add
       .ellipse(1930, 404, 500, 96, COLORS.sickly, 0.16)
       .setDepth(-9);
 
-    this.add.ellipse(1970, 286, 660, 340, COLORS.sickly, 0.04).setDepth(-7.5).setScale(1, 1);
+    this.ambientVeil = this.add.ellipse(1970, 286, 660, 340, COLORS.sickly, 0.04).setDepth(-7.5).setScale(1, 1);
   }
 
   createPlatforms() {
@@ -346,9 +354,30 @@ export class Chamber02Scene extends Phaser.Scene {
       return;
     }
 
+    this.applyPostLoreReactionState();
+
     this.isLoreTransitionActive = false;
     this.mobileControls.setMode('gameplay');
     this.cameras.main.fadeIn(500, 0, 0, 0);
+  }
+
+  applyPostLoreReactionState() {
+    if (this.hasAppliedPostLoreReaction) {
+      return;
+    }
+
+    this.hasAppliedPostLoreReaction = true;
+    this.sanctumAura?.setAlpha(CHAMBER02_POST_LORE_REACTION.sanctumAuraAlpha);
+    this.ambientVeil?.setAlpha(CHAMBER02_POST_LORE_REACTION.ambientVeilAlpha);
+    this.hornGateMonument?.setTint(CHAMBER02_POST_LORE_REACTION.gateTint).setAlpha(CHAMBER02_POST_LORE_REACTION.gateAlpha);
+
+    const sleepingEnemy = this.enemies.find((enemy) => !enemy.dead && !enemy.awakened);
+    if (!sleepingEnemy) {
+      return;
+    }
+
+    sleepingEnemy.awakened = true;
+    sleepingEnemy.awakenAtTime = null;
   }
 
   setupMobileUiCamera() {

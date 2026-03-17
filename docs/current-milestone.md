@@ -12,8 +12,9 @@ The playable baseline now spans Chamber 01 and Chamber 02 with a stable chamber 
 - Chamber 02 is playable with platform traversal and enemy pressure pacing.
 - Chamber 02 lore trigger uses in-world shrine/ossuary presentation.
 - Chamber 02 lore screen uses the Vertebral Horn Gate image with portrait-safe composition (no vertical flattening) while preserving landscape usability.
+- Chamber 02 lore beat runs through a reusable lore-cutscene system (`LoreCutsceneScene` + config), so future chambers can plug in by swapping art/text/config only.
 - Lore presentation remains dedicated cinematic ritual screens rather than generic dialogue overlays.
-- Chamber 02 applies a conservative post-lore reaction state: ambient ritual shift + gate/sanctum visual change + delayed ritual-aligned enemy wake.
+- Chamber 02 applies a conservative post-lore reaction state: ambient ritual shift + gate/sanctum visual change + one ritual-aligned enemy wake/activation.
 - Mobile controls remain screen-space anchored and usable in portrait + landscape.
 - Desktop keyboard controls remain available.
 - Texture-first rendering with fallback-only resilience remains in place.
