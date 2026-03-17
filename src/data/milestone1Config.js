@@ -50,9 +50,9 @@ export const DIALOGUE = {
 export const CONCEPT_PRESENTATION = {
   // Conservative grounding tuning: presentation-only origins; collision bodies remain authoritative.
   player: {
-    crop: { x: 560, y: 170, width: 430, height: 800 },
-    display: { width: 126, height: 184 },
-    origin: { x: 0.5, y: 0.975 }
+    crop: { x: 60, y: 14, width: 888, height: 1460 },
+    display: { width: 196, height: 322 },
+    origin: { x: 0.5, y: 0.985 }
   },
   skitter: {
     crop: { x: 510, y: 520, width: 540, height: 360 },
