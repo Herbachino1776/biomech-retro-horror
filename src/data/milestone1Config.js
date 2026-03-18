@@ -53,45 +53,6 @@ export const SKITTER = {
 };
 
 
-export const SKITTER_VARIANTS = {
-  tollKeeper: {
-    variantName: 'TOLL-KEEPER SKITTER',
-    health: 4,
-    speed: 42,
-    attackCooldownMs: 2700,
-    windupMs: 760,
-    attackActiveMs: 280,
-    attackRecoveryMs: 560,
-    hesitationMs: 520,
-    attackTriggerRange: 146,
-    attackRange: 176,
-    preferredRange: 124,
-    rangeBand: 22,
-    lungeSpeedBonus: 98,
-    lungeJumpVelocity: -96,
-    patrolDistance: 104,
-    presentation: {
-      alpha: 1,
-      scaleX: 1.6,
-      scaleY: 1.6,
-      tint: 0xe1c790
-    },
-    rangeTellColor: 0xe0cb84,
-    rangeTellAlphaBase: 0.2,
-    rangeTellAlphaGain: 0.28,
-    rangeTellStrokeColor: 0xf4e6b0,
-    rangeTellStrokeAlphaBase: 0.28,
-    rangeTellStrokeAlphaGain: 0.34,
-    eyeGlowColor: 0xe2f2a6,
-    eyeGlowWidth: 38,
-    eyeGlowHeight: 18,
-    eyeGlowOffsetX: 22,
-    eyeGlowYOffset: 20,
-    eyeGlowAlphaBase: 0.28,
-    eyeGlowWindupAlphaGain: 0.38
-  }
-};
-
 export const DIALOGUE = {
   width: 700,
   height: 140,
