@@ -18,12 +18,25 @@ export class HalfSkullMiniboss {
     this.lastDamageFlashTime = -Infinity;
     this.lastContactDamageTime = -Infinity;
     this.hitPulseUntil = -Infinity;
+    this.hurtUntil = -Infinity;
     this.deathEffectStarted = false;
     this.attackState = 'idle';
     this.attackWindupStartedAt = -Infinity;
     this.attackCommitAt = -Infinity;
 
     this.usingTexture = scene.textures.exists(ASSET_KEYS.chamber01HalfSkullMiniboss);
+    this.solidUnderlay = null;
+
+    if (this.usingTexture) {
+      this.solidUnderlay = scene.add
+        .image(x - 4, y + 4, ASSET_KEYS.chamber01HalfSkullMiniboss)
+        .setOrigin(config.presentation.origin.x, config.presentation.origin.y)
+        .setDisplaySize(config.presentation.display.width * 1.02, config.presentation.display.height * 1.02)
+        .setTint(0x5e5148)
+        .setAlpha(0.42)
+        .setDepth(5.7);
+    }
+
     this.sprite = this.usingTexture
       ? scene.add
           .image(x, y, ASSET_KEYS.chamber01HalfSkullMiniboss)
@@ -33,8 +46,8 @@ export class HalfSkullMiniboss {
           .setAlpha(config.presentation.alpha)
           .setDepth(6)
       : scene.add
-          .ellipse(x, y - FALLBACK_HEIGHT * 0.48, FALLBACK_WIDTH, FALLBACK_HEIGHT, COLORS.bone, 0.92)
-          .setStrokeStyle(4, COLORS.rust, 0.85)
+          .ellipse(x, y - FALLBACK_HEIGHT * 0.48, FALLBACK_WIDTH, FALLBACK_HEIGHT, COLORS.bone, 0.96)
+          .setStrokeStyle(4, COLORS.rust, 0.9)
           .setDepth(6);
 
     this.baseScaleX = this.sprite.scaleX;
@@ -52,6 +65,7 @@ export class HalfSkullMiniboss {
 
   setActive(active) {
     this.active = active;
+    this.syncSolidPresentation();
     if (!active && !this.dead) {
       this.attackState = 'idle';
       this.body.setVelocityX(0);
@@ -69,6 +83,11 @@ export class HalfSkullMiniboss {
     if (!this.active) {
       this.attackState = 'idle';
       this.body.setVelocityX(0);
+      return;
+    }
+
+    if (time < this.hurtUntil) {
+      this.body.setVelocityX(this.direction * -this.config.hurtRecoilVelocityX);
       return;
     }
 
@@ -139,6 +158,9 @@ export class HalfSkullMiniboss {
     this.health -= amount;
     this.lastDamageFlashTime = time;
     this.hitPulseUntil = time + this.config.hitPulseMs;
+    this.hurtUntil = time + this.config.hurtRecoverMs;
+    this.body.setVelocityX(-this.direction * this.config.hurtRecoilVelocityX);
+    this.body.setVelocityY(this.config.hurtRecoilVelocityY);
 
     if (this.health <= 0) {
       this.health = 0;
@@ -157,69 +179,98 @@ export class HalfSkullMiniboss {
 
     this.deathEffectStarted = true;
     if (this.usingTexture) {
-      this.sprite.setTint(0xdccfbc);
+      this.solidUnderlay?.setTint(0xc4b292).setAlpha(0.5);
+      this.sprite.setTint(0xe7dcc6);
     } else {
-      this.sprite.setFillStyle(0xdccfbc, 0.56);
+      this.sprite.setFillStyle(0xdccfbc, 0.72);
     }
-    this.scene.tweens.add({
-      targets: this.sprite,
-      y: this.sprite.y - 24,
-      scaleX: this.sprite.scaleX * 1.05,
-      scaleY: this.sprite.scaleY * 1.08,
-      alpha: 0.08,
-      duration: 780,
-      ease: 'Cubic.easeOut'
+    const deathTargets = [this.sprite, this.solidUnderlay].filter(Boolean);
+    deathTargets.forEach((target) => {
+      this.scene.tweens.add({
+        targets: target,
+        y: target.y - 24,
+        scaleX: target.scaleX * 1.08,
+        scaleY: target.scaleY * 1.12,
+        alpha: 0.14,
+        duration: 960,
+        ease: 'Cubic.easeOut'
+      });
     });
+  }
+
+  syncSolidPresentation() {
+    if (!this.solidUnderlay) {
+      return;
+    }
+
+    this.solidUnderlay
+      .setVisible(this.sprite.visible)
+      .setPosition(this.sprite.x - 5, this.sprite.y + 5)
+      .setScale(this.sprite.scaleX * 1.03, this.sprite.scaleY * 1.03)
+      .setAngle(this.sprite.angle);
   }
 
   updateVisuals(time) {
     const telegraphing = this.isTelegraphing(time);
     const telegraphProgress = this.getTelegraphProgress(time);
-    const takingHit = time < this.lastDamageFlashTime + 180;
+    const takingHit = time < this.lastDamageFlashTime + 220;
     const hitPulsing = time < this.hitPulseUntil;
+    const hurtRecovering = time < this.hurtUntil;
 
     if (this.dead) {
       if (this.usingTexture) {
-        this.sprite.setTint(0x80756c);
+        this.solidUnderlay?.setTint(0x7d6f63);
+        this.sprite.setTint(0x8f8377);
       } else {
-        this.sprite.setFillStyle(0x8d8176, 0.22);
+        this.sprite.setFillStyle(0x8d8176, 0.3);
       }
+      this.syncSolidPresentation();
       return;
     }
+
+    let scaleX = this.baseScaleX * this.config.presentation.scaleX;
+    let scaleY = this.baseScaleY * this.config.presentation.scaleY;
+    let angle = 0;
+    let tint = this.config.presentation.tint;
+    let underlayTint = 0x5e5148;
+    let underlayAlpha = 0.42;
 
     if (telegraphing) {
-      const pulse = 0.85 + Math.sin(time / 55) * 0.07 + telegraphProgress * 0.08;
-      this.sprite.setScale(this.baseScaleX * this.config.presentation.scaleX * pulse, this.baseScaleY * this.config.presentation.scaleY * (1.02 + telegraphProgress * 0.03));
-      this.sprite.setAngle(-this.direction * (3 + telegraphProgress * 5));
-      if (this.usingTexture) {
-        this.sprite.setTint(0xe0c37c);
-      } else {
-        this.sprite.setFillStyle(0xd6bb7a, 0.82);
-      }
-      return;
-    }
-
-    this.sprite.setScale(this.baseScaleX * this.config.presentation.scaleX, this.baseScaleY * this.config.presentation.scaleY);
-    this.sprite.setAngle(0);
-
-    if (takingHit) {
-      if (this.usingTexture) {
-        this.sprite.setTint(0xc5d89a);
-      } else {
-        this.sprite.setFillStyle(0xc5d89a, 0.92);
-      }
-      return;
-    }
-
-    if (hitPulsing) {
+      const pulse = 0.96 + Math.sin(time / 60) * 0.03 + telegraphProgress * 0.11;
+      scaleX *= 1.02 + telegraphProgress * 0.03;
+      scaleY *= pulse * (1.04 + telegraphProgress * 0.06);
+      angle = -this.direction * (5 + telegraphProgress * 8);
+      tint = Phaser.Display.Color.Interpolate.ColorWithColor(
+        Phaser.Display.Color.ValueToColor(0xd4c0a8),
+        Phaser.Display.Color.ValueToColor(0xe7ca82),
+        100,
+        Math.round(telegraphProgress * 100)
+      ).color;
+      underlayTint = 0x8a5f36;
+      underlayAlpha = 0.55 + telegraphProgress * 0.08;
+    } else if (takingHit || hurtRecovering) {
+      const recoilPulse = takingHit ? 1.03 : 1 + Math.sin(time / 42) * 0.02;
+      scaleX *= 1.01;
+      scaleY *= recoilPulse * 0.98;
+      angle = this.direction * (takingHit ? 8 : 4);
+      tint = takingHit ? 0xd9efae : 0xb8c987;
+      underlayTint = 0x99a567;
+      underlayAlpha = takingHit ? 0.62 : 0.5;
+    } else if (hitPulsing) {
       const pulse = 1 + Math.sin(time / 36) * 0.03;
-      this.sprite.setScale(this.baseScaleX * this.config.presentation.scaleX * pulse, this.baseScaleY * this.config.presentation.scaleY * pulse);
+      scaleX *= pulse;
+      scaleY *= pulse * 1.01;
     }
 
+    this.sprite.setScale(scaleX, scaleY);
+    this.sprite.setAngle(angle);
     if (this.usingTexture) {
-      this.sprite.setTint(this.config.presentation.tint);
+      this.sprite.setTint(tint);
+      this.solidUnderlay?.setTint(underlayTint).setAlpha(underlayAlpha);
     } else {
-      this.sprite.setFillStyle(COLORS.bone, 0.92);
+      this.sprite.setFillStyle(telegraphing ? 0xd6bb7a : takingHit ? 0xc5d89a : COLORS.bone, telegraphing ? 0.96 : 0.94);
     }
+
+    this.syncSolidPresentation();
   }
 }
