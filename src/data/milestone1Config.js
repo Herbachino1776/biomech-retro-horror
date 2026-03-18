@@ -179,7 +179,7 @@ export const CHAMBER01_MINIBOSS = {
   presentation: {
     display: { width: 338, height: 338 },
     origin: { x: 0.56, y: 0.99 },
-    alpha: 0.78,
+    alpha: 0.96,
     tint: 0xd0bea6,
     scaleX: 1,
     scaleY: 1
