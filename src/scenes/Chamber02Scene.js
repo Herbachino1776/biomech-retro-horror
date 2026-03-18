@@ -7,6 +7,7 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
+import { AudioDirector } from '../audio/AudioDirector.js';
 
 const CHAMBER02_WORLD_WIDTH = 3600;
 
@@ -59,7 +60,8 @@ const CHAMBER02_TOLL_KEEPER_CONFIG = {
   eyeGlowOffsetX: 24,
   eyeGlowYOffset: 18,
   eyeGlowAlphaBase: 0.42,
-  eyeGlowWindupAlphaGain: 0.46
+  eyeGlowWindupAlphaGain: 0.46,
+  audioProfile: 'tollkeeper'
 };
 
 const CHAMBER02_TOLL_KEEPER_SPAWNS = [
@@ -137,6 +139,8 @@ export class Chamber02Scene extends Phaser.Scene {
     this.createPlatforms();
     this.createLoreZones();
 
+    this.audioDirector = new AudioDirector(this);
+
     this.player = new Player(this, 150, 360, PLAYER);
     this.physics.add.collider(this.player.sprite, this.platforms);
 
@@ -173,6 +177,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+      this.audioDirector?.shutdown();
       this.cleanupSceneUi();
     });
 
@@ -401,6 +406,7 @@ export class Chamber02Scene extends Phaser.Scene {
     const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
     enemy.setHitReactionDirection(knockDirection);
     enemy.takeDamage(1, this.time.now);
+    this.audioDirector?.playPlayerHit();
   }
 
   handleEnemyContactPlayer(_playerSprite, enemySprite, enemy) {

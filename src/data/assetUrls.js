@@ -18,6 +18,7 @@ import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
 import laughingEngineConceptUrl from '../../assets/concepts/laughing-engine-concept-01.png';
 import biomechUiFrameUrl from '../../assets/ui/biomech-ui-frame-01.png';
 
+import { PROCEDURAL_AUDIO_URLS } from '../audio/proceduralAudio.js';
 import { ASSET_KEYS } from './assetKeys.js';
 
 export const ASSET_URLS = {
@@ -39,5 +40,20 @@ export const ASSET_URLS = {
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,
   [ASSET_KEYS.laughingEngine]: laughingEngineConceptUrl,
-  [ASSET_KEYS.uiFrame]: biomechUiFrameUrl
+  [ASSET_KEYS.uiFrame]: biomechUiFrameUrl,
+  [ASSET_KEYS.playerFootstepA]: PROCEDURAL_AUDIO_URLS.playerFootstepA,
+  [ASSET_KEYS.playerFootstepB]: PROCEDURAL_AUDIO_URLS.playerFootstepB,
+  [ASSET_KEYS.playerAttack]: PROCEDURAL_AUDIO_URLS.playerAttack,
+  [ASSET_KEYS.playerHit]: PROCEDURAL_AUDIO_URLS.playerHit,
+  [ASSET_KEYS.playerHurt]: PROCEDURAL_AUDIO_URLS.playerHurt,
+  [ASSET_KEYS.playerDeath]: PROCEDURAL_AUDIO_URLS.playerDeath,
+  [ASSET_KEYS.enemyAttack]: PROCEDURAL_AUDIO_URLS.enemyAttack,
+  [ASSET_KEYS.enemyHurt]: PROCEDURAL_AUDIO_URLS.enemyHurt,
+  [ASSET_KEYS.enemyDeath]: PROCEDURAL_AUDIO_URLS.enemyDeath,
+  [ASSET_KEYS.tollKeeperAttack]: PROCEDURAL_AUDIO_URLS.tollKeeperAttack,
+  [ASSET_KEYS.tollKeeperHurt]: PROCEDURAL_AUDIO_URLS.tollKeeperHurt,
+  [ASSET_KEYS.tollKeeperDeath]: PROCEDURAL_AUDIO_URLS.tollKeeperDeath,
+  [ASSET_KEYS.minibossAttack]: PROCEDURAL_AUDIO_URLS.minibossAttack,
+  [ASSET_KEYS.minibossHurt]: PROCEDURAL_AUDIO_URLS.minibossHurt,
+  [ASSET_KEYS.minibossDeath]: PROCEDURAL_AUDIO_URLS.minibossDeath
 };

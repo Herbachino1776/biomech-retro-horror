@@ -17,6 +17,7 @@ import {
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
+import { AudioDirector } from '../audio/AudioDirector.js';
 
 export class Chamber01Scene extends Phaser.Scene {
   constructor() {
@@ -32,6 +33,8 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.platforms = this.physics.add.staticGroup();
     this.createPlatforms();
+
+    this.audioDirector = new AudioDirector(this);
 
     this.player = new Player(this, PLAYER.startX, PLAYER.startY, PLAYER);
     this.physics.add.collider(this.player.sprite, this.platforms);
@@ -128,6 +131,7 @@ export class Chamber01Scene extends Phaser.Scene {
       this.scale.off('resize', this.applyResponsiveLayout, this);
       this.game.events.off('lore-screen-complete', this.handleLoreScreenComplete, this);
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+      this.audioDirector?.shutdown();
     });
 
     this.applyResponsiveLayout();
@@ -564,6 +568,7 @@ export class Chamber01Scene extends Phaser.Scene {
     const knockDirection = Math.sign(this.enemy.sprite.x - this.player.sprite.x) || this.player.facing;
     this.enemy.setHitReactionDirection(knockDirection);
     this.enemy.takeDamage(1, this.time.now);
+    this.audioDirector?.playPlayerHit();
   }
 
   playMinibossHitFeedback() {
@@ -589,6 +594,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.minibossLastAttackHitId = this.player.attackId;
     this.miniboss.takeDamage(1, this.time.now);
+    this.audioDirector?.playPlayerHit();
     this.playMinibossHitFeedback();
 
     const knockDirection = Math.sign(this.miniboss.sprite.x - this.player.sprite.x) || this.player.facing;
