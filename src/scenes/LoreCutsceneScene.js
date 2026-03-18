@@ -5,6 +5,7 @@ import { LORE_CUTSCENES } from '../data/loreCutsceneConfig.js';
 const DEPTH = {
   backdrop: 1,
   frame: 3,
+  imageMask: 3.5,
   image: 4,
   textRegion: 5,
   text: 6,
@@ -90,24 +91,11 @@ export class LoreCutsceneScene extends Phaser.Scene {
     const containerLeft = layout.outerMarginX;
     const containerTop = layout.outerMarginY;
 
-    this.add
-      .rectangle(0, 0, width, height, 0x000000, 1)
-      .setOrigin(0)
-      .setDepth(DEPTH.backdrop);
+    this.add.rectangle(0, 0, width, height, 0x000000, 1).setOrigin(0).setDepth(DEPTH.backdrop);
 
     const imageRegion = new Phaser.Geom.Rectangle(containerLeft, containerTop, containerWidth, imageHeight);
-    const textRegion = new Phaser.Geom.Rectangle(
-      containerLeft,
-      imageRegion.bottom + sectionGap,
-      containerWidth,
-      textHeight
-    );
-    const promptRegion = new Phaser.Geom.Rectangle(
-      containerLeft,
-      textRegion.bottom + sectionGap,
-      containerWidth,
-      promptHeight
-    );
+    const textRegion = new Phaser.Geom.Rectangle(containerLeft, imageRegion.bottom + sectionGap, containerWidth, textHeight);
+    const promptRegion = new Phaser.Geom.Rectangle(containerLeft, textRegion.bottom + sectionGap, containerWidth, promptHeight);
 
     this.drawImageRegion(imageRegion);
     this.drawTextRegion(textRegion, layout);
@@ -121,7 +109,6 @@ export class LoreCutsceneScene extends Phaser.Scene {
       .setDepth(DEPTH.frame);
 
     const hasImage = this.cutscene?.imageKey && this.textures.exists(this.cutscene.imageKey);
-
     if (!hasImage) {
       this.add
         .text(region.centerX, region.centerY, 'LORE IMAGE MISSING\nFALLBACK ACTIVE', {
@@ -141,19 +128,54 @@ export class LoreCutsceneScene extends Phaser.Scene {
 
     let drawWidth = region.width;
     let drawHeight = region.height;
-
     if (sourceAspect > targetAspect) {
       drawHeight = region.width / sourceAspect;
     } else {
       drawWidth = region.height * sourceAspect;
     }
 
-    this.add
+    const image = this.add
       .image(region.centerX, region.centerY, this.cutscene.imageKey)
       .setDisplaySize(drawWidth, drawHeight)
       .setTint(this.cutscene?.style?.imageTint ?? 0xd4b9a5)
       .setAlpha(this.cutscene?.style?.imageAlpha ?? 0.94)
       .setDepth(DEPTH.image);
+
+    const maskGraphic = this.make.graphics({ x: 0, y: 0, add: false });
+    maskGraphic.fillStyle(0xffffff, 1);
+    maskGraphic.fillRect(region.x, region.y, region.width, region.height);
+    image.setMask(maskGraphic.createGeometryMask());
+
+    this.applyImageMotion(image);
+  }
+
+  applyImageMotion(image) {
+    const motion = this.cutscene?.style?.motion;
+    if (!motion) {
+      return;
+    }
+
+    this.tweens.add({
+      targets: image,
+      x: image.x + (motion.panX ?? 0),
+      y: image.y + (motion.panY ?? 0),
+      scaleX: image.scaleX * (motion.zoom ?? 1.03),
+      scaleY: image.scaleY * (motion.zoom ?? 1.03),
+      ease: 'Sine.inOut',
+      duration: motion.duration ?? 8000,
+      yoyo: true,
+      repeat: -1
+    });
+
+    this.tweens.add({
+      targets: image,
+      x: image.x + (motion.shakeX ?? 2),
+      y: image.y + (motion.shakeY ?? -2),
+      ease: 'Sine.inOut',
+      duration: motion.shakeDuration ?? 3200,
+      yoyo: true,
+      repeat: -1
+    });
   }
 
   drawTextRegion(region, layout) {
@@ -185,7 +207,6 @@ export class LoreCutsceneScene extends Phaser.Scene {
     }
 
     const availableHeight = region.bottom - textPadding - nextY;
-
     let bodyFontSize = layout.bodySize;
     const body = this.add
       .text(textX, nextY, bodyText, {
@@ -249,7 +270,6 @@ export class LoreCutsceneScene extends Phaser.Scene {
     }
 
     this.isClosing = true;
-
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.resume(this.returnSceneKey);
       this.game.events.emit('lore-cutscene-complete', { cutsceneId: this.cutsceneId });
@@ -259,11 +279,7 @@ export class LoreCutsceneScene extends Phaser.Scene {
     this.cameras.main.fadeOut(400, 0, 0, 0);
   }
 
-  handleResize(gameSize) {
-    this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
-    this.scene.restart({
-      cutsceneId: this.cutsceneId,
-      returnSceneKey: this.returnSceneKey
-    });
+  handleResize() {
+    this.scene.restart({ cutsceneId: this.cutsceneId, returnSceneKey: this.returnSceneKey });
   }
 }

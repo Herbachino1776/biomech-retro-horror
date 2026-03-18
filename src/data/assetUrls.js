@@ -4,6 +4,8 @@ import chamber01FloorStripUrl from '../../art/raw/chamber01/floor_strip_repeatab
 import chamber01RibArchUrl from '../../art/raw/chamber01/foreground_rib_arch_alpha_01_source.png';
 import chamber01ShrineUrl from '../../art/raw/chamber01/lore_shrine_alpha_01_source.png';
 import chamber01LaughingEngineWorldUrl from '../../art/raw/chamber01/laughing_engine_world_insert_alpha_01_source.png';
+import chamber01DeadgodCutsceneUrl from '../../art/raw/chamber01/chamber01_deadgod_cutscene_01_source.png';
+import chamber01HalfSkullMinibossUrl from '../../art/raw/chamber01/chamber01_halfskull_miniboss_01_left_alpha.png';
 import chamber02VertebralHornGateUrl from '../../art/raw/chamber02/vertebral_horn_gate_01_source.png';
 import chamber02BackgroundPlateUrl from '../../art/raw/chamber02/chamber02_background_plate_01_source.png';
 import chamber02FloorStripUrl from '../../art/raw/chamber02/chamber02_floor_strip_01_source.png';
@@ -23,6 +25,8 @@ export const ASSET_URLS = {
   [ASSET_KEYS.chamber01RibArch]: chamber01RibArchUrl,
   [ASSET_KEYS.chamber01Shrine]: chamber01ShrineUrl,
   [ASSET_KEYS.chamber01LaughingEngineWorld]: chamber01LaughingEngineWorldUrl,
+  [ASSET_KEYS.chamber01DeadgodCutscene]: chamber01DeadgodCutsceneUrl,
+  [ASSET_KEYS.chamber01HalfSkullMiniboss]: chamber01HalfSkullMinibossUrl,
   [ASSET_KEYS.chamber02VertebralHornGate]: chamber02VertebralHornGateUrl,
   [ASSET_KEYS.chamber02BackgroundPlate]: chamber02BackgroundPlateUrl,
   [ASSET_KEYS.chamber02FloorStrip]: chamber02FloorStripUrl,

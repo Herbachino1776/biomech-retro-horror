@@ -121,6 +121,14 @@ export const LORE_ENTRIES = [
     width: 70,
     height: 70,
     screenId: 'chamber01-laughing-engine'
+  },
+  {
+    id: 'end-deadgod',
+    x: 1940,
+    y: 410,
+    width: 92,
+    height: 82,
+    cutsceneId: 'chamber01-deadgod-witness'
   }
 ];
 
@@ -142,5 +150,29 @@ export const LORE_SCREENS = {
         height: CONCEPT_PRESENTATION.laughingEngine.crop.height
       }
     }
+  }
+};
+
+export const CHAMBER01_MINIBOSS = {
+  name: 'THE HALF-SKULL ASCENDANT',
+  health: 15,
+  contactDamage: 1,
+  contactDamageCooldownMs: 1200,
+  attackCooldownMs: 3400,
+  attackRange: 210,
+  approachRange: 340,
+  approachSpeed: 34,
+  idleAdvanceSpeed: 12,
+  attackSpeed: 174,
+  attackLiftVelocity: -150,
+  spawnX: 2060,
+  spawnY: 468,
+  arenaStartX: 1720,
+  body: { width: 86, height: 126, offsetX: 118, offsetY: 146 },
+  presentation: {
+    display: { width: 338, height: 338 },
+    origin: { x: 0.56, y: 0.99 },
+    alpha: 0.96,
+    tint: 0xd0bea6
   }
 };
