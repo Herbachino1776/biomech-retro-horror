@@ -44,8 +44,53 @@ Milestone 2 signoff blockers are addressed in shipped implementation:
 8. GitHub Pages/Vite base-path behavior remains correct.
 9. `npm run build` succeeds.
 
+## Milestone 3 Definition
+**Milestone 3: Encounter Expansion + Combat Readability** is the next implementation milestone.
+
+### Core Goal
+Deepen encounter quality inside the existing vertical slice **without broad scope creep**. Milestone 3 is about making the shipped combat space read better, pace better, and feel more intentional rather than opening new content lanes.
+
+### Relationship to Milestone 2
+Milestone 2 established the shipped Chamber 01 + Chamber 02 slice, including chamber-to-chamber progression, lore/cutscene flow, and the baseline encounter space.
+Milestone 3 builds on that baseline by improving **encounter depth and readability**, **not** by expanding into new chambers or replacing the current slice structure.
+
+### Recommended Milestone 3 Scope
+**Must-have**
+- Better regular enemy telegraphing.
+- Better regular enemy pacing and attack downtime.
+- Clearer attack range and combat readability cues.
+- Stronger hit/hurt feedback.
+- One miniboss refinement pass.
+- Limited combat visual productionization only where required to support readability.
+
+**Nice-to-have only if it directly supports the must-have work**
+- Small presentation assists that make enemy intent or impact states easier to read.
+- Conservative cleanup of combat-facing visuals where fallback-looking placeholders still obscure encounter readability.
+
+### Explicitly Out of Scope
+- New chambers.
+- Giant new systems.
+- Full animation pipeline work.
+- Broad audio overhaul.
+- Puzzle expansion.
+- Multiple new enemy families introduced at once.
+- Major UI redesign.
+- Major progression rewrite.
+
+### Recommended Order Inside Milestone 3
+1. **Regular enemy encounter depth pass.**
+2. **Miniboss refinement pass.**
+3. **Limited combat presentation support only where needed.**
+
+### Hard Constraints / Invariants
+- Preserve portrait mobile playability.
+- Preserve desktop controls.
+- Preserve current Chamber 01 + Chamber 02 progression.
+- Preserve current lore/cutscene systems.
+- Avoid broad redesigns that destabilize the shipped slice.
+
 ## Exact Next Best Implementation Step
-Begin **Milestone 3 encounter expansion** by deepening one threat loop (Sentinel or Laughing Engine) with readable telegraphing, without regressing mobile usability, lore cadence, or deployment invariants.
+Begin the **regular enemy encounter depth pass**: improve one existing regular threat loop with clearer telegraphing, better downtime/pacing, and stronger hit/hurt readability, without regressing mobile usability, current chamber progression, lore cadence, or deployment invariants.
 
 ## Do Not Change Casually
 - Base-path deployment contract (`/biomech-retro-horror/` prod, `/` dev).

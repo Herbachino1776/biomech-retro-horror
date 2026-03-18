@@ -30,7 +30,15 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Audio identity pass (ambient + encounter + lore transitions) is still pending.
 
 ## Active Milestone
-**Milestone 2 — Slice Art Cohesion + Lore Pattern Consolidation: completed and closed out.**
+**Milestone 3 — Encounter Expansion + Combat Readability: planned, not yet implemented.**
+
+### Milestone 3 Planning Definition
+- Core goal: deepen encounter quality without broad scope creep.
+- Relationship to Milestone 2: Milestone 2 already established Chamber 01 + Chamber 02 progression, lore/cutscene flow, and the baseline encounter space; Milestone 3 now focuses on encounter depth/readability rather than new chamber expansion.
+- Must-have scope: better regular enemy telegraphing, pacing/attack downtime, attack range readability cues, stronger hit/hurt feedback, one miniboss refinement pass, and limited combat visual productionization only where needed.
+- Out of scope: new chambers, giant new systems, full animation pipeline work, broad audio overhaul, puzzle expansion, multiple new enemy families at once, major UI redesign, and major progression rewrite.
+- Ordered implementation path: (1) regular enemy encounter depth pass, (2) miniboss refinement pass, (3) limited combat presentation support only where needed.
+- Hard constraints: preserve portrait mobile playability, desktop controls, current chamber progression, current lore/cutscene systems, and avoid broad redesigns.
 
 ## Latest Completed Task
 - Milestone 2 closeout pass shipped and stabilized for handoff.
@@ -40,7 +48,7 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Milestone/docs status updated to match shipped behavior.
 
 ## Exact Next Best Step After This Task
-Begin **Milestone 3 encounter expansion** by deepening one existing threat loop with telegraphed behavior while preserving mobile readability, lore cadence, and deployment invariants.
+Begin the **regular enemy encounter depth pass** for Milestone 3: improve one existing regular enemy's telegraphing, pacing/downtime, attack range readability, and hit/hurt feedback while preserving mobile readability, current chamber progression, lore cadence, and deployment invariants.
 
 ## Most Important Constraints
 1. Do not regress GitHub Pages/Vite base-path behavior.
