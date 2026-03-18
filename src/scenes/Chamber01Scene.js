@@ -45,6 +45,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.physics.add.collider(this.miniboss.sprite, this.platforms);
     this.miniboss.setActive(false);
     this.miniboss.sprite.setVisible(false);
+    this.miniboss.solidUnderlay?.setVisible(false);
     this.miniboss.body.enable = false;
 
     this.physics.add.overlap(this.player.attackHitbox, this.enemy.sprite, this.handlePlayerHitEnemy, null, this);
@@ -70,6 +71,8 @@ export class Chamber01Scene extends Phaser.Scene {
     this.minibossDeathFlashUntil = -Infinity;
     this.minibossDeathPulse = null;
     this.minibossTellRing = this.add.ellipse(CHAMBER01_MINIBOSS.spawnX, CHAMBER01_MINIBOSS.spawnY - 150, 190, 74, 0xc39146, 0.0).setDepth(5).setVisible(false);
+    this.minibossTellCrest = this.add.ellipse(CHAMBER01_MINIBOSS.spawnX, CHAMBER01_MINIBOSS.spawnY - 208, 90, 26, 0xe3c883, 0.0).setDepth(5.2).setVisible(false);
+    this.minibossHitRing = this.add.ellipse(CHAMBER01_MINIBOSS.spawnX, CHAMBER01_MINIBOSS.spawnY - 132, 126, 58, 0xd6e7a4, 0.0).setDepth(5.3).setVisible(false);
     this.minibossDeathHalo = this.add.ellipse(CHAMBER01_MINIBOSS.spawnX, CHAMBER01_MINIBOSS.spawnY - 122, 250, 170, 0xd7c8af, 0.0).setDepth(5).setVisible(false);
 
     this.restartText = this.add
@@ -147,7 +150,7 @@ export class Chamber01Scene extends Phaser.Scene {
       current: this.miniboss.health,
       max: this.miniboss.maxHealth,
       telegraph: this.miniboss.getTelegraphProgress(time),
-      wounded: time < this.miniboss.lastDamageFlashTime + 180
+      wounded: time < this.miniboss.lastDamageFlashTime + 220
     });
   }
 
@@ -500,6 +503,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.minibossEncounterStarted = true;
     this.miniboss.sprite.setVisible(true);
+    this.miniboss.solidUnderlay?.setVisible(true);
     this.miniboss.body.enable = true;
     this.miniboss.setActive(true);
     this.gateSigil?.setAlpha(0.16);
@@ -522,6 +526,19 @@ export class Chamber01Scene extends Phaser.Scene {
     this.enemy.takeDamage(1, this.time.now);
   }
 
+  playMinibossHitFeedback() {
+    if (!this.minibossHitRing) {
+      return;
+    }
+
+    this.minibossHitRing
+      .setVisible(true)
+      .setPosition(this.miniboss.sprite.x, this.miniboss.sprite.y - 132)
+      .setScale(0.82, 0.82)
+      .setAlpha(0.34)
+      .setStrokeStyle(3, 0xd8efaf, 0.78);
+  }
+
   handlePlayerHitMiniboss(_attackZone, enemySprite) {
     if (!this.player.attackActive || !this.minibossEncounterStarted || this.miniboss.dead || !this.isEnemyOverlapTarget(enemySprite, this.miniboss.sprite)) {
       return;
@@ -532,10 +549,10 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.minibossLastAttackHitId = this.player.attackId;
     this.miniboss.takeDamage(1, this.time.now);
+    this.playMinibossHitFeedback();
 
     const knockDirection = Math.sign(this.miniboss.sprite.x - this.player.sprite.x) || this.player.facing;
-    this.miniboss.body.setVelocityX(knockDirection * 110);
-    this.miniboss.body.setVelocityY(-90);
+    this.miniboss.direction = knockDirection;
 
     if (this.miniboss.dead) {
       this.handleMinibossDefeated();
@@ -580,6 +597,8 @@ export class Chamber01Scene extends Phaser.Scene {
     this.miniboss.setActive(false);
     this.minibossDeathFlashUntil = this.time.now + 520;
     this.minibossTellRing?.setVisible(false).setAlpha(0);
+    this.minibossTellCrest?.setVisible(false).setAlpha(0);
+    this.minibossHitRing?.setVisible(false).setAlpha(0);
     if (this.minibossDeathHalo) {
       this.minibossDeathHalo.setPosition(this.miniboss.sprite.x, this.miniboss.sprite.y - 118).setScale(0.7).setAlpha(0.58).setVisible(true);
       this.tweens.add({
@@ -592,8 +611,9 @@ export class Chamber01Scene extends Phaser.Scene {
       });
     }
     this.minibossDeathPulse?.remove(false);
-    this.minibossDeathPulse = this.time.delayedCall(180, () => {
-      this.cameras.main.shake(220, 0.003);
+    this.minibossDeathPulse = this.time.delayedCall(120, () => {
+      this.cameras.main.shake(420, 0.0065);
+      this.time.delayedCall(170, () => this.cameras.main.shake(320, 0.0045));
     });
     this.updateGateActivationVisuals();
   }
@@ -602,15 +622,35 @@ export class Chamber01Scene extends Phaser.Scene {
     if (this.minibossTellRing) {
       if (this.minibossEncounterStarted && !this.miniboss.dead && this.miniboss.isTelegraphing(time)) {
         const progress = this.miniboss.getTelegraphProgress(time);
+        const pulse = 0.88 + Math.sin(time / 58) * 0.04;
         this.minibossTellRing
           .setVisible(true)
-          .setPosition(this.miniboss.sprite.x, this.miniboss.sprite.y - 150)
-          .setAlpha(0.08 + progress * 0.2)
-          .setStrokeStyle(3, 0xe0c37c, 0.3 + progress * 0.45)
-          .setScale(0.85 + progress * 0.35, 0.82 + progress * 0.18);
+          .setPosition(this.miniboss.sprite.x, this.miniboss.sprite.y - 146)
+          .setAlpha(0.14 + progress * 0.26)
+          .setStrokeStyle(4, 0xe6c981, 0.45 + progress * 0.4)
+          .setScale((0.9 + progress * 0.48) * pulse, 0.84 + progress * 0.24);
+        this.minibossTellCrest
+          ?.setVisible(true)
+          .setPosition(this.miniboss.sprite.x + this.miniboss.direction * 16, this.miniboss.sprite.y - 208 - progress * 8)
+          .setAlpha(0.18 + progress * 0.34)
+          .setStrokeStyle(2, 0xf2deb1, 0.48 + progress * 0.26)
+          .setScale(0.78 + progress * 0.34, 0.8 + progress * 0.28);
       } else {
         this.minibossTellRing.setVisible(false).setAlpha(0);
+        this.minibossTellCrest?.setVisible(false).setAlpha(0);
       }
+    }
+
+    if (this.minibossHitRing && time < this.miniboss.lastDamageFlashTime + 180 && !this.miniboss.dead) {
+      const progress = Phaser.Math.Clamp((time - this.miniboss.lastDamageFlashTime) / 180, 0, 1);
+      this.minibossHitRing
+        .setVisible(true)
+        .setPosition(this.miniboss.sprite.x, this.miniboss.sprite.y - 132)
+        .setAlpha(0.3 * (1 - progress))
+        .setStrokeStyle(3, 0xd6e7a4, 0.7 * (1 - progress))
+        .setScale(0.84 + progress * 0.36, 0.84 + progress * 0.18);
+    } else {
+      this.minibossHitRing?.setVisible(false).setAlpha(0);
     }
 
     if (time < this.minibossDeathFlashUntil) {
