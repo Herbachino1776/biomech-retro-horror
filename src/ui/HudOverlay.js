@@ -44,15 +44,27 @@ export class HudOverlay {
       .setScrollFactor(0)
       .setDepth(31);
 
-    this.bossBarFrame = scene.add.rectangle(0, 0, 0, 0, 0x090807, 0.88).setScrollFactor(0).setDepth(30).setVisible(false);
+    this.bossBarFrame = scene.add.rectangle(0, 0, 0, 0, 0x090807, 0.9).setScrollFactor(0).setDepth(30).setVisible(false);
     this.bossBarFrame.setStrokeStyle(2, 0x6b5647, 0.95);
-    this.bossBarFill = scene.add.rectangle(0, 0, 0, 0, 0x7c1111, 0.95).setScrollFactor(0).setDepth(31).setVisible(false);
-    this.bossBarUnderlay = scene.add.rectangle(0, 0, 0, 0, 0x1e1614, 0.95).setScrollFactor(0).setDepth(30).setVisible(false);
+    this.bossBarFill = scene.add.rectangle(0, 0, 0, 0, 0x7c1111, 0.97).setScrollFactor(0).setDepth(31).setVisible(false);
+    this.bossBarUnderlay = scene.add.rectangle(0, 0, 0, 0, 0x1e1614, 0.97).setScrollFactor(0).setDepth(30).setVisible(false);
+    this.bossTelegraph = scene.add.rectangle(0, 0, 0, 0, 0xc39146, 0.22).setScrollFactor(0).setDepth(31).setVisible(false);
     this.bossName = scene.add
       .text(0, 0, '', {
         fontFamily: 'monospace',
         fontSize: '16px',
         color: '#d2c2ac',
+        align: 'center'
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(31)
+      .setVisible(false);
+    this.bossSubtitle = scene.add
+      .text(0, 0, '', {
+        fontFamily: 'monospace',
+        fontSize: '11px',
+        color: '#8f7d72',
         align: 'center'
       })
       .setOrigin(0.5)
@@ -67,8 +79,10 @@ export class HudOverlay {
       this.healthValue,
       this.bossBarFrame,
       this.bossBarUnderlay,
+      this.bossTelegraph,
       this.bossBarFill,
-      this.bossName
+      this.bossName,
+      this.bossSubtitle
     ];
 
     this.layoutBossBar();
@@ -89,17 +103,19 @@ export class HudOverlay {
     const centerY = height - bottomMargin - frameHeight / 2;
 
     this.bossBarFrame.setPosition(centerX, centerY).setSize(frameWidth, frameHeight);
-    this.bossBarUnderlay.setPosition(centerX, centerY + 8).setSize(frameWidth - 24, 12);
-    this.bossBarFill.setPosition(centerX - (frameWidth - 24) / 2, centerY + 8).setOrigin(0, 0.5).setSize(frameWidth - 24, 12);
-    this.bossName.setPosition(centerX, centerY - 9).setFontSize(isPortrait ? 13 : 16);
+    this.bossBarUnderlay.setPosition(centerX, centerY + 10).setSize(frameWidth - 24, 12);
+    this.bossTelegraph.setPosition(centerX - (frameWidth - 24) / 2, centerY + 10).setOrigin(0, 0.5).setSize(0, 12);
+    this.bossBarFill.setPosition(centerX - (frameWidth - 24) / 2, centerY + 10).setOrigin(0, 0.5).setSize(frameWidth - 24, 12);
+    this.bossName.setPosition(centerX, centerY - 12).setFontSize(isPortrait ? 13 : 16);
+    this.bossSubtitle.setPosition(centerX, centerY - (isPortrait ? 0 : 1)).setFontSize(isPortrait ? 9 : 10);
   }
 
   update(current, max) {
     this.healthValue.setText(`${Math.max(current, 0)} / ${max}`);
   }
 
-  setBossBarState({ visible, name = '', current = 0, max = 1 } = {}) {
-    [this.bossBarFrame, this.bossBarUnderlay, this.bossBarFill, this.bossName].forEach((element) => {
+  setBossBarState({ visible, name = '', subtitle = '', current = 0, max = 1, telegraph = 0, wounded = false } = {}) {
+    [this.bossBarFrame, this.bossBarUnderlay, this.bossTelegraph, this.bossBarFill, this.bossName, this.bossSubtitle].forEach((element) => {
       element.setVisible(visible);
     });
 
@@ -109,8 +125,14 @@ export class HudOverlay {
 
     this.layoutBossBar();
     const ratio = max <= 0 ? 0 : Math.max(0, Math.min(1, current / max));
+    const telegraphRatio = Math.max(0, Math.min(1, telegraph));
     this.bossName.setText(name);
+    this.bossSubtitle.setText(subtitle);
     this.bossBarFill.displayWidth = Math.max(0, this.bossBarUnderlay.width * ratio);
+    this.bossTelegraph.displayWidth = Math.max(0, this.bossBarUnderlay.width * telegraphRatio);
+    this.bossBarFill.setFillStyle(wounded ? 0xa46d48 : 0x7c1111, wounded ? 1 : 0.97);
+    this.bossBarFrame.setStrokeStyle(2, telegraphRatio > 0 ? 0x9d7b47 : 0x6b5647, 0.95);
+    this.bossSubtitle.setColor(telegraphRatio > 0 ? '#d4b57b' : '#8f7d72');
   }
 
   setVisible(visible) {

@@ -67,6 +67,10 @@ export class Chamber01Scene extends Phaser.Scene {
     this.isLoreTransitionActive = false;
     this.minibossEncounterStarted = false;
     this.minibossDefeated = false;
+    this.minibossDeathFlashUntil = -Infinity;
+    this.minibossDeathPulse = null;
+    this.minibossTellRing = this.add.ellipse(CHAMBER01_MINIBOSS.spawnX, CHAMBER01_MINIBOSS.spawnY - 150, 190, 74, 0xc39146, 0.0).setDepth(5).setVisible(false);
+    this.minibossDeathHalo = this.add.ellipse(CHAMBER01_MINIBOSS.spawnX, CHAMBER01_MINIBOSS.spawnY - 122, 250, 170, 0xd7c8af, 0.0).setDepth(5).setVisible(false);
 
     this.restartText = this.add
       .text(this.scale.width / 2, 90, '', {
@@ -134,12 +138,16 @@ export class Chamber01Scene extends Phaser.Scene {
     this.player.update(time, this.getCombinedInput(mobileInput));
     this.enemy.update(time, this.player.sprite.x);
     this.miniboss.update(time, this.player.sprite);
+    this.updateMinibossArenaFeedback(time);
     this.hud.update(this.player.health, PLAYER.maxHealth);
     this.hud.setBossBarState({
       visible: this.minibossEncounterStarted && !this.minibossDefeated,
       name: CHAMBER01_MINIBOSS.name,
+      subtitle: CHAMBER01_MINIBOSS.subtitle,
       current: this.miniboss.health,
-      max: this.miniboss.maxHealth
+      max: this.miniboss.maxHealth,
+      telegraph: this.miniboss.getTelegraphProgress(time),
+      wounded: time < this.miniboss.lastDamageFlashTime + 180
     });
   }
 
@@ -569,7 +577,48 @@ export class Chamber01Scene extends Phaser.Scene {
   handleMinibossDefeated() {
     this.minibossDefeated = true;
     this.miniboss.setActive(false);
+    this.minibossDeathFlashUntil = this.time.now + 520;
+    this.minibossTellRing?.setVisible(false).setAlpha(0);
+    if (this.minibossDeathHalo) {
+      this.minibossDeathHalo.setPosition(this.miniboss.sprite.x, this.miniboss.sprite.y - 118).setScale(0.7).setAlpha(0.58).setVisible(true);
+      this.tweens.add({
+        targets: this.minibossDeathHalo,
+        scaleX: 1.35,
+        scaleY: 1.2,
+        alpha: 0,
+        duration: 780,
+        ease: 'Cubic.easeOut'
+      });
+    }
+    this.minibossDeathPulse?.remove(false);
+    this.minibossDeathPulse = this.time.delayedCall(180, () => {
+      this.cameras.main.shake(220, 0.003);
+    });
     this.updateGateActivationVisuals();
+  }
+
+  updateMinibossArenaFeedback(time) {
+    if (this.minibossTellRing) {
+      if (this.minibossEncounterStarted && !this.miniboss.dead && this.miniboss.isTelegraphing(time)) {
+        const progress = this.miniboss.getTelegraphProgress(time);
+        this.minibossTellRing
+          .setVisible(true)
+          .setPosition(this.miniboss.sprite.x, this.miniboss.sprite.y - 150)
+          .setAlpha(0.08 + progress * 0.2)
+          .setStrokeStyle(3, 0xe0c37c, 0.3 + progress * 0.45)
+          .setScale(0.85 + progress * 0.35, 0.82 + progress * 0.18);
+      } else {
+        this.minibossTellRing.setVisible(false).setAlpha(0);
+      }
+    }
+
+    if (time < this.minibossDeathFlashUntil) {
+      const progress = Phaser.Math.Clamp((this.minibossDeathFlashUntil - time) / 520, 0, 1);
+      this.cameras.main.setBackgroundColor(Phaser.Display.Color.GetColor(18 + Math.round(20 * progress), 11 + Math.round(14 * progress), 10 + Math.round(10 * progress)));
+      return;
+    }
+
+    this.cameras.main.setBackgroundColor(COLORS.backdrop);
   }
 
   updateGateActivationVisuals() {
