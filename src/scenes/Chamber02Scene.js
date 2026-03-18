@@ -4,7 +4,7 @@ import { SkitterServitor } from '../entities/SkitterServitor.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
-import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
+import { COLORS, PLAYER, SKITTER, SKITTER_VARIANTS, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 
@@ -19,6 +19,14 @@ const CHAMBER02_PLATFORMS = [
 ];
 
 const CHAMBER02_ENEMY_SPAWNS = [
+  {
+    x: 930,
+    y: 402,
+    awakenPlayerX: 660,
+    wakeDelayMs: 620,
+    variantKey: 'tollKeeper',
+    patrolDistance: 92
+  },
   { x: 1140, y: 402, awakenPlayerX: 830 },
   { x: 2410, y: 402, awakenPlayerX: 2050 },
   { x: 3180, y: 402, awakenPlayerX: 2880 },
@@ -190,11 +198,13 @@ export class Chamber02Scene extends Phaser.Scene {
 
   createEnemyEncounter() {
     const enemies = CHAMBER02_ENEMY_SPAWNS.map((spawn) => {
+      const variantConfig = spawn.variantKey ? SKITTER_VARIANTS[spawn.variantKey] ?? {} : {};
       const enemyConfig = {
         ...SKITTER,
+        ...variantConfig,
         awakenPlayerX: spawn.awakenPlayerX,
-        wakeDelayMs: spawn.wakeDelayMs ?? 500,
-        patrolDistance: 180
+        wakeDelayMs: spawn.wakeDelayMs ?? variantConfig.wakeDelayMs ?? 500,
+        patrolDistance: spawn.patrolDistance ?? variantConfig.patrolDistance ?? 180
       };
       const enemy = new SkitterServitor(this, spawn.x, spawn.y, enemyConfig);
       this.physics.add.collider(enemy.sprite, this.platforms);
