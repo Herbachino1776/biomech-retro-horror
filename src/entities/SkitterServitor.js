@@ -67,6 +67,7 @@ export class SkitterServitor {
     this.baseScaleX = this.sprite.scaleX || 1;
     this.baseScaleY = this.sprite.scaleY || 1;
     this.baseAlpha = spritePresentation.alpha ?? defaultPresentation.alpha ?? 0.92;
+    this.stateAlphas = spritePresentation.stateAlpha ?? {};
     this.rangeTell = scene.add
       .ellipse(x, y + 8, config.attackRange * 2, 26, config.rangeTellColor ?? 0xbfa878, 0)
       .setDepth(4.5)
@@ -237,13 +238,15 @@ export class SkitterServitor {
 
     if (this.health <= 0) {
       this.dead = true;
+      this.body.stop();
+      this.body.setAllowGravity(false);
       this.body.enable = false;
       this.rangeTell.setVisible(false);
       this.eyeGlow.setVisible(false);
       this.setVisualTint(0x1f1714);
       this.scene.tweens.add({
         targets: this.sprite,
-        alpha: 0.2,
+        alpha: this.getStateAlpha('dead', 0.4),
         duration: 380
       });
       this.scene.tweens.add({
@@ -271,28 +274,32 @@ export class SkitterServitor {
       return;
     }
 
-    this.sprite.setFlipX(this.direction > 0);
+    if (typeof this.sprite.setFlipX === 'function') {
+      this.sprite.setFlipX(this.direction > 0);
+    } else {
+      this.sprite.setScale(Math.abs(this.baseScaleX) * (this.direction > 0 ? -1 : 1), this.sprite.scaleY);
+    }
     this.updateEyeGlow(time);
 
     if (this.combatState === 'windup') {
       const pulse = 0.82 + Math.sin(time * 0.03) * 0.05;
       this.sprite.setScale(this.baseScaleX * 0.92, this.baseScaleY * 1.04);
       this.setVisualTint(0x98725a);
-      this.sprite.setAlpha(pulse);
+      this.sprite.setAlpha(this.getStateAlpha('windup', pulse));
       return;
     }
 
     if (this.combatState === 'attack') {
       this.sprite.setScale(this.baseScaleX * 1.04, this.baseScaleY * 0.98);
       this.setVisualTint(0x8f6f55);
-      this.sprite.setAlpha(0.95);
+      this.sprite.setAlpha(this.getStateAlpha('attack', 0.95));
       return;
     }
 
     if (this.combatState === 'hurt') {
       this.sprite.setScale(this.baseScaleX * 1.02, this.baseScaleY * 0.96);
       this.setVisualTint(0x6f8c59);
-      this.sprite.setAlpha(0.88);
+      this.sprite.setAlpha(this.getStateAlpha('hurt', 0.88));
       return;
     }
 
@@ -305,6 +312,10 @@ export class SkitterServitor {
     }
 
     this.setVisualTint(0x64453a);
+  }
+
+  getStateAlpha(state, fallbackAlpha) {
+    return this.stateAlphas[state] ?? fallbackAlpha;
   }
 
   updateRangeTell(time) {

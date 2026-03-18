@@ -18,61 +18,58 @@ const CHAMBER02_PLATFORMS = [
   { x: 3070, y: 376, width: 220, height: 20 }
 ];
 
-const CHAMBER02_TOLL_KEEPER = {
-  x: 520,
-  y: 402,
-  config: {
-    ...SKITTER,
-    textureKey: ASSET_KEYS.chamber02TollKeeperSkitter,
-    variantName: 'TOLL-KEEPER SKITTER',
-    health: 4,
-    speed: 42,
-    attackCooldownMs: 2700,
-    windupMs: 760,
-    attackActiveMs: 280,
-    attackRecoveryMs: 560,
-    hesitationMs: 520,
-    attackTriggerRange: 146,
-    attackRange: 176,
-    preferredRange: 124,
-    rangeBand: 22,
-    lungeSpeedBonus: 98,
-    lungeJumpVelocity: -96,
-    patrolDistance: 64,
-    awakenPlayerX: undefined,
-    wakeDelayMs: 0,
-    presentation: {
-      alpha: 1,
-      display: {
-        width: 212,
-        height: 188
-      },
-      origin: {
-        x: 0.52,
-        y: 0.93
-      }
-    },
-    rangeTellColor: 0xe8d78f,
-    rangeTellAlphaBase: 0.32,
-    rangeTellAlphaGain: 0.42,
-    rangeTellStrokeColor: 0xfff1bd,
-    rangeTellStrokeAlphaBase: 0.46,
-    rangeTellStrokeAlphaGain: 0.32,
-    eyeGlowColor: 0xe9ffb4,
-    eyeGlowWidth: 44,
-    eyeGlowHeight: 22,
-    eyeGlowOffsetX: 24,
-    eyeGlowYOffset: 20,
-    eyeGlowAlphaBase: 0.42,
-    eyeGlowWindupAlphaGain: 0.46
-  }
+const CHAMBER02_TOLL_KEEPER_CONFIG = {
+  ...SKITTER,
+  textureKey: ASSET_KEYS.chamber02TollKeeperSkitter,
+  variantName: 'TOLL-KEEPER',
+  health: 7,
+  speed: 46,
+  attackCooldownMs: 3000,
+  windupMs: 820,
+  attackActiveMs: 320,
+  attackRecoveryMs: 620,
+  hesitationMs: 560,
+  attackTriggerRange: 158,
+  attackRange: 192,
+  preferredRange: 136,
+  rangeBand: 20,
+  lungeSpeedBonus: 104,
+  lungeJumpVelocity: -92,
+  recoilVelocityX: 144,
+  recoilVelocityY: -84,
+  patrolDistance: 72,
+  awakenPlayerX: 2820,
+  wakeDelayMs: 0,
+  body: { width: 74, height: 44, offsetX: 32, offsetY: 94 },
+  presentation: {
+    alpha: 1,
+    display: { width: 284, height: 218 },
+    origin: { x: 0.52, y: 0.965 },
+    stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.46 }
+  },
+  rangeTellColor: 0xe8d78f,
+  rangeTellAlphaBase: 0.32,
+  rangeTellAlphaGain: 0.42,
+  rangeTellStrokeColor: 0xfff1bd,
+  rangeTellStrokeAlphaBase: 0.46,
+  rangeTellStrokeAlphaGain: 0.32,
+  eyeGlowColor: 0xe9ffb4,
+  eyeGlowWidth: 44,
+  eyeGlowHeight: 22,
+  eyeGlowOffsetX: 24,
+  eyeGlowYOffset: 18,
+  eyeGlowAlphaBase: 0.42,
+  eyeGlowWindupAlphaGain: 0.46
 };
+
+const CHAMBER02_TOLL_KEEPER_SPAWNS = [
+  { x: 3005, y: 404, awakenPlayerX: 2820, wakeDelayMs: 0 },
+  { x: 3325, y: 404, awakenPlayerX: 3010, wakeDelayMs: 220 }
+];
 
 const CHAMBER02_ENEMY_SPAWNS = [
   { x: 1600, y: 402, awakenPlayerX: 1360 },
-  { x: 2410, y: 402, awakenPlayerX: 2050 },
-  { x: 2935, y: 402, awakenPlayerX: 2660, wakeDelayMs: 250 },
-  { x: 3180, y: 402, awakenPlayerX: 2880 }
+  { x: 2410, y: 402, awakenPlayerX: 2050 }
 ];
 
 const CHAMBER02_LORE_ENTRY = {
@@ -89,6 +86,24 @@ const CHAMBER02_POST_LORE_REACTION = {
   gateAlpha: 0.94,
   sanctumAuraAlpha: 0.2,
   ambientVeilAlpha: 0.11,
+};
+
+const CHAMBER02_EXIT_GATE = {
+  x: 3480,
+  y: 272,
+  displayWidth: 404,
+  displayHeight: 444,
+  barrierWidth: 86,
+  barrierHeight: 252,
+  zoneOffsetX: -96,
+  zoneY: 402,
+  zoneWidth: 164,
+  zoneHeight: 172,
+  lockedTint: 0x927f66,
+  lockedAlpha: 0.76,
+  unlockedTint: 0xd7c5ac,
+  unlockedAlpha: 0.96,
+  loreCutsceneId: 'chamber02-exit-gate'
 };
 
 export class Chamber02Scene extends Phaser.Scene {
@@ -112,9 +127,11 @@ export class Chamber02Scene extends Phaser.Scene {
     this.loreZones = this.physics.add.staticGroup();
     this.triggeredLoreIds = new Set();
     this.currentLoreZone = null;
+    this.currentGateZone = null;
     this.isLoreTransitionActive = false;
     this.isRestartingRun = false;
     this.hasAppliedPostLoreReaction = false;
+    this.hasTriggeredExitGateLore = false;
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
@@ -124,6 +141,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.physics.add.collider(this.player.sprite, this.platforms);
 
     this.enemies = [];
+    this.tollKeepers = [];
     this.createTollKeeperEncounter();
     this.createEnemyEncounter();
 
@@ -238,12 +256,60 @@ export class Chamber02Scene extends Phaser.Scene {
         .setDepth(-6);
     }
 
+    this.createExitGate();
+  }
+
+  createExitGate() {
+    this.exitGateBarrier = this.add
+      .rectangle(CHAMBER02_EXIT_GATE.x + 8, WORLD.floorY - 6, CHAMBER02_EXIT_GATE.barrierWidth, CHAMBER02_EXIT_GATE.barrierHeight, COLORS.architecture, 0)
+      .setOrigin(0.5, 1)
+      .setDepth(-5.5);
+    this.physics.add.existing(this.exitGateBarrier, true);
+    this.platforms.add(this.exitGateBarrier);
+
+    if (this.textures.exists(ASSET_KEYS.chamber02VertebralHornGate)) {
+      this.exitGateArt = this.add
+        .image(CHAMBER02_EXIT_GATE.x, CHAMBER02_EXIT_GATE.y, ASSET_KEYS.chamber02VertebralHornGate)
+        .setDisplaySize(CHAMBER02_EXIT_GATE.displayWidth, CHAMBER02_EXIT_GATE.displayHeight)
+        .setCrop(194, 166, 640, 1140)
+        .setTint(CHAMBER02_EXIT_GATE.lockedTint)
+        .setAlpha(CHAMBER02_EXIT_GATE.lockedAlpha)
+        .setDepth(-5.4);
+    } else {
+      this.exitGateArt = this.add
+        .rectangle(CHAMBER02_EXIT_GATE.x, WORLD.floorY - 126, 112, 252, COLORS.foreground, 0.94)
+        .setStrokeStyle(3, COLORS.bone, 0.8)
+        .setDepth(-5.4);
+    }
+
+    this.exitGateSigil = this.add
+      .ellipse(CHAMBER02_EXIT_GATE.x - 26, 324, 50, 108, COLORS.sickly, 0.14)
+      .setDepth(-5.3);
+
+    this.exitGateZone = this.add
+      .zone(
+        CHAMBER02_EXIT_GATE.x + CHAMBER02_EXIT_GATE.zoneOffsetX,
+        CHAMBER02_EXIT_GATE.zoneY,
+        CHAMBER02_EXIT_GATE.zoneWidth,
+        CHAMBER02_EXIT_GATE.zoneHeight
+      )
+      .setOrigin(0.5);
+    this.physics.add.existing(this.exitGateZone, true);
   }
 
   createTollKeeperEncounter() {
-    const tollKeeper = this.createSkitterEnemy(CHAMBER02_TOLL_KEEPER.x, CHAMBER02_TOLL_KEEPER.y, CHAMBER02_TOLL_KEEPER.config);
-    this.enemies.push(tollKeeper);
-    return tollKeeper;
+    CHAMBER02_TOLL_KEEPER_SPAWNS.forEach((spawn) => {
+      const tollKeeper = this.createSkitterEnemy(spawn.x, spawn.y, {
+        ...CHAMBER02_TOLL_KEEPER_CONFIG,
+        awakenPlayerX: spawn.awakenPlayerX,
+        wakeDelayMs: spawn.wakeDelayMs
+      });
+      tollKeeper.isTollKeeper = true;
+      this.tollKeepers.push(tollKeeper);
+      this.enemies.push(tollKeeper);
+    });
+
+    return this.tollKeepers;
   }
 
   createEnemyEncounter() {
@@ -307,7 +373,10 @@ export class Chamber02Scene extends Phaser.Scene {
     });
 
     this.refreshLoreZonePresence();
+    this.refreshExitGatePresence();
     this.tryBeginLoreSequence(mobileInput);
+    this.tryUseExitGate(mobileInput);
+    this.refreshExitGateState();
 
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
 
@@ -349,6 +418,50 @@ export class Chamber02Scene extends Phaser.Scene {
     return target === enemy.sprite || target?.gameObject === enemy.sprite;
   }
 
+  countDefeatedTollKeepers() {
+    return this.tollKeepers.filter((enemy) => enemy.dead).length;
+  }
+
+  areAllTollKeepersDefeated() {
+    return this.tollKeepers.length > 0 && this.countDefeatedTollKeepers() === this.tollKeepers.length;
+  }
+
+  applyExitGateVisualState(unlocked) {
+    if (!this.exitGateArt) {
+      return;
+    }
+
+    const targetTint = unlocked ? CHAMBER02_EXIT_GATE.unlockedTint : CHAMBER02_EXIT_GATE.lockedTint;
+    const targetAlpha = unlocked ? CHAMBER02_EXIT_GATE.unlockedAlpha : CHAMBER02_EXIT_GATE.lockedAlpha;
+
+    if (typeof this.exitGateArt.setTint === 'function') {
+      this.exitGateArt.setTint(targetTint);
+    } else if (typeof this.exitGateArt.setFillStyle === 'function') {
+      this.exitGateArt.setFillStyle(targetTint, targetAlpha);
+    }
+
+    if (typeof this.exitGateArt.setAlpha === 'function') {
+      this.exitGateArt.setAlpha(targetAlpha);
+    }
+  }
+
+  refreshExitGateState() {
+    const unlocked = this.areAllTollKeepersDefeated();
+    if (this.exitGateUnlocked === unlocked) {
+      return;
+    }
+
+    this.exitGateUnlocked = unlocked;
+    this.exitGateSigil?.setAlpha(unlocked ? 0.3 : 0.14);
+    this.applyExitGateVisualState(unlocked);
+    this.exitGateBarrier?.setVisible(!unlocked);
+
+    if (this.exitGateBarrier?.body) {
+      this.exitGateBarrier.body.enable = !unlocked;
+      this.exitGateBarrier.body.updateFromGameObject?.();
+    }
+  }
+
   createLoreZones() {
     const entry = CHAMBER02_LORE_ENTRY;
     const zone = this.add.zone(entry.x, entry.y, entry.width, entry.height).setOrigin(0.5);
@@ -366,6 +479,18 @@ export class Chamber02Scene extends Phaser.Scene {
       }
 
       this.currentLoreZone = zone;
+    });
+  }
+
+  refreshExitGatePresence() {
+    this.currentGateZone = null;
+
+    if (!this.exitGateZone || this.hasTriggeredExitGateLore || !this.areAllTollKeepersDefeated()) {
+      return;
+    }
+
+    this.physics.overlap(this.player.sprite, this.exitGateZone, () => {
+      this.currentGateZone = this.exitGateZone;
     });
   }
 
@@ -392,33 +517,69 @@ export class Chamber02Scene extends Phaser.Scene {
     this.beginLoreSequence(loreEntry);
   }
 
+  tryUseExitGate(mobileInput) {
+    if (!this.currentGateZone || this.isLoreTransitionActive || this.hasTriggeredExitGateLore) {
+      return;
+    }
+
+    const interactPressed =
+      Phaser.Input.Keyboard.JustDown(this.keyInteract) ||
+      Phaser.Input.Keyboard.JustDown(this.keyEnter) ||
+      mobileInput.interactPressed;
+
+    if (!interactPressed) {
+      return;
+    }
+
+    this.hasTriggeredExitGateLore = true;
+    this.beginLoreSequence({ cutsceneId: CHAMBER02_EXIT_GATE.loreCutsceneId });
+  }
+
+  launchLoreCutscene(cutsceneId) {
+    if (this.hasLaunchedLoreCutscene || !cutsceneId) {
+      return;
+    }
+
+    this.hasLaunchedLoreCutscene = true;
+    this.scene.pause();
+    this.scene.launch('LoreCutsceneScene', {
+      cutsceneId,
+      returnSceneKey: this.scene.key
+    });
+  }
+
   beginLoreSequence(loreEntry) {
     if (!loreEntry?.cutsceneId || this.isLoreTransitionActive) {
       return;
     }
 
     this.isLoreTransitionActive = true;
+    this.hasLaunchedLoreCutscene = false;
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
     this.enemies.forEach((enemy) => enemy.body.setVelocity(0, 0));
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.pause();
-      this.scene.launch('LoreCutsceneScene', {
-        cutsceneId: loreEntry.cutsceneId,
-        returnSceneKey: this.scene.key
-      });
+      this.launchLoreCutscene(loreEntry.cutsceneId);
     });
+
+    if (typeof window !== 'undefined') {
+      window.setTimeout(() => {
+        this.launchLoreCutscene(loreEntry.cutsceneId);
+      }, 520);
+    }
 
     this.cameras.main.fadeOut(450, 0, 0, 0);
   }
 
   handleLoreCutsceneComplete({ cutsceneId } = {}) {
-    if (cutsceneId !== CHAMBER02_LORE_ENTRY.cutsceneId) {
-      return;
+    if (cutsceneId === CHAMBER02_LORE_ENTRY.cutsceneId) {
+      this.applyPostLoreReactionState();
     }
 
-    this.applyPostLoreReactionState();
+    if (cutsceneId !== CHAMBER02_LORE_ENTRY.cutsceneId && cutsceneId !== CHAMBER02_EXIT_GATE.loreCutsceneId) {
+      return;
+    }
 
     this.isLoreTransitionActive = false;
     this.mobileControls.setMode('gameplay');
