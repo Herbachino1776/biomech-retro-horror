@@ -72,23 +72,23 @@ export const SKITTER_VARIANTS = {
     patrolDistance: 104,
     presentation: {
       alpha: 1,
-      scaleX: 1.5,
-      scaleY: 1.5,
-      tint: 0xc9b28f
+      scaleX: 1.6,
+      scaleY: 1.6,
+      tint: 0xe1c790
     },
-    rangeTellColor: 0xd7c486,
-    rangeTellAlphaBase: 0.12,
-    rangeTellAlphaGain: 0.2,
-    rangeTellStrokeColor: 0xe3d39f,
-    rangeTellStrokeAlphaBase: 0.2,
-    rangeTellStrokeAlphaGain: 0.24,
-    eyeGlowColor: 0xc6db8c,
-    eyeGlowWidth: 30,
-    eyeGlowHeight: 14,
-    eyeGlowOffsetX: 20,
+    rangeTellColor: 0xe0cb84,
+    rangeTellAlphaBase: 0.2,
+    rangeTellAlphaGain: 0.28,
+    rangeTellStrokeColor: 0xf4e6b0,
+    rangeTellStrokeAlphaBase: 0.28,
+    rangeTellStrokeAlphaGain: 0.34,
+    eyeGlowColor: 0xe2f2a6,
+    eyeGlowWidth: 38,
+    eyeGlowHeight: 18,
+    eyeGlowOffsetX: 22,
     eyeGlowYOffset: 20,
-    eyeGlowAlphaBase: 0.18,
-    eyeGlowWindupAlphaGain: 0.28
+    eyeGlowAlphaBase: 0.28,
+    eyeGlowWindupAlphaGain: 0.38
   }
 };
 

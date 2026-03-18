@@ -20,18 +20,17 @@ const CHAMBER02_PLATFORMS = [
 
 const CHAMBER02_ENEMY_SPAWNS = [
   {
-    // The TOLL-KEEPER must read immediately as the first Chamber 02 threat.
-    // Keep it on the standard floor lane, but remove the delayed wake gate so the
-    // variant is visibly present as soon as the player enters its approach space.
-    x: 740,
+    // Chamber 02 now opens with the TOLL-KEEPER as the actual first encounter,
+    // replacing the previous ambiguous extra-variant approach.
+    x: 480,
     y: 402,
     variantKey: 'tollKeeper',
-    patrolDistance: 72
+    patrolDistance: 64
   },
-  { x: 1180, y: 402, awakenPlayerX: 980 },
+  { x: 1380, y: 402, awakenPlayerX: 1160 },
   { x: 2410, y: 402, awakenPlayerX: 2050 },
-  { x: 3180, y: 402, awakenPlayerX: 2880 },
-  { x: 2935, y: 402, awakenPlayerX: 2860, wakeDelayMs: 250 }
+  { x: 2935, y: 402, awakenPlayerX: 2660, wakeDelayMs: 250 },
+  { x: 3180, y: 402, awakenPlayerX: 2880 }
 ];
 
 const CHAMBER02_LORE_ENTRY = {
