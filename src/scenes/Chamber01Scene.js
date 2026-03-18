@@ -66,14 +66,39 @@ export class Chamber01Scene extends Phaser.Scene {
     this.isChamber02GateActive = false;
     this.isGateTransitionActive = false;
     this.isLoreTransitionActive = false;
+    this.isMinibossRewardActive = false;
     this.minibossEncounterStarted = false;
     this.minibossDefeated = false;
     this.minibossDeathFlashUntil = -Infinity;
     this.minibossDeathPulse = null;
+    this.minibossRewardReleaseTimer = null;
     this.minibossTellRing = this.add.ellipse(CHAMBER01_MINIBOSS.spawnX, CHAMBER01_MINIBOSS.spawnY - 150, 190, 74, 0xc39146, 0.0).setDepth(5).setVisible(false);
     this.minibossTellCrest = this.add.ellipse(CHAMBER01_MINIBOSS.spawnX, CHAMBER01_MINIBOSS.spawnY - 208, 90, 26, 0xe3c883, 0.0).setDepth(5.2).setVisible(false);
     this.minibossHitRing = this.add.ellipse(CHAMBER01_MINIBOSS.spawnX, CHAMBER01_MINIBOSS.spawnY - 132, 126, 58, 0xd6e7a4, 0.0).setDepth(5.3).setVisible(false);
     this.minibossDeathHalo = this.add.ellipse(CHAMBER01_MINIBOSS.spawnX, CHAMBER01_MINIBOSS.spawnY - 122, 250, 170, 0xd7c8af, 0.0).setDepth(5).setVisible(false);
+    this.minibossBloodPool = null;
+    this.minibossRewardText = this.add
+      .text(this.scale.width / 2, this.scale.height * 0.28, 'Blasphemous Demon\nhas been Banished!', {
+        fontFamily: 'Georgia, Times, serif',
+        fontSize: '42px',
+        fontStyle: 'bold',
+        align: 'center',
+        color: '#f4efe5',
+        stroke: '#201514',
+        strokeThickness: 8,
+        shadow: {
+          offsetX: 0,
+          offsetY: 6,
+          color: '#090404',
+          blur: 10,
+          fill: true
+        }
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(34)
+      .setAlpha(0)
+      .setVisible(false);
 
     this.restartText = this.add
       .text(this.scale.width / 2, 90, '', {
@@ -123,7 +148,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.restartText.setVisible(false);
 
-    if (this.isLoreTransitionActive || this.isGateTransitionActive) {
+    if (this.isLoreTransitionActive || this.isGateTransitionActive || this.isMinibossRewardActive) {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemy.body.setVelocity(0, 0);
@@ -196,7 +221,7 @@ export class Chamber01Scene extends Phaser.Scene {
     }
 
     const gateX = WORLD.width - 70;
-    const gateY = 352;
+    const gateY = 372;
     const gateHeight = 250;
 
     this.gateBarrier = this.add.rectangle(gateX, gateY, 48, gateHeight).setOrigin(0.5);
@@ -331,6 +356,7 @@ export class Chamber01Scene extends Phaser.Scene {
       camera.setFollowOffset(-140, PORTRAIT_LAYOUT.portraitFollowOffsetY);
       this.mobileControls.setReservedBottomPx(height - worldBandHeight);
       this.restartText.setPosition(width / 2, Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY));
+      this.layoutMinibossRewardText(width, height, worldBandHeight);
       this.hud.layoutBossBar();
       return;
     }
@@ -340,7 +366,21 @@ export class Chamber01Scene extends Phaser.Scene {
     camera.setFollowOffset(-140, PORTRAIT_LAYOUT.desktopFollowOffsetY);
     this.mobileControls.setReservedBottomPx(0);
     this.restartText.setPosition(width / 2, 90);
+    this.layoutMinibossRewardText(width, height, height);
     this.hud.layoutBossBar();
+  }
+
+  layoutMinibossRewardText(width = this.scale.width, height = this.scale.height, worldBandHeight = height) {
+    if (!this.minibossRewardText) {
+      return;
+    }
+
+    const isPortrait = height >= width;
+    this.minibossRewardText
+      .setPosition(width / 2, Math.max(78, worldBandHeight * (isPortrait ? 0.34 : 0.26)))
+      .setFontSize(isPortrait ? '28px' : '42px')
+      .setStroke('#201514', isPortrait ? 6 : 8)
+      .setShadow(0, isPortrait ? 4 : 6, '#090404', isPortrait ? 8 : 10, true, true);
   }
 
   createLoreZones() {
@@ -595,10 +635,12 @@ export class Chamber01Scene extends Phaser.Scene {
   handleMinibossDefeated() {
     this.minibossDefeated = true;
     this.miniboss.setActive(false);
+    this.isMinibossRewardActive = true;
     this.minibossDeathFlashUntil = this.time.now + 520;
     this.minibossTellRing?.setVisible(false).setAlpha(0);
     this.minibossTellCrest?.setVisible(false).setAlpha(0);
     this.minibossHitRing?.setVisible(false).setAlpha(0);
+    this.spawnMinibossBloodPool(this.miniboss.sprite.x, WORLD.floorY - 5);
     if (this.minibossDeathHalo) {
       this.minibossDeathHalo.setPosition(this.miniboss.sprite.x, this.miniboss.sprite.y - 118).setScale(0.7).setAlpha(0.58).setVisible(true);
       this.tweens.add({
@@ -612,10 +654,74 @@ export class Chamber01Scene extends Phaser.Scene {
     }
     this.minibossDeathPulse?.remove(false);
     this.minibossDeathPulse = this.time.delayedCall(120, () => {
-      this.cameras.main.shake(420, 0.0065);
-      this.time.delayedCall(170, () => this.cameras.main.shake(320, 0.0045));
+      this.playMinibossRewardBeat();
     });
     this.updateGateActivationVisuals();
+  }
+
+  spawnMinibossBloodPool(x, y) {
+    this.minibossBloodPool?.destroy(true);
+
+    const pool = this.add.container(x, y).setDepth(1.2);
+    const outerShadow = this.add.ellipse(0, 8, 250, 58, 0x120707, 0.4);
+    const outerPool = this.add.ellipse(0, 0, 228, 48, 0x391012, 0.88).setStrokeStyle(4, 0x68403d, 0.22);
+    const midPool = this.add.ellipse(-10, -2, 180, 34, 0x5a1718, 0.72);
+    const glossPool = this.add.ellipse(22, -8, 96, 14, 0xb86d5e, 0.2);
+    const clotRidge = this.add.ellipse(-34, 4, 68, 16, 0x2a0b0c, 0.44);
+    pool.add([outerShadow, outerPool, midPool, glossPool, clotRidge]);
+    pool.setScale(0.2, 0.2).setAlpha(0);
+
+    this.tweens.add({
+      targets: pool,
+      scaleX: 1,
+      scaleY: 1,
+      alpha: 1,
+      duration: 520,
+      ease: 'Cubic.easeOut'
+    });
+
+    this.minibossBloodPool = pool;
+  }
+
+  playMinibossRewardBeat() {
+    const shakeDurations = [420, 420, 380, 380, 320];
+    const shakeIntensities = [0.012, 0.011, 0.01, 0.009, 0.0075];
+    let elapsed = 0;
+    shakeDurations.forEach((duration, index) => {
+      this.time.delayedCall(elapsed, () => {
+        this.cameras.main.shake(duration, shakeIntensities[index], true);
+      });
+      elapsed += duration - 30;
+    });
+
+    if (this.minibossRewardText) {
+      this.tweens.killTweensOf(this.minibossRewardText);
+      this.minibossRewardText.setVisible(true).setAlpha(0).setScale(0.94);
+      this.tweens.add({
+        targets: this.minibossRewardText,
+        alpha: 1,
+        scaleX: 1,
+        scaleY: 1,
+        duration: 320,
+        ease: 'Cubic.easeOut',
+        hold: 1000,
+        yoyo: false,
+        onComplete: () => {
+          this.tweens.add({
+            targets: this.minibossRewardText,
+            alpha: 0,
+            duration: 420,
+            ease: 'Cubic.easeIn',
+            onComplete: () => this.minibossRewardText.setVisible(false)
+          });
+        }
+      });
+    }
+
+    this.minibossRewardReleaseTimer?.remove(false);
+    this.minibossRewardReleaseTimer = this.time.delayedCall(2060, () => {
+      this.isMinibossRewardActive = false;
+    });
   }
 
   updateMinibossArenaFeedback(time) {

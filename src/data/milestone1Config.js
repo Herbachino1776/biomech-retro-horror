@@ -138,7 +138,7 @@ export const LORE_ENTRIES = [
   {
     id: 'end-deadgod',
     x: 1940,
-    y: 410,
+    y: 428,
     width: 92,
     height: 82,
     cutsceneId: 'chamber01-deadgod-witness'
