@@ -37,6 +37,9 @@ export class HalfSkullMiniboss {
           .setStrokeStyle(4, COLORS.rust, 0.85)
           .setDepth(6);
 
+    this.baseScaleX = this.sprite.scaleX;
+    this.baseScaleY = this.sprite.scaleY;
+
     scene.physics.add.existing(this.sprite);
     this.body = this.sprite.body;
     this.body.setCollideWorldBounds(true);
@@ -186,7 +189,7 @@ export class HalfSkullMiniboss {
 
     if (telegraphing) {
       const pulse = 0.85 + Math.sin(time / 55) * 0.07 + telegraphProgress * 0.08;
-      this.sprite.setScale(this.config.presentation.scaleX * pulse, this.config.presentation.scaleY * (1.02 + telegraphProgress * 0.03));
+      this.sprite.setScale(this.baseScaleX * this.config.presentation.scaleX * pulse, this.baseScaleY * this.config.presentation.scaleY * (1.02 + telegraphProgress * 0.03));
       this.sprite.setAngle(-this.direction * (3 + telegraphProgress * 5));
       if (this.usingTexture) {
         this.sprite.setTint(0xe0c37c);
@@ -196,7 +199,7 @@ export class HalfSkullMiniboss {
       return;
     }
 
-    this.sprite.setScale(this.config.presentation.scaleX, this.config.presentation.scaleY);
+    this.sprite.setScale(this.baseScaleX * this.config.presentation.scaleX, this.baseScaleY * this.config.presentation.scaleY);
     this.sprite.setAngle(0);
 
     if (takingHit) {
@@ -210,7 +213,7 @@ export class HalfSkullMiniboss {
 
     if (hitPulsing) {
       const pulse = 1 + Math.sin(time / 36) * 0.03;
-      this.sprite.setScale(this.config.presentation.scaleX * pulse, this.config.presentation.scaleY * pulse);
+      this.sprite.setScale(this.baseScaleX * this.config.presentation.scaleX * pulse, this.baseScaleY * this.config.presentation.scaleY * pulse);
     }
 
     if (this.usingTexture) {
