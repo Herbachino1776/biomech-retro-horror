@@ -39,6 +39,18 @@ export class SkitterServitor {
       : scene.add.rectangle(x, y, 48, 34, 0x64453a).setOrigin(0.5).setDepth(6);
     scene.physics.add.existing(this.sprite);
 
+    if (config.presentation?.scaleX || config.presentation?.scaleY) {
+      this.sprite.setScale(config.presentation.scaleX ?? this.sprite.scaleX, config.presentation.scaleY ?? this.sprite.scaleY);
+    }
+
+    if (config.presentation?.alpha !== undefined) {
+      this.sprite.setAlpha(config.presentation.alpha);
+    }
+
+    if (config.presentation?.tint !== undefined) {
+      this.presentationTint = config.presentation.tint;
+    }
+
     this.body = this.sprite.body;
     this.body.setCollideWorldBounds(true);
 
@@ -49,7 +61,15 @@ export class SkitterServitor {
 
     this.baseScaleX = this.sprite.scaleX || 1;
     this.baseScaleY = this.sprite.scaleY || 1;
-    this.rangeTell = scene.add.ellipse(x, y + 8, config.attackRange * 2, 26, 0xbfa878, 0).setDepth(4.5).setVisible(false);
+    this.baseAlpha = config.presentation?.alpha ?? 0.92;
+    this.rangeTell = scene.add
+      .ellipse(x, y + 8, config.attackRange * 2, 26, config.rangeTellColor ?? 0xbfa878, 0)
+      .setDepth(4.5)
+      .setVisible(false);
+    this.eyeGlow = scene.add
+      .ellipse(x, y - (config.eyeGlowYOffset ?? 18), config.eyeGlowWidth ?? 24, config.eyeGlowHeight ?? 12, config.eyeGlowColor ?? 0x6f8c59, 0)
+      .setDepth(6.4)
+      .setVisible(true);
   }
 
   update(time, playerX) {
@@ -214,6 +234,7 @@ export class SkitterServitor {
       this.dead = true;
       this.body.enable = false;
       this.rangeTell.setVisible(false);
+      this.eyeGlow.setVisible(false);
       this.setVisualTint(0x1f1714);
       this.scene.tweens.add({
         targets: this.sprite,
@@ -221,10 +242,13 @@ export class SkitterServitor {
         duration: 380
       });
       this.scene.tweens.add({
-        targets: this.rangeTell,
+        targets: [this.rangeTell, this.eyeGlow],
         alpha: 0,
         duration: 180,
-        onComplete: () => this.rangeTell.destroy()
+        onComplete: () => {
+          this.rangeTell.destroy();
+          this.eyeGlow.destroy();
+        }
       });
       return;
     }
@@ -238,10 +262,12 @@ export class SkitterServitor {
     this.updateRangeTell(time);
 
     if (this.dead) {
+      this.updateEyeGlow(time);
       return;
     }
 
     this.sprite.setFlipX(this.direction > 0);
+    this.updateEyeGlow(time);
 
     if (this.combatState === 'windup') {
       const pulse = 0.82 + Math.sin(time * 0.03) * 0.05;
@@ -266,7 +292,7 @@ export class SkitterServitor {
     }
 
     this.sprite.setScale(this.baseScaleX, this.baseScaleY);
-    this.sprite.setAlpha(0.92);
+    this.sprite.setAlpha(this.baseAlpha);
 
     if (time < this.lastDamageFlashTime + 120) {
       this.setVisualTint(0x6f8c59);
@@ -289,8 +315,31 @@ export class SkitterServitor {
       .setVisible(true)
       .setPosition(centerX, this.sprite.y + 12)
       .setScale(0.78 + windupProgress * 0.22, 0.88 + windupProgress * 0.12)
-      .setAlpha(0.08 + windupProgress * 0.14)
-      .setStrokeStyle(2, 0xd9c9b2, 0.12 + windupProgress * 0.18);
+      .setAlpha((this.config.rangeTellAlphaBase ?? 0.08) + windupProgress * (this.config.rangeTellAlphaGain ?? 0.14))
+      .setStrokeStyle(2, this.config.rangeTellStrokeColor ?? 0xd9c9b2, (this.config.rangeTellStrokeAlphaBase ?? 0.12) + windupProgress * (this.config.rangeTellStrokeAlphaGain ?? 0.18));
+  }
+
+  updateEyeGlow(time) {
+    if (!this.eyeGlow) {
+      return;
+    }
+
+    if (this.dead) {
+      this.eyeGlow.setVisible(false);
+      return;
+    }
+
+    const windupProgress = this.combatState === 'windup'
+      ? Phaser.Math.Clamp((time - this.stateStartedAt) / this.config.windupMs, 0, 1)
+      : 0;
+    const eyeOffsetX = (this.config.eyeGlowOffsetX ?? 18) * (this.direction > 0 ? 1 : -1);
+    const pulse = this.combatState === 'windup' ? 0.82 + windupProgress * 0.78 : this.combatState === 'attack' ? 1.22 : 0.72 + Math.sin(time * 0.01) * 0.05;
+
+    this.eyeGlow
+      .setVisible(this.awakened || this.combatState === 'windup' || this.combatState === 'attack')
+      .setPosition(this.sprite.x + eyeOffsetX, this.sprite.y - (this.config.eyeGlowYOffset ?? 18))
+      .setScale(pulse, 1 + (pulse - 1) * 0.28)
+      .setAlpha((this.config.eyeGlowAlphaBase ?? 0.14) + (this.awakened ? 0.08 : 0) + windupProgress * (this.config.eyeGlowWindupAlphaGain ?? 0.22));
   }
 
   setHitReactionDirection(direction) {
@@ -314,6 +363,11 @@ export class SkitterServitor {
 
       if (color === 0x1f1714) {
         this.sprite.setTint(0x5b4a44);
+        return;
+      }
+
+      if (this.presentationTint !== undefined) {
+        this.sprite.setTint(this.presentationTint);
         return;
       }
 
