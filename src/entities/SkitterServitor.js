@@ -215,6 +215,7 @@ export class SkitterServitor {
     this.enterState('attack', time, this.config.attackActiveMs);
     this.body.setVelocityX(this.direction * (this.config.speed + this.config.lungeSpeedBonus));
     this.body.setVelocityY(this.config.lungeJumpVelocity);
+    this.scene.audioDirector?.playEnemyAttack(this.config.audioProfile ?? 'enemy');
   }
 
   enterState(state, time, duration = 0) {
@@ -237,6 +238,7 @@ export class SkitterServitor {
     this.setVisualTint(0x6f8c59);
 
     if (this.health <= 0) {
+      this.scene.audioDirector?.playEnemyDeath(this.config.audioProfile ?? 'enemy');
       this.dead = true;
       this.body.stop();
       this.body.setAllowGravity(false);
@@ -261,6 +263,7 @@ export class SkitterServitor {
       return;
     }
 
+    this.scene.audioDirector?.playEnemyHurt(this.config.audioProfile ?? 'enemy');
     this.enterState('hurt', time, this.config.hurtLockMs);
     this.body.setVelocityX(this.hurtPushDirection * this.config.recoilVelocityX);
     this.body.setVelocityY(this.config.recoilVelocityY);

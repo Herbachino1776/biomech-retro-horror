@@ -49,7 +49,8 @@ export const SKITTER = {
   awakenPlayerX: 760,
   wakeDelayMs: 700,
   startX: 1160,
-  startY: 402
+  startY: 402,
+  audioProfile: 'enemy'
 };
 
 
@@ -191,6 +192,7 @@ export const CHAMBER01_MINIBOSS = {
   spawnY: 468,
   arenaStartX: 1720,
   body: { width: 86, height: 126, offsetX: 118, offsetY: 146 },
+  audioProfile: 'miniboss',
   presentation: {
     display: { width: 338, height: 338 },
     origin: { x: 0.56, y: 0.99 },

@@ -100,6 +100,7 @@ export class HalfSkullMiniboss {
       if (time >= this.attackCommitAt) {
         this.attackState = 'recover';
         this.lastAttackTime = time;
+        this.scene.audioDirector?.playEnemyAttack(this.config.audioProfile ?? 'miniboss');
         this.body.setVelocityX(this.direction * this.config.attackSpeed);
         this.body.setVelocityY(this.config.attackLiftVelocity);
       }
@@ -161,8 +162,10 @@ export class HalfSkullMiniboss {
     this.hurtUntil = time + this.config.hurtRecoverMs;
     this.body.setVelocityX(-this.direction * this.config.hurtRecoilVelocityX);
     this.body.setVelocityY(this.config.hurtRecoilVelocityY);
+    this.scene.audioDirector?.playEnemyHurt(this.config.audioProfile ?? 'miniboss');
 
     if (this.health <= 0) {
+      this.scene.audioDirector?.playEnemyDeath(this.config.audioProfile ?? 'miniboss');
       this.health = 0;
       this.dead = true;
       this.body.enable = false;

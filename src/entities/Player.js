@@ -14,6 +14,7 @@ export class Player {
     this.attackId = 0;
     this.lastAttackTime = -Infinity;
     this.lastHitTime = -Infinity;
+    this.lastFootstepAt = -Infinity;
     this.isDead = false;
 
     this.usingConceptSprite = scene.textures.exists(ASSET_KEYS.player);
@@ -98,6 +99,7 @@ export class Player {
 
     this.updateVisuals(time);
     this.updateAttackHitbox();
+    this.updateFootsteps(time);
   }
 
   startAttack(time) {
@@ -106,6 +108,7 @@ export class Player {
     this.attackPhase = 'startup';
     this.attackHitbox.body.enable = false;
     this.setVisualTint(0x6f8c59);
+    this.scene.audioDirector?.playPlayerAttack();
   }
 
   updateAttackState(time) {
@@ -149,6 +152,8 @@ export class Player {
     this.health -= amount;
     this.lastHitTime = time;
 
+    this.scene.audioDirector?.playPlayerHurt();
+
     if (this.health <= 0) {
       this.die();
     }
@@ -162,6 +167,7 @@ export class Player {
     this.body.setVelocity(0, 0);
     this.body.enable = false;
     this.setVisualTint(0x392926);
+    this.scene.audioDirector?.playPlayerDeath();
   }
 
   updateVisuals(time) {
@@ -181,6 +187,26 @@ export class Player {
     }
 
     this.setVisualTint(0xb8aa92);
+  }
+
+
+  updateFootsteps(time) {
+    if (this.isDead || !this.body.blocked.down) {
+      return;
+    }
+
+    const speed = Math.abs(this.body.velocity.x);
+    if (speed < 36) {
+      return;
+    }
+
+    const intervalMs = Phaser.Math.Clamp(460 - speed * 1.25, 220, 430);
+    if (time < this.lastFootstepAt + intervalMs) {
+      return;
+    }
+
+    this.lastFootstepAt = time;
+    this.scene.audioDirector?.playPlayerFootstep();
   }
 
   updateAttackHitbox() {

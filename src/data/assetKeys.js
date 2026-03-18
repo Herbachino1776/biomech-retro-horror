@@ -17,7 +17,22 @@ export const ASSET_KEYS = {
   skitter: 'skitter-concept-01',
   sentinel: 'sentinel-concept-01',
   uiFrame: 'biomech-ui-frame-01',
-  laughingEngine: 'laughing-engine-concept-01'
+  laughingEngine: 'laughing-engine-concept-01',
+  playerFootstepA: 'player-footstep-a',
+  playerFootstepB: 'player-footstep-b',
+  playerAttack: 'player-attack',
+  playerHit: 'player-hit',
+  playerHurt: 'player-hurt',
+  playerDeath: 'player-death',
+  enemyAttack: 'enemy-attack',
+  enemyHurt: 'enemy-hurt',
+  enemyDeath: 'enemy-death',
+  tollKeeperAttack: 'tollkeeper-attack',
+  tollKeeperHurt: 'tollkeeper-hurt',
+  tollKeeperDeath: 'tollkeeper-death',
+  minibossAttack: 'miniboss-attack',
+  minibossHurt: 'miniboss-hurt',
+  minibossDeath: 'miniboss-death'
 };
 
 export const REQUIRED_TEXTURE_KEYS = [
@@ -39,5 +54,20 @@ export const REQUIRED_TEXTURE_KEYS = [
   ASSET_KEYS.skitter,
   ASSET_KEYS.sentinel,
   ASSET_KEYS.uiFrame,
-  ASSET_KEYS.laughingEngine
+  ASSET_KEYS.laughingEngine,
+  ASSET_KEYS.playerFootstepA,
+  ASSET_KEYS.playerFootstepB,
+  ASSET_KEYS.playerAttack,
+  ASSET_KEYS.playerHit,
+  ASSET_KEYS.playerHurt,
+  ASSET_KEYS.playerDeath,
+  ASSET_KEYS.enemyAttack,
+  ASSET_KEYS.enemyHurt,
+  ASSET_KEYS.enemyDeath,
+  ASSET_KEYS.tollKeeperAttack,
+  ASSET_KEYS.tollKeeperHurt,
+  ASSET_KEYS.tollKeeperDeath,
+  ASSET_KEYS.minibossAttack,
+  ASSET_KEYS.minibossHurt,
+  ASSET_KEYS.minibossDeath
 ];
