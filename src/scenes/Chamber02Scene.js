@@ -19,10 +19,11 @@ const CHAMBER02_PLATFORMS = [
 ];
 
 const CHAMBER02_TOLL_KEEPER = {
-  x: 480,
+  x: 520,
   y: 402,
   config: {
     ...SKITTER,
+    textureKey: ASSET_KEYS.chamber02TollKeeperSkitter,
     variantName: 'TOLL-KEEPER SKITTER',
     health: 4,
     speed: 42,
@@ -42,9 +43,14 @@ const CHAMBER02_TOLL_KEEPER = {
     wakeDelayMs: 0,
     presentation: {
       alpha: 1,
-      scaleX: 1.62,
-      scaleY: 1.62,
-      tint: 0xf0d39c
+      display: {
+        width: 212,
+        height: 188
+      },
+      origin: {
+        x: 0.52,
+        y: 0.93
+      }
     },
     rangeTellColor: 0xe8d78f,
     rangeTellAlphaBase: 0.32,
@@ -63,7 +69,7 @@ const CHAMBER02_TOLL_KEEPER = {
 };
 
 const CHAMBER02_ENEMY_SPAWNS = [
-  { x: 1560, y: 402, awakenPlayerX: 1320 },
+  { x: 1600, y: 402, awakenPlayerX: 1360 },
   { x: 2410, y: 402, awakenPlayerX: 2050 },
   { x: 2935, y: 402, awakenPlayerX: 2660, wakeDelayMs: 250 },
   { x: 3180, y: 402, awakenPlayerX: 2880 }

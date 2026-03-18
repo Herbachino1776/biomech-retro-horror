@@ -22,33 +22,38 @@ export class SkitterServitor {
     this.contactDamageWindowUntil = -Infinity;
     this.hurtPushDirection = 0;
 
-    this.usingConceptSprite = scene.textures.exists(ASSET_KEYS.skitter);
+    const spriteKey = config.textureKey ?? ASSET_KEYS.skitter;
+    const spritePresentation = config.presentation ?? {};
+    const defaultPresentation = CONCEPT_PRESENTATION.skitter;
+    const crop = spritePresentation.crop ?? defaultPresentation.crop;
+    const display = spritePresentation.display ?? defaultPresentation.display;
+    const origin = spritePresentation.origin ?? defaultPresentation.origin;
+
+    this.usingConceptSprite = scene.textures.exists(spriteKey);
     this.sprite = this.usingConceptSprite
       ? scene.add
-          .image(x, y, ASSET_KEYS.skitter)
-          .setOrigin(CONCEPT_PRESENTATION.skitter.origin.x, CONCEPT_PRESENTATION.skitter.origin.y)
-          .setDisplaySize(CONCEPT_PRESENTATION.skitter.display.width, CONCEPT_PRESENTATION.skitter.display.height)
-          .setCrop(
-            CONCEPT_PRESENTATION.skitter.crop.x,
-            CONCEPT_PRESENTATION.skitter.crop.y,
-            CONCEPT_PRESENTATION.skitter.crop.width,
-            CONCEPT_PRESENTATION.skitter.crop.height
-          )
-          .setAlpha(CONCEPT_PRESENTATION.skitter.alpha ?? 1)
+          .image(x, y, spriteKey)
+          .setOrigin(origin.x, origin.y)
+          .setDisplaySize(display.width, display.height)
+          .setAlpha(spritePresentation.alpha ?? defaultPresentation.alpha ?? 1)
           .setDepth(6)
       : scene.add.rectangle(x, y, 48, 34, 0x64453a).setOrigin(0.5).setDepth(6);
     scene.physics.add.existing(this.sprite);
 
-    if (config.presentation?.scaleX || config.presentation?.scaleY) {
-      this.sprite.setScale(config.presentation.scaleX ?? this.sprite.scaleX, config.presentation.scaleY ?? this.sprite.scaleY);
+    if (this.usingConceptSprite && crop) {
+      this.sprite.setCrop(crop.x, crop.y, crop.width, crop.height);
     }
 
-    if (config.presentation?.alpha !== undefined) {
-      this.sprite.setAlpha(config.presentation.alpha);
+    if (spritePresentation.scaleX || spritePresentation.scaleY) {
+      this.sprite.setScale(spritePresentation.scaleX ?? this.sprite.scaleX, spritePresentation.scaleY ?? this.sprite.scaleY);
     }
 
-    if (config.presentation?.tint !== undefined) {
-      this.presentationTint = config.presentation.tint;
+    if (spritePresentation.alpha !== undefined) {
+      this.sprite.setAlpha(spritePresentation.alpha);
+    }
+
+    if (spritePresentation.tint !== undefined) {
+      this.presentationTint = spritePresentation.tint;
     }
 
     this.body = this.sprite.body;
@@ -61,7 +66,7 @@ export class SkitterServitor {
 
     this.baseScaleX = this.sprite.scaleX || 1;
     this.baseScaleY = this.sprite.scaleY || 1;
-    this.baseAlpha = config.presentation?.alpha ?? 0.92;
+    this.baseAlpha = spritePresentation.alpha ?? defaultPresentation.alpha ?? 0.92;
     this.rangeTell = scene.add
       .ellipse(x, y + 8, config.attackRange * 2, 26, config.rangeTellColor ?? 0xbfa878, 0)
       .setDepth(4.5)
