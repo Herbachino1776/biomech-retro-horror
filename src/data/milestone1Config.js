@@ -157,16 +157,21 @@ export const LORE_SCREENS = {
 
 export const CHAMBER01_MINIBOSS = {
   name: 'THE HALF-SKULL ASCENDANT',
+  subtitle: 'Laughing Engine Warden',
   health: 15,
   contactDamage: 1,
   contactDamageCooldownMs: 1200,
   attackCooldownMs: 3400,
+  attackTelegraphMs: 520,
+  attackRecoveryMs: 520,
   attackRange: 210,
   approachRange: 340,
   approachSpeed: 34,
   idleAdvanceSpeed: 12,
+  windupDriftSpeed: 10,
   attackSpeed: 174,
   attackLiftVelocity: -150,
+  hitPulseMs: 220,
   spawnX: 2060,
   spawnY: 468,
   arenaStartX: 1720,
@@ -174,7 +179,9 @@ export const CHAMBER01_MINIBOSS = {
   presentation: {
     display: { width: 338, height: 338 },
     origin: { x: 0.56, y: 0.99 },
-    alpha: 1,
-    tint: 0xd0bea6
+    alpha: 0.78,
+    tint: 0xd0bea6,
+    scaleX: 1,
+    scaleY: 1
   }
 };

@@ -17,6 +17,11 @@ export class HalfSkullMiniboss {
     this.lastAttackTime = -Infinity;
     this.lastDamageFlashTime = -Infinity;
     this.lastContactDamageTime = -Infinity;
+    this.hitPulseUntil = -Infinity;
+    this.deathEffectStarted = false;
+    this.attackState = 'idle';
+    this.attackWindupStartedAt = -Infinity;
+    this.attackCommitAt = -Infinity;
 
     this.usingTexture = scene.textures.exists(ASSET_KEYS.chamber01HalfSkullMiniboss);
     this.sprite = this.usingTexture
@@ -45,6 +50,7 @@ export class HalfSkullMiniboss {
   setActive(active) {
     this.active = active;
     if (!active && !this.dead) {
+      this.attackState = 'idle';
       this.body.setVelocityX(0);
     }
   }
@@ -58,6 +64,7 @@ export class HalfSkullMiniboss {
     }
 
     if (!this.active) {
+      this.attackState = 'idle';
       this.body.setVelocityX(0);
       return;
     }
@@ -65,6 +72,24 @@ export class HalfSkullMiniboss {
     const dx = player.x - this.sprite.x;
     const absDx = Math.abs(dx);
     this.direction = Math.sign(dx) || this.direction;
+
+    if (this.attackState === 'windup') {
+      this.body.setVelocityX(this.direction * this.config.windupDriftSpeed);
+      if (time >= this.attackCommitAt) {
+        this.attackState = 'recover';
+        this.lastAttackTime = time;
+        this.body.setVelocityX(this.direction * this.config.attackSpeed);
+        this.body.setVelocityY(this.config.attackLiftVelocity);
+      }
+      return;
+    }
+
+    if (this.attackState === 'recover') {
+      if (time >= this.lastAttackTime + this.config.attackRecoveryMs) {
+        this.attackState = 'idle';
+      }
+      return;
+    }
 
     if (absDx > this.config.approachRange) {
       this.body.setVelocityX(this.direction * this.config.approachSpeed);
@@ -74,10 +99,23 @@ export class HalfSkullMiniboss {
     this.body.setVelocityX(this.direction * this.config.idleAdvanceSpeed);
 
     if (absDx <= this.config.attackRange && time >= this.lastAttackTime + this.config.attackCooldownMs) {
-      this.lastAttackTime = time;
-      this.body.setVelocityX(this.direction * this.config.attackSpeed);
-      this.body.setVelocityY(this.config.attackLiftVelocity);
+      this.attackState = 'windup';
+      this.attackWindupStartedAt = time;
+      this.attackCommitAt = time + this.config.attackTelegraphMs;
+      this.body.setVelocityX(this.direction * this.config.windupDriftSpeed);
     }
+  }
+
+  isTelegraphing(time = this.scene.time.now) {
+    return !this.dead && this.attackState === 'windup' && time < this.attackCommitAt;
+  }
+
+  getTelegraphProgress(time = this.scene.time.now) {
+    if (!this.isTelegraphing(time)) {
+      return 0;
+    }
+
+    return Phaser.Math.Clamp((time - this.attackWindupStartedAt) / this.config.attackTelegraphMs, 0, 1);
   }
 
   canDealContactDamage(time) {
@@ -94,39 +132,91 @@ export class HalfSkullMiniboss {
     }
 
     this.active = true;
+    this.attackState = 'idle';
     this.health -= amount;
     this.lastDamageFlashTime = time;
+    this.hitPulseUntil = time + this.config.hitPulseMs;
 
     if (this.health <= 0) {
       this.health = 0;
       this.dead = true;
       this.body.enable = false;
-      this.scene.tweens.add({
-        targets: this.sprite,
-        alpha: 0.16,
-        duration: 650,
-        ease: 'Quad.out'
-      });
+      this.playDeathEffect();
     }
 
     return true;
   }
 
-  updateVisuals(time) {
-    if (!this.usingTexture) {
+  playDeathEffect() {
+    if (this.deathEffectStarted) {
       return;
     }
+
+    this.deathEffectStarted = true;
+    if (this.usingTexture) {
+      this.sprite.setTint(0xdccfbc);
+    } else {
+      this.sprite.setFillStyle(0xdccfbc, 0.56);
+    }
+    this.scene.tweens.add({
+      targets: this.sprite,
+      y: this.sprite.y - 24,
+      scaleX: this.sprite.scaleX * 1.05,
+      scaleY: this.sprite.scaleY * 1.08,
+      alpha: 0.08,
+      duration: 780,
+      ease: 'Cubic.easeOut'
+    });
+  }
+
+  updateVisuals(time) {
+    const telegraphing = this.isTelegraphing(time);
+    const telegraphProgress = this.getTelegraphProgress(time);
+    const takingHit = time < this.lastDamageFlashTime + 180;
+    const hitPulsing = time < this.hitPulseUntil;
 
     if (this.dead) {
-      this.sprite.setTint(0x5f4e49);
+      if (this.usingTexture) {
+        this.sprite.setTint(0x80756c);
+      } else {
+        this.sprite.setFillStyle(0x8d8176, 0.22);
+      }
       return;
     }
 
-    if (time < this.lastDamageFlashTime + 140) {
-      this.sprite.setTint(0xc5d89a);
+    if (telegraphing) {
+      const pulse = 0.85 + Math.sin(time / 55) * 0.07 + telegraphProgress * 0.08;
+      this.sprite.setScale(this.config.presentation.scaleX * pulse, this.config.presentation.scaleY * (1.02 + telegraphProgress * 0.03));
+      this.sprite.setAngle(-this.direction * (3 + telegraphProgress * 5));
+      if (this.usingTexture) {
+        this.sprite.setTint(0xe0c37c);
+      } else {
+        this.sprite.setFillStyle(0xd6bb7a, 0.82);
+      }
       return;
     }
 
-    this.sprite.setTint(this.config.presentation.tint);
+    this.sprite.setScale(this.config.presentation.scaleX, this.config.presentation.scaleY);
+    this.sprite.setAngle(0);
+
+    if (takingHit) {
+      if (this.usingTexture) {
+        this.sprite.setTint(0xc5d89a);
+      } else {
+        this.sprite.setFillStyle(0xc5d89a, 0.92);
+      }
+      return;
+    }
+
+    if (hitPulsing) {
+      const pulse = 1 + Math.sin(time / 36) * 0.03;
+      this.sprite.setScale(this.config.presentation.scaleX * pulse, this.config.presentation.scaleY * pulse);
+    }
+
+    if (this.usingTexture) {
+      this.sprite.setTint(this.config.presentation.tint);
+    } else {
+      this.sprite.setFillStyle(COLORS.bone, 0.92);
+    }
   }
 }
