@@ -23,12 +23,14 @@
 - establish chamber 02 first post-lore reaction state (environmental shift + threat increase)
 - remove remaining temporary mobile HUD debug label from shipped gameplay UI
 
-## Milestone 3 — Encounter Expansion (Next)
-- deepen sentinel and/or Laughing Engine threat behavior
-- improve telegraphing and commitment pacing
-- preserve mobile/desktop readability and control parity
+## Milestone 3 — Encounter Expansion + Combat Readability (Completed / Closed Out)
+- deepen regular enemy readability and commitment pacing in the existing slice
+- ship the chamber 01 miniboss refinement and payoff gate release
+- preserve chamber 01 -> chamber 02 continuity
+- ship chamber 02 TOLL-KEEPER gate unlock + exit lore payoff
+- preserve death/restart/reset plus portrait/landscape usability
 
-## Milestone 4 — Audio Identity (Planned)
+## Milestone 4 — Audio Identity (Next)
 - add ambient audio and SFX layering
 - reinforce chamber/lore transition mood
 

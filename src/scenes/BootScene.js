@@ -59,7 +59,7 @@ export class BootScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(centerX, centerY - (smallViewport ? 44 : 2), 'CHAMBER 01 // GRAYBOX SLICE', {
+      .text(centerX, centerY - (smallViewport ? 44 : 2), 'CHAMBERS 01-02 // ENCOUNTER SLICE', {
         fontFamily: 'monospace',
         fontSize: '16px',
         color: '#8f7d72',
