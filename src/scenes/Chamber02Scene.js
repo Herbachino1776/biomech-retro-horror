@@ -261,15 +261,16 @@ export class Chamber02Scene extends Phaser.Scene {
     }
 
     enemy.lastAttackHitId = this.player.attackId;
-    enemy.takeDamage(1, this.time.now);
-
     const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
-    enemy.body.setVelocityX(knockDirection * 160);
-    enemy.body.setVelocityY(-120);
+    enemy.setHitReactionDirection(knockDirection);
+    enemy.takeDamage(1, this.time.now);
   }
 
   handleEnemyContactPlayer(_playerSprite, enemySprite, enemy) {
     if (enemy.dead || !this.isEnemyOverlapTarget(enemySprite, enemy)) {
+      return;
+    }
+    if (!enemy.canDealContactDamage(this.time.now)) {
       return;
     }
 
