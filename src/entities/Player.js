@@ -33,6 +33,7 @@ export class Player {
             playerPresentation.crop.width,
             playerPresentation.crop.height
           )
+          .setAlpha(playerPresentation.alpha ?? 1)
           .setDepth(6)
       : scene.add.rectangle(x, y, 48, 60, 0xb8aa92).setOrigin(0.5).setDepth(6);
     scene.physics.add.existing(this.sprite);

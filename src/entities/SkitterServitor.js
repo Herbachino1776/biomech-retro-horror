@@ -26,6 +26,7 @@ export class SkitterServitor {
             CONCEPT_PRESENTATION.skitter.crop.width,
             CONCEPT_PRESENTATION.skitter.crop.height
           )
+          .setAlpha(CONCEPT_PRESENTATION.skitter.alpha ?? 1)
           .setDepth(6)
       : scene.add.rectangle(x, y, 48, 34, 0x64453a).setOrigin(0.5).setDepth(6);
     scene.physics.add.existing(this.sprite);

@@ -35,8 +35,10 @@ export class HalfSkullMiniboss {
     scene.physics.add.existing(this.sprite);
     this.body = this.sprite.body;
     this.body.setCollideWorldBounds(true);
-    this.body.setSize(config.body.width, config.body.height);
-    this.body.setOffset(config.body.offsetX, config.body.offsetY);
+    const scaleX = Math.abs(this.sprite.scaleX) || 1;
+    const scaleY = Math.abs(this.sprite.scaleY) || 1;
+    this.body.setSize(config.body.width / scaleX, config.body.height / scaleY);
+    this.body.setOffset(config.body.offsetX / scaleX, config.body.offsetY / scaleY);
     this.body.setAllowGravity(true);
   }
 

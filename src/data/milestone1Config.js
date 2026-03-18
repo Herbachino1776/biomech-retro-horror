@@ -58,12 +58,14 @@ export const CONCEPT_PRESENTATION = {
       targetDisplayHeight: 252,
       origin: { x: 0.5, y: 0.965 },
       yOffset: -10
-    }
+    },
+    alpha: 0.94
   },
   skitter: {
     crop: { x: 40, y: 340, width: 930, height: 840 },
     display: { width: 158, height: 142 },
-    origin: { x: 0.5, y: 0.91 }
+    origin: { x: 0.5, y: 0.91 },
+    alpha: 0.92
   },
   sentinel: {
     crop: { x: 520, y: 120, width: 520, height: 860 },
@@ -172,7 +174,7 @@ export const CHAMBER01_MINIBOSS = {
   presentation: {
     display: { width: 338, height: 338 },
     origin: { x: 0.56, y: 0.99 },
-    alpha: 0.96,
+    alpha: 1,
     tint: 0xd0bea6
   }
 };
