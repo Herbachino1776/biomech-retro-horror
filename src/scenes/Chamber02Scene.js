@@ -20,14 +20,16 @@ const CHAMBER02_PLATFORMS = [
 
 const CHAMBER02_ENEMY_SPAWNS = [
   {
-    x: 930,
+    // The TOLL-KEEPER must read as the first distinct Chamber 02 threat rather than
+    // collapsing into the nearby standard skitter lane.
+    x: 740,
     y: 402,
-    awakenPlayerX: 660,
-    wakeDelayMs: 620,
+    awakenPlayerX: 500,
+    wakeDelayMs: 320,
     variantKey: 'tollKeeper',
-    patrolDistance: 92
+    patrolDistance: 72
   },
-  { x: 1140, y: 402, awakenPlayerX: 830 },
+  { x: 1180, y: 402, awakenPlayerX: 980 },
   { x: 2410, y: 402, awakenPlayerX: 2050 },
   { x: 3180, y: 402, awakenPlayerX: 2880 },
   { x: 2935, y: 402, awakenPlayerX: 2860, wakeDelayMs: 250 }
