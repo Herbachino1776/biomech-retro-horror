@@ -4,7 +4,7 @@ import { SkitterServitor } from '../entities/SkitterServitor.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
-import { COLORS, PLAYER, SKITTER, SKITTER_VARIANTS, WORLD } from '../data/milestone1Config.js';
+import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 
@@ -18,16 +18,52 @@ const CHAMBER02_PLATFORMS = [
   { x: 3070, y: 376, width: 220, height: 20 }
 ];
 
+const CHAMBER02_TOLL_KEEPER = {
+  x: 480,
+  y: 402,
+  config: {
+    ...SKITTER,
+    variantName: 'TOLL-KEEPER SKITTER',
+    health: 4,
+    speed: 42,
+    attackCooldownMs: 2700,
+    windupMs: 760,
+    attackActiveMs: 280,
+    attackRecoveryMs: 560,
+    hesitationMs: 520,
+    attackTriggerRange: 146,
+    attackRange: 176,
+    preferredRange: 124,
+    rangeBand: 22,
+    lungeSpeedBonus: 98,
+    lungeJumpVelocity: -96,
+    patrolDistance: 64,
+    awakenPlayerX: undefined,
+    wakeDelayMs: 0,
+    presentation: {
+      alpha: 1,
+      scaleX: 1.62,
+      scaleY: 1.62,
+      tint: 0xf0d39c
+    },
+    rangeTellColor: 0xe8d78f,
+    rangeTellAlphaBase: 0.32,
+    rangeTellAlphaGain: 0.42,
+    rangeTellStrokeColor: 0xfff1bd,
+    rangeTellStrokeAlphaBase: 0.46,
+    rangeTellStrokeAlphaGain: 0.32,
+    eyeGlowColor: 0xe9ffb4,
+    eyeGlowWidth: 44,
+    eyeGlowHeight: 22,
+    eyeGlowOffsetX: 24,
+    eyeGlowYOffset: 20,
+    eyeGlowAlphaBase: 0.42,
+    eyeGlowWindupAlphaGain: 0.46
+  }
+};
+
 const CHAMBER02_ENEMY_SPAWNS = [
-  {
-    // Chamber 02 now opens with the TOLL-KEEPER as the actual first encounter,
-    // replacing the previous ambiguous extra-variant approach.
-    x: 480,
-    y: 402,
-    variantKey: 'tollKeeper',
-    patrolDistance: 64
-  },
-  { x: 1380, y: 402, awakenPlayerX: 1160 },
+  { x: 1560, y: 402, awakenPlayerX: 1320 },
   { x: 2410, y: 402, awakenPlayerX: 2050 },
   { x: 2935, y: 402, awakenPlayerX: 2660, wakeDelayMs: 250 },
   { x: 3180, y: 402, awakenPlayerX: 2880 }
@@ -81,7 +117,9 @@ export class Chamber02Scene extends Phaser.Scene {
     this.player = new Player(this, 150, 360, PLAYER);
     this.physics.add.collider(this.player.sprite, this.platforms);
 
-    this.enemies = this.createEnemyEncounter();
+    this.enemies = [];
+    this.createTollKeeperEncounter();
+    this.createEnemyEncounter();
 
     this.hud = new HudOverlay(this);
     this.mobileControls = new MobileControls(this);
@@ -196,28 +234,37 @@ export class Chamber02Scene extends Phaser.Scene {
 
   }
 
+  createTollKeeperEncounter() {
+    const tollKeeper = this.createSkitterEnemy(CHAMBER02_TOLL_KEEPER.x, CHAMBER02_TOLL_KEEPER.y, CHAMBER02_TOLL_KEEPER.config);
+    this.enemies.push(tollKeeper);
+    return tollKeeper;
+  }
+
   createEnemyEncounter() {
-    const enemies = CHAMBER02_ENEMY_SPAWNS.map((spawn) => {
-      const variantConfig = spawn.variantKey ? SKITTER_VARIANTS[spawn.variantKey] ?? {} : {};
+    CHAMBER02_ENEMY_SPAWNS.forEach((spawn) => {
       const enemyConfig = {
         ...SKITTER,
-        ...variantConfig,
         awakenPlayerX: spawn.awakenPlayerX,
-        wakeDelayMs: spawn.wakeDelayMs ?? variantConfig.wakeDelayMs ?? 500,
-        patrolDistance: spawn.patrolDistance ?? variantConfig.patrolDistance ?? 180
+        wakeDelayMs: spawn.wakeDelayMs ?? 500,
+        patrolDistance: spawn.patrolDistance ?? 180
       };
-      const enemy = new SkitterServitor(this, spawn.x, spawn.y, enemyConfig);
-      this.physics.add.collider(enemy.sprite, this.platforms);
-      this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (attackZone, enemySprite) => {
-        this.handlePlayerHitEnemy(attackZone, enemySprite, enemy);
-      });
-      this.physics.add.overlap(this.player.sprite, enemy.sprite, (playerSprite, enemySprite) => {
-        this.handleEnemyContactPlayer(playerSprite, enemySprite, enemy);
-      });
-      return enemy;
+      const enemy = this.createSkitterEnemy(spawn.x, spawn.y, enemyConfig);
+      this.enemies.push(enemy);
     });
 
-    return enemies;
+    return this.enemies;
+  }
+
+  createSkitterEnemy(x, y, config) {
+    const enemy = new SkitterServitor(this, x, y, config);
+    this.physics.add.collider(enemy.sprite, this.platforms);
+    this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (attackZone, enemySprite) => {
+      this.handlePlayerHitEnemy(attackZone, enemySprite, enemy);
+    });
+    this.physics.add.overlap(this.player.sprite, enemy.sprite, (playerSprite, enemySprite) => {
+      this.handleEnemyContactPlayer(playerSprite, enemySprite, enemy);
+    });
+    return enemy;
   }
 
   update(time) {
