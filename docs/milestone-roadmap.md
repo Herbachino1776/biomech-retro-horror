@@ -30,7 +30,7 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 
 ## Milestone 3 — Encounter Expansion + Combat Readability
 **Purpose:** deepen encounter quality inside the shipped Chamber 01 + Chamber 02 slice without broad scope creep.
-**Relationship to Milestone 2:** Milestone 2 established Chamber 01 + Chamber 02 progression, lore/cutscene flow, and the baseline encounter space. Milestone 3 builds on that baseline by improving encounter depth/readability rather than adding new chambers.
+**Relationship to Milestone 2:** Milestone 2 established Chamber 01 + Chamber 02 progression, lore/cutscene flow, and the baseline encounter space. Milestone 3 built on that baseline by improving encounter depth/readability rather than adding new chambers.
 **Scope / Includes:**
 - Better regular enemy telegraphing.
 - Better regular enemy pacing / attack downtime.
@@ -38,22 +38,17 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 - Stronger hit/hurt feedback.
 - One miniboss refinement pass.
 - Limited combat visual productionization only where needed to support readability.
-**Must-Have Order:**
-1. Regular enemy encounter depth pass.
-2. Miniboss refinement pass.
-3. Limited combat presentation support only where needed.
-**Nice-to-Have:** small readability-oriented presentation assists only when they directly support must-have encounter work.
 **Acceptance Criteria:** at least one regular enemy depth pass and one miniboss refinement pass land with clearer readable combat feedback, while preserving mobile portrait playability, desktop controls, current chamber progression, lore/cutscene flow, and deployment invariants.
 **Dependencies:** Milestone 2 cohesion and presentation hardening.
 **Do Not Expand Prematurely:** new chambers, giant new systems, full animation pipeline work, broad audio overhaul, puzzle expansion, multiple new enemy families at once, major UI redesign, or major progression rewrites.
-**First Recommended Implementation Step:** regular enemy encounter depth pass.
-**Status:** planned.
+**Status:** completed.
+**Completion Notes:** Chamber 01 miniboss encounter now serves as the milestone miniboss refinement; Chamber 02 regular encounters and TOLL-KEEPER gate sequence provide the shipped regular-enemy readability/pacing pass; death/restart/reset and portrait/landscape playability remain stable through the full slice.
 
 ## Milestone 4 — Audio Identity Pass
 **Purpose:** establish oppressive audio identity without overwhelming readability.
 **Scope / Includes:** ambient bed, combat feedback SFX, lore transition audio treatment.
 **Acceptance Criteria:** functional audio layering for chamber/gameplay/lore states.
-**Dependencies:** stable lore-screen/state structure from Milestones 1–2.
+**Dependencies:** stable lore-screen/state structure from Milestones 1–3.
 **Do Not Expand Prematurely:** full soundtrack production.
 **Status:** planned.
 

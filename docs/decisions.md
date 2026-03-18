@@ -43,8 +43,9 @@ Concise record of technical/design decisions currently in force.
 - Prefer small reliable fixes over architecture expansion.
 - Regressions must be diagnosed/fixed at root cause, not “reimplemented differently” without reason.
 - Milestone 2 is complete and established the current Chamber 01 + Chamber 02 progression/lore baseline.
-- Milestone 3 is defined as **Encounter Expansion + Combat Readability** and should deepen encounter quality inside the existing slice rather than open new chambers or broad redesign tracks.
-- Milestone 3 implementation order should be: regular enemy encounter depth pass first, miniboss refinement second, limited combat presentation support third.
+- Milestone 3 was defined as **Encounter Expansion + Combat Readability** and is now complete for the shipped Chamber 01 + Chamber 02 slice.
+- Milestone 3 implementation landed in the intended order: regular enemy encounter depth pass first, miniboss refinement second, limited combat presentation support third.
+- Milestone 4 (audio identity) is the next planned milestone after Milestone 3 closeout.
 
 ## Lore Presentation Direction
 - Lore is a core identity system, not optional garnish.

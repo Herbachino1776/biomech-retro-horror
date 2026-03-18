@@ -4,9 +4,9 @@ A 1990s-inspired retro horror game project with oppressive biomechanical aesthet
 
 ## Objective
 Create a playable vertical slice first:
-- 1 finished level / chamber
+- Chamber 01 and Chamber 02 playable in sequence
 - 1 player character
-- 2 enemy types
+- regular skitter encounters plus TOLL-KEEPER variants
 - 1 miniboss
 - chamber-specific cinematic lore flows
 - 1 title screen
@@ -16,8 +16,10 @@ Create a playable vertical slice first:
 ## Shipped Slice Reality
 - Chamber 01 remains the playable foundation and still uses `LoreScreenScene` for its first shrine-driven lore beat.
 - Chamber 01 also uses `LoreCutsceneScene` for the later dead-god witness beat.
+- Chamber 01 culminates in the Half-Skull Ascendant miniboss encounter and gate-release payoff.
 - Chamber 02 uses `LoreCutsceneScene` for its shrine/exit-gate lore flow and post-lore reaction state.
-- Restart/reset flow must safely handle both lore-scene types because both are live in the shipped game.
+- Chamber 02 ends on a TOLL-KEEPER-gated exit lore payoff rather than a playable Chamber 03, which is the current intentional scope boundary.
+- Restart/reset flow safely handles both lore-scene types because both are live in the shipped game.
 
 ## Tech Stack (Current Scaffold)
 - Engine: Phaser 3
@@ -121,10 +123,10 @@ This still serves the game locally from `/`.
 
 ## Workflow
 1. Read `AGENTS.md`.
-2. Read all files in `/docs`.
+2. Read repo docs in `/docs` and treat them as source of truth.
 3. Implement the current milestone only.
 4. Keep changes small and modular.
 5. Open PR-sized changes, not giant rewrites.
 
-## First Milestone
-See `docs/milestones.md` and `docs/room-01-spec.md`.
+## Current Milestone Status
+Milestone 3 is complete. See `docs/current-milestone.md`, `docs/milestone-roadmap.md`, and `docs/milestones.md` for the shipped slice status and the next milestone.

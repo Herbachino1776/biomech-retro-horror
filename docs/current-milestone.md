@@ -1,96 +1,58 @@
 # Current Milestone
 
 ## Current Project State
-The project has completed **Milestone 2: Slice Art Cohesion + Lore Pattern Consolidation**.
-The playable baseline now spans Chamber 01 and Chamber 02 with a stable chamber transition, cinematic lore-screen beats in both chambers, and a conservative Chamber 02 post-lore reaction state.
+The project has completed **Milestone 3: Encounter Expansion + Combat Readability**.
+The shipped playable slice now covers Chamber 01 and Chamber 02 with stabilized encounter flow, a refined Chamber 01 miniboss payoff, Chamber 02 toll-keeper gate progression, cinematic lore beats, and maintained mobile/desktop usability.
 
 ## What Is Currently Working
-- Boot/start flow transitions into Chamber 01 and supports death/restart.
-- Core player loop works: movement, jump, attack, damage, death.
-- Chamber 01 remains stable and playable with lore shrine interaction.
-- Chamber 01 -> Chamber 02 transition is live and stable.
-- Chamber 02 is playable with platform traversal and enemy pressure pacing.
-- Chamber 02 lore trigger uses in-world shrine/ossuary presentation.
-- Chamber 02 lore screen uses the Vertebral Horn Gate image with portrait-safe composition (no vertical flattening) while preserving landscape usability.
-- Chamber 02 lore beat runs through a reusable lore-cutscene system (`LoreCutsceneScene` + config), so future chambers can plug in by swapping art/text/config only.
-- Lore presentation remains dedicated cinematic ritual screens rather than generic dialogue overlays.
-- Chamber 02 applies a conservative post-lore reaction state: ambient ritual shift + gate/sanctum visual change + one ritual-aligned enemy wake/activation.
+- Boot/title flow reliably enters the current Chamber 01 -> Chamber 02 vertical slice.
+- Core player loop works: movement, jump, attack, damage, death, and full restart/reset.
+- Chamber 01 baseline encounter remains stable and readable.
+- Chamber 01 lore shrine still unlocks the chamber gate flow without regressing the original lore-screen cadence.
+- Chamber 01 dead-god witness beat still triggers the Half-Skull Ascendant miniboss.
+- Chamber 01 miniboss telegraphing, contact danger, defeat payoff, and gate release remain active in the shipped flow.
+- Chamber 01 -> Chamber 02 transition remains stable.
+- Chamber 02 enemy encounters remain active with conservative wake timing and readable spacing.
+- Chamber 02 TOLL-KEEPER encounter pair gates the chamber exit and now has clearer end-gate readiness feedback.
+- Chamber 02 central lore trigger still uses a dedicated cinematic cutscene flow and now retains a clear diegetic shrine/ossuary affordance at the trigger site.
+- Chamber 02 exit gate unlock + lore trigger flow remains intact after the TOLL-KEEPER fight.
 - Mobile controls remain screen-space anchored and usable in portrait + landscape.
 - Desktop keyboard controls remain available.
 - Texture-first rendering with fallback-only resilience remains in place.
-- Vite/GitHub Pages deployment model is configured (`/biomech-retro-horror/` production base).
+- Vite/GitHub Pages deployment model is still configured (`/biomech-retro-horror/` production base).
 
-## Milestone 2 Closeout Status
-Milestone 2 is now considered **fully closed** for the shipped Chamber 01 + Chamber 02 slice.
-Stabilization pass notes:
-- Chamber 01/Chamber 02 flow and death/restart handoff remain intact.
-- Chamber 02 lore cutscene and post-lore reaction state remain active and readable.
-- Portrait + landscape control layout behavior remains in the mobile-safe path.
-- Leftover mobile debug overlay text has been removed from runtime UI.
+## Milestone 3 Closeout Status
+Milestone 3 is now considered **complete** for the currently shipped Chamber 01 + Chamber 02 slice.
 
-Milestone 2 signoff blockers are addressed in shipped implementation:
-- Chamber 02 lore-screen portrait presentation no longer collapses into a thin/squashed strip.
-- Chamber 02 post-lore reaction state now clearly changes chamber state and increases threat conservatively.
-- Lore-screen pattern is now safely reusable with per-screen layout overrides while preserving Chamber 01 behavior.
+### Milestone 3 Closeout Rationale
+- Regular enemy encounter readability/pacing work is present in the shipped skitter + TOLL-KEEPER behavior.
+- Chamber 01 includes the required miniboss refinement pass with telegraph, hurt feedback, defeat feedback, and payoff gating.
+- Chamber 02 encounter sequencing now closes cleanly from enemy pressure -> TOLL-KEEPER gate unlock -> exit lore beat.
+- Death/restart/reset remains functional across both active gameplay chambers and both lore-scene types.
+- Portrait mobile playability and landscape usability remain preserved.
+- `npm run build` succeeds.
 
-## Milestone 2 Acceptance Criteria (Completed)
-1. Playable slice remains stable across Chamber 01 and Chamber 02.
-2. Chamber 01 behavior and lore-screen flow remain intact.
-3. Chamber 01 -> Chamber 02 transition remains stable.
-4. Chamber 02 lore screen is readable in portrait and landscape and uses correct art presentation.
-5. Chamber 02 returns from lore in a visibly changed state.
-6. Chamber 02 threat increases after lore without adding broad new systems.
-7. Mobile/desktop input parity remains intact.
-8. GitHub Pages/Vite base-path behavior remains correct.
+## Milestone 3 Acceptance Criteria (Completed)
+1. At least one regular enemy depth/readability pass is shipped.
+2. One miniboss refinement pass is shipped in Chamber 01.
+3. Chamber 01 -> Chamber 02 progression remains stable.
+4. Chamber 02 encounter flow, including TOLL-KEEPER gating, remains playable end-to-end.
+5. Exit-gate unlock + lore trigger flow is readable and stable.
+6. Death/restart/reset still works without soft-locking scene flow.
+7. Portrait mobile playability remains intact.
+8. Landscape usability remains intact.
 9. `npm run build` succeeds.
 
-## Milestone 3 Definition
-**Milestone 3: Encounter Expansion + Combat Readability** is the next implementation milestone.
+## Known Remaining Rough Edges (Non-Blocking)
+- Chamber 02 still ends on an exit-gate lore payoff rather than entering a playable Chamber 03, which is acceptable because new chambers remain out of scope for this milestone.
+- Combat presentation is still intentionally lightweight and relies on conservative shape/tint feedback rather than a full animation/audio production pass.
+- Audio identity work remains a later milestone and is not required for Milestone 3 completion.
+
+## Next Milestone Definition
+**Milestone 4: Audio Identity Pass** is the next implementation milestone.
 
 ### Core Goal
-Deepen encounter quality inside the existing vertical slice **without broad scope creep**. Milestone 3 is about making the shipped combat space read better, pace better, and feel more intentional rather than opening new content lanes.
-
-### Relationship to Milestone 2
-Milestone 2 established the shipped Chamber 01 + Chamber 02 slice, including chamber-to-chamber progression, lore/cutscene flow, and the baseline encounter space.
-Milestone 3 builds on that baseline by improving **encounter depth and readability**, **not** by expanding into new chambers or replacing the current slice structure.
-
-### Recommended Milestone 3 Scope
-**Must-have**
-- Better regular enemy telegraphing.
-- Better regular enemy pacing and attack downtime.
-- Clearer attack range and combat readability cues.
-- Stronger hit/hurt feedback.
-- One miniboss refinement pass.
-- Limited combat visual productionization only where required to support readability.
-
-**Nice-to-have only if it directly supports the must-have work**
-- Small presentation assists that make enemy intent or impact states easier to read.
-- Conservative cleanup of combat-facing visuals where fallback-looking placeholders still obscure encounter readability.
-
-### Explicitly Out of Scope
-- New chambers.
-- Giant new systems.
-- Full animation pipeline work.
-- Broad audio overhaul.
-- Puzzle expansion.
-- Multiple new enemy families introduced at once.
-- Major UI redesign.
-- Major progression rewrite.
-
-### Recommended Order Inside Milestone 3
-1. **Regular enemy encounter depth pass.**
-2. **Miniboss refinement pass.**
-3. **Limited combat presentation support only where needed.**
-
-### Hard Constraints / Invariants
-- Preserve portrait mobile playability.
-- Preserve desktop controls.
-- Preserve current Chamber 01 + Chamber 02 progression.
-- Preserve current lore/cutscene systems.
-- Avoid broad redesigns that destabilize the shipped slice.
-
-## Exact Next Best Implementation Step
-Begin the **regular enemy encounter depth pass**: improve one existing regular threat loop with clearer telegraphing, better downtime/pacing, and stronger hit/hurt readability, without regressing mobile usability, current chamber progression, lore cadence, or deployment invariants.
+Add oppressive chamber, encounter, and lore-transition audio treatment without destabilizing the now-complete Milestone 3 playable slice.
 
 ## Do Not Change Casually
 - Base-path deployment contract (`/biomech-retro-horror/` prod, `/` dev).

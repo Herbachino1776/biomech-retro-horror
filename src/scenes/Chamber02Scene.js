@@ -85,7 +85,7 @@ const CHAMBER02_POST_LORE_REACTION = {
   gateTint: 0xbca775,
   gateAlpha: 0.94,
   sanctumAuraAlpha: 0.2,
-  ambientVeilAlpha: 0.11,
+  ambientVeilAlpha: 0.11
 };
 
 const CHAMBER02_EXIT_GATE = {
@@ -285,6 +285,10 @@ export class Chamber02Scene extends Phaser.Scene {
     this.exitGateSigil = this.add
       .ellipse(CHAMBER02_EXIT_GATE.x - 26, 324, 50, 108, COLORS.sickly, 0.14)
       .setDepth(-5.3);
+    this.exitGateReadyAura = this.add
+      .ellipse(CHAMBER02_EXIT_GATE.x - 96, CHAMBER02_EXIT_GATE.zoneY, 138, 88, COLORS.sickly, 0.1)
+      .setDepth(-5.25)
+      .setVisible(false);
 
     this.exitGateZone = this.add
       .zone(
@@ -377,6 +381,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.tryBeginLoreSequence(mobileInput);
     this.tryUseExitGate(mobileInput);
     this.refreshExitGateState();
+    this.updateExitGateAura(time);
 
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
 
@@ -455,6 +460,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.exitGateSigil?.setAlpha(unlocked ? 0.3 : 0.14);
     this.applyExitGateVisualState(unlocked);
     this.exitGateBarrier?.setVisible(!unlocked);
+    this.exitGateReadyAura?.setVisible(unlocked && !this.hasTriggeredExitGateLore);
 
     if (this.exitGateBarrier?.body) {
       this.exitGateBarrier.body.enable = !unlocked;
@@ -468,6 +474,21 @@ export class Chamber02Scene extends Phaser.Scene {
     this.physics.add.existing(zone, true);
     zone.loreEntry = entry;
     this.loreZones.add(zone);
+    this.createLoreShrineProp(entry);
+  }
+
+  createLoreShrineProp(entry) {
+    const baseY = entry.y + 14;
+    this.add.ellipse(entry.x, baseY + 4, 188, 44, COLORS.oil, 0.34).setDepth(-5.1);
+    this.add.ellipse(entry.x, baseY + 2, 142, 30, COLORS.sickly, 0.16).setDepth(-5.05);
+    this.add.rectangle(entry.x, baseY - 2, 134, 22, COLORS.bloodMetal, 0.8).setDepth(-5);
+    this.add.rectangle(entry.x, baseY - 8, 88, 14, COLORS.foreground, 0.92).setDepth(-4.95);
+    this.add.ellipse(entry.x, baseY - 26, 84, 40, COLORS.bone, 0.86).setDepth(-4.9);
+    this.add.ellipse(entry.x, baseY - 24, 44, 16, COLORS.oil, 0.84).setDepth(-4.85);
+    this.add.ellipse(entry.x - 28, baseY - 30, 28, 64, COLORS.bone, 0.7).setAngle(-18).setDepth(-4.84);
+    this.add.ellipse(entry.x + 28, baseY - 30, 28, 64, COLORS.bone, 0.7).setAngle(18).setDepth(-4.84);
+    this.add.rectangle(entry.x, baseY - 34, 10, 54, COLORS.rust, 0.78).setAngle(4).setDepth(-4.83);
+    this.add.ellipse(entry.x, baseY - 42, 16, 10, COLORS.sickly, 0.36).setDepth(-4.8);
   }
 
   refreshLoreZonePresence() {
@@ -577,6 +598,11 @@ export class Chamber02Scene extends Phaser.Scene {
       this.applyPostLoreReactionState();
     }
 
+    if (cutsceneId === CHAMBER02_EXIT_GATE.loreCutsceneId) {
+      this.exitGateReadyAura?.setVisible(false);
+      this.exitGateSigil?.setAlpha(0.38);
+    }
+
     if (cutsceneId !== CHAMBER02_LORE_ENTRY.cutsceneId && cutsceneId !== CHAMBER02_EXIT_GATE.loreCutsceneId) {
       return;
     }
@@ -626,6 +652,16 @@ export class Chamber02Scene extends Phaser.Scene {
     this.mobileControls?.setMode('init');
     this.hud?.setVisible(false);
   }
+
+  updateExitGateAura(time) {
+    if (!this.exitGateReadyAura?.visible) {
+      return;
+    }
+
+    const pulse = 0.12 + (Math.sin(time / 180) + 1) * 0.045;
+    this.exitGateReadyAura.setAlpha(pulse).setScale(1 + Math.sin(time / 320) * 0.04, 1);
+  }
+
   applyResponsiveLayout() {
     const camera = this.cameras.main;
     const width = this.scale.width;
