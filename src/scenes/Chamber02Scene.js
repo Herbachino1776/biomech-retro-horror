@@ -425,6 +425,7 @@ export class Chamber02Scene extends Phaser.Scene {
       );
       camera.setViewport(0, 0, width, worldBandHeight);
       camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
+      camera.setFollowOffset(-140, PORTRAIT_LAYOUT.portraitFollowOffsetY);
       this.mobileControls.setReservedBottomPx(height - worldBandHeight);
       this.restartText.setPosition(
         width / 2,
@@ -435,6 +436,7 @@ export class Chamber02Scene extends Phaser.Scene {
 
     camera.setViewport(0, 0, width, height);
     camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
+    camera.setFollowOffset(-140, PORTRAIT_LAYOUT.desktopFollowOffsetY);
     this.mobileControls.setReservedBottomPx(0);
     this.restartText.setPosition(width / 2, 90);
   }
