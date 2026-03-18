@@ -517,11 +517,9 @@ export class Chamber01Scene extends Phaser.Scene {
     }
 
     this.enemyLastAttackHitId = this.player.attackId;
-    this.enemy.takeDamage(1, this.time.now);
-
     const knockDirection = Math.sign(this.enemy.sprite.x - this.player.sprite.x) || this.player.facing;
-    this.enemy.body.setVelocityX(knockDirection * 160);
-    this.enemy.body.setVelocityY(-120);
+    this.enemy.setHitReactionDirection(knockDirection);
+    this.enemy.takeDamage(1, this.time.now);
   }
 
   handlePlayerHitMiniboss(_attackZone, enemySprite) {
@@ -546,6 +544,9 @@ export class Chamber01Scene extends Phaser.Scene {
 
   handleEnemyContactPlayer(_playerSprite, enemySprite) {
     if (this.enemy.dead || !this.isEnemyOverlapTarget(enemySprite, this.enemy.sprite)) {
+      return;
+    }
+    if (!this.enemy.canDealContactDamage(this.time.now)) {
       return;
     }
 
