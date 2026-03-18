@@ -8,10 +8,16 @@ Create a playable vertical slice first:
 - 1 player character
 - 2 enemy types
 - 1 miniboss
-- 1 dialogue / lore system
+- chamber-specific cinematic lore flows
 - 1 title screen
 - 1 death / restart loop
 - 1 coherent visual biome
+
+## Shipped Slice Reality
+- Chamber 01 remains the playable foundation and still uses `LoreScreenScene` for its first shrine-driven lore beat.
+- Chamber 01 also uses `LoreCutsceneScene` for the later dead-god witness beat.
+- Chamber 02 uses `LoreCutsceneScene` for its shrine/exit-gate lore flow and post-lore reaction state.
+- Restart/reset flow must safely handle both lore-scene types because both are live in the shipped game.
 
 ## Tech Stack (Current Scaffold)
 - Engine: Phaser 3
