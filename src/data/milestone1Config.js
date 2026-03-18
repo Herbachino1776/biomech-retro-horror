@@ -61,9 +61,9 @@ export const CONCEPT_PRESENTATION = {
     }
   },
   skitter: {
-    crop: { x: 510, y: 520, width: 540, height: 360 },
-    display: { width: 148, height: 104 },
-    origin: { x: 0.5, y: 0.93 }
+    crop: { x: 40, y: 340, width: 930, height: 840 },
+    display: { width: 158, height: 142 },
+    origin: { x: 0.5, y: 0.91 }
   },
   sentinel: {
     crop: { x: 520, y: 120, width: 520, height: 860 },

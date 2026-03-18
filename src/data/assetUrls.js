@@ -9,7 +9,7 @@ import chamber02BackgroundPlateUrl from '../../art/raw/chamber02/chamber02_backg
 import chamber02FloorStripUrl from '../../art/raw/chamber02/chamber02_floor_strip_01_source.png';
 import chamber02ForegroundHornArchUrl from '../../art/raw/chamber02/foreground_vertebral_horn_arch_01_source.png';
 import playerConceptUrl from '../../assets/concepts/player-concept-03-right-alpha.png';
-import skitterConceptUrl from '../../assets/concepts/skitter-concept-01.png';
+import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
 import laughingEngineConceptUrl from '../../assets/concepts/laughing-engine-concept-01.png';
 import biomechUiFrameUrl from '../../assets/ui/biomech-ui-frame-01.png';

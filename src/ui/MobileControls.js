@@ -33,8 +33,6 @@ export class MobileControls {
     };
 
     this.activePointers = {
-      left: new Set(),
-      right: new Set(),
       jump: new Set(),
       attack: new Set(),
       interact: new Set()
@@ -44,6 +42,8 @@ export class MobileControls {
     this.controls = [];
     this.uiElements = [];
     this.reservedBottomPx = 0;
+    this.joystickPointerId = null;
+    this.joystickVector = new Phaser.Math.Vector2();
 
     if (!this.enabled) {
       return;
@@ -55,23 +55,32 @@ export class MobileControls {
     scene.events.on('shutdown', this.destroy, this);
     scene.input.on('gameout', this.releaseAll, this);
     scene.input.on('pointerup', this.handlePointerUpAnywhere, this);
+    scene.input.on('pointermove', this.handlePointerMove, this);
   }
 
   createControls() {
-    this.dpadBase = this.scene.add
-      .circle(0, 0, 72, CONTROL_COLORS.outer, 0.68)
+    this.joystickBase = this.scene.add
+      .circle(0, 0, MOBILE_CONTROLS_LAYOUT.joystick.baseRadius, CONTROL_COLORS.outer, 0.68)
       .setStrokeStyle(3, CONTROL_COLORS.stroke, 0.8)
       .setDepth(60)
       .setScrollFactor(0);
-    this.uiElements.push(this.dpadBase);
+    this.joystickKnob = this.scene.add
+      .circle(0, 0, MOBILE_CONTROLS_LAYOUT.joystick.knobRadius, CONTROL_COLORS.inner, GAMEPLAY_RING_ALPHA)
+      .setStrokeStyle(2, CONTROL_COLORS.stroke, 0.95)
+      .setDepth(61)
+      .setScrollFactor(0);
+    this.joystickZone = this.scene.add
+      .zone(0, 0, MOBILE_CONTROLS_LAYOUT.joystick.hitDiameter, MOBILE_CONTROLS_LAYOUT.joystick.hitDiameter)
+      .setOrigin(0.5)
+      .setDepth(62)
+      .setScrollFactor(0)
+      .setInteractive({ useHandCursor: false })
+      .on('pointerdown', (pointer) => this.startJoystick(pointer));
+    this.uiElements.push(this.joystickBase, this.joystickKnob, this.joystickZone);
 
-    this.leftControl = this.createButton('◀', 'left', 34);
-    this.rightControl = this.createButton('▶', 'right', 34);
-    this.upControl = this.createButton('▲', 'jump', 30);
-    this.downControl = this.createButton('▼', 'none', 30, 0.45);
-
-    this.attackControl = this.createButton('ATTACK', 'attack', 42);
-    this.interactControl = this.createButton('RITE', 'interact', 30, 0.62);
+    this.jumpControl = this.createButton('JUMP', 'jump', MOBILE_CONTROLS_LAYOUT.actionButtons.jumpRadius);
+    this.attackControl = this.createButton('ATTACK', 'attack', MOBILE_CONTROLS_LAYOUT.actionButtons.attackRadius);
+    this.interactControl = this.createButton('RITE', 'interact', MOBILE_CONTROLS_LAYOUT.actionButtons.interactRadius, 0.62);
 
     this.layout();
     this.setMode('gameplay');
@@ -87,7 +96,7 @@ export class MobileControls {
     const text = this.scene.add
       .text(0, 1, label, {
         fontFamily: 'monospace',
-        fontSize: radius > 38 ? '15px' : '14px',
+        fontSize: radius > 36 ? '14px' : '13px',
         color: CONTROL_COLORS.glyph,
         fontStyle: 'bold'
       })
@@ -96,7 +105,7 @@ export class MobileControls {
       .setScrollFactor(0);
 
     const hitArea = this.scene.add
-      .zone(0, 0, radius * 2.5, radius * 2.5)
+      .zone(0, 0, radius * 2.45, radius * 2.45)
       .setOrigin(0.5)
       .setDepth(62)
       .setScrollFactor(0);
@@ -118,31 +127,77 @@ export class MobileControls {
         hitArea.setVisible(visible);
         if (!visible) {
           hitArea.disableInteractive();
-        } else if (action !== 'none') {
+        } else {
           hitArea.setInteractive({ useHandCursor: false });
         }
       }
     };
 
-    if (action !== 'none') {
-      hitArea
-        .setInteractive({ useHandCursor: false })
-        .on('pointerdown', (pointer) => this.onPress(action, pointer.id, control))
-        .on('pointerup', (pointer) => this.onRelease(action, pointer.id, control))
-        .on('pointerout', (pointer) => this.onRelease(action, pointer.id, control));
+    hitArea
+      .setInteractive({ useHandCursor: false })
+      .on('pointerdown', (pointer) => this.onPress(action, pointer.id, control))
+      .on('pointerup', (pointer) => this.onRelease(action, pointer.id, control))
+      .on('pointerout', (pointer) => this.onRelease(action, pointer.id, control));
 
-      this.controls.push(control);
-    }
-
+    this.controls.push(control);
     this.uiElements.push(ring, text, hitArea);
     return control;
+  }
+
+  startJoystick(pointer) {
+    if (this.joystickPointerId !== null && this.joystickPointerId !== pointer.id) {
+      return;
+    }
+
+    this.joystickPointerId = pointer.id;
+    this.pointerActionById.set(pointer.id, 'joystick');
+    this.updateJoystickFromPointer(pointer);
+  }
+
+  handlePointerMove(pointer) {
+    if (pointer.id !== this.joystickPointerId) {
+      return;
+    }
+
+    this.updateJoystickFromPointer(pointer);
+  }
+
+  updateJoystickFromPointer(pointer) {
+    const dx = pointer.x - this.joystickBase.x;
+    const dy = pointer.y - this.joystickBase.y;
+    const maxDistance = MOBILE_CONTROLS_LAYOUT.joystick.maxTravel;
+    const distance = Math.hypot(dx, dy);
+    const clampedDistance = Math.min(distance, maxDistance);
+    const angle = Math.atan2(dy, dx);
+    const knobX = Math.cos(angle) * clampedDistance;
+    const knobY = Math.sin(angle) * clampedDistance;
+
+    this.joystickVector.set(knobX, knobY);
+    this.joystickKnob.setPosition(this.joystickBase.x + knobX, this.joystickBase.y + knobY);
+    this.joystickKnob.setFillStyle(CONTROL_COLORS.active, FOCUSED_RING_ALPHA);
+    this.updateDirectionalState();
+  }
+
+  updateDirectionalState() {
+    const deadZone = MOBILE_CONTROLS_LAYOUT.joystick.deadZone;
+    this.state.left = this.joystickVector.x <= -deadZone;
+    this.state.right = this.joystickVector.x >= deadZone;
+  }
+
+  resetJoystick() {
+    this.joystickPointerId = null;
+    this.joystickVector.set(0, 0);
+    this.state.left = false;
+    this.state.right = false;
+    this.joystickKnob.setPosition(this.joystickBase.x, this.joystickBase.y);
+    this.joystickKnob.setFillStyle(CONTROL_COLORS.inner, GAMEPLAY_RING_ALPHA);
   }
 
   onPress(action, pointerId, control) {
     this.pointerActionById.set(pointerId, action);
     this.activePointers[action].add(pointerId);
 
-    if (!this.state[action] && (action === 'jump' || action === 'attack' || action === 'interact')) {
+    if (!this.state[action]) {
       this.justPressed[action] = true;
     }
 
@@ -170,6 +225,12 @@ export class MobileControls {
       return;
     }
 
+    if (action === 'joystick') {
+      this.pointerActionById.delete(pointer.id);
+      this.resetJoystick();
+      return;
+    }
+
     const control = this.controls.find((item) => item.action === action);
     if (control) {
       this.onRelease(action, pointer.id, control);
@@ -183,6 +244,7 @@ export class MobileControls {
     });
 
     this.pointerActionById.clear();
+    this.resetJoystick();
 
     this.controls.forEach((control) => {
       control.ring.setFillStyle(CONTROL_COLORS.inner, GAMEPLAY_RING_ALPHA);
@@ -198,7 +260,7 @@ export class MobileControls {
     const snapshot = {
       left: this.state.left,
       right: this.state.right,
-      jumpPressed: this.justPressed.jump || this.state.jump,
+      jumpPressed: this.justPressed.jump,
       attackPressed: this.justPressed.attack,
       interactPressed: this.justPressed.interact
     };
@@ -233,11 +295,7 @@ export class MobileControls {
     const safeAreaBottom = this.getSafeAreaInsetPx('bottom');
     const orientationLayout = isPortrait ? MOBILE_CONTROLS_LAYOUT.portrait : MOBILE_CONTROLS_LAYOUT.landscape;
 
-    const leftAnchorX = Math.max(
-      orientationLayout.horizontalEdgeInset,
-      width * orientationLayout.leftAnchorRatio
-    );
-
+    const leftAnchorX = Math.max(orientationLayout.horizontalEdgeInset, width * orientationLayout.leftAnchorRatio);
     const defaultReservedBottom = isPortrait
       ? orientationLayout.baseBandHeight + safeAreaBottom + MOBILE_CONTROLS_LAYOUT.safeAreaBottomPadding
       : 0;
@@ -255,27 +313,21 @@ export class MobileControls {
           MOBILE_CONTROLS_LAYOUT.minAnchorY,
           height - safeAreaBottom - orientationLayout.maxAnchorBottomPadding
         );
+    const rightAnchorX = Math.min(width - orientationLayout.horizontalEdgeInset, width * orientationLayout.rightAnchorRatio);
 
-    const rightAnchorX = Math.min(
-      width - orientationLayout.horizontalEdgeInset,
-      width * orientationLayout.rightAnchorRatio
-    );
+    this.joystickBase.setPosition(leftAnchorX, lowerAnchorY);
+    this.joystickZone.setPosition(leftAnchorX, lowerAnchorY);
+    this.resetJoystick();
 
-    this.dpadBase.setPosition(leftAnchorX, lowerAnchorY);
-    this.leftControl.setPosition(leftAnchorX - orientationLayout.dpadStep, lowerAnchorY);
-    this.rightControl.setPosition(leftAnchorX + orientationLayout.dpadStep, lowerAnchorY);
-    this.upControl.setPosition(leftAnchorX, lowerAnchorY - orientationLayout.dpadStep);
-    this.downControl.setPosition(leftAnchorX, lowerAnchorY + orientationLayout.dpadStep);
-
-    this.attackControl.setPosition(rightAnchorX, lowerAnchorY - orientationLayout.actionYOffset);
+    this.attackControl.setPosition(rightAnchorX, lowerAnchorY - orientationLayout.attackYOffset);
+    this.jumpControl.setPosition(rightAnchorX - orientationLayout.jumpOffsetX, lowerAnchorY - orientationLayout.jumpOffsetY);
     this.interactControl.setPosition(
       rightAnchorX - orientationLayout.interactOffsetX,
-      lowerAnchorY - orientationLayout.actionYOffset - orientationLayout.interactVerticalGap
+      lowerAnchorY - orientationLayout.interactOffsetY
     );
 
     this.scene.input.setPollAlways();
   }
-
 
   getUiElements() {
     return this.uiElements;
@@ -289,11 +341,10 @@ export class MobileControls {
     this.mode = mode;
     const gameplayVisible = mode === 'gameplay';
 
-    this.dpadBase.setVisible(gameplayVisible);
-    this.leftControl.setVisible(gameplayVisible);
-    this.rightControl.setVisible(gameplayVisible);
-    this.upControl.setVisible(gameplayVisible);
-    this.downControl.setVisible(gameplayVisible);
+    this.joystickBase.setVisible(gameplayVisible);
+    this.joystickKnob.setVisible(gameplayVisible);
+    this.joystickZone.setVisible(gameplayVisible);
+    this.jumpControl.setVisible(gameplayVisible);
     this.attackControl.setVisible(gameplayVisible);
 
     this.interactControl.setVisible(mode !== 'init');
@@ -312,6 +363,7 @@ export class MobileControls {
     this.scene.scale.off('resize', this.layout, this);
     this.scene.input.off('gameout', this.releaseAll, this);
     this.scene.input.off('pointerup', this.handlePointerUpAnywhere, this);
+    this.scene.input.off('pointermove', this.handlePointerMove, this);
     this.releaseAll();
     this.uiElements.forEach((element) => element.destroy());
     this.uiElements.length = 0;
