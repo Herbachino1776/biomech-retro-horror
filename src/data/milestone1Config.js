@@ -71,10 +71,10 @@ export const SKITTER_VARIANTS = {
     lungeJumpVelocity: -96,
     patrolDistance: 104,
     presentation: {
-      alpha: 0.84,
-      scaleX: 1.08,
-      scaleY: 1.05,
-      tint: 0xbda786
+      alpha: 1,
+      scaleX: 1.5,
+      scaleY: 1.5,
+      tint: 0xc9b28f
     },
     rangeTellColor: 0xd7c486,
     rangeTellAlphaBase: 0.12,
