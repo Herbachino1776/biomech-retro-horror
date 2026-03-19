@@ -133,7 +133,7 @@ const SOUND_GROUPS = {
   },
   loreEnter: {
     keys: [ASSET_KEYS.loreEnter],
-    volume: 0.21,
+    volume: 0.1365,
     detuneRange: 0,
     minIntervalMs: 400,
     allowOverlap: false

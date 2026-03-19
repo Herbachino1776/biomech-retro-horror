@@ -90,6 +90,8 @@ const CHAMBER02_POST_LORE_REACTION = {
   ambientVeilAlpha: 0.11
 };
 
+const EXIT_GATE_UNLOCK_AUDIO_DELAY_MS = 2000;
+
 const CHAMBER02_EXIT_GATE = {
   x: 3480,
   y: 272,
@@ -134,6 +136,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.isRestartingRun = false;
     this.hasAppliedPostLoreReaction = false;
     this.hasTriggeredExitGateLore = false;
+    this.exitGateUnlockAudioTimer = null;
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
@@ -178,6 +181,8 @@ export class Chamber02Scene extends Phaser.Scene {
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+      this.exitGateUnlockAudioTimer?.remove(false);
+      this.exitGateUnlockAudioTimer = null;
       this.audioDirector?.shutdown();
       this.cleanupSceneUi();
     });
@@ -465,7 +470,14 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.exitGateUnlocked = unlocked;
     if (unlocked) {
-      this.audioDirector?.playGateUnlock();
+      this.exitGateUnlockAudioTimer?.remove(false);
+      this.exitGateUnlockAudioTimer = this.time.delayedCall(EXIT_GATE_UNLOCK_AUDIO_DELAY_MS, () => {
+        this.audioDirector?.playGateUnlock();
+        this.exitGateUnlockAudioTimer = null;
+      });
+    } else {
+      this.exitGateUnlockAudioTimer?.remove(false);
+      this.exitGateUnlockAudioTimer = null;
     }
     this.exitGateSigil?.setAlpha(unlocked ? 0.3 : 0.14);
     this.applyExitGateVisualState(unlocked);
