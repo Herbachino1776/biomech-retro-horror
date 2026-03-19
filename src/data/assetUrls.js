@@ -25,6 +25,9 @@ import playerAttack01Url from '../../assets/audio/player/player_attack_01.ogg';
 import playerHit01Url from '../../assets/audio/player/player_hit_01.ogg';
 import playerHurt01Url from '../../assets/audio/player/player_hurt_01.ogg';
 import playerDeath01Url from '../../assets/audio/player/player_death_01.ogg';
+import skitterAttack01Url from '../../assets/audio/enemy/skitter_attack_01.ogg';
+import skitterHurt01Url from '../../assets/audio/enemy/skitter_hurt_01.ogg';
+import skitterDeath01Url from '../../assets/audio/enemy/skitter_death_01.ogg';
 
 import { PROCEDURAL_AUDIO_URLS } from '../audio/proceduralAudio.js';
 import { ASSET_KEYS } from './assetKeys.js';
@@ -61,9 +64,12 @@ export const ASSET_URLS = {
   [ASSET_KEYS.playerHurtFallback]: PROCEDURAL_AUDIO_URLS.playerHurt,
   [ASSET_KEYS.playerDeath]: playerDeath01Url,
   [ASSET_KEYS.playerDeathFallback]: PROCEDURAL_AUDIO_URLS.playerDeath,
-  [ASSET_KEYS.enemyAttack]: PROCEDURAL_AUDIO_URLS.enemyAttack,
-  [ASSET_KEYS.enemyHurt]: PROCEDURAL_AUDIO_URLS.enemyHurt,
-  [ASSET_KEYS.enemyDeath]: PROCEDURAL_AUDIO_URLS.enemyDeath,
+  [ASSET_KEYS.enemyAttack]: skitterAttack01Url,
+  [ASSET_KEYS.enemyAttackFallback]: PROCEDURAL_AUDIO_URLS.enemyAttack,
+  [ASSET_KEYS.enemyHurt]: skitterHurt01Url,
+  [ASSET_KEYS.enemyHurtFallback]: PROCEDURAL_AUDIO_URLS.enemyHurt,
+  [ASSET_KEYS.enemyDeath]: skitterDeath01Url,
+  [ASSET_KEYS.enemyDeathFallback]: PROCEDURAL_AUDIO_URLS.enemyDeath,
   [ASSET_KEYS.tollKeeperAttack]: PROCEDURAL_AUDIO_URLS.tollKeeperAttack,
   [ASSET_KEYS.tollKeeperHurt]: PROCEDURAL_AUDIO_URLS.tollKeeperHurt,
   [ASSET_KEYS.tollKeeperDeath]: PROCEDURAL_AUDIO_URLS.tollKeeperDeath,
