@@ -8,7 +8,7 @@ const SOUND_GROUPS = {
       ASSET_KEYS.playerFootstepSlate03,
       ASSET_KEYS.playerFootstepSlate04
     ],
-    volume: 0.18,
+    volume: 0.21,
     detuneRange: 18,
     minIntervalMs: 90,
     allowOverlap: false
@@ -16,7 +16,7 @@ const SOUND_GROUPS = {
   playerAttack: {
     keys: [ASSET_KEYS.playerAttack],
     fallbackKeys: [ASSET_KEYS.playerAttackFallback],
-    volume: 0.22,
+    volume: 0.19,
     detuneRange: 12,
     minIntervalMs: 80,
     allowOverlap: true
@@ -133,7 +133,7 @@ const SOUND_GROUPS = {
   },
   loreEnter: {
     keys: [ASSET_KEYS.loreEnter],
-    volume: 0.28,
+    volume: 0.21,
     detuneRange: 0,
     minIntervalMs: 400,
     allowOverlap: false

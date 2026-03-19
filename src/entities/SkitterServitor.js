@@ -21,6 +21,7 @@ export class SkitterServitor {
     this.attackCommittedAt = -Infinity;
     this.contactDamageWindowUntil = -Infinity;
     this.hurtPushDirection = 0;
+    this.attackAudioLocked = false;
 
     const spriteKey = config.textureKey ?? ASSET_KEYS.skitter;
     const spritePresentation = config.presentation ?? {};
@@ -79,14 +80,15 @@ export class SkitterServitor {
   }
 
   update(time, playerX) {
-    this.updateAwakeningState(time, playerX);
-    this.updateState(time, playerX);
     this.updateVisuals(time);
 
     if (this.dead) {
-      this.body.setVelocityX(0);
+      this.body.setVelocity(0, 0);
       return;
     }
+
+    this.updateAwakeningState(time, playerX);
+    this.updateState(time, playerX);
 
     if (!this.awakened) {
       this.body.setVelocityX(0);
@@ -208,6 +210,11 @@ export class SkitterServitor {
   }
 
   beginAttack(time) {
+    if (!this.isAliveForAttack()) {
+      this.clearAttackState(time, 'stalk');
+      return;
+    }
+
     this.lastAttackTime = time;
     this.attackCommittedAt = time;
     this.contactDamageWindowUntil = time + this.config.attackActiveMs;
@@ -215,13 +222,31 @@ export class SkitterServitor {
     this.enterState('attack', time, this.config.attackActiveMs);
     this.body.setVelocityX(this.direction * (this.config.speed + this.config.lungeSpeedBonus));
     this.body.setVelocityY(this.config.lungeJumpVelocity);
-    this.scene.audioDirector?.playEnemyAttack(this.config.audioProfile ?? 'enemy');
+
+    if (!this.attackAudioLocked) {
+      this.attackAudioLocked = true;
+      this.scene.audioDirector?.playEnemyAttack(this.config.audioProfile ?? 'enemy');
+    }
   }
 
   enterState(state, time, duration = 0) {
     this.combatState = state;
     this.stateStartedAt = time;
     this.stateEndsAt = duration > 0 ? time + duration : time;
+    if (state !== 'attack' && state !== 'windup') {
+      this.attackAudioLocked = false;
+    }
+  }
+
+  clearAttackState(time = this.scene.time.now, nextState = 'stalk') {
+    this.attackCommittedAt = -Infinity;
+    this.contactDamageWindowUntil = -Infinity;
+    this.attackAudioLocked = false;
+    this.enterState(nextState, time);
+  }
+
+  isAliveForAttack() {
+    return !this.dead && this.body?.enable !== false && this.awakened;
   }
 
   takeDamage(amount, time = this.scene.time.now) {
@@ -240,6 +265,7 @@ export class SkitterServitor {
     if (this.health <= 0) {
       this.scene.audioDirector?.playEnemyDeath(this.config.audioProfile ?? 'enemy');
       this.dead = true;
+      this.clearAttackState(time, 'dead');
       this.body.stop();
       this.body.setAllowGravity(false);
       this.body.enable = false;

@@ -71,6 +71,8 @@ export class LoreCutsceneScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.handleResize, this);
       this.input.off('pointerdown', this.requestContinue, this);
+      this.sound.get(ASSET_KEYS.loreEnter)?.stop();
+      this.sound.get(ASSET_KEYS.loreExit)?.stop();
     });
 
     this.cameras.main.fadeIn(500, 0, 0, 0);
