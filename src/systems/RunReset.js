@@ -1,3 +1,5 @@
+import { ASSET_KEYS } from '../data/assetKeys.js';
+
 const CHAMBER01_SCENE_KEY = 'Chamber01Scene';
 const CHAMBER02_SCENE_KEY = 'Chamber02Scene';
 const LORE_SCENE_KEYS = ['LoreScreenScene', 'LoreCutsceneScene'];
@@ -6,6 +8,9 @@ export function restartRunFromDeath(scene) {
   if (!scene?.scene) {
     return;
   }
+
+  scene.game?.sound?.get(ASSET_KEYS.loreEnter)?.stop();
+  scene.game?.sound?.get(ASSET_KEYS.loreExit)?.stop();
 
   LORE_SCENE_KEYS.forEach((loreSceneKey) => {
     scene.scene.stop(loreSceneKey);
