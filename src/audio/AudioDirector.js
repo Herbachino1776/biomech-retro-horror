@@ -47,6 +47,7 @@ const SOUND_GROUPS = {
   },
   enemyAttack: {
     keys: [ASSET_KEYS.enemyAttack],
+    fallbackKeys: [ASSET_KEYS.enemyAttackFallback],
     volume: 0.18,
     detuneRange: 14,
     minIntervalMs: 120,
@@ -54,6 +55,7 @@ const SOUND_GROUPS = {
   },
   enemyHurt: {
     keys: [ASSET_KEYS.enemyHurt],
+    fallbackKeys: [ASSET_KEYS.enemyHurtFallback],
     volume: 0.2,
     detuneRange: 14,
     minIntervalMs: 90,
@@ -61,6 +63,7 @@ const SOUND_GROUPS = {
   },
   enemyDeath: {
     keys: [ASSET_KEYS.enemyDeath],
+    fallbackKeys: [ASSET_KEYS.enemyDeathFallback],
     volume: 0.24,
     detuneRange: 12,
     minIntervalMs: 180,
