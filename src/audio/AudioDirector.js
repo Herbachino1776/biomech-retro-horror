@@ -31,6 +31,7 @@ const SOUND_GROUPS = {
   },
   playerHurt: {
     keys: [ASSET_KEYS.playerHurt],
+    fallbackKeys: [ASSET_KEYS.playerHurtFallback],
     volume: 0.26,
     detuneRange: 10,
     minIntervalMs: 120,

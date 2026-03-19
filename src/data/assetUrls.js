@@ -23,6 +23,7 @@ import playerFootstepSlate03Url from '../../assets/audio/footsteps/player_footst
 import playerFootstepSlate04Url from '../../assets/audio/footsteps/player_footstep_slate_04.ogg';
 import playerAttack01Url from '../../assets/audio/player/player_attack_01.ogg';
 import playerHit01Url from '../../assets/audio/player/player_hit_01.ogg';
+import playerHurt01Url from '../../assets/audio/player/player_hurt_01.ogg';
 
 import { PROCEDURAL_AUDIO_URLS } from '../audio/proceduralAudio.js';
 import { ASSET_KEYS } from './assetKeys.js';
@@ -55,7 +56,8 @@ export const ASSET_URLS = {
   [ASSET_KEYS.playerAttackFallback]: PROCEDURAL_AUDIO_URLS.playerAttack,
   [ASSET_KEYS.playerHit]: playerHit01Url,
   [ASSET_KEYS.playerHitFallback]: PROCEDURAL_AUDIO_URLS.playerHit,
-  [ASSET_KEYS.playerHurt]: PROCEDURAL_AUDIO_URLS.playerHurt,
+  [ASSET_KEYS.playerHurt]: playerHurt01Url,
+  [ASSET_KEYS.playerHurtFallback]: PROCEDURAL_AUDIO_URLS.playerHurt,
   [ASSET_KEYS.playerDeath]: PROCEDURAL_AUDIO_URLS.playerDeath,
   [ASSET_KEYS.enemyAttack]: PROCEDURAL_AUDIO_URLS.enemyAttack,
   [ASSET_KEYS.enemyHurt]: PROCEDURAL_AUDIO_URLS.enemyHurt,
