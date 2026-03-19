@@ -34,6 +34,11 @@ import tollKeeperDeath01Url from '../../assets/audio/enemy/tollkeeper_death_01.o
 import minibossAttack01Url from '../../assets/audio/boss/miniboss_attack_01.ogg';
 import minibossHurt01Url from '../../assets/audio/boss/miniboss_hurt_01.ogg';
 import minibossDeath01Url from '../../assets/audio/boss/miniboss_death_01.ogg';
+import gateInteract01Url from '../../assets/audio/ui/gate_interact_01.ogg';
+import gateUnlock01Url from '../../assets/audio/ui/gate_unlock_01.ogg';
+import loreEnter01Url from '../../assets/audio/ui/lore_enter_01.ogg';
+import loreExit01Url from '../../assets/audio/ui/lore_exit_01.ogg';
+import banishmentSting01Url from '../../assets/audio/ui/banishment_sting_01.ogg';
 
 import { PROCEDURAL_AUDIO_URLS } from '../audio/proceduralAudio.js';
 import { ASSET_KEYS } from './assetKeys.js';
@@ -84,5 +89,10 @@ export const ASSET_URLS = {
   [ASSET_KEYS.minibossHurt]: minibossHurt01Url,
   [ASSET_KEYS.minibossHurtFallback]: PROCEDURAL_AUDIO_URLS.minibossHurt,
   [ASSET_KEYS.minibossDeath]: minibossDeath01Url,
-  [ASSET_KEYS.minibossDeathFallback]: PROCEDURAL_AUDIO_URLS.minibossDeath
+  [ASSET_KEYS.minibossDeathFallback]: PROCEDURAL_AUDIO_URLS.minibossDeath,
+  [ASSET_KEYS.gateInteract]: gateInteract01Url,
+  [ASSET_KEYS.gateUnlock]: gateUnlock01Url,
+  [ASSET_KEYS.loreEnter]: loreEnter01Url,
+  [ASSET_KEYS.loreExit]: loreExit01Url,
+  [ASSET_KEYS.banishmentSting]: banishmentSting01Url
 };

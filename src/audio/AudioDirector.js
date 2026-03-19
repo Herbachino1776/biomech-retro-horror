@@ -116,6 +116,41 @@ const SOUND_GROUPS = {
     detuneRange: 0,
     minIntervalMs: 900,
     allowOverlap: false
+  },
+  gateInteract: {
+    keys: [ASSET_KEYS.gateInteract],
+    volume: 0.24,
+    detuneRange: 0,
+    minIntervalMs: 180,
+    allowOverlap: false
+  },
+  gateUnlock: {
+    keys: [ASSET_KEYS.gateUnlock],
+    volume: 0.3,
+    detuneRange: 0,
+    minIntervalMs: 500,
+    allowOverlap: false
+  },
+  loreEnter: {
+    keys: [ASSET_KEYS.loreEnter],
+    volume: 0.28,
+    detuneRange: 0,
+    minIntervalMs: 400,
+    allowOverlap: false
+  },
+  loreExit: {
+    keys: [ASSET_KEYS.loreExit],
+    volume: 0.26,
+    detuneRange: 0,
+    minIntervalMs: 300,
+    allowOverlap: false
+  },
+  banishmentSting: {
+    keys: [ASSET_KEYS.banishmentSting],
+    volume: 0.34,
+    detuneRange: 0,
+    minIntervalMs: 900,
+    allowOverlap: false
   }
 };
 
@@ -153,6 +188,11 @@ export class AudioDirector {
   playEnemyAttack(profile = 'enemy') { this.playProfileGroup(profile, 'attack'); }
   playEnemyHurt(profile = 'enemy') { this.playProfileGroup(profile, 'hurt'); }
   playEnemyDeath(profile = 'enemy') { this.playProfileGroup(profile, 'death'); }
+  playGateInteract() { this.playGroup('gateInteract'); }
+  playGateUnlock() { this.playGroup('gateUnlock'); }
+  playLoreEnter() { this.playGroup('loreEnter'); }
+  playLoreExit() { this.playGroup('loreExit'); }
+  playBanishmentSting() { this.playGroup('banishmentSting'); }
 
   playProfileGroup(profile, event) {
     const group = PROFILE_MAP[profile]?.[event];

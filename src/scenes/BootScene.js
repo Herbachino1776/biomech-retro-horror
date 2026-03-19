@@ -58,6 +58,11 @@ export class BootScene extends Phaser.Scene {
     this.preloadAudioAsset(ASSET_KEYS.minibossHurtFallback);
     this.preloadAudioAsset(ASSET_KEYS.minibossDeath);
     this.preloadAudioAsset(ASSET_KEYS.minibossDeathFallback);
+    this.preloadAudioAsset(ASSET_KEYS.gateInteract);
+    this.preloadAudioAsset(ASSET_KEYS.gateUnlock);
+    this.preloadAudioAsset(ASSET_KEYS.loreEnter);
+    this.preloadAudioAsset(ASSET_KEYS.loreExit);
+    this.preloadAudioAsset(ASSET_KEYS.banishmentSting);
   }
 
 

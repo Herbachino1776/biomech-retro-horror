@@ -480,6 +480,7 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
+    this.audioDirector?.playGateInteract();
     this.beginGateTransitionToChamber02();
   }
 
@@ -690,6 +691,7 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   playMinibossRewardBeat() {
+    this.audioDirector?.playBanishmentSting();
     const shakeDurations = [420, 420, 380, 380, 320];
     const shakeIntensities = [0.012, 0.011, 0.01, 0.009, 0.0075];
     let elapsed = 0;
@@ -726,6 +728,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.minibossRewardReleaseTimer?.remove(false);
     this.minibossRewardReleaseTimer = this.time.delayedCall(2060, () => {
+      this.audioDirector?.playGateUnlock();
       this.isMinibossRewardActive = false;
     });
   }
