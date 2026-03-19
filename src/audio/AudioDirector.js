@@ -39,6 +39,7 @@ const SOUND_GROUPS = {
   },
   playerDeath: {
     keys: [ASSET_KEYS.playerDeath],
+    fallbackKeys: [ASSET_KEYS.playerDeathFallback],
     volume: 0.32,
     detuneRange: 0,
     minIntervalMs: 600,
