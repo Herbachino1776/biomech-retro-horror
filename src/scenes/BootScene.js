@@ -40,6 +40,7 @@ export class BootScene extends Phaser.Scene {
     this.preloadAudioAsset(ASSET_KEYS.playerHit);
     this.preloadAudioAsset(ASSET_KEYS.playerHitFallback);
     this.preloadAudioAsset(ASSET_KEYS.playerHurt);
+    this.preloadAudioAsset(ASSET_KEYS.playerHurtFallback);
     this.preloadAudioAsset(ASSET_KEYS.playerDeath);
     this.preloadAudioAsset(ASSET_KEYS.enemyAttack);
     this.preloadAudioAsset(ASSET_KEYS.enemyHurt);
