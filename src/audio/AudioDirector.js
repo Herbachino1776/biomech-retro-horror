@@ -95,6 +95,7 @@ const SOUND_GROUPS = {
   },
   minibossAttack: {
     keys: [ASSET_KEYS.minibossAttack],
+    fallbackKeys: [ASSET_KEYS.minibossAttackFallback],
     volume: 0.26,
     detuneRange: 0,
     minIntervalMs: 260,
@@ -102,6 +103,7 @@ const SOUND_GROUPS = {
   },
   minibossHurt: {
     keys: [ASSET_KEYS.minibossHurt],
+    fallbackKeys: [ASSET_KEYS.minibossHurtFallback],
     volume: 0.25,
     detuneRange: 0,
     minIntervalMs: 160,
@@ -109,6 +111,7 @@ const SOUND_GROUPS = {
   },
   minibossDeath: {
     keys: [ASSET_KEYS.minibossDeath],
+    fallbackKeys: [ASSET_KEYS.minibossDeathFallback],
     volume: 0.34,
     detuneRange: 0,
     minIntervalMs: 900,

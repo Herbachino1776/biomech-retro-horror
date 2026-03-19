@@ -40,8 +40,11 @@ export const ASSET_KEYS = {
   tollKeeperHurt: 'tollkeeper-hurt',
   tollKeeperDeath: 'tollkeeper-death',
   minibossAttack: 'miniboss-attack',
+  minibossAttackFallback: 'miniboss-attack-fallback',
   minibossHurt: 'miniboss-hurt',
-  minibossDeath: 'miniboss-death'
+  minibossHurtFallback: 'miniboss-hurt-fallback',
+  minibossDeath: 'miniboss-death',
+  minibossDeathFallback: 'miniboss-death-fallback'
 };
 
 export const REQUIRED_TEXTURE_KEYS = [
@@ -86,6 +89,9 @@ export const REQUIRED_TEXTURE_KEYS = [
   ASSET_KEYS.tollKeeperHurt,
   ASSET_KEYS.tollKeeperDeath,
   ASSET_KEYS.minibossAttack,
+  ASSET_KEYS.minibossAttackFallback,
   ASSET_KEYS.minibossHurt,
-  ASSET_KEYS.minibossDeath
+  ASSET_KEYS.minibossHurtFallback,
+  ASSET_KEYS.minibossDeath,
+  ASSET_KEYS.minibossDeathFallback
 ];
