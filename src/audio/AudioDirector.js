@@ -71,6 +71,7 @@ const SOUND_GROUPS = {
   },
   tollKeeperAttack: {
     keys: [ASSET_KEYS.tollKeeperAttack],
+    fallbackKeys: [ASSET_KEYS.enemyAttackFallback],
     volume: 0.22,
     detuneRange: 8,
     minIntervalMs: 180,
@@ -78,6 +79,7 @@ const SOUND_GROUPS = {
   },
   tollKeeperHurt: {
     keys: [ASSET_KEYS.tollKeeperHurt],
+    fallbackKeys: [ASSET_KEYS.enemyHurtFallback],
     volume: 0.24,
     detuneRange: 8,
     minIntervalMs: 140,
@@ -85,6 +87,7 @@ const SOUND_GROUPS = {
   },
   tollKeeperDeath: {
     keys: [ASSET_KEYS.tollKeeperDeath],
+    fallbackKeys: [ASSET_KEYS.enemyDeathFallback],
     volume: 0.3,
     detuneRange: 0,
     minIntervalMs: 400,
