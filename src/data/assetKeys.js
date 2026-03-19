@@ -49,7 +49,9 @@ export const ASSET_KEYS = {
   gateUnlock: 'ui-gate-unlock-01',
   loreEnter: 'ui-lore-enter-01',
   loreExit: 'ui-lore-exit-01',
-  banishmentSting: 'ui-banishment-sting-01'
+  banishmentSting: 'ui-banishment-sting-01',
+  ambientChamber01Loop01: 'ambient-chamber01-loop-01',
+  ambientChamber02Loop01: 'ambient-chamber02-loop-01'
 };
 
 export const REQUIRED_TEXTURE_KEYS = [
@@ -103,5 +105,7 @@ export const REQUIRED_TEXTURE_KEYS = [
   ASSET_KEYS.gateUnlock,
   ASSET_KEYS.loreEnter,
   ASSET_KEYS.loreExit,
-  ASSET_KEYS.banishmentSting
+  ASSET_KEYS.banishmentSting,
+  ASSET_KEYS.ambientChamber01Loop01,
+  ASSET_KEYS.ambientChamber02Loop01
 ];

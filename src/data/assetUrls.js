@@ -39,6 +39,8 @@ import gateUnlock01Url from '../../assets/audio/ui/gate_unlock_01.ogg';
 import loreEnter01Url from '../../assets/audio/ui/lore_enter_01.ogg';
 import loreExit01Url from '../../assets/audio/ui/lore_exit_01.ogg';
 import banishmentSting01Url from '../../assets/audio/ui/banishment_sting_01.ogg';
+import ambientChamber01Loop01Url from '../../assets/audio/ambient/ambient_chamber01_loop_01.ogg';
+import ambientChamber02Loop01Url from '../../assets/audio/ambient/ambient_chamber02_loop_01.ogg';
 
 import { PROCEDURAL_AUDIO_URLS } from '../audio/proceduralAudio.js';
 import { ASSET_KEYS } from './assetKeys.js';
@@ -94,5 +96,7 @@ export const ASSET_URLS = {
   [ASSET_KEYS.gateUnlock]: gateUnlock01Url,
   [ASSET_KEYS.loreEnter]: loreEnter01Url,
   [ASSET_KEYS.loreExit]: loreExit01Url,
-  [ASSET_KEYS.banishmentSting]: banishmentSting01Url
+  [ASSET_KEYS.banishmentSting]: banishmentSting01Url,
+  [ASSET_KEYS.ambientChamber01Loop01]: ambientChamber01Loop01Url,
+  [ASSET_KEYS.ambientChamber02Loop01]: ambientChamber02Loop01Url
 };
