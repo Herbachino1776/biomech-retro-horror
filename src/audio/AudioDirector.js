@@ -2,7 +2,12 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 
 const SOUND_GROUPS = {
   footstep: {
-    keys: [ASSET_KEYS.playerFootstepA, ASSET_KEYS.playerFootstepB],
+    keys: [
+      ASSET_KEYS.playerFootstepSlate01,
+      ASSET_KEYS.playerFootstepSlate02,
+      ASSET_KEYS.playerFootstepSlate03,
+      ASSET_KEYS.playerFootstepSlate04
+    ],
     volume: 0.18,
     detuneRange: 18,
     minIntervalMs: 90,
