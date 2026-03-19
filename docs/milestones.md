@@ -30,11 +30,17 @@
 - ship chamber 02 TOLL-KEEPER gate unlock + exit lore payoff
 - preserve death/restart/reset plus portrait/landscape usability
 
-## Milestone 4 — Audio Identity (Next)
-- add ambient audio and SFX layering
-- reinforce chamber/lore transition mood
+## Milestone 4 — Audio Identity (Completed / Closed Out)
+- ship ambient audio and SFX layering in the current slice
+- reinforce chamber/lore transition mood with integrated cues
+- keep the audio pass scoped to the shipped Chamber 01 + Chamber 02 baseline
 
-## Milestone 5 — Polish + Stability (Planned)
+## Milestone 5 — Content Expansion (Active)
+- extend beyond the shipped chamber 01 + chamber 02 baseline
+- add the next playable area progression using established patterns
+- preserve the shipped audio-integrated slice while expanding content
+
+## Milestone 6 — Polish + Stability (Planned)
 - replace remaining temporary surfaces as needed
 - tighten hit feedback and transitions
 - maintain mobile browser usability and performance

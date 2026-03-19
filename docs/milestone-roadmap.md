@@ -50,15 +50,16 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 **Acceptance Criteria:** functional audio layering for chamber/gameplay/lore states.
 **Dependencies:** stable lore-screen/state structure from Milestones 1–3.
 **Do Not Expand Prematurely:** full soundtrack production.
-**Status:** planned.
+**Status:** completed.
+**Completion Notes:** the shipped Chamber 01 + Chamber 02 slice now includes chamber ambience, player footsteps/combat/death feedback, skitter/TOLL-KEEPER/miniboss cues, and lore/gate/banishment treatment; recent audio QA/polish is already reflected in the current baseline.
 
-## Milestone 5 — Second Area / Content Expansion
-**Purpose:** prove repeatability of slice systems in a second environment.
-**Scope / Includes:** second chamber/area using established control/combat/lore patterns.
-**Acceptance Criteria:** second area is playable without regressing Milestone 1 quality bar.
+## Milestone 5 — Content Expansion
+**Purpose:** extend the playable slice beyond the current Chamber 01 + Chamber 02 baseline.
+**Scope / Includes:** next playable area/chamber progression using established control/combat/lore/audio patterns.
+**Acceptance Criteria:** next content step is playable without regressing the current baseline quality bar.
 **Dependencies:** Milestones 1–4 stable.
-**Do Not Expand Prematurely:** open-world structure or large branching map.
-**Status:** planned.
+**Do Not Expand Prematurely:** open-world structure, broad branching map, or new systems not required by the next playable area.
+**Status:** next planned / active.
 
 ## Milestone 6 — Polish, Testing, and Release Slice
 **Purpose:** stabilize and package a coherent release-quality vertical slice.

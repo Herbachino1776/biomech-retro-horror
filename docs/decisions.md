@@ -45,7 +45,8 @@ Concise record of technical/design decisions currently in force.
 - Milestone 2 is complete and established the current Chamber 01 + Chamber 02 progression/lore baseline.
 - Milestone 3 was defined as **Encounter Expansion + Combat Readability** and is now complete for the shipped Chamber 01 + Chamber 02 slice.
 - Milestone 3 implementation landed in the intended order: regular enemy encounter depth pass first, miniboss refinement second, limited combat presentation support third.
-- Milestone 4 (audio identity) is the next planned milestone after Milestone 3 closeout.
+- Milestone 4 (**Audio Identity**) is complete for the shipped Chamber 01 + Chamber 02 slice.
+- Milestone 5 (**Content Expansion**) is now the active milestone.
 
 ## Lore Presentation Direction
 - Lore is a core identity system, not optional garnish.
