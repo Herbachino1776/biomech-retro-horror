@@ -63,6 +63,8 @@ export class BootScene extends Phaser.Scene {
     this.preloadAudioAsset(ASSET_KEYS.loreEnter);
     this.preloadAudioAsset(ASSET_KEYS.loreExit);
     this.preloadAudioAsset(ASSET_KEYS.banishmentSting);
+    this.preloadAudioAsset(ASSET_KEYS.ambientChamber01Loop01);
+    this.preloadAudioAsset(ASSET_KEYS.ambientChamber02Loop01);
   }
 
 

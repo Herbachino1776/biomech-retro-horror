@@ -140,6 +140,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.createLoreZones();
 
     this.audioDirector = new AudioDirector(this);
+    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01);
 
     this.player = new Player(this, 150, 360, PLAYER);
     this.physics.add.collider(this.player.sprite, this.platforms);
@@ -590,6 +591,8 @@ export class Chamber02Scene extends Phaser.Scene {
     this.player.body.setVelocity(0, 0);
     this.enemies.forEach((enemy) => enemy.body.setVelocity(0, 0));
 
+    this.audioDirector?.stopAmbientLoop();
+
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.launchLoreCutscene(loreEntry.cutsceneId);
     });
@@ -619,6 +622,7 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.isLoreTransitionActive = false;
     this.mobileControls.setMode('gameplay');
+    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01);
     this.cameras.main.fadeIn(500, 0, 0, 0);
   }
 

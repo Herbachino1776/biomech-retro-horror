@@ -172,12 +172,19 @@ const PROFILE_MAP = {
   }
 };
 
+const AMBIENT_SOUND_CONFIG = {
+  fadeDurationMs: 220,
+  volume: 0.13
+};
+
 export class AudioDirector {
   constructor(scene) {
     this.scene = scene;
     this.variantCursor = new Map();
     this.lastPlayedAt = new Map();
     this.activeSounds = new Map();
+    this.activeAmbient = null;
+    this.ambientFadeTween = null;
   }
 
   playPlayerFootstep() { this.playGroup('footstep'); }
@@ -193,6 +200,67 @@ export class AudioDirector {
   playLoreEnter() { this.playGroup('loreEnter'); }
   playLoreExit() { this.playGroup('loreExit'); }
   playBanishmentSting() { this.playGroup('banishmentSting'); }
+
+  playAmbientLoop(key, config = {}) {
+    if (!this.scene.sound || this.scene.sound.mute || !key || !this.scene.cache.audio.exists(key)) {
+      return;
+    }
+
+    const targetVolume = config.volume ?? AMBIENT_SOUND_CONFIG.volume;
+    if (this.activeAmbient?.key === key && this.activeAmbient.isPlaying) {
+      this.stopAmbientFadeTween();
+      this.activeAmbient.setVolume(targetVolume);
+      this.activeAmbient.setMute(false);
+      return;
+    }
+
+    this.stopAmbientLoop({ fadeOut: false });
+
+    const ambient = this.scene.sound.add(key, {
+      loop: true,
+      volume: targetVolume
+    });
+    ambient.play();
+    this.activeAmbient = ambient;
+  }
+
+  stopAmbientLoop({ fadeOut = true } = {}) {
+    if (!this.activeAmbient) {
+      return;
+    }
+
+    const ambient = this.activeAmbient;
+    this.activeAmbient = null;
+    this.stopAmbientFadeTween();
+
+    if (!fadeOut || !ambient.isPlaying) {
+      ambient.stop();
+      ambient.destroy();
+      return;
+    }
+
+    this.ambientFadeTween = this.scene.tweens.add({
+      targets: ambient,
+      volume: 0,
+      duration: AMBIENT_SOUND_CONFIG.fadeDurationMs,
+      onComplete: () => {
+        ambient.stop();
+        ambient.destroy();
+        if (this.ambientFadeTween?.targets?.includes?.(ambient)) {
+          this.ambientFadeTween = null;
+        }
+      }
+    });
+  }
+
+  stopAmbientFadeTween() {
+    if (!this.ambientFadeTween) {
+      return;
+    }
+
+    this.ambientFadeTween.stop();
+    this.ambientFadeTween = null;
+  }
 
   playProfileGroup(profile, event) {
     const group = PROFILE_MAP[profile]?.[event];
@@ -265,7 +333,9 @@ export class AudioDirector {
   }
 
   shutdown() {
+    this.stopAmbientLoop({ fadeOut: false });
     this.activeSounds.forEach((sound) => sound.stop());
     this.activeSounds.clear();
   }
 }
+
