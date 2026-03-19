@@ -23,6 +23,7 @@ export class HalfSkullMiniboss {
     this.attackState = 'idle';
     this.attackWindupStartedAt = -Infinity;
     this.attackCommitAt = -Infinity;
+    this.attackAudioLocked = false;
 
     this.usingTexture = scene.textures.exists(ASSET_KEYS.chamber01HalfSkullMiniboss);
     this.solidUnderlay = null;
@@ -67,7 +68,7 @@ export class HalfSkullMiniboss {
     this.active = active;
     this.syncSolidPresentation();
     if (!active && !this.dead) {
-      this.attackState = 'idle';
+      this.clearAttackState();
       this.body.setVelocityX(0);
     }
   }
@@ -98,9 +99,17 @@ export class HalfSkullMiniboss {
     if (this.attackState === 'windup') {
       this.body.setVelocityX(this.direction * this.config.windupDriftSpeed);
       if (time >= this.attackCommitAt) {
+        if (!this.canStartAttack()) {
+          this.clearAttackState();
+          return;
+        }
+
         this.attackState = 'recover';
         this.lastAttackTime = time;
-        this.scene.audioDirector?.playEnemyAttack(this.config.audioProfile ?? 'miniboss');
+        if (!this.attackAudioLocked) {
+          this.attackAudioLocked = true;
+          this.scene.audioDirector?.playEnemyAttack(this.config.audioProfile ?? 'miniboss');
+        }
         this.body.setVelocityX(this.direction * this.config.attackSpeed);
         this.body.setVelocityY(this.config.attackLiftVelocity);
       }
@@ -129,6 +138,17 @@ export class HalfSkullMiniboss {
     }
   }
 
+  clearAttackState() {
+    this.attackState = 'idle';
+    this.attackWindupStartedAt = -Infinity;
+    this.attackCommitAt = -Infinity;
+    this.attackAudioLocked = false;
+  }
+
+  canStartAttack() {
+    return this.active && !this.dead && this.body?.enable !== false;
+  }
+
   isTelegraphing(time = this.scene.time.now) {
     return !this.dead && this.attackState === 'windup' && time < this.attackCommitAt;
   }
@@ -155,7 +175,7 @@ export class HalfSkullMiniboss {
     }
 
     this.active = true;
-    this.attackState = 'idle';
+    this.clearAttackState();
     this.health -= amount;
     this.lastDamageFlashTime = time;
     this.hitPulseUntil = time + this.config.hitPulseMs;
@@ -168,6 +188,7 @@ export class HalfSkullMiniboss {
       this.scene.audioDirector?.playEnemyDeath(this.config.audioProfile ?? 'miniboss');
       this.health = 0;
       this.dead = true;
+      this.clearAttackState();
       this.body.enable = false;
       this.playDeathEffect();
     }
