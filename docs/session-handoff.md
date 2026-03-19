@@ -23,31 +23,34 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Chamber 02 post-lore reaction state is implemented: environmental ritual shift plus enemy wake/activation.
 - Chamber 02 TOLL-KEEPER encounter pair gates the exit and unlocks the end gate on defeat.
 - Chamber 02 exit gate lore trigger/payoff is active after unlock.
+- Chamber 01 + Chamber 02 ambience is integrated in the shipped slice.
+- Player footsteps/combat/death audio is present.
+- Skitter, TOLL-KEEPER, miniboss, lore/gate, and banishment cues are present.
+- Recent audio QA/polish is already reflected in the shipped baseline.
 - Mobile controls remain corrected for portrait and landscape playability.
 - Texture-first asset loading with fallback resilience remains stable.
 
 ## What Still Needs Work Now
 - Chamber 02 still ends with lore payoff rather than a playable Chamber 03 transition.
-- Audio identity pass (ambient + encounter + lore transitions) is still pending.
-- Combat presentation can still be polished further later, but current readability is sufficient for Milestone 3 closeout.
+- Content expansion beyond the shipped Chamber 01 + Chamber 02 slice is the next milestone focus.
+- Combat presentation can still be polished further later, but current readability is sufficient for the shipped baseline.
 
 ## Active Milestone
-**Milestone 4 — Audio Identity Pass: next up.**
+**Milestone 5 — Content Expansion: active.**
 
-### Milestone 4 Planning Definition
-- Core goal: establish oppressive audio identity without destabilizing the completed Chamber 01 + Chamber 02 encounter slice.
-- Scope: ambient chamber bed, combat feedback SFX, lore transition treatment.
-- Constraints: preserve mobile playability, preserve keyboard parity, do not expand content scope while adding audio.
+### Milestone 5 Planning Definition
+- Core goal: extend the shipped Chamber 01 + Chamber 02 audio-integrated slice with the next playable content step.
+- Scope: next area/chamber progression using established control, combat, lore, and audio patterns.
+- Constraints: preserve mobile playability, preserve keyboard parity, and do not destabilize the current shipped baseline while expanding content.
 
 ## Latest Completed Task
-- Milestone 3 closeout pass shipped and stabilized.
-- Verified Chamber 01 baseline encounter, miniboss flow/payoff, Chamber 01 -> Chamber 02 transition, Chamber 02 enemy encounters, TOLL-KEEPER gate sequence, exit lore trigger, and death/restart/reset.
-- Added a diegetic Chamber 02 shrine/ossuary prop so the lore trigger remains readable in-world.
-- Added clearer Chamber 02 exit-gate readiness aura feedback after TOLL-KEEPER defeat.
-- Updated docs/status files to mark Milestone 3 complete.
+- Milestone 4 audio identity pass is shipped and closed out.
+- Chamber 01 + Chamber 02 ambience, player footsteps/combat/death audio, skitter/TOLL-KEEPER/miniboss cues, and lore/gate/banishment cues are integrated in the current playable slice.
+- Recent audio QA/polish has already been folded into the shipped baseline without changing the slice scope.
+- Docs/status files now reflect Milestone 4 completion and Milestone 5 activation.
 
 ## Exact Next Best Step After This Task
-Begin **Milestone 4 audio planning/implementation** with a conservative pass on chamber ambience plus lore-transition audio cues.
+Begin **Milestone 5 content expansion planning** for the next playable area progression, using the shipped Chamber 01 + Chamber 02 audio-integrated slice as the stability baseline.
 
 ## Most Important Constraints
 1. Do not regress GitHub Pages/Vite base-path behavior.
@@ -56,5 +59,5 @@ Begin **Milestone 4 audio planning/implementation** with a conservative pass on 
 4. Keep texture-first rendering; fallback only on load failure.
 5. Preserve dedicated cinematic lore-screen flow as the preferred lore delivery direction.
 6. Preserve in-world ritual shrine/ossuary lore trigger presentation direction.
-7. Preserve Chamber 01 + Chamber 02 stability while polishing.
+7. Preserve Chamber 01 + Chamber 02 stability while expanding content.
 8. End meaningful tasks with `npm run build`.
