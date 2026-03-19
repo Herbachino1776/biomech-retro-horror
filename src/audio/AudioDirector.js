@@ -15,6 +15,7 @@ const SOUND_GROUPS = {
   },
   playerAttack: {
     keys: [ASSET_KEYS.playerAttack],
+    fallbackKeys: [ASSET_KEYS.playerAttackFallback],
     volume: 0.22,
     detuneRange: 12,
     minIntervalMs: 80,
@@ -160,7 +161,10 @@ export class AudioDirector {
       return;
     }
 
-    const key = this.nextVariantKey(groupName, soundConfig.keys);
+    const key = this.resolvePlayableKey(groupName, soundConfig.keys, soundConfig.fallbackKeys);
+    if (!key) {
+      return;
+    }
     const detune = soundConfig.detuneRange > 0 ? Math.round((Math.random() * 2 - 1) * soundConfig.detuneRange) : 0;
 
     if (!soundConfig.allowOverlap) {
@@ -188,6 +192,24 @@ export class AudioDirector {
     const key = keys[cursor % keys.length];
     this.variantCursor.set(groupName, cursor + 1);
     return key;
+  }
+
+  resolvePlayableKey(groupName, keys, fallbackKeys = []) {
+    const primaryKey = this.nextLoadedKey(groupName, keys);
+    if (primaryKey) {
+      return primaryKey;
+    }
+
+    return this.nextLoadedKey(`${groupName}-fallback`, fallbackKeys);
+  }
+
+  nextLoadedKey(groupName, keys = []) {
+    const loadedKeys = keys.filter((key) => this.scene.cache.audio.exists(key));
+    if (loadedKeys.length === 0) {
+      return null;
+    }
+
+    return this.nextVariantKey(groupName, loadedKeys);
   }
 
   shutdown() {
