@@ -17,6 +17,10 @@ import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
 import laughingEngineConceptUrl from '../../assets/concepts/laughing-engine-concept-01.png';
 import biomechUiFrameUrl from '../../assets/ui/biomech-ui-frame-01.png';
+import playerFootstepSlate01Url from '../../assets/audio/footsteps/player_footstep_slate_01.ogg';
+import playerFootstepSlate02Url from '../../assets/audio/footsteps/player_footstep_slate_02.ogg';
+import playerFootstepSlate03Url from '../../assets/audio/footsteps/player_footstep_slate_03.ogg';
+import playerFootstepSlate04Url from '../../assets/audio/footsteps/player_footstep_slate_04.ogg';
 
 import { PROCEDURAL_AUDIO_URLS } from '../audio/proceduralAudio.js';
 import { ASSET_KEYS } from './assetKeys.js';
@@ -41,8 +45,10 @@ export const ASSET_URLS = {
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,
   [ASSET_KEYS.laughingEngine]: laughingEngineConceptUrl,
   [ASSET_KEYS.uiFrame]: biomechUiFrameUrl,
-  [ASSET_KEYS.playerFootstepA]: PROCEDURAL_AUDIO_URLS.playerFootstepA,
-  [ASSET_KEYS.playerFootstepB]: PROCEDURAL_AUDIO_URLS.playerFootstepB,
+  [ASSET_KEYS.playerFootstepSlate01]: playerFootstepSlate01Url,
+  [ASSET_KEYS.playerFootstepSlate02]: playerFootstepSlate02Url,
+  [ASSET_KEYS.playerFootstepSlate03]: playerFootstepSlate03Url,
+  [ASSET_KEYS.playerFootstepSlate04]: playerFootstepSlate04Url,
   [ASSET_KEYS.playerAttack]: PROCEDURAL_AUDIO_URLS.playerAttack,
   [ASSET_KEYS.playerHit]: PROCEDURAL_AUDIO_URLS.playerHit,
   [ASSET_KEYS.playerHurt]: PROCEDURAL_AUDIO_URLS.playerHurt,

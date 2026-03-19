@@ -31,21 +31,33 @@ export class BootScene extends Phaser.Scene {
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
     this.load.image(ASSET_KEYS.laughingEngine, ASSET_URLS[ASSET_KEYS.laughingEngine]);
     this.load.image(ASSET_KEYS.uiFrame, ASSET_URLS[ASSET_KEYS.uiFrame]);
-    this.load.audio(ASSET_KEYS.playerFootstepA, ASSET_URLS[ASSET_KEYS.playerFootstepA]);
-    this.load.audio(ASSET_KEYS.playerFootstepB, ASSET_URLS[ASSET_KEYS.playerFootstepB]);
-    this.load.audio(ASSET_KEYS.playerAttack, ASSET_URLS[ASSET_KEYS.playerAttack]);
-    this.load.audio(ASSET_KEYS.playerHit, ASSET_URLS[ASSET_KEYS.playerHit]);
-    this.load.audio(ASSET_KEYS.playerHurt, ASSET_URLS[ASSET_KEYS.playerHurt]);
-    this.load.audio(ASSET_KEYS.playerDeath, ASSET_URLS[ASSET_KEYS.playerDeath]);
-    this.load.audio(ASSET_KEYS.enemyAttack, ASSET_URLS[ASSET_KEYS.enemyAttack]);
-    this.load.audio(ASSET_KEYS.enemyHurt, ASSET_URLS[ASSET_KEYS.enemyHurt]);
-    this.load.audio(ASSET_KEYS.enemyDeath, ASSET_URLS[ASSET_KEYS.enemyDeath]);
-    this.load.audio(ASSET_KEYS.tollKeeperAttack, ASSET_URLS[ASSET_KEYS.tollKeeperAttack]);
-    this.load.audio(ASSET_KEYS.tollKeeperHurt, ASSET_URLS[ASSET_KEYS.tollKeeperHurt]);
-    this.load.audio(ASSET_KEYS.tollKeeperDeath, ASSET_URLS[ASSET_KEYS.tollKeeperDeath]);
-    this.load.audio(ASSET_KEYS.minibossAttack, ASSET_URLS[ASSET_KEYS.minibossAttack]);
-    this.load.audio(ASSET_KEYS.minibossHurt, ASSET_URLS[ASSET_KEYS.minibossHurt]);
-    this.load.audio(ASSET_KEYS.minibossDeath, ASSET_URLS[ASSET_KEYS.minibossDeath]);
+    this.preloadAudioAsset(ASSET_KEYS.playerFootstepSlate01);
+    this.preloadAudioAsset(ASSET_KEYS.playerFootstepSlate02);
+    this.preloadAudioAsset(ASSET_KEYS.playerFootstepSlate03);
+    this.preloadAudioAsset(ASSET_KEYS.playerFootstepSlate04);
+    this.preloadAudioAsset(ASSET_KEYS.playerAttack);
+    this.preloadAudioAsset(ASSET_KEYS.playerHit);
+    this.preloadAudioAsset(ASSET_KEYS.playerHurt);
+    this.preloadAudioAsset(ASSET_KEYS.playerDeath);
+    this.preloadAudioAsset(ASSET_KEYS.enemyAttack);
+    this.preloadAudioAsset(ASSET_KEYS.enemyHurt);
+    this.preloadAudioAsset(ASSET_KEYS.enemyDeath);
+    this.preloadAudioAsset(ASSET_KEYS.tollKeeperAttack);
+    this.preloadAudioAsset(ASSET_KEYS.tollKeeperHurt);
+    this.preloadAudioAsset(ASSET_KEYS.tollKeeperDeath);
+    this.preloadAudioAsset(ASSET_KEYS.minibossAttack);
+    this.preloadAudioAsset(ASSET_KEYS.minibossHurt);
+    this.preloadAudioAsset(ASSET_KEYS.minibossDeath);
+  }
+
+
+  preloadAudioAsset(assetKey) {
+    const assetUrl = ASSET_URLS[assetKey];
+    if (!assetUrl) {
+      return;
+    }
+
+    this.load.audio(assetKey, assetUrl);
   }
 
   create() {
