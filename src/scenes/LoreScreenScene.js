@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { COLORS, LORE_SCREENS } from '../data/milestone1Config.js';
+import { ASSET_KEYS } from '../data/assetKeys.js';
 
 const LORE_DEPTH = {
   backdrop: 2,
@@ -53,6 +54,9 @@ export class LoreScreenScene extends Phaser.Scene {
 
   create(data) {
     this.returnSceneKey = data?.returnSceneKey ?? 'Chamber01Scene';
+    this.sound.get(ASSET_KEYS.loreEnter)?.stop();
+    this.sound.get(ASSET_KEYS.loreExit)?.stop();
+    this.sound.play?.(ASSET_KEYS.loreEnter);
     this.screenId = data?.screenId ?? null;
     this.screenConfig = LORE_SCREENS[this.screenId] ?? null;
     this.isClosing = false;
@@ -273,6 +277,9 @@ export class LoreScreenScene extends Phaser.Scene {
     }
 
     this.isClosing = true;
+    this.sound.get(ASSET_KEYS.loreEnter)?.stop();
+    this.sound.get(ASSET_KEYS.loreExit)?.stop();
+    this.sound.play?.(ASSET_KEYS.loreExit);
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.resume(this.returnSceneKey);

@@ -44,7 +44,12 @@ export const ASSET_KEYS = {
   minibossHurt: 'miniboss-hurt',
   minibossHurtFallback: 'miniboss-hurt-fallback',
   minibossDeath: 'miniboss-death',
-  minibossDeathFallback: 'miniboss-death-fallback'
+  minibossDeathFallback: 'miniboss-death-fallback',
+  gateInteract: 'ui-gate-interact-01',
+  gateUnlock: 'ui-gate-unlock-01',
+  loreEnter: 'ui-lore-enter-01',
+  loreExit: 'ui-lore-exit-01',
+  banishmentSting: 'ui-banishment-sting-01'
 };
 
 export const REQUIRED_TEXTURE_KEYS = [
@@ -93,5 +98,10 @@ export const REQUIRED_TEXTURE_KEYS = [
   ASSET_KEYS.minibossHurt,
   ASSET_KEYS.minibossHurtFallback,
   ASSET_KEYS.minibossDeath,
-  ASSET_KEYS.minibossDeathFallback
+  ASSET_KEYS.minibossDeathFallback,
+  ASSET_KEYS.gateInteract,
+  ASSET_KEYS.gateUnlock,
+  ASSET_KEYS.loreEnter,
+  ASSET_KEYS.loreExit,
+  ASSET_KEYS.banishmentSting
 ];

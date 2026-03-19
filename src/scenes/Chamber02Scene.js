@@ -463,6 +463,9 @@ export class Chamber02Scene extends Phaser.Scene {
     }
 
     this.exitGateUnlocked = unlocked;
+    if (unlocked) {
+      this.audioDirector?.playGateUnlock();
+    }
     this.exitGateSigil?.setAlpha(unlocked ? 0.3 : 0.14);
     this.applyExitGateVisualState(unlocked);
     this.exitGateBarrier?.setVisible(!unlocked);
@@ -559,6 +562,7 @@ export class Chamber02Scene extends Phaser.Scene {
     }
 
     this.hasTriggeredExitGateLore = true;
+    this.audioDirector?.playGateInteract();
     this.beginLoreSequence({ cutsceneId: CHAMBER02_EXIT_GATE.loreCutsceneId });
   }
 

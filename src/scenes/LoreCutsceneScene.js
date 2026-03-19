@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { COLORS } from '../data/milestone1Config.js';
 import { LORE_CUTSCENES } from '../data/loreCutsceneConfig.js';
+import { ASSET_KEYS } from '../data/assetKeys.js';
 
 const DEPTH = {
   backdrop: 1,
@@ -53,6 +54,9 @@ export class LoreCutsceneScene extends Phaser.Scene {
 
   create(data) {
     this.returnSceneKey = data?.returnSceneKey ?? 'Chamber02Scene';
+    this.sound.get(ASSET_KEYS.loreEnter)?.stop();
+    this.sound.get(ASSET_KEYS.loreExit)?.stop();
+    this.sound.play?.(ASSET_KEYS.loreEnter);
     this.cutsceneId = data?.cutsceneId ?? null;
     this.cutscene = this.cutsceneId ? LORE_CUTSCENES[this.cutsceneId] : null;
     this.isClosing = false;
@@ -270,6 +274,9 @@ export class LoreCutsceneScene extends Phaser.Scene {
     }
 
     this.isClosing = true;
+    this.sound.get(ASSET_KEYS.loreEnter)?.stop();
+    this.sound.get(ASSET_KEYS.loreExit)?.stop();
+    this.sound.play?.(ASSET_KEYS.loreExit);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.resume(this.returnSceneKey);
       this.game.events.emit('lore-cutscene-complete', { cutsceneId: this.cutsceneId });
