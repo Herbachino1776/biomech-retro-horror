@@ -16,15 +16,22 @@ export class HudOverlay {
             CONCEPT_PRESENTATION.uiFrame.crop.width,
             CONCEPT_PRESENTATION.uiFrame.crop.height
           )
-          .setDisplaySize(220, 62)
           .setScrollFactor(0)
           .setDepth(30)
           .setTint(0xd2c2ac)
-      : scene.add.rectangle(16, 16, 220, 62, 0x0f1313).setOrigin(0).setScrollFactor(0).setDepth(30);
+          .setAlpha(0.9)
+      : scene.add.rectangle(16, 16, 220, 62, 0x0f1313, 0.84).setOrigin(0).setScrollFactor(0).setDepth(30);
 
     if (!hasUiFrame) {
-      frame.setStrokeStyle(2, 0x64453a, 1);
+      frame.setStrokeStyle(2, 0x64453a, 0.92);
     }
+
+    this.frame = frame;
+    this.frameBacking = scene.add
+      .rectangle(0, 0, 0, 0, 0x090807, 0.28)
+      .setOrigin(0)
+      .setScrollFactor(0)
+      .setDepth(29.5);
 
     this.healthLabel = scene.add
       .text(30, 28, 'VESSEL INTEGRITY', {
@@ -44,12 +51,12 @@ export class HudOverlay {
       .setScrollFactor(0)
       .setDepth(31);
 
-    this.bossBarFrame = scene.add.rectangle(0, 0, 0, 0, 0x090807, 0.94).setScrollFactor(0).setDepth(30).setVisible(false);
-    this.bossBarFrame.setStrokeStyle(2, 0x6b5647, 0.95);
-    this.bossBarFill = scene.add.rectangle(0, 0, 0, 0, 0x7c1111, 0.98).setScrollFactor(0).setDepth(31).setVisible(false);
-    this.bossBarUnderlay = scene.add.rectangle(0, 0, 0, 0, 0x18110f, 0.98).setScrollFactor(0).setDepth(30).setVisible(false);
-    this.bossTelegraph = scene.add.rectangle(0, 0, 0, 0, 0xc39146, 0.3).setScrollFactor(0).setDepth(31).setVisible(false);
-    this.bossNamePlate = scene.add.rectangle(0, 0, 0, 0, 0x120d0c, 0.88).setScrollFactor(0).setDepth(30).setVisible(false);
+    this.bossBarFrame = scene.add.rectangle(0, 0, 0, 0, 0x090807, 0.86).setScrollFactor(0).setDepth(30).setVisible(false);
+    this.bossBarFrame.setStrokeStyle(2, 0x6b5647, 0.9);
+    this.bossBarFill = scene.add.rectangle(0, 0, 0, 0, 0x7c1111, 0.96).setScrollFactor(0).setDepth(31).setVisible(false);
+    this.bossBarUnderlay = scene.add.rectangle(0, 0, 0, 0, 0x18110f, 0.92).setScrollFactor(0).setDepth(30).setVisible(false);
+    this.bossTelegraph = scene.add.rectangle(0, 0, 0, 0, 0xc39146, 0.22).setScrollFactor(0).setDepth(31).setVisible(false);
+    this.bossNamePlate = scene.add.rectangle(0, 0, 0, 0, 0x120d0c, 0.78).setScrollFactor(0).setDepth(30).setVisible(false);
     this.bossName = scene.add
       .text(0, 0, '', {
         fontFamily: 'monospace',
@@ -73,8 +80,8 @@ export class HudOverlay {
       .setDepth(31)
       .setVisible(false);
 
-    this.frame = frame;
     this.elements = [
+      this.frameBacking,
       this.frame,
       this.healthLabel,
       this.healthValue,
@@ -87,30 +94,74 @@ export class HudOverlay {
       this.bossSubtitle
     ];
 
-    this.layoutBossBar();
-    scene.scale.on('resize', this.layoutBossBar, this);
+    this.layout();
+    scene.scale.on('resize', this.layout, this);
     scene.events.once('shutdown', () => {
-      scene.scale.off('resize', this.layoutBossBar, this);
+      scene.scale.off('resize', this.layout, this);
     });
   }
 
-  layoutBossBar() {
+  getSafeAreaInsetPx(edge = 'top') {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return 0;
+    }
+
+    const cssVar = `--safe-area-inset-${edge}`;
+    const rawValue = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+    const parsed = Number.parseFloat(rawValue);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  layout() {
     const width = this.scene.scale.width;
     const height = this.scene.scale.height;
     const isPortrait = height >= width;
-    const frameWidth = Math.min(width - 32, isPortrait ? 312 : 520);
-    const frameHeight = isPortrait ? 46 : 52;
-    const bottomMargin = isPortrait ? 22 : 18;
-    const centerX = width / 2;
-    const centerY = height - bottomMargin - frameHeight / 2;
+    const safeAreaTop = this.getSafeAreaInsetPx('top');
+    const safeAreaBottom = this.getSafeAreaInsetPx('bottom');
 
-    this.bossBarFrame.setPosition(centerX, centerY).setSize(frameWidth, frameHeight);
-    this.bossBarUnderlay.setPosition(centerX, centerY + 10).setSize(frameWidth - 24, 12);
-    this.bossTelegraph.setPosition(centerX - (frameWidth - 24) / 2, centerY + 10).setOrigin(0, 0.5).setSize(0, 12);
-    this.bossBarFill.setPosition(centerX - (frameWidth - 24) / 2, centerY + 10).setOrigin(0, 0.5).setSize(frameWidth - 24, 12);
-    this.bossNamePlate.setPosition(centerX, centerY - 10).setSize(Math.min(frameWidth - 18, isPortrait ? 250 : 300), isPortrait ? 22 : 24);
-    this.bossName.setPosition(centerX, centerY - 13).setFontSize(isPortrait ? 13 : 16);
-    this.bossSubtitle.setPosition(centerX, centerY + (isPortrait ? 1 : 0)).setFontSize(isPortrait ? 9 : 10);
+    const frameX = isPortrait ? 12 : 16;
+    const frameY = safeAreaTop + (isPortrait ? 10 : 14);
+    const frameWidth = Math.min(width - frameX * 2, isPortrait ? 176 : 220);
+    const frameHeight = isPortrait ? 50 : 62;
+    const healthLabelX = frameX + (isPortrait ? 12 : 14);
+    const healthLabelY = frameY + (isPortrait ? 9 : 12);
+    const healthValueY = frameY + (isPortrait ? 24 : 30);
+
+    if (this.frame.setDisplaySize) {
+      this.frame.setPosition(frameX, frameY).setDisplaySize(frameWidth, frameHeight);
+    } else {
+      this.frame.setPosition(frameX, frameY).setSize(frameWidth, frameHeight);
+    }
+
+    this.frameBacking.setPosition(frameX + 5, frameY + 5).setSize(frameWidth - 10, frameHeight - 10);
+    this.healthLabel
+      .setPosition(healthLabelX, healthLabelY)
+      .setFontSize(isPortrait ? '10px' : '12px');
+    this.healthValue
+      .setPosition(healthLabelX, healthValueY)
+      .setFontSize(isPortrait ? '15px' : '18px');
+
+    const frameWidthBoss = Math.min(width - (isPortrait ? 24 : 36), isPortrait ? 276 : 520);
+    const frameHeightBoss = isPortrait ? 38 : 52;
+    const underlayWidth = frameWidthBoss - (isPortrait ? 18 : 24);
+    const underlayHeight = isPortrait ? 10 : 12;
+    const bottomMargin = safeAreaBottom + (isPortrait ? 14 : 18);
+    const centerX = width / 2;
+    const centerY = height - bottomMargin - frameHeightBoss / 2;
+
+    this.bossBarFrame.setPosition(centerX, centerY).setSize(frameWidthBoss, frameHeightBoss);
+    this.bossBarUnderlay.setPosition(centerX, centerY + (isPortrait ? 8 : 10)).setSize(underlayWidth, underlayHeight);
+    this.bossTelegraph.setPosition(centerX - underlayWidth / 2, centerY + (isPortrait ? 8 : 10)).setOrigin(0, 0.5).setSize(0, underlayHeight);
+    this.bossBarFill.setPosition(centerX - underlayWidth / 2, centerY + (isPortrait ? 8 : 10)).setOrigin(0, 0.5).setSize(underlayWidth, underlayHeight);
+    this.bossNamePlate
+      .setPosition(centerX, centerY - (isPortrait ? 8 : 10))
+      .setSize(Math.min(frameWidthBoss - 16, isPortrait ? 210 : 300), isPortrait ? 18 : 24);
+    this.bossName.setPosition(centerX, centerY - (isPortrait ? 10 : 13)).setFontSize(isPortrait ? 12 : 16);
+    this.bossSubtitle.setPosition(centerX, centerY + (isPortrait ? 0 : 1)).setFontSize(isPortrait ? 8 : 10);
+  }
+
+  layoutBossBar() {
+    this.layout();
   }
 
   update(current, max) {
@@ -126,7 +177,7 @@ export class HudOverlay {
       return;
     }
 
-    this.layoutBossBar();
+    this.layout();
     const ratio = max <= 0 ? 0 : Math.max(0, Math.min(1, current / max));
     const telegraphRatio = Math.max(0, Math.min(1, telegraph));
     this.bossName.setText(name);
@@ -134,8 +185,8 @@ export class HudOverlay {
     this.bossBarFill.displayWidth = Math.max(0, this.bossBarUnderlay.width * ratio);
     this.bossTelegraph.displayWidth = Math.max(0, this.bossBarUnderlay.width * telegraphRatio);
     this.bossBarFill.setFillStyle(wounded ? 0xa46d48 : 0x7c1111, wounded ? 1 : 0.97);
-    this.bossBarFrame.setStrokeStyle(2, telegraphRatio > 0 ? 0xae8750 : wounded ? 0x8b6246 : 0x6b5647, 0.98);
-    this.bossNamePlate.setFillStyle(telegraphRatio > 0 ? 0x1d140f : 0x120d0c, telegraphRatio > 0 ? 0.94 : 0.88);
+    this.bossBarFrame.setStrokeStyle(2, telegraphRatio > 0 ? 0xae8750 : wounded ? 0x8b6246 : 0x6b5647, 0.96);
+    this.bossNamePlate.setFillStyle(telegraphRatio > 0 ? 0x1d140f : 0x120d0c, telegraphRatio > 0 ? 0.88 : 0.78);
     this.bossName.setColor(telegraphRatio > 0 ? '#f0d9a7' : '#dcccb5');
     this.bossSubtitle.setColor(telegraphRatio > 0 ? '#d4b57b' : wounded ? '#c9a282' : '#9a8779');
   }

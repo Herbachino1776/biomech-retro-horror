@@ -38,13 +38,16 @@ export class Chamber01Scene extends Phaser.Scene {
     this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01);
 
     this.player = new Player(this, PLAYER.startX, PLAYER.startY, PLAYER);
+    this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
     this.physics.add.collider(this.player.sprite, this.platforms);
 
     this.enemy = new SkitterServitor(this, SKITTER.startX, SKITTER.startY, SKITTER);
+    this.applyGameplayReadabilitySupport(this.enemy.sprite, { fill: 0x9eb26d, alpha: 0.14, scale: 1.05 });
     this.enemyLastAttackHitId = -1;
     this.physics.add.collider(this.enemy.sprite, this.platforms);
 
     this.miniboss = new HalfSkullMiniboss(this, CHAMBER01_MINIBOSS.spawnX, CHAMBER01_MINIBOSS.spawnY, CHAMBER01_MINIBOSS);
+    this.applyGameplayReadabilitySupport(this.miniboss.sprite, { fill: 0xc8b07d, alpha: 0.13, scale: 1.16 });
     this.minibossLastAttackHitId = -1;
     this.physics.add.collider(this.miniboss.sprite, this.platforms);
     this.miniboss.setActive(false);
@@ -198,8 +201,8 @@ export class Chamber01Scene extends Phaser.Scene {
 
   createPlatforms() {
     const hasBackdropConcept = this.textures.exists(ASSET_KEYS.chamberBackground);
-    const floorAlpha = hasBackdropConcept ? 0.2 : 1;
-    const platformAlpha = hasBackdropConcept ? 0.58 : 1;
+    const floorAlpha = hasBackdropConcept ? 0.14 : 1;
+    const platformAlpha = hasBackdropConcept ? 0.42 : 1;
     const gateAlpha = hasBackdropConcept ? 0.7 : 0.9;
 
     const floor = this.add.rectangle(WORLD.width / 2, WORLD.floorY + 32, WORLD.width, 64, COLORS.foreground, floorAlpha).setOrigin(0.5);
@@ -212,7 +215,7 @@ export class Chamber01Scene extends Phaser.Scene {
       this.platforms.add(block);
 
       this.add
-        .rectangle(platform.x, platform.y - 4, platform.width, Math.max(10, platform.height + 4), COLORS.oil, hasBackdropConcept ? 0.2 : 0)
+        .rectangle(platform.x, platform.y - 4, platform.width, Math.max(10, platform.height + 4), COLORS.oil, hasBackdropConcept ? 0.1 : 0)
         .setOrigin(0.5)
         .setDepth(-5);
     });
@@ -273,12 +276,12 @@ export class Chamber01Scene extends Phaser.Scene {
     const slabAlpha = hasBackdropConcept ? CONCEPT_PRESENTATION.chamberBackdrop.slabAlphaWithConcept : CONCEPT_PRESENTATION.chamberBackdrop.slabAlphaFallbackOnly;
     const slabTint = hasBackdropConcept ? CONCEPT_PRESENTATION.chamberBackdrop.slabTintWithConcept : CONCEPT_PRESENTATION.chamberBackdrop.slabTintFallbackOnly;
 
-    this.add.rectangle(420, 190, 760, 230, slabTint, slabAlpha).setOrigin(0.5).setDepth(-10);
-    this.add.rectangle(1200, 170, 900, 240, slabTint, slabAlpha).setOrigin(0.5).setDepth(-10);
-    this.add.ellipse(1120, 255, 340, 210, COLORS.oil, hasBackdropConcept ? 0.1 : 1).setStrokeStyle(3, COLORS.rust, hasBackdropConcept ? 0.2 : 0.8).setDepth(-9);
-    this.add.rectangle(1120, 255, 18, 160, COLORS.bone, hasBackdropConcept ? 0.08 : 0.9).setDepth(-9);
-    this.add.rectangle(1030, 255, 10, 130, COLORS.bone, hasBackdropConcept ? 0.07 : 0.7).setDepth(-9);
-    this.add.rectangle(1210, 255, 10, 130, COLORS.bone, hasBackdropConcept ? 0.07 : 0.7).setDepth(-9);
+    this.add.ellipse(420, 192, 760, 228, slabTint, slabAlpha * 0.72).setOrigin(0.5).setDepth(-10);
+    this.add.ellipse(1200, 174, 900, 236, slabTint, slabAlpha * 0.72).setOrigin(0.5).setDepth(-10);
+    this.add.ellipse(1120, 255, 340, 210, COLORS.oil, hasBackdropConcept ? 0.08 : 1).setStrokeStyle(3, COLORS.rust, hasBackdropConcept ? 0.15 : 0.8).setDepth(-9);
+    this.add.ellipse(1120, 255, 18, 160, COLORS.bone, hasBackdropConcept ? 0.06 : 0.9).setDepth(-9);
+    this.add.ellipse(1030, 255, 10, 130, COLORS.bone, hasBackdropConcept ? 0.05 : 0.7).setDepth(-9);
+    this.add.ellipse(1210, 255, 10, 130, COLORS.bone, hasBackdropConcept ? 0.05 : 0.7).setDepth(-9);
 
     if (this.textures.exists(ASSET_KEYS.laughingEngine)) {
       this.add
@@ -320,11 +323,13 @@ export class Chamber01Scene extends Phaser.Scene {
       this.add.image(1435, 202, ASSET_KEYS.chamber01RibArch).setDisplaySize(760, 360).setTint(0xd4c5af).setAlpha(0.5).setDepth(-6);
     }
 
-    this.add.text(1032, 355, 'ALTAR ENGINE // FALLBACK SAFETY', {
-      fontFamily: 'monospace',
-      fontSize: '12px',
-      color: '#8f7d72'
-    }).setDepth(-7).setAlpha(hasBackdropConcept ? 0.32 : 1);
+    if (!hasBackdropConcept) {
+      this.add.text(1032, 355, 'ALTAR ENGINE // FALLBACK SAFETY', {
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        color: '#8f7d72'
+      }).setDepth(-7).setAlpha(1);
+    }
   }
 
   setupMobileUiCamera() {
@@ -358,7 +363,7 @@ export class Chamber01Scene extends Phaser.Scene {
       const worldBandHeight = Phaser.Math.Clamp(Math.floor(height * PORTRAIT_LAYOUT.worldBandRatio), PORTRAIT_LAYOUT.worldBandMin, worldBandMax);
       camera.setViewport(0, 0, width, worldBandHeight);
       camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
-      camera.setFollowOffset(-140, PORTRAIT_LAYOUT.portraitFollowOffsetY);
+      camera.setFollowOffset(-120, PORTRAIT_LAYOUT.portraitFollowOffsetY);
       this.mobileControls.setReservedBottomPx(height - worldBandHeight);
       this.restartText.setPosition(width / 2, Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY));
       this.layoutMinibossRewardText(width, height, worldBandHeight);
@@ -386,6 +391,39 @@ export class Chamber01Scene extends Phaser.Scene {
       .setFontSize(isPortrait ? '28px' : '42px')
       .setStroke('#201514', isPortrait ? 6 : 8)
       .setShadow(0, isPortrait ? 4 : 6, '#090404', isPortrait ? 8 : 10, true, true);
+  }
+
+  applyGameplayReadabilitySupport(target, { fill = 0xd2c2ac, alpha = 0.16, scale = 1.08 } = {}) {
+    if (!target) {
+      return null;
+    }
+
+    const shadow = this.add
+      .ellipse(target.x, WORLD.floorY + 6, 104 * scale, 22 * scale, 0x050404, alpha * 1.1)
+      .setDepth(target.depth - 0.6);
+    const halo = this.add
+      .ellipse(target.x, target.y - 6, 86 * scale, 120 * scale, fill, alpha)
+      .setDepth(target.depth - 0.4);
+
+    target.__gameplayShadow = shadow;
+    target.__gameplayHalo = halo;
+
+    return this.events.on(Phaser.Scenes.Events.UPDATE, () => {
+      if (!target.active) {
+        halo.setVisible(false);
+        shadow.setVisible(false);
+        return;
+      }
+
+      halo
+        .setVisible(target.visible)
+        .setPosition(target.x, target.y - 8)
+        .setAlpha(target.visible ? alpha : 0);
+      shadow
+        .setVisible(target.visible)
+        .setPosition(target.x, WORLD.floorY + 6)
+        .setAlpha(target.visible ? alpha * 1.1 : 0);
+    });
   }
 
   createLoreZones() {

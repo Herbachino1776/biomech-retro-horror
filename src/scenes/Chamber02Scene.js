@@ -146,6 +146,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01);
 
     this.player = new Player(this, 150, 360, PLAYER);
+    this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
     this.physics.add.collider(this.player.sprite, this.platforms);
 
     this.enemies = [];
@@ -208,7 +209,7 @@ export class Chamber02Scene extends Phaser.Scene {
           .image(segmentX, 220, ASSET_KEYS.chamber02BackgroundPlate)
           .setDisplaySize(plateSegmentWidth + 44, 382)
           .setTint(parityTint)
-          .setAlpha(0.56)
+          .setAlpha(0.46)
           .setDepth(-13);
       } else {
         this.add
@@ -222,7 +223,7 @@ export class Chamber02Scene extends Phaser.Scene {
           .image(segmentX + 32, 276, ASSET_KEYS.chamber02ForegroundHornArch)
           .setDisplaySize(230, 226)
           .setTint(0xb39f89)
-          .setAlpha(0.22)
+          .setAlpha(0.16)
           .setDepth(-11);
       }
     }
@@ -232,27 +233,27 @@ export class Chamber02Scene extends Phaser.Scene {
       this.add
         .tileSprite(CHAMBER02_WORLD_WIDTH / 2, WORLD.floorY + 4, CHAMBER02_WORLD_WIDTH, floorStripHeight, ASSET_KEYS.chamber02FloorStrip)
         .setTint(0xd8cab4)
-        .setAlpha(0.84)
+        .setAlpha(0.78)
         .setDepth(-10);
     }
 
     this.sanctumAura = this.add
-      .ellipse(1930, 404, 500, 96, COLORS.sickly, 0.16)
+      .ellipse(1930, 404, 500, 96, COLORS.sickly, 0.12)
       .setDepth(-9);
 
-    this.ambientVeil = this.add.ellipse(1970, 286, 660, 340, COLORS.sickly, 0.04).setDepth(-7.5).setScale(1, 1);
+    this.ambientVeil = this.add.ellipse(1970, 286, 660, 340, COLORS.sickly, 0.03).setDepth(-7.5).setScale(1, 1);
   }
 
   createPlatforms() {
     const floor = this.add
-      .rectangle(CHAMBER02_WORLD_WIDTH / 2, WORLD.floorY + 28, CHAMBER02_WORLD_WIDTH, 72, COLORS.foreground, 0.9)
+      .rectangle(CHAMBER02_WORLD_WIDTH / 2, WORLD.floorY + 28, CHAMBER02_WORLD_WIDTH, 72, COLORS.foreground, 0.78)
       .setOrigin(0.5)
       .setDepth(-8);
     this.physics.add.existing(floor, true);
     this.platforms.add(floor);
 
     CHAMBER02_PLATFORMS.forEach((platform) => {
-      const slab = this.add.rectangle(platform.x, platform.y, platform.width, platform.height, COLORS.foreground, 0.9).setDepth(-7);
+      const slab = this.add.rectangle(platform.x, platform.y, platform.width, platform.height, COLORS.foreground, 0.76).setDepth(-7);
       this.physics.add.existing(slab, true);
       this.platforms.add(slab);
     });
@@ -344,6 +345,11 @@ export class Chamber02Scene extends Phaser.Scene {
 
   createSkitterEnemy(x, y, config) {
     const enemy = new SkitterServitor(this, x, y, config);
+    this.applyGameplayReadabilitySupport(enemy.sprite, {
+      fill: config.variantName === 'TOLL-KEEPER' ? 0xc2b07d : 0x9eb26d,
+      alpha: config.variantName === 'TOLL-KEEPER' ? 0.14 : 0.12,
+      scale: config.variantName === 'TOLL-KEEPER' ? 1.1 : 1.04
+    });
     this.physics.add.collider(enemy.sprite, this.platforms);
     this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (attackZone, enemySprite) => {
       this.handlePlayerHitEnemy(attackZone, enemySprite, enemy);
@@ -501,10 +507,10 @@ export class Chamber02Scene extends Phaser.Scene {
 
   createLoreShrineProp(entry) {
     const baseY = entry.y + 14;
-    this.add.ellipse(entry.x, baseY + 4, 188, 44, COLORS.oil, 0.34).setDepth(-5.1);
-    this.add.ellipse(entry.x, baseY + 2, 142, 30, COLORS.sickly, 0.16).setDepth(-5.05);
-    this.add.rectangle(entry.x, baseY - 2, 134, 22, COLORS.bloodMetal, 0.8).setDepth(-5);
-    this.add.rectangle(entry.x, baseY - 8, 88, 14, COLORS.foreground, 0.92).setDepth(-4.95);
+    this.add.ellipse(entry.x, baseY + 4, 188, 44, COLORS.oil, 0.3).setDepth(-5.1);
+    this.add.ellipse(entry.x, baseY + 2, 142, 30, COLORS.sickly, 0.14).setDepth(-5.05);
+    this.add.ellipse(entry.x, baseY - 2, 134, 24, COLORS.bloodMetal, 0.72).setDepth(-5);
+    this.add.ellipse(entry.x, baseY - 8, 88, 16, COLORS.foreground, 0.86).setDepth(-4.95);
     this.add.ellipse(entry.x, baseY - 26, 84, 40, COLORS.bone, 0.86).setDepth(-4.9);
     this.add.ellipse(entry.x, baseY - 24, 44, 16, COLORS.oil, 0.84).setDepth(-4.85);
     this.add.ellipse(entry.x - 28, baseY - 30, 28, 64, COLORS.bone, 0.7).setAngle(-18).setDepth(-4.84);
@@ -673,6 +679,32 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
 
+  applyGameplayReadabilitySupport(target, { fill = 0xd2c2ac, alpha = 0.16, scale = 1.08 } = {}) {
+    if (!target) {
+      return null;
+    }
+
+    const shadow = this.add
+      .ellipse(target.x, WORLD.floorY + 6, 104 * scale, 22 * scale, 0x050404, alpha * 1.05)
+      .setDepth(target.depth - 0.6);
+    const halo = this.add
+      .ellipse(target.x, target.y - 6, 84 * scale, 118 * scale, fill, alpha)
+      .setDepth(target.depth - 0.4);
+
+    this.events.on(Phaser.Scenes.Events.UPDATE, () => {
+      if (!target.active) {
+        halo.setVisible(false);
+        shadow.setVisible(false);
+        return;
+      }
+
+      halo.setVisible(target.visible).setPosition(target.x, target.y - 8).setAlpha(target.visible ? alpha : 0);
+      shadow.setVisible(target.visible).setPosition(target.x, WORLD.floorY + 6).setAlpha(target.visible ? alpha * 1.05 : 0);
+    });
+
+    return { halo, shadow };
+  }
+
   cleanupSceneUi() {
     this.restartText?.setVisible(false);
     this.mobileControls?.setMode('init');
@@ -712,7 +744,7 @@ export class Chamber02Scene extends Phaser.Scene {
       );
       camera.setViewport(0, 0, width, worldBandHeight);
       camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
-      camera.setFollowOffset(-140, PORTRAIT_LAYOUT.portraitFollowOffsetY);
+      camera.setFollowOffset(-120, PORTRAIT_LAYOUT.portraitFollowOffsetY);
       this.mobileControls.setReservedBottomPx(height - worldBandHeight);
       this.restartText.setPosition(
         width / 2,
