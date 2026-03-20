@@ -201,24 +201,15 @@ export class Chamber01Scene extends Phaser.Scene {
 
   createPlatforms() {
     const hasBackdropConcept = this.textures.exists(ASSET_KEYS.chamberBackground);
-    const floorAlpha = hasBackdropConcept ? 0.14 : 1;
-    const platformAlpha = hasBackdropConcept ? 0.42 : 1;
     const gateAlpha = hasBackdropConcept ? 0.7 : 0.9;
 
-    const floor = this.add.rectangle(WORLD.width / 2, WORLD.floorY + 32, WORLD.width, 64, COLORS.foreground, floorAlpha).setOrigin(0.5);
-    this.physics.add.existing(floor, true);
-    this.platforms.add(floor);
+    this.createInvisiblePlatform(WORLD.width / 2, WORLD.floorY + 32, WORLD.width, 64);
 
-    CHAMBER_PLATFORM_LAYOUT.forEach((platform) => {
-      const block = this.add.rectangle(platform.x, platform.y, platform.width, platform.height, COLORS.bloodMetal, platformAlpha).setOrigin(0.5);
-      this.physics.add.existing(block, true);
-      this.platforms.add(block);
-
-      this.add
-        .rectangle(platform.x, platform.y - 4, platform.width, Math.max(10, platform.height + 4), COLORS.oil, hasBackdropConcept ? 0.1 : 0)
-        .setOrigin(0.5)
-        .setDepth(-5);
-    });
+    CHAMBER_PLATFORM_LAYOUT
+      .filter((platform) => platform.x < 1200)
+      .forEach((platform) => {
+        this.createInvisiblePlatform(platform.x, platform.y, platform.width, platform.height);
+      });
 
     if (this.textures.exists(ASSET_KEYS.chamber01FloorStrip)) {
       this.add
@@ -232,7 +223,7 @@ export class Chamber01Scene extends Phaser.Scene {
     const gateY = 372;
     const gateHeight = 250;
 
-    this.gateBarrier = this.add.rectangle(gateX, gateY, 48, gateHeight).setOrigin(0.5);
+    this.gateBarrier = this.createInvisiblePlatform(gateX, gateY, 48, gateHeight);
 
     if (this.textures.exists(ASSET_KEYS.chamber02VertebralHornGate)) {
       this.gateArt = this.add
@@ -245,13 +236,19 @@ export class Chamber01Scene extends Phaser.Scene {
     }
 
     this.gateSigil = this.add.ellipse(gateX - 26, gateY + 6, 34, 92, COLORS.sickly, 0.12).setDepth(-3);
-    this.physics.add.existing(this.gateBarrier, true);
-    this.platforms.add(this.gateBarrier);
-
     this.gateZone = this.add.zone(gateX - 96, gateY + 14, 108, 144).setOrigin(0.5);
     this.physics.add.existing(this.gateZone, true);
 
     this.updateGateActivationVisuals();
+  }
+
+
+  createInvisiblePlatform(x, y, width, height) {
+    const platform = this.add.rectangle(x, y, width, height, 0x000000, 0).setOrigin(0.5);
+    platform.setVisible(false);
+    this.physics.add.existing(platform, true);
+    this.platforms.add(platform);
+    return platform;
   }
 
   renderGrayboxBackdrop() {
