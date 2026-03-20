@@ -1,10 +1,10 @@
 export const PORTRAIT_LAYOUT = {
-  worldBandRatio: 0.84,
-  worldBandMin: 360,
-  worldBandMax: 560,
-  minControlBand: 168,
-  portraitZoom: 1.1,
-  portraitFollowOffsetY: 40,
+  worldBandRatio: 0.865,
+  worldBandMin: 400,
+  worldBandMax: 620,
+  minControlBand: 136,
+  portraitZoom: 1.08,
+  portraitFollowOffsetY: 28,
   // Keep chamber scale monumental on portrait while preserving control usability.
   desktopZoom: 1,
   desktopFollowOffsetY: 0,
@@ -13,33 +13,36 @@ export const PORTRAIT_LAYOUT = {
 };
 
 export const MOBILE_CONTROLS_LAYOUT = {
-  safeAreaBottomPadding: 16,
+  safeAreaBottomPadding: 12,
   safeAreaTopPadding: 8,
   minAnchorY: 110,
   joystick: {
-    baseRadius: 54,
-    knobRadius: 26,
-    hitDiameter: 156,
-    maxTravel: 28,
+    baseRadius: { portrait: 46, landscape: 54 },
+    knobRadius: { portrait: 22, landscape: 26 },
+    hitDiameter: { portrait: 136, landscape: 156 },
+    maxTravel: { portrait: 24, landscape: 28 },
     deadZone: 10
   },
   actionButtons: {
-    jumpRadius: 28,
-    attackRadius: 38,
-    interactRadius: 28
+    jumpRadius: { portrait: 24, landscape: 28 },
+    attackRadius: { portrait: 32, landscape: 38 },
+    interactRadius: { portrait: 24, landscape: 28 },
+    hitMultiplier: { portrait: 2.25, landscape: 2.45 }
   },
   portrait: {
-    baseBandHeight: 136,
-    horizontalEdgeInset: 70,
-    leftAnchorRatio: 0.2,
-    rightAnchorRatio: 0.81,
-    anchorBandRatioY: 0.52,
-    attackYOffset: 0,
-    jumpOffsetX: 58,
-    jumpOffsetY: 48,
-    interactOffsetX: 6,
-    interactOffsetY: 84,
-    maxAnchorBottomPadding: 58
+    baseBandHeight: 118,
+    horizontalEdgeInset: 48,
+    leftAnchorRatio: 0.18,
+    rightAnchorRatio: 0.84,
+    anchorBandRatioY: 0.56,
+    attackYOffset: 2,
+    jumpOffsetX: 48,
+    jumpOffsetY: 40,
+    interactOffsetX: 2,
+    interactOffsetY: 72,
+    maxAnchorBottomPadding: 40,
+    dialogueInteractInset: 74,
+    dialogueInteractY: 64
   },
   landscape: {
     horizontalEdgeInset: 72,
@@ -51,6 +54,8 @@ export const MOBILE_CONTROLS_LAYOUT = {
     jumpOffsetY: 50,
     interactOffsetX: 2,
     interactOffsetY: 88,
-    maxAnchorBottomPadding: 56
+    maxAnchorBottomPadding: 56,
+    dialogueInteractInset: 92,
+    dialogueInteractY: 88
   }
 };

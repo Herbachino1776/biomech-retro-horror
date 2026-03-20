@@ -2,21 +2,25 @@ import Phaser from 'phaser';
 import { MOBILE_CONTROLS_LAYOUT } from '../data/layoutConfig.js';
 
 const CONTROL_COLORS = {
-  outer: 0x261d19,
-  inner: 0x3a2b24,
+  outer: 0x1f1714,
+  shell: 0x2c211c,
+  inner: 0x352720,
   stroke: 0x8f7d72,
   active: 0x6f8c59,
-  glyph: '#d2c2ac'
+  glyph: '#d2c2ac',
+  glyphMuted: '#8f7d72',
+  shadow: 0x090706
 };
 
-const GAMEPLAY_RING_ALPHA = 0.75;
-const FOCUSED_RING_ALPHA = 0.9;
+const GAMEPLAY_RING_ALPHA = 0.54;
+const FOCUSED_RING_ALPHA = 0.82;
 
 export class MobileControls {
   constructor(scene) {
     this.scene = scene;
     this.enabled = scene.sys.game.device.input.touch;
     this.mode = 'init';
+    this.isPortrait = false;
 
     this.state = {
       left: false,
@@ -59,69 +63,101 @@ export class MobileControls {
   }
 
   createControls() {
-    this.joystickBase = this.scene.add
-      .circle(0, 0, MOBILE_CONTROLS_LAYOUT.joystick.baseRadius, CONTROL_COLORS.outer, 0.68)
-      .setStrokeStyle(3, CONTROL_COLORS.stroke, 0.8)
-      .setDepth(60)
+    this.joystickShadow = this.scene.add
+      .ellipse(0, 0, 0, 0, CONTROL_COLORS.shadow, 0.28)
+      .setDepth(59)
       .setScrollFactor(0);
-    this.joystickKnob = this.scene.add
-      .circle(0, 0, MOBILE_CONTROLS_LAYOUT.joystick.knobRadius, CONTROL_COLORS.inner, GAMEPLAY_RING_ALPHA)
-      .setStrokeStyle(2, CONTROL_COLORS.stroke, 0.95)
-      .setDepth(61)
-      .setScrollFactor(0);
-    this.joystickZone = this.scene.add
-      .zone(0, 0, MOBILE_CONTROLS_LAYOUT.joystick.hitDiameter, MOBILE_CONTROLS_LAYOUT.joystick.hitDiameter)
+    this.joystickBase = this.scene.add.circle(0, 0, 1, CONTROL_COLORS.outer, 0.68).setDepth(60).setScrollFactor(0);
+    this.joystickShell = this.scene.add.circle(0, 0, 1, CONTROL_COLORS.shell, 0.74).setDepth(60.2).setScrollFactor(0);
+    this.joystickCore = this.scene.add.circle(0, 0, 1, CONTROL_COLORS.inner, 0.52).setDepth(60.3).setScrollFactor(0);
+    this.joystickKnob = this.scene.add.circle(0, 0, 1, CONTROL_COLORS.inner, GAMEPLAY_RING_ALPHA).setDepth(61).setScrollFactor(0);
+    this.joystickMarkLeft = this.scene.add.text(0, 0, '◁', {
+      fontFamily: 'monospace',
+      fontSize: '12px',
+      color: CONTROL_COLORS.glyphMuted,
+      fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(60.5).setScrollFactor(0);
+    this.joystickMarkRight = this.scene.add.text(0, 0, '▷', {
+      fontFamily: 'monospace',
+      fontSize: '12px',
+      color: CONTROL_COLORS.glyphMuted,
+      fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(60.5).setScrollFactor(0);
+    this.joystickZone = this.scene.add.zone(0, 0, 1, 1)
       .setOrigin(0.5)
       .setDepth(62)
       .setScrollFactor(0)
       .setInteractive({ useHandCursor: false })
       .on('pointerdown', (pointer) => this.startJoystick(pointer));
-    this.uiElements.push(this.joystickBase, this.joystickKnob, this.joystickZone);
 
-    this.jumpControl = this.createButton('JUMP', 'jump', MOBILE_CONTROLS_LAYOUT.actionButtons.jumpRadius);
-    this.attackControl = this.createButton('ATTACK', 'attack', MOBILE_CONTROLS_LAYOUT.actionButtons.attackRadius);
-    this.interactControl = this.createButton('RITE', 'interact', MOBILE_CONTROLS_LAYOUT.actionButtons.interactRadius, 0.62);
+    this.uiElements.push(
+      this.joystickShadow,
+      this.joystickBase,
+      this.joystickShell,
+      this.joystickCore,
+      this.joystickKnob,
+      this.joystickMarkLeft,
+      this.joystickMarkRight,
+      this.joystickZone
+    );
+
+    this.jumpControl = this.createButton('JUMP', 'jump');
+    this.attackControl = this.createButton('ATTACK', 'attack');
+    this.interactControl = this.createButton('RITE', 'interact', 0.6);
 
     this.layout();
     this.setMode('gameplay');
   }
 
-  createButton(label, action, radius, alpha = GAMEPLAY_RING_ALPHA) {
-    const ring = this.scene.add
-      .circle(0, 0, radius, CONTROL_COLORS.inner, alpha)
-      .setStrokeStyle(2, CONTROL_COLORS.stroke, 0.95)
-      .setDepth(60)
-      .setScrollFactor(0);
+  createButton(label, action, alpha = GAMEPLAY_RING_ALPHA) {
+    const shadow = this.scene.add.ellipse(0, 0, 1, 1, CONTROL_COLORS.shadow, 0.28).setDepth(59).setScrollFactor(0);
+    const outer = this.scene.add.circle(0, 0, 1, CONTROL_COLORS.outer, 0.72).setDepth(60).setScrollFactor(0);
+    const shell = this.scene.add.circle(0, 0, 1, CONTROL_COLORS.shell, 0.76).setDepth(60.15).setScrollFactor(0);
+    const ring = this.scene.add.circle(0, 0, 1, CONTROL_COLORS.inner, alpha).setDepth(60.3).setScrollFactor(0);
 
-    const text = this.scene.add
-      .text(0, 1, label, {
-        fontFamily: 'monospace',
-        fontSize: radius > 36 ? '14px' : '13px',
-        color: CONTROL_COLORS.glyph,
-        fontStyle: 'bold'
-      })
-      .setOrigin(0.5)
-      .setDepth(61)
-      .setScrollFactor(0);
+    const text = this.scene.add.text(0, 1, label, {
+      fontFamily: 'monospace',
+      fontSize: '13px',
+      color: CONTROL_COLORS.glyph,
+      fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(61).setScrollFactor(0);
 
-    const hitArea = this.scene.add
-      .zone(0, 0, radius * 2.45, radius * 2.45)
-      .setOrigin(0.5)
-      .setDepth(62)
-      .setScrollFactor(0);
+    const hitArea = this.scene.add.zone(0, 0, 1, 1).setOrigin(0.5).setDepth(62).setScrollFactor(0);
 
     const control = {
       action,
-      radius,
+      shadow,
+      outer,
+      shell,
       ring,
       text,
       hitArea,
+      radius: 1,
+      setRadius: (radius, hitMultiplier) => {
+        const hitDiameter = radius * 2 * hitMultiplier;
+        control.radius = radius;
+        shadow.setSize(radius * 2.12, radius * 1.08);
+        outer.setRadius(radius);
+        outer.setStrokeStyle(Math.max(1, Math.round(radius * 0.07)), CONTROL_COLORS.stroke, 0.54);
+        shell.setRadius(radius * 0.86);
+        shell.setStrokeStyle(Math.max(1, Math.round(radius * 0.05)), CONTROL_COLORS.stroke, 0.22);
+        ring.setRadius(radius * 0.68);
+        ring.setStrokeStyle(Math.max(1, Math.round(radius * 0.06)), CONTROL_COLORS.stroke, 0.9);
+        text.setFontSize(radius >= 34 ? '13px' : '11px');
+        hitArea.setSize(hitDiameter, hitDiameter);
+      },
       setPosition: (x, y) => {
+        shadow.setPosition(x, y + Math.max(4, control.radius * 0.14));
+        outer.setPosition(x, y);
+        shell.setPosition(x, y);
         ring.setPosition(x, y);
         text.setPosition(x, y + 1);
         hitArea.setPosition(x, y);
       },
       setVisible: (visible) => {
+        shadow.setVisible(visible);
+        outer.setVisible(visible);
+        shell.setVisible(visible);
         ring.setVisible(visible);
         text.setVisible(visible);
         hitArea.setVisible(visible);
@@ -140,8 +176,36 @@ export class MobileControls {
       .on('pointerout', (pointer) => this.onRelease(action, pointer.id, control));
 
     this.controls.push(control);
-    this.uiElements.push(ring, text, hitArea);
+    this.uiElements.push(shadow, outer, shell, ring, text, hitArea);
     return control;
+  }
+
+  getOrientationValue(value) {
+    if (typeof value === 'number') {
+      return value;
+    }
+
+    return this.isPortrait ? value.portrait : value.landscape;
+  }
+
+  refreshControlGeometry() {
+    const joystickBaseRadius = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.joystick.baseRadius);
+    const joystickKnobRadius = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.joystick.knobRadius);
+    const joystickHitDiameter = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.joystick.hitDiameter);
+
+    this.joystickShadow.setSize(joystickBaseRadius * 2.4, joystickBaseRadius * 1.18);
+    this.joystickBase.setRadius(joystickBaseRadius).setStrokeStyle(2, CONTROL_COLORS.stroke, 0.48);
+    this.joystickShell.setRadius(joystickBaseRadius * 0.86).setStrokeStyle(2, CONTROL_COLORS.stroke, 0.22);
+    this.joystickCore.setRadius(joystickBaseRadius * 0.64).setStrokeStyle(1, CONTROL_COLORS.stroke, 0.16);
+    this.joystickKnob.setRadius(joystickKnobRadius).setStrokeStyle(2, CONTROL_COLORS.stroke, 0.92);
+    this.joystickZone.setSize(joystickHitDiameter, joystickHitDiameter);
+    this.joystickMarkLeft.setFontSize(joystickBaseRadius > 50 ? '12px' : '11px');
+    this.joystickMarkRight.setFontSize(joystickBaseRadius > 50 ? '12px' : '11px');
+
+    const hitMultiplier = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.hitMultiplier);
+    this.attackControl.setRadius(this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.attackRadius), hitMultiplier);
+    this.jumpControl.setRadius(this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.jumpRadius), hitMultiplier);
+    this.interactControl.setRadius(this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.interactRadius), hitMultiplier);
   }
 
   startJoystick(pointer) {
@@ -165,7 +229,7 @@ export class MobileControls {
   updateJoystickFromPointer(pointer) {
     const dx = pointer.x - this.joystickBase.x;
     const dy = pointer.y - this.joystickBase.y;
-    const maxDistance = MOBILE_CONTROLS_LAYOUT.joystick.maxTravel;
+    const maxDistance = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.joystick.maxTravel);
     const distance = Math.hypot(dx, dy);
     const clampedDistance = Math.min(distance, maxDistance);
     const angle = Math.atan2(dy, dx);
@@ -291,18 +355,20 @@ export class MobileControls {
     const width = this.scene.scale.width;
     const height = this.scene.scale.height;
 
-    const isPortrait = height >= width;
+    this.isPortrait = height >= width;
     const safeAreaBottom = this.getSafeAreaInsetPx('bottom');
-    const orientationLayout = isPortrait ? MOBILE_CONTROLS_LAYOUT.portrait : MOBILE_CONTROLS_LAYOUT.landscape;
+    const orientationLayout = this.isPortrait ? MOBILE_CONTROLS_LAYOUT.portrait : MOBILE_CONTROLS_LAYOUT.landscape;
+
+    this.refreshControlGeometry();
 
     const leftAnchorX = Math.max(orientationLayout.horizontalEdgeInset, width * orientationLayout.leftAnchorRatio);
-    const defaultReservedBottom = isPortrait
+    const defaultReservedBottom = this.isPortrait
       ? orientationLayout.baseBandHeight + safeAreaBottom + MOBILE_CONTROLS_LAYOUT.safeAreaBottomPadding
       : 0;
 
     const reservedBottom = Math.max(this.reservedBottomPx, defaultReservedBottom);
-    const controlsTopY = isPortrait ? height - reservedBottom : 0;
-    const lowerAnchorY = isPortrait
+    const controlsTopY = this.isPortrait ? height - reservedBottom : 0;
+    const lowerAnchorY = this.isPortrait
       ? Phaser.Math.Clamp(
           controlsTopY + reservedBottom * orientationLayout.anchorBandRatioY,
           MOBILE_CONTROLS_LAYOUT.minAnchorY,
@@ -315,8 +381,13 @@ export class MobileControls {
         );
     const rightAnchorX = Math.min(width - orientationLayout.horizontalEdgeInset, width * orientationLayout.rightAnchorRatio);
 
+    this.joystickShadow.setPosition(leftAnchorX, lowerAnchorY + Math.max(4, this.joystickBase.radius * 0.18));
     this.joystickBase.setPosition(leftAnchorX, lowerAnchorY);
+    this.joystickShell.setPosition(leftAnchorX, lowerAnchorY);
+    this.joystickCore.setPosition(leftAnchorX, lowerAnchorY);
     this.joystickZone.setPosition(leftAnchorX, lowerAnchorY);
+    this.joystickMarkLeft.setPosition(leftAnchorX - this.joystickBase.radius * 0.42, lowerAnchorY + 1);
+    this.joystickMarkRight.setPosition(leftAnchorX + this.joystickBase.radius * 0.42, lowerAnchorY + 1);
     this.resetJoystick();
 
     this.attackControl.setPosition(rightAnchorX, lowerAnchorY - orientationLayout.attackYOffset);
@@ -341,8 +412,13 @@ export class MobileControls {
     this.mode = mode;
     const gameplayVisible = mode === 'gameplay';
 
+    this.joystickShadow.setVisible(gameplayVisible);
     this.joystickBase.setVisible(gameplayVisible);
+    this.joystickShell.setVisible(gameplayVisible);
+    this.joystickCore.setVisible(gameplayVisible);
     this.joystickKnob.setVisible(gameplayVisible);
+    this.joystickMarkLeft.setVisible(gameplayVisible);
+    this.joystickMarkRight.setVisible(gameplayVisible);
     this.joystickZone.setVisible(gameplayVisible);
     this.jumpControl.setVisible(gameplayVisible);
     this.attackControl.setVisible(gameplayVisible);
@@ -352,7 +428,13 @@ export class MobileControls {
 
     if (mode === 'dialogue' || mode === 'dead') {
       const safeAreaTop = this.getSafeAreaInsetPx('top');
-      this.interactControl.setPosition(this.scene.scale.width - 92, 88 + safeAreaTop + MOBILE_CONTROLS_LAYOUT.safeAreaTopPadding);
+      const orientationLayout = this.scene.scale.height >= this.scene.scale.width
+        ? MOBILE_CONTROLS_LAYOUT.portrait
+        : MOBILE_CONTROLS_LAYOUT.landscape;
+      this.interactControl.setPosition(
+        this.scene.scale.width - orientationLayout.dialogueInteractInset,
+        orientationLayout.dialogueInteractY + safeAreaTop + MOBILE_CONTROLS_LAYOUT.safeAreaTopPadding
+      );
       this.interactControl.ring.setFillStyle(CONTROL_COLORS.inner, FOCUSED_RING_ALPHA);
     } else {
       this.layout();
