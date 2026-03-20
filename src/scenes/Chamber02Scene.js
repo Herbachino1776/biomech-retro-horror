@@ -245,17 +245,10 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   createPlatforms() {
-    const floor = this.add
-      .rectangle(CHAMBER02_WORLD_WIDTH / 2, WORLD.floorY + 28, CHAMBER02_WORLD_WIDTH, 72, COLORS.foreground, 0.78)
-      .setOrigin(0.5)
-      .setDepth(-8);
-    this.physics.add.existing(floor, true);
-    this.platforms.add(floor);
+    this.createInvisiblePlatform(CHAMBER02_WORLD_WIDTH / 2, WORLD.floorY + 28, CHAMBER02_WORLD_WIDTH, 72);
 
     CHAMBER02_PLATFORMS.forEach((platform) => {
-      const slab = this.add.rectangle(platform.x, platform.y, platform.width, platform.height, COLORS.foreground, 0.76).setDepth(-7);
-      this.physics.add.existing(slab, true);
-      this.platforms.add(slab);
+      this.createInvisiblePlatform(platform.x, platform.y, platform.width, platform.height);
     });
 
     if (this.textures.exists(ASSET_KEYS.chamber02VertebralHornGate)) {
@@ -271,13 +264,22 @@ export class Chamber02Scene extends Phaser.Scene {
     this.createExitGate();
   }
 
+
+  createInvisiblePlatform(x, y, width, height) {
+    const platform = this.add.rectangle(x, y, width, height, 0x000000, 0).setOrigin(0.5);
+    platform.setVisible(false);
+    this.physics.add.existing(platform, true);
+    this.platforms.add(platform);
+    return platform;
+  }
+
   createExitGate() {
-    this.exitGateBarrier = this.add
-      .rectangle(CHAMBER02_EXIT_GATE.x + 8, WORLD.floorY - 6, CHAMBER02_EXIT_GATE.barrierWidth, CHAMBER02_EXIT_GATE.barrierHeight, COLORS.architecture, 0)
-      .setOrigin(0.5, 1)
-      .setDepth(-5.5);
-    this.physics.add.existing(this.exitGateBarrier, true);
-    this.platforms.add(this.exitGateBarrier);
+    this.exitGateBarrier = this.createInvisiblePlatform(
+      CHAMBER02_EXIT_GATE.x + 8,
+      WORLD.floorY - 6 - CHAMBER02_EXIT_GATE.barrierHeight / 2,
+      CHAMBER02_EXIT_GATE.barrierWidth,
+      CHAMBER02_EXIT_GATE.barrierHeight
+    ).setDepth(-5.5);
 
     if (this.textures.exists(ASSET_KEYS.chamber02VertebralHornGate)) {
       this.exitGateArt = this.add

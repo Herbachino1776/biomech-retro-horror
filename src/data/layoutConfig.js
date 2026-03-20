@@ -1,10 +1,10 @@
 export const PORTRAIT_LAYOUT = {
-  worldBandRatio: 0.865,
+  worldBandRatio: 0.89,
   worldBandMin: 400,
-  worldBandMax: 620,
+  worldBandMax: 660,
   minControlBand: 136,
-  portraitZoom: 1.08,
-  portraitFollowOffsetY: 28,
+  portraitZoom: 1.04,
+  portraitFollowOffsetY: -36,
   // Keep chamber scale monumental on portrait while preserving control usability.
   desktopZoom: 1,
   desktopFollowOffsetY: 0,
