@@ -8,6 +8,7 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
+import { CHAMBER03_ACTIVE_TEXTURE_KEYS, CHAMBER03_TEXTURE_ASSET_KEYS, queueMissingTextureAssets, pruneUnusedTextures } from '../data/sceneAssetPlan.js';
 import {
   CHAMBER03_BOSS,
   CHAMBER03_BOSS_ARENA,
@@ -27,11 +28,16 @@ export class Chamber03Scene extends Phaser.Scene {
     super('Chamber03Scene');
   }
 
+  preload() {
+    queueMissingTextureAssets(this, CHAMBER03_TEXTURE_ASSET_KEYS);
+  }
+
   init(data) {
     this.transitionContext = data ?? {};
   }
 
   create() {
+    pruneUnusedTextures(this, CHAMBER03_ACTIVE_TEXTURE_KEYS);
     this.resetStartupState();
     this.createSceneRuntimeState();
     this.createSceneBounds();

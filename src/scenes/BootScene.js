@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { ASSET_URLS } from '../data/assetUrls.js';
+import { CHAMBER01_TEXTURE_ASSET_KEYS, GLOBAL_TEXTURE_ASSET_KEYS } from '../data/sceneAssetPlan.js';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -12,32 +13,9 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image(ASSET_KEYS.chamberBackground, ASSET_URLS[ASSET_KEYS.chamberBackground]);
-    this.load.image(ASSET_KEYS.chamber01Wall, ASSET_URLS[ASSET_KEYS.chamber01Wall]);
-    this.load.image(ASSET_KEYS.chamber01FloorStrip, ASSET_URLS[ASSET_KEYS.chamber01FloorStrip]);
-    this.load.image(ASSET_KEYS.chamber01RibArch, ASSET_URLS[ASSET_KEYS.chamber01RibArch]);
-    this.load.image(ASSET_KEYS.chamber01Shrine, ASSET_URLS[ASSET_KEYS.chamber01Shrine]);
-    this.load.image(ASSET_KEYS.chamber01LaughingEngineWorld, ASSET_URLS[ASSET_KEYS.chamber01LaughingEngineWorld]);
-    this.load.image(ASSET_KEYS.chamber01DeadgodCutscene, ASSET_URLS[ASSET_KEYS.chamber01DeadgodCutscene]);
-    this.load.image(ASSET_KEYS.chamber01HalfSkullMiniboss, ASSET_URLS[ASSET_KEYS.chamber01HalfSkullMiniboss]);
-    this.load.image(ASSET_KEYS.chamber02VertebralHornGate, ASSET_URLS[ASSET_KEYS.chamber02VertebralHornGate]);
-    this.load.image(ASSET_KEYS.chamber02BackgroundPlate, ASSET_URLS[ASSET_KEYS.chamber02BackgroundPlate]);
-    this.load.image(ASSET_KEYS.chamber02FloorStrip, ASSET_URLS[ASSET_KEYS.chamber02FloorStrip]);
-    this.load.image(ASSET_KEYS.chamber02ForegroundHornArch, ASSET_URLS[ASSET_KEYS.chamber02ForegroundHornArch]);
-    this.load.image(ASSET_KEYS.chamber02TollKeeperSkitter, ASSET_URLS[ASSET_KEYS.chamber02TollKeeperSkitter]);
-    this.load.image(ASSET_KEYS.chamber02ExitGateLore, ASSET_URLS[ASSET_KEYS.chamber02ExitGateLore]);
-    this.load.image(ASSET_KEYS.chamber03WallModule, ASSET_URLS[ASSET_KEYS.chamber03WallModule]);
-    this.load.image(ASSET_KEYS.chamber03EntryNave, ASSET_URLS[ASSET_KEYS.chamber03EntryNave]);
-    this.load.image(ASSET_KEYS.chamber03BossDais, ASSET_URLS[ASSET_KEYS.chamber03BossDais]);
-    this.load.image(ASSET_KEYS.chamber03PrecentorBoss, ASSET_URLS[ASSET_KEYS.chamber03PrecentorBoss]);
-    this.load.image(ASSET_KEYS.chamber03Lore, ASSET_URLS[ASSET_KEYS.chamber03Lore]);
-    this.load.image(ASSET_KEYS.chamber03ChoirOpening, ASSET_URLS[ASSET_KEYS.chamber03ChoirOpening]);
-    this.load.image(ASSET_KEYS.chamber03Threshold, ASSET_URLS[ASSET_KEYS.chamber03Threshold]);
-    this.load.image(ASSET_KEYS.player, ASSET_URLS[ASSET_KEYS.player]);
-    this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
-    this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
-    this.load.image(ASSET_KEYS.laughingEngine, ASSET_URLS[ASSET_KEYS.laughingEngine]);
-    this.load.image(ASSET_KEYS.uiFrame, ASSET_URLS[ASSET_KEYS.uiFrame]);
+    [...GLOBAL_TEXTURE_ASSET_KEYS, ...CHAMBER01_TEXTURE_ASSET_KEYS].forEach((assetKey) => {
+      this.load.image(assetKey, ASSET_URLS[assetKey]);
+    });
     this.preloadAudioAsset(ASSET_KEYS.playerFootstepSlate01);
     this.preloadAudioAsset(ASSET_KEYS.playerFootstepSlate02);
     this.preloadAudioAsset(ASSET_KEYS.playerFootstepSlate03);
