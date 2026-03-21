@@ -31,8 +31,8 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Texture-first asset loading with fallback resilience remains stable.
 
 ## What Still Needs Work Now
-- Chamber 02 still ends with lore payoff rather than a playable Chamber 03 transition.
-- Content expansion beyond the shipped Chamber 01 + Chamber 02 slice is the next milestone focus.
+- Chamber 03 now exists as the next playable content step and completes the current sector with a threshold omen beat plus true boss encounter.
+- Future content expansion should treat Chamber 03 length/consequence as the new chamber complexity floor.
 - Combat presentation can still be polished further later, but current readability is sufficient for the shipped baseline.
 
 ## Active Milestone
@@ -50,7 +50,7 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Docs/status files now reflect Milestone 4 completion and Milestone 5 activation.
 
 ## Exact Next Best Step After This Task
-Begin **Milestone 5 content expansion planning** for the next playable area progression, using the shipped Chamber 01 + Chamber 02 audio-integrated slice as the stability baseline.
+Extend beyond the new Chamber 03 sector finale baseline without regressing the now-playable Chamber 01 -> Chamber 02 -> Chamber 03 sequence.
 
 ## Most Important Constraints
 1. Do not regress GitHub Pages/Vite base-path behavior.

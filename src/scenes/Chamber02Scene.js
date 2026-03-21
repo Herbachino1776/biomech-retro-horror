@@ -634,9 +634,14 @@ export class Chamber02Scene extends Phaser.Scene {
     if (cutsceneId === CHAMBER02_EXIT_GATE.loreCutsceneId) {
       this.exitGateReadyAura?.setVisible(false);
       this.exitGateSigil?.setAlpha(0.38);
+      this.time.delayedCall(120, () => {
+        this.cleanupSceneUi();
+        this.scene.start('Chamber03Scene', { fromScene: this.scene.key });
+      });
+      return;
     }
 
-    if (cutsceneId !== CHAMBER02_LORE_ENTRY.cutsceneId && cutsceneId !== CHAMBER02_EXIT_GATE.loreCutsceneId) {
+    if (cutsceneId !== CHAMBER02_LORE_ENTRY.cutsceneId) {
       return;
     }
 

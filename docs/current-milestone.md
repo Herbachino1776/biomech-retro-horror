@@ -2,7 +2,7 @@
 
 ## Current Project State
 The project has completed **Milestone 4: Audio Identity Pass**.
-The shipped playable slice remains Chamber 01 and Chamber 02, now with stabilized encounter flow, refined Chamber 01 miniboss payoff, Chamber 02 toll-keeper gate progression, cinematic lore beats, integrated ambient/audio cue coverage, and maintained mobile/desktop usability.
+The shipped playable slice now reaches Chamber 03, adding a longer sector-finale processional, threshold omen beat, and first true boss encounter while preserving the stabilized Chamber 01 -> Chamber 02 baseline, integrated ambience/audio cue coverage, and mobile/desktop usability.
 
 ## What Is Currently Working
 - Boot/title flow reliably enters the current Chamber 01 -> Chamber 02 vertical slice.
@@ -15,7 +15,8 @@ The shipped playable slice remains Chamber 01 and Chamber 02, now with stabilize
 - Chamber 02 enemy encounters remain active with conservative wake timing and readable spacing.
 - Chamber 02 TOLL-KEEPER encounter pair gates the chamber exit and now has clearer end-gate readiness feedback.
 - Chamber 02 central lore trigger still uses a dedicated cinematic cutscene flow and now retains a clear diegetic shrine/ossuary affordance at the trigger site.
-- Chamber 02 exit gate unlock + lore trigger flow remains intact after the TOLL-KEEPER fight.
+- Chamber 02 exit gate unlock + lore trigger flow now flows cleanly into playable Chamber 03 after the payoff cutscene.
+- Chamber 03 is playable as a long processional finale with repeated wall-module pacing, multiple encounter pockets, a threshold omen lore beat, and a true boss fight on the boss dais.
 - Chamber 01 and Chamber 02 ambience are integrated in the shipped flow.
 - Player combat/death feedback, skitter, TOLL-KEEPER, miniboss, lore/gate, and banishment audio cues are present in the shipped slice.
 - Mobile controls remain screen-space anchored and usable in portrait + landscape.
@@ -43,9 +44,9 @@ Milestone 4 is now considered **complete / closed out** for the currently shippe
 7. Landscape usability remains intact.
 
 ## Known Remaining Rough Edges (Non-Blocking)
-- Chamber 02 still ends on an exit-gate lore payoff rather than entering a playable Chamber 03, which is acceptable because new chambers remain out of scope for the shipped slice.
+- Chamber 03 ambience currently reuses existing chamber audio coverage until a dedicated sector-finale layer is produced.
 - Combat presentation remains intentionally restrained and should only expand when content work needs it.
-- Future milestone work should add new playable content without destabilizing the shipped Chamber 01 + Chamber 02 baseline.
+- Future milestone work should add new playable content without destabilizing the shipped Chamber 01 -> Chamber 02 -> Chamber 03 baseline.
 
 ## Next Milestone Definition
 **Milestone 5: Content Expansion** is the active implementation milestone.

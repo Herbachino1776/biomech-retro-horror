@@ -26,6 +26,13 @@ export class BootScene extends Phaser.Scene {
     this.load.image(ASSET_KEYS.chamber02ForegroundHornArch, ASSET_URLS[ASSET_KEYS.chamber02ForegroundHornArch]);
     this.load.image(ASSET_KEYS.chamber02TollKeeperSkitter, ASSET_URLS[ASSET_KEYS.chamber02TollKeeperSkitter]);
     this.load.image(ASSET_KEYS.chamber02ExitGateLore, ASSET_URLS[ASSET_KEYS.chamber02ExitGateLore]);
+    this.load.image(ASSET_KEYS.chamber03WallModule, ASSET_URLS[ASSET_KEYS.chamber03WallModule]);
+    this.load.image(ASSET_KEYS.chamber03EntryNave, ASSET_URLS[ASSET_KEYS.chamber03EntryNave]);
+    this.load.image(ASSET_KEYS.chamber03BossDais, ASSET_URLS[ASSET_KEYS.chamber03BossDais]);
+    this.load.image(ASSET_KEYS.chamber03PrecentorBoss, ASSET_URLS[ASSET_KEYS.chamber03PrecentorBoss]);
+    this.load.image(ASSET_KEYS.chamber03Lore, ASSET_URLS[ASSET_KEYS.chamber03Lore]);
+    this.load.image(ASSET_KEYS.chamber03ChoirOpening, ASSET_URLS[ASSET_KEYS.chamber03ChoirOpening]);
+    this.load.image(ASSET_KEYS.chamber03Threshold, ASSET_URLS[ASSET_KEYS.chamber03Threshold]);
     this.load.image(ASSET_KEYS.player, ASSET_URLS[ASSET_KEYS.player]);
     this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
@@ -103,7 +110,7 @@ export class BootScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(centerX, centerY - (smallViewport ? 44 : 2), 'CHAMBERS 01-02 // ENCOUNTER SLICE', {
+      .text(centerX, centerY - (smallViewport ? 44 : 2), 'CHAMBERS 01-03 // SECTOR SLICE', {
         fontFamily: 'monospace',
         fontSize: '16px',
         color: '#8f7d72',
