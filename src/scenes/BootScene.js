@@ -3,6 +3,7 @@ import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { ASSET_URLS } from '../data/assetUrls.js';
 import { CHAMBER01_TEXTURE_ASSET_KEYS, GLOBAL_TEXTURE_ASSET_KEYS } from '../data/sceneAssetPlan.js';
+import { CHAMBER03_RESCUE_FLAGS } from '../data/chamber03Config.js';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -96,6 +97,7 @@ export class BootScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
+    const directBootEnabled = CHAMBER03_RESCUE_FLAGS.directBootEnabled;
     const interactionPrompt = smallViewport ? 'Tap to Begin' : 'Tap or Press Enter';
     const instructionText = smallViewport
       ? `Move: Arrow Keys\nAttack: X\nLore: E\nRestart: R\n\n${interactionPrompt}`
@@ -113,6 +115,18 @@ export class BootScene extends Phaser.Scene {
     const buttonWidth = smallViewport ? 280 : 320;
     const buttonHeight = 74;
     const buttonY = centerY + (smallViewport ? 136 : 158);
+
+
+    if (directBootEnabled) {
+      this.add
+        .text(centerX, buttonY - 68, 'DEBUG OVERRIDE: DIRECT BOOT TO CHAMBER 03 (RESCUE MODE)', {
+          fontFamily: 'monospace',
+          fontSize: smallViewport ? '11px' : '12px',
+          color: '#cdbd89',
+          align: 'center'
+        })
+        .setOrigin(0.5);
+    }
 
     const tapRegion = this.add
       .rectangle(centerX, buttonY, buttonWidth, buttonHeight, 0x181211, 0.55)
@@ -184,6 +198,7 @@ export class BootScene extends Phaser.Scene {
       });
     }
 
-    this.scene.start('Chamber01Scene');
+    const targetSceneKey = CHAMBER03_RESCUE_FLAGS.directBootEnabled ? 'Chamber03Scene' : 'Chamber01Scene';
+    this.scene.start(targetSceneKey, CHAMBER03_RESCUE_FLAGS.directBootEnabled ? { fromScene: this.scene.key, directBoot: true } : undefined);
   }
 }

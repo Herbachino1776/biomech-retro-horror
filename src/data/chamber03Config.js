@@ -3,6 +3,54 @@ import { COLORS, PLAYER, SKITTER, WORLD } from './milestone1Config.js';
 
 export const CHAMBER03_WORLD_WIDTH = 6580;
 
+export const CHAMBER03_RESCUE_FLAGS = {
+  bootMode: 'minimal',
+  directBootEnabled: true,
+  enableBackdropSequence: false,
+  enableEncounters: false,
+  enableThresholdLore: false,
+  enableBoss: false,
+  enableAmbient: false
+};
+
+export const CHAMBER03_RESCUE_BOOT = {
+  spawnX: 220,
+  spawnY: WORLD.floorY - 72,
+  visibleFloorHeight: 96,
+  backdrop: {
+    width: 940,
+    height: 380,
+    x: 470,
+    y: 218
+  },
+  fallbackPlate: {
+    width: 940,
+    height: 380,
+    fill: 0x1b1412,
+    fillAlpha: 0.96,
+    stroke: 0xb8aa92,
+    strokeAlpha: 0.4,
+    ribWidth: 420,
+    ribHeight: 88,
+    ribAlpha: 0.16,
+    glowWidth: 520,
+    glowHeight: 46,
+    glowAlpha: 0.18
+  }
+};
+
+export function isChamber03MinimalBootMode() {
+  return CHAMBER03_RESCUE_FLAGS.bootMode === 'minimal';
+}
+
+export function isChamber03FeatureEnabled(flagName) {
+  if (isChamber03MinimalBootMode()) {
+    return Boolean(CHAMBER03_RESCUE_FLAGS[flagName]);
+  }
+
+  return true;
+}
+
 export const CHAMBER03_SEGMENTS = [
   { key: ASSET_KEYS.chamber03EntryNave, width: 940, tint: 0xd7c7b3, alpha: 0.84, y: 218, height: 380 },
   { key: ASSET_KEYS.chamber03WallModule, width: 760, tint: 0xc9b69b, alpha: 0.54, y: 220, height: 356 },

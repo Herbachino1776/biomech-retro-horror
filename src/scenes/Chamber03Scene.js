@@ -14,11 +14,15 @@ import {
   CHAMBER03_BOSS_ARENA,
   CHAMBER03_ELITE_CONFIG,
   CHAMBER03_ENCOUNTERS,
+  CHAMBER03_RESCUE_BOOT,
+  CHAMBER03_RESCUE_FLAGS,
   CHAMBER03_RUNTIME,
   CHAMBER03_SEGMENT_LAYOUT,
   CHAMBER03_SKITTER_CONFIG,
   CHAMBER03_THRESHOLD_LORE,
-  CHAMBER03_WORLD_WIDTH
+  CHAMBER03_WORLD_WIDTH,
+  isChamber03FeatureEnabled,
+  isChamber03MinimalBootMode
 } from '../data/chamber03Config.js';
 
 const { world: WORLD, player: PLAYER, colors: COLORS } = CHAMBER03_RUNTIME;
@@ -42,10 +46,11 @@ export class Chamber03Scene extends Phaser.Scene {
     this.createSceneRuntimeState();
     this.createSceneBounds();
     this.createCoreScene();
-    this.establishInitialCameraFrame();
 
     this.audioDirector = new AudioDirector(this);
-    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.14 });
+    if (this.featureFlags.enableAmbient) {
+      this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.14 });
+    }
 
     this.hud = new HudOverlay(this);
     this.mobileControls = new MobileControls(this);
@@ -62,7 +67,10 @@ export class Chamber03Scene extends Phaser.Scene {
       .setDepth(35)
       .setOrigin(0.5)
       .setVisible(false);
-    this.createBossUi();
+
+    if (this.featureFlags.enableBoss) {
+      this.createBossUi();
+    }
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
@@ -71,6 +79,8 @@ export class Chamber03Scene extends Phaser.Scene {
     this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     this.bootstrapOptionalSystems();
+    this.establishInitialCameraFrame();
+
     this.scale.on('resize', this.applyResponsiveLayout, this);
     this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -95,11 +105,23 @@ export class Chamber03Scene extends Phaser.Scene {
     this.cameras.main.resetFX();
     this.cameras.main.setAlpha(1);
     this.cameras.main.clearRenderToTexture();
-    this.cameras.main.setBackgroundColor('#050505');
-    this.cameras.main.fadeIn(750, 0, 0, 0);
+    this.cameras.main.setBackgroundColor(isChamber03MinimalBootMode() ? '#16100f' : '#050505');
+    if (!isChamber03MinimalBootMode()) {
+      this.cameras.main.fadeIn(750, 0, 0, 0);
+    }
   }
 
   createSceneRuntimeState() {
+    this.featureFlags = {
+      bootMode: CHAMBER03_RESCUE_FLAGS.bootMode,
+      directBootEnabled: CHAMBER03_RESCUE_FLAGS.directBootEnabled,
+      enableBackdropSequence: isChamber03FeatureEnabled('enableBackdropSequence'),
+      enableEncounters: isChamber03FeatureEnabled('enableEncounters'),
+      enableThresholdLore: isChamber03FeatureEnabled('enableThresholdLore'),
+      enableBoss: isChamber03FeatureEnabled('enableBoss'),
+      enableAmbient: isChamber03FeatureEnabled('enableAmbient')
+    };
+
     this.platforms = this.physics.add.staticGroup();
     this.loreZones = this.physics.add.staticGroup();
     this.enemies = [];
@@ -116,7 +138,12 @@ export class Chamber03Scene extends Phaser.Scene {
     this.bossRewardTimer = null;
     this.bossAftermathPool = null;
     this.boss = null;
+    this.bossArenaBarrier = null;
+    this.bossArenaSeal = null;
     this.hasAppliedBootSanityFrame = false;
+    this.playerReadability = null;
+    this.activeBackdrop = null;
+    this.visibleFloorBand = null;
   }
 
   createSceneBounds() {
@@ -125,19 +152,26 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   createCoreScene() {
-    this.renderBackdropSequence();
+    if (this.featureFlags.enableBackdropSequence) {
+      this.renderBackdropSequence();
+    } else {
+      this.renderRescueBackdrop();
+    }
     this.createPlatforms();
     this.createPlayerSpawn();
   }
 
   createPlayerSpawn() {
-    const spawnX = Phaser.Math.Clamp(PLAYER.startX, 96, CHAMBER03_WORLD_WIDTH - 96);
-    const spawnY = Phaser.Math.Clamp(PLAYER.startY, 200, WORLD.floorY - 18);
+    const minimalMode = isChamber03MinimalBootMode();
+    const spawnX = Phaser.Math.Clamp(minimalMode ? CHAMBER03_RESCUE_BOOT.spawnX : PLAYER.startX, 96, CHAMBER03_WORLD_WIDTH - 96);
+    const spawnY = Phaser.Math.Clamp(minimalMode ? CHAMBER03_RESCUE_BOOT.spawnY : PLAYER.startY, 200, WORLD.floorY - 18);
 
     this.player = new Player(this, spawnX, spawnY, PLAYER);
-    this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
+    this.playerReadability = this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
     this.player.sprite.setDepth(6).setAlpha(1);
     this.physics.add.collider(this.player.sprite, this.platforms);
+    this.player.body.setVelocity(0, 0);
+    this.player.attackHitbox.body.updateFromGameObject();
   }
 
   createBossUi() {
@@ -164,17 +198,23 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   bootstrapOptionalSystems() {
-    this.runOptionalStartupStep('threshold omen hook', () => {
-      this.createThresholdLoreZone();
-    });
+    if (this.featureFlags.enableThresholdLore) {
+      this.runOptionalStartupStep('threshold omen hook', () => {
+        this.createThresholdLoreZone();
+      });
+    }
 
-    this.runOptionalStartupStep('encounter pockets', () => {
-      this.createEncounterPockets();
-    });
+    if (this.featureFlags.enableEncounters) {
+      this.runOptionalStartupStep('encounter pockets', () => {
+        this.createEncounterPockets();
+      });
+    }
 
-    this.runOptionalStartupStep('boss bootstrap', () => {
-      this.createBossEncounter();
-    });
+    if (this.featureFlags.enableBoss) {
+      this.runOptionalStartupStep('boss bootstrap', () => {
+        this.createBossEncounter();
+      });
+    }
   }
 
   createBossEncounter() {
@@ -187,6 +227,19 @@ export class Chamber03Scene extends Phaser.Scene {
     this.boss.sprite.setVisible(false);
     this.boss.solidUnderlay?.setVisible(false);
     this.boss.body.enable = false;
+
+    this.bossArenaBarrier = this.createInvisiblePlatform(
+      CHAMBER03_BOSS_ARENA.barrierX,
+      WORLD.floorY - CHAMBER03_BOSS_ARENA.barrierHeight / 2 + 6,
+      CHAMBER03_BOSS_ARENA.barrierWidth,
+      CHAMBER03_BOSS_ARENA.barrierHeight
+    );
+    this.bossArenaBarrier.body.enable = false;
+
+    this.bossArenaSeal = this.add.rectangle(CHAMBER03_BOSS_ARENA.barrierX, WORLD.floorY - 126, 54, 262, COLORS.foreground, 0.2)
+      .setStrokeStyle(2, COLORS.bone, 0.22)
+      .setDepth(-5.2)
+      .setVisible(false);
   }
 
   runOptionalStartupStep(label, step) {
@@ -213,7 +266,7 @@ export class Chamber03Scene extends Phaser.Scene {
 
     this.restartText.setVisible(false);
 
-    if (this.isLoreTransitionActive || this.isBossRewardActive) {
+    if ((this.featureFlags.enableThresholdLore && this.isLoreTransitionActive) || (this.featureFlags.enableBoss && this.isBossRewardActive)) {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body.setVelocity(0, 0));
@@ -236,17 +289,25 @@ export class Chamber03Scene extends Phaser.Scene {
     };
 
     this.player.update(time, combinedInput);
-    this.refreshLoreZonePresence();
-    this.tryBeginLoreSequence(mobileInput);
 
-    this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
-    this.tryStartBossEncounter();
-    this.boss?.update(time, this.player.sprite);
-    this.updateBossArenaFeedback(time);
+    if (this.featureFlags.enableThresholdLore) {
+      this.refreshLoreZonePresence();
+      this.tryBeginLoreSequence(mobileInput);
+    }
+
+    if (this.featureFlags.enableEncounters) {
+      this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
+    }
+
+    if (this.featureFlags.enableBoss) {
+      this.tryStartBossEncounter();
+      this.boss?.update(time, this.player.sprite);
+      this.updateBossArenaFeedback(time);
+    }
 
     this.hud.update(this.player.health, PLAYER.maxHealth);
     this.hud.setBossBarState({
-      visible: this.bossEncounterStarted && !this.bossDefeated,
+      visible: this.featureFlags.enableBoss && this.bossEncounterStarted && !this.bossDefeated,
       name: CHAMBER03_BOSS.name,
       subtitle: CHAMBER03_BOSS.subtitle,
       current: this.boss?.health ?? CHAMBER03_BOSS.health,
@@ -254,6 +315,49 @@ export class Chamber03Scene extends Phaser.Scene {
       telegraph: this.boss?.getTelegraphProgress(time) ?? 0,
       wounded: this.boss ? time < this.boss.lastDamageFlashTime + 220 : false
     });
+  }
+
+  renderRescueBackdrop() {
+    this.add.rectangle(CHAMBER03_WORLD_WIDTH / 2, WORLD.height / 2, CHAMBER03_WORLD_WIDTH, WORLD.height, 0x130e0d, 1).setOrigin(0.5).setDepth(-16);
+    this.add.rectangle(CHAMBER03_RESCUE_BOOT.backdrop.x, WORLD.height * 0.27, 1260, 248, 0x0d0a09, 0.84).setDepth(-15);
+
+    if (this.textures.exists(ASSET_KEYS.chamber03EntryNave)) {
+      this.activeBackdrop = this.add
+        .image(CHAMBER03_RESCUE_BOOT.backdrop.x, CHAMBER03_RESCUE_BOOT.backdrop.y, ASSET_KEYS.chamber03EntryNave)
+        .setDisplaySize(CHAMBER03_RESCUE_BOOT.backdrop.width, CHAMBER03_RESCUE_BOOT.backdrop.height)
+        .setTint(0xd4c5af)
+        .setAlpha(0.92)
+        .setDepth(-13.5);
+    } else {
+      const fallback = CHAMBER03_RESCUE_BOOT.fallbackPlate;
+      this.activeBackdrop = this.add
+        .rectangle(CHAMBER03_RESCUE_BOOT.backdrop.x, CHAMBER03_RESCUE_BOOT.backdrop.y, fallback.width, fallback.height, fallback.fill, fallback.fillAlpha)
+        .setStrokeStyle(3, fallback.stroke, fallback.strokeAlpha)
+        .setDepth(-13.5);
+      this.add.ellipse(CHAMBER03_RESCUE_BOOT.backdrop.x, CHAMBER03_RESCUE_BOOT.backdrop.y - 42, fallback.ribWidth, fallback.ribHeight, COLORS.bone, fallback.ribAlpha).setDepth(-13.3);
+      this.add.rectangle(CHAMBER03_RESCUE_BOOT.backdrop.x, CHAMBER03_RESCUE_BOOT.backdrop.y + 44, 620, 122, COLORS.foreground, 0.32).setDepth(-13.2);
+      this.add.ellipse(CHAMBER03_RESCUE_BOOT.backdrop.x, WORLD.floorY - 18, fallback.glowWidth, fallback.glowHeight, COLORS.sickly, fallback.glowAlpha).setDepth(-10.2);
+      this.add
+        .text(CHAMBER03_RESCUE_BOOT.backdrop.x, CHAMBER03_RESCUE_BOOT.backdrop.y, 'CHAMBER 03 RESCUE PLATE\nENTRY NAVE TEXTURE MISSING', {
+          fontFamily: 'monospace',
+          fontSize: '22px',
+          color: '#d8cfbb',
+          align: 'center'
+        })
+        .setOrigin(0.5)
+        .setDepth(-13.1);
+    }
+
+    this.add.ellipse(CHAMBER03_RESCUE_BOOT.backdrop.x, WORLD.floorY + 10, 1220, 86, COLORS.oil, 0.42).setDepth(-10.3);
+    this.visibleFloorBand = this.add.rectangle(
+      CHAMBER03_RESCUE_BOOT.backdrop.x,
+      WORLD.floorY + 18,
+      1400,
+      CHAMBER03_RESCUE_BOOT.visibleFloorHeight,
+      0x5f5148,
+      0.42
+    ).setDepth(-10.15);
+    this.add.rectangle(CHAMBER03_RESCUE_BOOT.backdrop.x, WORLD.floorY + 30, 1400, 34, COLORS.foreground, 0.78).setDepth(-10.05);
   }
 
   renderBackdropSequence() {
@@ -300,6 +404,10 @@ export class Chamber03Scene extends Phaser.Scene {
   createPlatforms() {
     this.createInvisiblePlatform(CHAMBER03_WORLD_WIDTH / 2, WORLD.floorY + 28, CHAMBER03_WORLD_WIDTH, 72);
 
+    if (!this.featureFlags.enableBackdropSequence) {
+      return;
+    }
+
     [
       { x: 910, y: 368, width: 200, height: 18 },
       { x: 1700, y: 344, width: 170, height: 18 },
@@ -308,25 +416,12 @@ export class Chamber03Scene extends Phaser.Scene {
       { x: 4370, y: 382, width: 200, height: 18 },
       { x: 5940, y: 334, width: 220, height: 18 }
     ].forEach((platform) => this.createInvisiblePlatform(platform.x, platform.y, platform.width, platform.height));
-
-    this.bossArenaBarrier = this.createInvisiblePlatform(
-      CHAMBER03_BOSS_ARENA.barrierX,
-      WORLD.floorY - CHAMBER03_BOSS_ARENA.barrierHeight / 2 + 6,
-      CHAMBER03_BOSS_ARENA.barrierWidth,
-      CHAMBER03_BOSS_ARENA.barrierHeight
-    );
-    this.bossArenaBarrier.body.enable = false;
-
-    this.bossArenaSeal = this.add.rectangle(CHAMBER03_BOSS_ARENA.barrierX, WORLD.floorY - 126, 54, 262, COLORS.foreground, 0.2)
-      .setStrokeStyle(2, COLORS.bone, 0.22)
-      .setDepth(-5.2)
-      .setVisible(false);
   }
 
   establishInitialCameraFrame() {
     const camera = this.cameras.main;
-    const spawnBandTop = 150;
-    const spawnBandBottom = WORLD.floorY - 16;
+    const spawnBandTop = WORLD.floorY - 176;
+    const spawnBandBottom = WORLD.floorY - 18;
     const clampedPlayerY = Phaser.Math.Clamp(this.player.sprite.y, spawnBandTop, spawnBandBottom);
 
     if (clampedPlayerY !== this.player.sprite.y) {
@@ -338,17 +433,12 @@ export class Chamber03Scene extends Phaser.Scene {
     this.applyResponsiveLayout();
 
     const viewportHeight = camera.height / camera.zoom;
-    const targetCenterY = Phaser.Math.Clamp(
-      this.player.sprite.y - (camera.followOffset?.y ?? 0),
-      viewportHeight * 0.5,
-      WORLD.height - viewportHeight * 0.5
-    );
-    const bootScrollY = Phaser.Math.Clamp(targetCenterY - viewportHeight * 0.5, 0, Math.max(0, WORLD.height - viewportHeight));
-
-    camera.centerOn(this.player.sprite.x - 84, targetCenterY);
-    camera.scrollY = bootScrollY;
-    camera.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
-    camera.setLerp(0.08, 0.08);
+    const targetCenterY = Phaser.Math.Clamp(this.player.sprite.y - (camera.followOffset?.y ?? 0), viewportHeight * 0.5, WORLD.height - viewportHeight * 0.5);
+    const targetCenterX = Phaser.Math.Clamp(this.player.sprite.x, camera.width * 0.5 / camera.zoom, CHAMBER03_WORLD_WIDTH - camera.width * 0.5 / camera.zoom);
+    camera.centerOn(targetCenterX, targetCenterY);
+    camera.roundPixels = true;
+    camera.startFollow(this.player.sprite, false, 1, 1, camera.followOffset?.x ?? -140, camera.followOffset?.y ?? 0);
+    camera.setLerp(0.12, 0.12);
 
     this.hasAppliedBootSanityFrame = true;
   }
@@ -416,7 +506,7 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   tryBeginLoreSequence(mobileInput) {
-    if (!this.currentLoreZone || this.isLoreTransitionActive || this.bossEncounterStarted) {
+    if (!this.featureFlags.enableThresholdLore || !this.currentLoreZone || this.isLoreTransitionActive || this.bossEncounterStarted) {
       return;
     }
 
@@ -435,7 +525,7 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   beginLoreSequence(loreEntry) {
-    if (!loreEntry?.cutsceneId || this.isLoreTransitionActive) {
+    if (!this.featureFlags.enableThresholdLore || !loreEntry?.cutsceneId || this.isLoreTransitionActive) {
       return;
     }
 
@@ -458,7 +548,7 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   launchLoreCutscene(cutsceneId) {
-    if (this.hasLaunchedLoreCutscene || !cutsceneId) {
+    if (!this.featureFlags.enableThresholdLore || this.hasLaunchedLoreCutscene || !cutsceneId) {
       return;
     }
 
@@ -471,7 +561,7 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   handleLoreCutsceneComplete({ cutsceneId } = {}) {
-    if (cutsceneId !== CHAMBER03_THRESHOLD_LORE.cutsceneId) {
+    if (!this.featureFlags.enableThresholdLore || cutsceneId !== CHAMBER03_THRESHOLD_LORE.cutsceneId) {
       return;
     }
 
@@ -500,13 +590,19 @@ export class Chamber03Scene extends Phaser.Scene {
       this.boss.body.setVelocity(0, 0);
     }
 
-    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.14 });
+    if (this.featureFlags.enableAmbient) {
+      this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.14 });
+    }
     this.cameras.main.fadeIn(520, 0, 0, 0);
     this.bossArenaSeal?.setVisible(true).setAlpha(0.32);
   }
 
   tryStartBossEncounter() {
-    if (this.bossEncounterStarted || !this.boss || !this.triggeredLoreIds.has(CHAMBER03_THRESHOLD_LORE.id)) {
+    if (!this.featureFlags.enableBoss || this.bossEncounterStarted || !this.boss) {
+      return;
+    }
+
+    if (this.featureFlags.enableThresholdLore && !this.triggeredLoreIds.has(CHAMBER03_THRESHOLD_LORE.id)) {
       return;
     }
 
@@ -526,7 +622,7 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   handlePlayerHitEnemy(_attackZone, enemySprite, enemy) {
-    if (!this.player.attackActive || enemy.dead || !this.isEnemyOverlapTarget(enemySprite, enemy)) {
+    if (!this.featureFlags.enableEncounters || !this.player.attackActive || enemy.dead || !this.isEnemyOverlapTarget(enemySprite, enemy)) {
       return;
     }
 
@@ -542,7 +638,7 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   handleEnemyContactPlayer(_playerSprite, enemySprite, enemy) {
-    if (enemy.dead || !this.isEnemyOverlapTarget(enemySprite, enemy)) {
+    if (!this.featureFlags.enableEncounters || enemy.dead || !this.isEnemyOverlapTarget(enemySprite, enemy)) {
       return;
     }
     if (!enemy.canDealContactDamage(this.time.now)) {
@@ -560,6 +656,7 @@ export class Chamber03Scene extends Phaser.Scene {
 
   handlePlayerHitBoss(_attackZone, enemySprite) {
     if (
+      !this.featureFlags.enableBoss ||
       !this.boss ||
       !this.player.attackActive ||
       !this.bossEncounterStarted ||
@@ -587,7 +684,7 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   handleBossContactPlayer(_playerSprite, enemySprite) {
-    if (!this.boss || this.boss.dead || !this.bossEncounterStarted || !this.isEnemyOverlapTarget(enemySprite, this.boss.sprite)) {
+    if (!this.featureFlags.enableBoss || !this.boss || this.boss.dead || !this.bossEncounterStarted || !this.isEnemyOverlapTarget(enemySprite, this.boss.sprite)) {
       return;
     }
 
@@ -694,7 +791,7 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   updateBossArenaFeedback(time) {
-    if (!this.boss) {
+    if (!this.featureFlags.enableBoss || !this.boss) {
       this.bossTellRing?.setVisible(false).setAlpha(0);
       this.bossTellHalo?.setVisible(false).setAlpha(0);
       return;
@@ -795,7 +892,7 @@ export class Chamber03Scene extends Phaser.Scene {
       camera.setViewport(0, 0, width, worldBandHeight);
       camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
       camera.setFollowOffset(-120, PORTRAIT_LAYOUT.portraitFollowOffsetY);
-      if (this.player && this.hasAppliedBootSanityFrame) {
+      if (this.player) {
         const viewportHeight = camera.height / camera.zoom;
         const targetCenterY = Phaser.Math.Clamp(this.player.sprite.y - PORTRAIT_LAYOUT.portraitFollowOffsetY, viewportHeight * 0.5, WORLD.height - viewportHeight * 0.5);
         camera.scrollY = Phaser.Math.Clamp(targetCenterY - viewportHeight * 0.5, 0, Math.max(0, WORLD.height - viewportHeight));
@@ -808,7 +905,7 @@ export class Chamber03Scene extends Phaser.Scene {
     camera.setViewport(0, 0, width, height);
     camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
     camera.setFollowOffset(-140, PORTRAIT_LAYOUT.desktopFollowOffsetY);
-    if (this.player && this.hasAppliedBootSanityFrame) {
+    if (this.player) {
       const viewportHeight = camera.height / camera.zoom;
       const targetCenterY = Phaser.Math.Clamp(this.player.sprite.y - PORTRAIT_LAYOUT.desktopFollowOffsetY, viewportHeight * 0.5, WORLD.height - viewportHeight * 0.5);
       camera.scrollY = Phaser.Math.Clamp(targetCenterY - viewportHeight * 0.5, 0, Math.max(0, WORLD.height - viewportHeight));
