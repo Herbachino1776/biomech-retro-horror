@@ -27,50 +27,18 @@ export class Chamber03Scene extends Phaser.Scene {
     super('Chamber03Scene');
   }
 
+  init(data) {
+    this.transitionContext = data ?? {};
+  }
+
   create() {
-    this.physics.world.gravity.y = WORLD.gravityY;
-    this.cameras.main.setBounds(0, 0, CHAMBER03_WORLD_WIDTH, WORLD.height);
-    this.physics.world.setBounds(0, 0, CHAMBER03_WORLD_WIDTH, WORLD.height);
-    this.cameras.main.setBackgroundColor('#050505');
-    this.cameras.main.fadeIn(750, 0, 0, 0);
-
-    this.platforms = this.physics.add.staticGroup();
-    this.loreZones = this.physics.add.staticGroup();
-    this.triggeredLoreIds = new Set();
-    this.currentLoreZone = null;
-    this.isLoreTransitionActive = false;
-    this.hasLaunchedLoreCutscene = false;
-    this.isRestartingRun = false;
-    this.bossEncounterStarted = false;
-    this.bossDefeated = false;
-    this.isBossRewardActive = false;
-    this.sectorCleared = false;
-    this.bossLastAttackHitId = -1;
-    this.bossRewardTimer = null;
-
-    this.renderBackdropSequence();
-    this.createPlatforms();
-    this.createThresholdLoreZone();
+    this.resetStartupState();
+    this.createSceneRuntimeState();
+    this.createSceneBounds();
+    this.createCoreScene();
 
     this.audioDirector = new AudioDirector(this);
     this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.14 });
-
-    this.player = new Player(this, 150, 360, PLAYER);
-    this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
-    this.physics.add.collider(this.player.sprite, this.platforms);
-
-    this.enemies = [];
-    this.createEncounterPockets();
-
-    this.boss = new PrecentorBoss(this, CHAMBER03_BOSS.spawnX, CHAMBER03_BOSS.spawnY, CHAMBER03_BOSS);
-    this.applyGameplayReadabilitySupport(this.boss.sprite, { fill: 0xd6c39d, alpha: 0.16, scale: 1.2 });
-    this.physics.add.collider(this.boss.sprite, this.platforms);
-    this.physics.add.overlap(this.player.attackHitbox, this.boss.sprite, this.handlePlayerHitBoss, null, this);
-    this.physics.add.overlap(this.player.sprite, this.boss.sprite, this.handleBossContactPlayer, null, this);
-    this.boss.setActive(false);
-    this.boss.sprite.setVisible(false);
-    this.boss.solidUnderlay?.setVisible(false);
-    this.boss.body.enable = false;
 
     this.hud = new HudOverlay(this);
     this.mobileControls = new MobileControls(this);
@@ -87,12 +55,86 @@ export class Chamber03Scene extends Phaser.Scene {
       .setDepth(35)
       .setOrigin(0.5)
       .setVisible(false);
+    this.createBossUi();
 
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+    this.keyInteract = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    this.keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+    this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+
+    this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
+    this.bootstrapOptionalSystems();
+    this.scale.on('resize', this.applyResponsiveLayout, this);
+    this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+    this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.scale.off('resize', this.applyResponsiveLayout, this);
+      this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+      this.audioDirector?.shutdown();
+      this.bossRewardTimer?.remove(false);
+      this.cleanupSceneUi();
+    });
+
+    this.applyResponsiveLayout();
+    this.hud.update(this.player.health, PLAYER.maxHealth);
+  }
+
+  resetStartupState() {
+    this.input.enabled = true;
+    this.physics.world.resume();
+    this.physics.world.gravity.y = WORLD.gravityY;
+    this.time.timeScale = 1;
+    this.cameras.main.resetFX();
+    this.cameras.main.setBackgroundColor('#050505');
+    this.cameras.main.fadeIn(750, 0, 0, 0);
+  }
+
+  createSceneRuntimeState() {
+    this.platforms = this.physics.add.staticGroup();
+    this.loreZones = this.physics.add.staticGroup();
+    this.enemies = [];
+    this.triggeredLoreIds = new Set();
+    this.currentLoreZone = null;
+    this.isLoreTransitionActive = false;
+    this.hasLaunchedLoreCutscene = false;
+    this.isRestartingRun = false;
+    this.bossEncounterStarted = false;
+    this.bossDefeated = false;
+    this.isBossRewardActive = false;
+    this.sectorCleared = false;
+    this.bossLastAttackHitId = -1;
+    this.bossRewardTimer = null;
+    this.bossAftermathPool = null;
+    this.boss = null;
+  }
+
+  createSceneBounds() {
+    this.cameras.main.setBounds(0, 0, CHAMBER03_WORLD_WIDTH, WORLD.height);
+    this.physics.world.setBounds(0, 0, CHAMBER03_WORLD_WIDTH, WORLD.height);
+  }
+
+  createCoreScene() {
+    this.renderBackdropSequence();
+    this.createPlatforms();
+    this.createPlayerSpawn();
+    this.createThresholdLoreZone();
+  }
+
+  createPlayerSpawn() {
+    const spawnX = Phaser.Math.Clamp(PLAYER.startX, 96, CHAMBER03_WORLD_WIDTH - 96);
+    const spawnY = Phaser.Math.Clamp(PLAYER.startY, 200, WORLD.floorY - 18);
+
+    this.player = new Player(this, spawnX, spawnY, PLAYER);
+    this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
+    this.player.sprite.setDepth(6).setAlpha(1);
+    this.physics.add.collider(this.player.sprite, this.platforms);
+  }
+
+  createBossUi() {
     this.bossTellRing = this.add.ellipse(CHAMBER03_BOSS.spawnX, CHAMBER03_BOSS.spawnY - 142, 248, 86, 0xd2a355, 0).setDepth(5).setVisible(false);
     this.bossTellHalo = this.add.ellipse(CHAMBER03_BOSS.spawnX, CHAMBER03_BOSS.spawnY - 208, 154, 52, 0xf2ddab, 0).setDepth(5.2).setVisible(false);
     this.bossHitRing = this.add.ellipse(CHAMBER03_BOSS.spawnX, CHAMBER03_BOSS.spawnY - 128, 190, 78, 0xd6e7a4, 0).setDepth(5.3).setVisible(false);
     this.bossDeathHalo = this.add.ellipse(CHAMBER03_BOSS.spawnX, CHAMBER03_BOSS.spawnY - 132, 340, 220, 0xf1e2c8, 0).setDepth(5).setVisible(false);
-    this.bossAftermathPool = null;
     this.bossRewardText = this.add
       .text(this.scale.width / 2, this.scale.height * 0.24, `${CHAMBER03_BOSS_ARENA.text}\n${CHAMBER03_BOSS_ARENA.subtitle}`, {
         fontFamily: 'Georgia, Times, serif',
@@ -109,26 +151,36 @@ export class Chamber03Scene extends Phaser.Scene {
       .setDepth(34)
       .setAlpha(0)
       .setVisible(false);
+  }
 
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
-    this.keyInteract = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-    this.keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-    this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-
-    this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
-    this.scale.on('resize', this.applyResponsiveLayout, this);
-    this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
-    this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.scale.off('resize', this.applyResponsiveLayout, this);
-      this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
-      this.audioDirector?.shutdown();
-      this.bossRewardTimer?.remove(false);
-      this.cleanupSceneUi();
+  bootstrapOptionalSystems() {
+    this.runOptionalStartupStep('encounter pockets', () => {
+      this.createEncounterPockets();
     });
 
-    this.applyResponsiveLayout();
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.runOptionalStartupStep('boss bootstrap', () => {
+      this.createBossEncounter();
+    });
+  }
+
+  createBossEncounter() {
+    this.boss = new PrecentorBoss(this, CHAMBER03_BOSS.spawnX, CHAMBER03_BOSS.spawnY, CHAMBER03_BOSS);
+    this.applyGameplayReadabilitySupport(this.boss.sprite, { fill: 0xd6c39d, alpha: 0.16, scale: 1.2 });
+    this.physics.add.collider(this.boss.sprite, this.platforms);
+    this.physics.add.overlap(this.player.attackHitbox, this.boss.sprite, this.handlePlayerHitBoss, null, this);
+    this.physics.add.overlap(this.player.sprite, this.boss.sprite, this.handleBossContactPlayer, null, this);
+    this.boss.setActive(false);
+    this.boss.sprite.setVisible(false);
+    this.boss.solidUnderlay?.setVisible(false);
+    this.boss.body.enable = false;
+  }
+
+  runOptionalStartupStep(label, step) {
+    try {
+      step();
+    } catch (error) {
+      console.warn(`[Chamber03Scene] Optional startup step failed: ${label}`, error);
+    }
   }
 
   update(time) {
@@ -151,7 +203,7 @@ export class Chamber03Scene extends Phaser.Scene {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body.setVelocity(0, 0));
-      if (!this.boss.dead) {
+      if (this.boss && !this.boss.dead) {
         this.boss.body.setVelocity(0, 0);
       }
       return;
@@ -175,7 +227,7 @@ export class Chamber03Scene extends Phaser.Scene {
 
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
     this.tryStartBossEncounter();
-    this.boss.update(time, this.player.sprite);
+    this.boss?.update(time, this.player.sprite);
     this.updateBossArenaFeedback(time);
 
     this.hud.update(this.player.health, PLAYER.maxHealth);
@@ -183,10 +235,10 @@ export class Chamber03Scene extends Phaser.Scene {
       visible: this.bossEncounterStarted && !this.bossDefeated,
       name: CHAMBER03_BOSS.name,
       subtitle: CHAMBER03_BOSS.subtitle,
-      current: this.boss.health,
-      max: this.boss.maxHealth,
-      telegraph: this.boss.getTelegraphProgress(time),
-      wounded: time < this.boss.lastDamageFlashTime + 220
+      current: this.boss?.health ?? CHAMBER03_BOSS.health,
+      max: this.boss?.maxHealth ?? CHAMBER03_BOSS.maxHealth,
+      telegraph: this.boss?.getTelegraphProgress(time) ?? 0,
+      wounded: this.boss ? time < this.boss.lastDamageFlashTime + 220 : false
     });
   }
 
@@ -216,6 +268,11 @@ export class Chamber03Scene extends Phaser.Scene {
       this.add.ellipse(segment.centerX + (index % 2 === 0 ? -90 : 90), 242, 210, 160, COLORS.foreground, 0.12).setDepth(-12);
       this.add.ellipse(segment.centerX, 208, 300, 80, COLORS.bone, 0.08).setDepth(-12.2);
     });
+
+    if (!this.textures.exists(ASSET_KEYS.chamber03EntryNave)) {
+      this.add.rectangle(320, 220, 560, 340, 0x120e0d, 0.72).setDepth(-12.5);
+      this.add.ellipse(320, WORLD.floorY - 8, 360, 52, COLORS.sickly, 0.08).setDepth(-10.1);
+    }
   }
 
   createPlatforms() {
@@ -373,7 +430,7 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   tryStartBossEncounter() {
-    if (this.bossEncounterStarted || !this.triggeredLoreIds.has(CHAMBER03_THRESHOLD_LORE.id)) {
+    if (this.bossEncounterStarted || !this.boss || !this.triggeredLoreIds.has(CHAMBER03_THRESHOLD_LORE.id)) {
       return;
     }
 
@@ -426,7 +483,13 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   handlePlayerHitBoss(_attackZone, enemySprite) {
-    if (!this.player.attackActive || !this.bossEncounterStarted || this.boss.dead || !this.isEnemyOverlapTarget(enemySprite, this.boss.sprite)) {
+    if (
+      !this.boss ||
+      !this.player.attackActive ||
+      !this.bossEncounterStarted ||
+      this.boss.dead ||
+      !this.isEnemyOverlapTarget(enemySprite, this.boss.sprite)
+    ) {
       return;
     }
 
@@ -448,7 +511,7 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   handleBossContactPlayer(_playerSprite, enemySprite) {
-    if (this.boss.dead || !this.bossEncounterStarted || !this.isEnemyOverlapTarget(enemySprite, this.boss.sprite)) {
+    if (!this.boss || this.boss.dead || !this.bossEncounterStarted || !this.isEnemyOverlapTarget(enemySprite, this.boss.sprite)) {
       return;
     }
 
@@ -555,6 +618,12 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   updateBossArenaFeedback(time) {
+    if (!this.boss) {
+      this.bossTellRing?.setVisible(false).setAlpha(0);
+      this.bossTellHalo?.setVisible(false).setAlpha(0);
+      return;
+    }
+
     if (this.bossTellRing) {
       if (this.bossEncounterStarted && !this.boss.dead && this.boss.isTelegraphing(time)) {
         const progress = this.boss.getTelegraphProgress(time);

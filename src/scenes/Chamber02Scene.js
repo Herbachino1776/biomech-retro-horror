@@ -632,6 +632,10 @@ export class Chamber02Scene extends Phaser.Scene {
     }
 
     if (cutsceneId === CHAMBER02_EXIT_GATE.loreCutsceneId) {
+      this.isLoreTransitionActive = false;
+      this.mobileControls?.setMode('gameplay');
+      this.input.enabled = true;
+      this.physics.world.resume();
       this.exitGateReadyAura?.setVisible(false);
       this.exitGateSigil?.setAlpha(0.38);
       this.time.delayedCall(120, () => {
