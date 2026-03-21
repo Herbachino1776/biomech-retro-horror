@@ -60,6 +60,7 @@ export const LORE_CUTSCENES = {
       }
     }
   },
+
   'chamber02-horn-arch': {
     id: 'chamber02-horn-arch',
     imageKey: ASSET_KEYS.chamber02VertebralHornGate,
@@ -78,6 +79,36 @@ export const LORE_CUTSCENES = {
       imageTint: 0xd4b9a5,
       imageAlpha: 0.94,
       backgroundColor: '#000000'
+    }
+  },
+
+  'chamber03-threshold-omen': {
+    id: 'chamber03-threshold-omen',
+    imageKey: ASSET_KEYS.chamber03Lore,
+    title: 'CHAMBER 03 // THRESHOLD OF ENTRY',
+    body: [
+      'The threshold peels open before the dais and recites the names of those who entered as offerings.',
+      'Choir-hollows sway inside the seam, each one waiting for the Precentor to split your silhouette into praise.',
+      'Step closer and the third chamber stops being architecture. It becomes a mouth rehearsing your surrender.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xc1af92,
+      titleColor: '#a9bb91',
+      bodyColor: '#d9ccb8',
+      promptColor: '#8fa574',
+      imageTint: 0xd7c1aa,
+      imageAlpha: 0.97,
+      backgroundColor: '#000000',
+      motion: {
+        panX: 14,
+        panY: -8,
+        zoom: 1.04,
+        duration: 9000,
+        shakeX: 3,
+        shakeY: 2,
+        shakeDuration: 3600
+      }
     }
   }
 };

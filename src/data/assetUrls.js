@@ -12,6 +12,13 @@ import chamber02FloorStripUrl from '../../art/raw/chamber02/chamber02_floor_stri
 import chamber02ForegroundHornArchUrl from '../../art/raw/chamber02/foreground_vertebral_horn_arch_01_source.png';
 import chamber02TollKeeperSkitterUrl from '../../art/raw/chamber02/chamber02_tollkeeper_skitter_01_left_alpha.png';
 import chamber02ExitGateLoreUrl from '../../art/raw/chamber02/chamber02_exit_gate_lore_01_source.png';
+import chamber03WallModuleUrl from '../../art/raw/chamber03/chamber03_bg_wall_module_01_source.png';
+import chamber03EntryNaveUrl from '../../art/raw/chamber03/chamber03_bg_entry_nave_01_source.png';
+import chamber03BossDaisUrl from '../../art/raw/chamber03/chamber03_bg_boss_dais_01_source.png';
+import chamber03PrecentorBossUrl from '../../art/raw/chamber03/boss_chamber03_precentor_main_01_alpha.png';
+import chamber03LoreUrl from '../../art/raw/chamber03/chamber03_lore_01_source.png';
+import chamber03ChoirOpeningUrl from '../../art/raw/chamber03/chamber03_bg_choir_opening_01_source.png';
+import chamber03ThresholdUrl from '../../art/raw/chamber03/chamber03_bg_threshold_01_source.png';
 import playerConceptUrl from '../../assets/concepts/player-concept-03-right-alpha.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
@@ -60,6 +67,13 @@ export const ASSET_URLS = {
   [ASSET_KEYS.chamber02ForegroundHornArch]: chamber02ForegroundHornArchUrl,
   [ASSET_KEYS.chamber02TollKeeperSkitter]: chamber02TollKeeperSkitterUrl,
   [ASSET_KEYS.chamber02ExitGateLore]: chamber02ExitGateLoreUrl,
+  [ASSET_KEYS.chamber03WallModule]: chamber03WallModuleUrl,
+  [ASSET_KEYS.chamber03EntryNave]: chamber03EntryNaveUrl,
+  [ASSET_KEYS.chamber03BossDais]: chamber03BossDaisUrl,
+  [ASSET_KEYS.chamber03PrecentorBoss]: chamber03PrecentorBossUrl,
+  [ASSET_KEYS.chamber03Lore]: chamber03LoreUrl,
+  [ASSET_KEYS.chamber03ChoirOpening]: chamber03ChoirOpeningUrl,
+  [ASSET_KEYS.chamber03Threshold]: chamber03ThresholdUrl,
   [ASSET_KEYS.player]: playerConceptUrl,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,

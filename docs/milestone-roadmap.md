@@ -56,7 +56,7 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 ## Milestone 5 — Content Expansion
 **Purpose:** extend the playable slice beyond the current Chamber 01 + Chamber 02 baseline.
 **Scope / Includes:** next playable area/chamber progression using established control/combat/lore/audio patterns.
-**Acceptance Criteria:** next content step is playable without regressing the current baseline quality bar.
+**Acceptance Criteria:** next content step is playable without regressing the current baseline quality bar. Chamber 03 first-pass sector-finale implementation now satisfies the first playable expansion step.
 **Dependencies:** Milestones 1–4 stable.
 **Do Not Expand Prematurely:** open-world structure, broad branching map, or new systems not required by the next playable area.
 **Status:** next planned / active.
