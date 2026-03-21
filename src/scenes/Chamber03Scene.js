@@ -36,6 +36,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.createSceneRuntimeState();
     this.createSceneBounds();
     this.createCoreScene();
+    this.establishInitialCameraFrame();
 
     this.audioDirector = new AudioDirector(this);
     this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.14 });
@@ -63,7 +64,6 @@ export class Chamber03Scene extends Phaser.Scene {
     this.keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
-    this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
     this.bootstrapOptionalSystems();
     this.scale.on('resize', this.applyResponsiveLayout, this);
     this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
@@ -83,8 +83,12 @@ export class Chamber03Scene extends Phaser.Scene {
     this.input.enabled = true;
     this.physics.world.resume();
     this.physics.world.gravity.y = WORLD.gravityY;
+    this.physics.world.timeScale = 1;
     this.time.timeScale = 1;
+    this.cameras.main.stopFollow();
     this.cameras.main.resetFX();
+    this.cameras.main.setAlpha(1);
+    this.cameras.main.clearRenderToTexture();
     this.cameras.main.setBackgroundColor('#050505');
     this.cameras.main.fadeIn(750, 0, 0, 0);
   }
@@ -106,6 +110,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.bossRewardTimer = null;
     this.bossAftermathPool = null;
     this.boss = null;
+    this.hasAppliedBootSanityFrame = false;
   }
 
   createSceneBounds() {
@@ -117,7 +122,6 @@ export class Chamber03Scene extends Phaser.Scene {
     this.renderBackdropSequence();
     this.createPlatforms();
     this.createPlayerSpawn();
-    this.createThresholdLoreZone();
   }
 
   createPlayerSpawn() {
@@ -154,6 +158,10 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   bootstrapOptionalSystems() {
+    this.runOptionalStartupStep('threshold omen hook', () => {
+      this.createThresholdLoreZone();
+    });
+
     this.runOptionalStartupStep('encounter pockets', () => {
       this.createEncounterPockets();
     });
@@ -244,6 +252,8 @@ export class Chamber03Scene extends Phaser.Scene {
 
   renderBackdropSequence() {
     this.add.rectangle(CHAMBER03_WORLD_WIDTH / 2, WORLD.height / 2, CHAMBER03_WORLD_WIDTH, WORLD.height, COLORS.backdrop, 1).setOrigin(0.5).setDepth(-16);
+    this.add.rectangle(CHAMBER03_WORLD_WIDTH / 2, WORLD.height * 0.22, CHAMBER03_WORLD_WIDTH, WORLD.height * 0.44, 0x0e0908, 0.72).setDepth(-15.5);
+    this.add.ellipse(CHAMBER03_WORLD_WIDTH / 2, WORLD.floorY + 22, CHAMBER03_WORLD_WIDTH * 0.92, 156, COLORS.oil, 0.42).setDepth(-10.4);
 
     CHAMBER03_SEGMENT_LAYOUT.forEach((segment, index) => {
       if (this.textures.exists(segment.key)) {
@@ -253,9 +263,11 @@ export class Chamber03Scene extends Phaser.Scene {
           .setAlpha(segment.alpha)
           .setDepth(index === CHAMBER03_SEGMENT_LAYOUT.length - 1 ? -11 : -13);
       } else {
-        this.add.rectangle(segment.centerX, segment.y, segment.width, segment.height, COLORS.architecture, 0.5)
-          .setStrokeStyle(2, COLORS.rust, 0.3)
+        this.add.rectangle(segment.centerX, segment.y, segment.width, segment.height, COLORS.architecture, 0.54)
+          .setStrokeStyle(2, COLORS.rust, 0.34)
           .setDepth(-13);
+        this.add.ellipse(segment.centerX, segment.y - 36, segment.width * 0.42, 84, COLORS.bone, 0.14).setDepth(-12.8);
+        this.add.rectangle(segment.centerX, segment.y + 34, segment.width * 0.68, segment.height * 0.38, COLORS.foreground, 0.22).setDepth(-12.7);
       }
 
       const floorGlowAlpha = segment.key === ASSET_KEYS.chamber03BossDais ? 0.18 : segment.key === ASSET_KEYS.chamber03Threshold ? 0.12 : 0.06;
@@ -268,6 +280,10 @@ export class Chamber03Scene extends Phaser.Scene {
       this.add.ellipse(segment.centerX + (index % 2 === 0 ? -90 : 90), 242, 210, 160, COLORS.foreground, 0.12).setDepth(-12);
       this.add.ellipse(segment.centerX, 208, 300, 80, COLORS.bone, 0.08).setDepth(-12.2);
     });
+
+    const floorPlateColor = this.textures.exists(ASSET_KEYS.chamber03BossDais) ? COLORS.bone : 0x8a7765;
+    this.add.rectangle(CHAMBER03_WORLD_WIDTH / 2, WORLD.floorY + 10, CHAMBER03_WORLD_WIDTH, 96, floorPlateColor, 0.18).setDepth(-10.2);
+    this.add.rectangle(CHAMBER03_WORLD_WIDTH / 2, WORLD.floorY + 28, CHAMBER03_WORLD_WIDTH, 34, COLORS.foreground, 0.42).setDepth(-10.1);
 
     if (!this.textures.exists(ASSET_KEYS.chamber03EntryNave)) {
       this.add.rectangle(320, 220, 560, 340, 0x120e0d, 0.72).setDepth(-12.5);
@@ -299,6 +315,36 @@ export class Chamber03Scene extends Phaser.Scene {
       .setStrokeStyle(2, COLORS.bone, 0.22)
       .setDepth(-5.2)
       .setVisible(false);
+  }
+
+  establishInitialCameraFrame() {
+    const camera = this.cameras.main;
+    const spawnBandTop = 150;
+    const spawnBandBottom = WORLD.floorY - 16;
+    const clampedPlayerY = Phaser.Math.Clamp(this.player.sprite.y, spawnBandTop, spawnBandBottom);
+
+    if (clampedPlayerY !== this.player.sprite.y) {
+      this.player.sprite.y = clampedPlayerY;
+      this.player.body.updateFromGameObject();
+      this.player.attackHitbox.body.updateFromGameObject();
+    }
+
+    this.applyResponsiveLayout();
+
+    const viewportHeight = camera.height / camera.zoom;
+    const targetCenterY = Phaser.Math.Clamp(
+      this.player.sprite.y - (camera.followOffset?.y ?? 0),
+      viewportHeight * 0.5,
+      WORLD.height - viewportHeight * 0.5
+    );
+    const bootScrollY = Phaser.Math.Clamp(targetCenterY - viewportHeight * 0.5, 0, Math.max(0, WORLD.height - viewportHeight));
+
+    camera.centerOn(this.player.sprite.x - 84, targetCenterY);
+    camera.scrollY = bootScrollY;
+    camera.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
+    camera.setLerp(0.08, 0.08);
+
+    this.hasAppliedBootSanityFrame = true;
   }
 
   createThresholdLoreZone() {
@@ -423,7 +469,31 @@ export class Chamber03Scene extends Phaser.Scene {
       return;
     }
 
+    const scenePlugin = this.scene;
+    const wasPaused = scenePlugin.isPaused(this.scene.key);
+    if (wasPaused) {
+      scenePlugin.resume(this.scene.key);
+    }
+
     this.isLoreTransitionActive = false;
+    this.hasLaunchedLoreCutscene = false;
+    this.input.enabled = true;
+    this.physics.world.resume();
+    this.physics.world.timeScale = 1;
+    this.time.timeScale = 1;
+    this.mobileControls?.setMode('gameplay');
+    this.player.body.enable = true;
+    this.player.body.setVelocity(0, 0);
+    this.player.attackHitbox.body.enable = this.player.attackActive;
+    this.enemies.forEach((enemy) => {
+      enemy.body.enable = !enemy.dead;
+      enemy.body.setVelocity(0, enemy.body.velocity.y);
+    });
+    if (this.boss && !this.boss.dead) {
+      this.boss.body.enable = this.bossEncounterStarted;
+      this.boss.body.setVelocity(0, 0);
+    }
+
     this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.14 });
     this.cameras.main.fadeIn(520, 0, 0, 0);
     this.bossArenaSeal?.setVisible(true).setAlpha(0.32);
@@ -697,7 +767,9 @@ export class Chamber03Scene extends Phaser.Scene {
     const camera = this.cameras.main;
     const width = this.scale.width;
     const height = this.scale.height;
-    const isPortraitMobile = this.mobileControls.enabled && height >= width;
+    const mobileControls = this.mobileControls;
+    const mobileEnabled = mobileControls?.enabled ?? false;
+    const isPortraitMobile = mobileEnabled && height >= width;
 
     if (this.uiCamera) {
       this.uiCamera.setViewport(0, 0, width, height);
@@ -706,7 +778,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.bossRewardText?.setPosition(width / 2, Math.max(100, height * 0.24));
 
     if (isPortraitMobile) {
-      const safeAreaBottom = this.mobileControls.getSafeAreaInsetPx('bottom');
+      const safeAreaBottom = mobileControls?.getSafeAreaInsetPx('bottom') ?? 0;
       const maxWorldBandFromControlNeeds = height - PORTRAIT_LAYOUT.minControlBand - safeAreaBottom;
       const worldBandMax = Math.max(PORTRAIT_LAYOUT.worldBandMin, Math.min(PORTRAIT_LAYOUT.worldBandMax, maxWorldBandFromControlNeeds));
       const worldBandHeight = Phaser.Math.Clamp(
@@ -717,7 +789,12 @@ export class Chamber03Scene extends Phaser.Scene {
       camera.setViewport(0, 0, width, worldBandHeight);
       camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
       camera.setFollowOffset(-120, PORTRAIT_LAYOUT.portraitFollowOffsetY);
-      this.mobileControls.setReservedBottomPx(height - worldBandHeight);
+      if (this.player && this.hasAppliedBootSanityFrame) {
+        const viewportHeight = camera.height / camera.zoom;
+        const targetCenterY = Phaser.Math.Clamp(this.player.sprite.y - PORTRAIT_LAYOUT.portraitFollowOffsetY, viewportHeight * 0.5, WORLD.height - viewportHeight * 0.5);
+        camera.scrollY = Phaser.Math.Clamp(targetCenterY - viewportHeight * 0.5, 0, Math.max(0, WORLD.height - viewportHeight));
+      }
+      mobileControls?.setReservedBottomPx(height - worldBandHeight);
       this.restartText.setPosition(width / 2, Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY));
       return;
     }
@@ -725,7 +802,12 @@ export class Chamber03Scene extends Phaser.Scene {
     camera.setViewport(0, 0, width, height);
     camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
     camera.setFollowOffset(-140, PORTRAIT_LAYOUT.desktopFollowOffsetY);
-    this.mobileControls.setReservedBottomPx(0);
+    if (this.player && this.hasAppliedBootSanityFrame) {
+      const viewportHeight = camera.height / camera.zoom;
+      const targetCenterY = Phaser.Math.Clamp(this.player.sprite.y - PORTRAIT_LAYOUT.desktopFollowOffsetY, viewportHeight * 0.5, WORLD.height - viewportHeight * 0.5);
+      camera.scrollY = Phaser.Math.Clamp(targetCenterY - viewportHeight * 0.5, 0, Math.max(0, WORLD.height - viewportHeight));
+    }
+    mobileControls?.setReservedBottomPx(0);
     this.restartText.setPosition(width / 2, 90);
   }
 }
