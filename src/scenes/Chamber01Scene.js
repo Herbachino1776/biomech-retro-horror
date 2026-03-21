@@ -18,13 +18,19 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
+import { CHAMBER01_ACTIVE_TEXTURE_KEYS, CHAMBER01_TEXTURE_ASSET_KEYS, queueMissingTextureAssets, pruneUnusedTextures } from '../data/sceneAssetPlan.js';
 
 export class Chamber01Scene extends Phaser.Scene {
   constructor() {
     super('Chamber01Scene');
   }
 
+  preload() {
+    queueMissingTextureAssets(this, CHAMBER01_TEXTURE_ASSET_KEYS);
+  }
+
   create() {
+    pruneUnusedTextures(this, CHAMBER01_ACTIVE_TEXTURE_KEYS);
     this.physics.world.gravity.y = WORLD.gravityY;
     this.cameras.main.setBounds(0, 0, WORLD.width, WORLD.height);
     this.physics.world.setBounds(0, 0, WORLD.width, WORLD.height);

@@ -8,6 +8,7 @@ import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
+import { CHAMBER02_ACTIVE_TEXTURE_KEYS, CHAMBER02_TEXTURE_ASSET_KEYS, queueMissingTextureAssets, pruneUnusedTextures } from '../data/sceneAssetPlan.js';
 
 const CHAMBER02_WORLD_WIDTH = 3600;
 
@@ -115,11 +116,16 @@ export class Chamber02Scene extends Phaser.Scene {
     super('Chamber02Scene');
   }
 
+  preload() {
+    queueMissingTextureAssets(this, CHAMBER02_TEXTURE_ASSET_KEYS);
+  }
+
   init(data) {
     this.transitionContext = data ?? {};
   }
 
   create() {
+    pruneUnusedTextures(this, CHAMBER02_ACTIVE_TEXTURE_KEYS);
     this.physics.world.gravity.y = WORLD.gravityY;
     this.cameras.main.setBounds(0, 0, CHAMBER02_WORLD_WIDTH, WORLD.height);
     this.physics.world.setBounds(0, 0, CHAMBER02_WORLD_WIDTH, WORLD.height);
