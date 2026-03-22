@@ -23,4 +23,4 @@ export const gameConfig = {
 };
 
 
-export const BOOT_SCENE_OVERRIDE = null;
+export const BOOT_SCENE_OVERRIDE = Chamber03Scene;
