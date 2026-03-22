@@ -22,7 +22,7 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Chamber 02 central shrine/ossuary lore trigger runs through `LoreCutsceneScene` and preserves diegetic presentation.
 - Chamber 02 post-lore reaction state is implemented: environmental ritual shift plus enemy wake/activation.
 - Chamber 02 TOLL-KEEPER encounter pair gates the exit and unlocks the end gate on defeat.
-- Chamber 02 exit gate unlock state remains active after the TOLL-KEEPER fight and now opens into a new physical exit corridor/threshold into Chamber 03.
+- Chamber 02 exit gate unlock state remains active after the TOLL-KEEPER fight, and the restored baseline now stops safely at the Chamber 02 threshold without entering Chamber 03.
 - Chamber 01 + Chamber 02 ambience is integrated in the shipped slice.
 - Player footsteps/combat/death audio is present.
 - Skitter, TOLL-KEEPER, miniboss, lore/gate, and banishment cues are present.
@@ -31,8 +31,8 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Texture-first asset loading with fallback resilience remains stable.
 
 ## What Still Needs Work Now
-- Chamber 03 now exists as a brutally simple visible bootstrap chamber with explicit proof text/floor geometry while dedicated Chamber 03 art/content remains pending.
-- This pass intentionally prioritized reliable Chamber 02 -> Chamber 03 threshold crossing and a visible empty Chamber 03 over spectacle, enemies, boss content, or new lore sequences.
+- Chamber 03 work currently in the repo is not trusted gameplay content and should not be used as the active baseline.
+- Chamber 03 will be rebuilt from scratch in a later pass rather than debugged forward from the current emergency scene.
 - Content expansion beyond the shipped Chamber 01 + Chamber 02 slice is the next milestone focus.
 - Combat presentation can still be polished further later, but current readability is sufficient for the shipped baseline.
 
@@ -45,12 +45,11 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Constraints: preserve mobile playability, preserve keyboard parity, and do not destabilize the current shipped baseline while expanding content.
 
 ## Latest Completed Task
-- The repo has been intentionally rolled back to the state just before the failed oversized Chamber 03 implementation attempt and is trusted as the new baseline.
-- Milestone 4 audio identity pass is shipped and closed out.
-- Chamber 01 + Chamber 02 ambience, player footsteps/combat/death audio, skitter/TOLL-KEEPER/miniboss cues, and lore/gate/banishment cues are integrated in the current playable slice.
-- The Chamber 02 exit-gate placeholder lore handoff has now been removed so Chamber 03 can restart cleanly from this baseline.
-- Recent audio QA/polish has already been folded into the shipped baseline without changing the slice scope.
-- Docs/status files now reflect Milestone 4 completion, the cleanup reset, and Milestone 5 activation.
+- Emergency Chamber 03 direct-boot overrides were removed from the active app path.
+- Normal BootScene title flow was restored as the trusted default entry.
+- Chamber 01 + Chamber 02 are again the active reliable baseline.
+- Chamber 02 now ends safely at its unlocked threshold instead of handing off into the current Chamber 03 emergency debug scene.
+- Docs/status files now reflect the restored baseline and the requirement to rebuild Chamber 03 from scratch later.
 
 ## Exact Next Best Step After This Task
 Use the Chamber 03 chunked planning docs as the implementation contract:
@@ -58,8 +57,9 @@ Use the Chamber 03 chunked planning docs as the implementation contract:
 - `docs/chamber-03-implementation-roadmap.md`
 
 Immediate follow-through:
-- begin with the smallest milestone-disciplined Chamber 03 bootstrap slice rather than a full grand implementation,
-- use the current Chamber 03 bootstrap as the stable starting point for later spatial buildout, encounter layering, threshold lore, and boss work without replacing the new real-gate handoff.
+- begin from the restored title -> Chamber 01 -> Chamber 02 baseline,
+- rebuild Chamber 03 in small milestone-disciplined slices,
+- do not treat the current Chamber 03 emergency implementation as a stable starting point.
 
 ## Most Important Constraints
 1. Do not regress GitHub Pages/Vite base-path behavior.

@@ -24,6 +24,11 @@ const CHAMBER02_EXIT_CORRIDOR = {
   cameraHintX: 3910
 };
 
+const CHAMBER02_RESTORATION_END_STATE = {
+  thresholdLabel: 'THRESHOLD SEALED // CHAMBER 03 REBUILD PENDING',
+  thresholdDescription: 'Chamber 02 ends here for the restored baseline.'
+};
+
 const CHAMBER02_PLATFORMS = [
   { x: 700, y: 372, width: 170, height: 20 },
   { x: 1170, y: 338, width: 160, height: 20 },
@@ -401,9 +406,9 @@ export class Chamber02Scene extends Phaser.Scene {
     this.physics.add.existing(this.exitThresholdZone, true);
 
     this.exitThresholdPromptText = this.add
-      .text(CHAMBER02_EXIT_CORRIDOR.thresholdX, CHAMBER02_EXIT_CORRIDOR.thresholdLabelY, 'THRESHOLD // CHAMBER 03', {
+      .text(CHAMBER02_EXIT_CORRIDOR.thresholdX, CHAMBER02_EXIT_CORRIDOR.thresholdLabelY, CHAMBER02_RESTORATION_END_STATE.thresholdLabel, {
         fontFamily: 'monospace',
-        fontSize: '14px',
+        fontSize: '13px',
         color: '#d6c9b8',
         align: 'center',
         stroke: '#140f0e',
@@ -411,6 +416,23 @@ export class Chamber02Scene extends Phaser.Scene {
       })
       .setOrigin(0.5)
       .setDepth(-4.9)
+      .setVisible(false);
+    this.exitThresholdDescriptionText = this.add
+      .text(
+        CHAMBER02_EXIT_CORRIDOR.thresholdX,
+        CHAMBER02_EXIT_CORRIDOR.thresholdLabelY + 42,
+        CHAMBER02_RESTORATION_END_STATE.thresholdDescription,
+        {
+          fontFamily: 'monospace',
+          fontSize: '11px',
+          color: '#9f9387',
+          align: 'center',
+          stroke: '#140f0e',
+          strokeThickness: 3
+        }
+      )
+      .setOrigin(0.5)
+      .setDepth(-4.88)
       .setVisible(false);
   }
 
@@ -602,7 +624,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.exitGateBarrier?.setVisible(!unlocked);
     this.exitGateReadyAura?.setVisible(unlocked);
     this.exitCorridorArch?.setVisible(unlocked);
-    this.exitThresholdAura?.setVisible(unlocked);
+    this.exitThresholdAura?.setVisible(false);
 
     if (this.exitGateBarrier?.body) {
       this.exitGateBarrier.body.enable = !unlocked;
@@ -690,6 +712,7 @@ export class Chamber02Scene extends Phaser.Scene {
 
     if (!this.exitGateUnlocked || !this.exitThresholdZone || this.isHandingOffToChamber03) {
       this.exitThresholdPromptText?.setVisible(false);
+      this.exitThresholdDescriptionText?.setVisible(false);
       return;
     }
 
@@ -697,21 +720,13 @@ export class Chamber02Scene extends Phaser.Scene {
       this.currentExitThresholdZone = this.exitThresholdZone;
     });
 
-    this.exitThresholdPromptText?.setVisible(Boolean(this.currentExitThresholdZone));
+    const isAtRestoredEndpoint = Boolean(this.currentExitThresholdZone);
+    this.exitThresholdPromptText?.setVisible(isAtRestoredEndpoint);
+    this.exitThresholdDescriptionText?.setVisible(isAtRestoredEndpoint);
   }
 
   tryBeginExitGateTransition() {
-    if (!this.currentExitThresholdZone || this.isExitGateTransitionActive || this.isHandingOffToChamber03) {
-      return;
-    }
-
-    console.log('[Chamber02Scene] Chamber 03 threshold crossed', {
-      playerX: this.player.sprite.x,
-      playerY: this.player.sprite.y,
-      transitionContext: this.transitionContext
-    });
-    this.audioDirector?.playGateInteract();
-    this.beginExitGateTransitionToChamber03();
+    return;
   }
 
   beginExitGateTransitionToChamber03() {
@@ -887,6 +902,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.restartText?.setVisible(false);
     this.exitGatePromptText?.setVisible(false);
     this.exitThresholdPromptText?.setVisible(false);
+    this.exitThresholdDescriptionText?.setVisible(false);
     this.mobileControls?.setMode('init');
     this.hud?.setVisible(false);
   }

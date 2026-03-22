@@ -205,8 +205,8 @@ export const CHAMBER01_MINIBOSS = {
 
 
 export const DEBUG_BOOT_OVERRIDES = {
-  skipTitleAndBootSceneDirect: true,
-  startScene: 'Chamber03Scene'
+  skipTitleAndBootSceneDirect: false,
+  startScene: null
 };
 
 export const CHAMBER02_EXIT_GATE_TRANSITION = {
