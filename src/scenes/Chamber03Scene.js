@@ -43,16 +43,23 @@ export class Chamber03Scene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, CHAMBER03_WORLD.width, WORLD.height);
     this.physics.world.setBounds(0, 0, CHAMBER03_WORLD.width, WORLD.height);
 
-    this.cameras.main.setBackgroundColor('#261917');
+    this.cameras.main.setBackgroundColor('#35211d');
 
-    this.add.rectangle(CHAMBER03_WORLD.width / 2, WORLD.height / 2, CHAMBER03_WORLD.width, WORLD.height, 0x261917, 1).setDepth(-20);
+    this.add.rectangle(CHAMBER03_WORLD.width / 2, WORLD.height / 2, CHAMBER03_WORLD.width, WORLD.height, 0x35211d, 1).setDepth(-20);
+    this.add.text(32, 26, 'CHAMBER 03 BOOT OK', {
+      fontFamily: 'monospace',
+      fontSize: '28px',
+      color: '#f4e6d2',
+      stroke: '#140d0c',
+      strokeThickness: 6
+    }).setScrollFactor(0).setDepth(40);
     this.bootstrapFloor = this.add.rectangle(
       CHAMBER03_WORLD.width / 2,
       CHAMBER03_WORLD.floorBandY,
       CHAMBER03_WORLD.width,
       CHAMBER03_WORLD.floorHeight,
-      0x7f6a55,
-      0.95
+      0x9b8468,
+      1
     ).setDepth(-11);
     this.bootstrapFloorGlow = this.add.rectangle(
       CHAMBER03_WORLD.width / 2,
