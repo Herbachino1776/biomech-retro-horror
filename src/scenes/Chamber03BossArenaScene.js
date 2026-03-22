@@ -105,6 +105,18 @@ const CHAMBER03_BOSS_COMBAT = {
   arenaPaddingX: 164
 };
 
+const CHAMBER03_FINALE = {
+  bloodFlashMs: 860,
+  payoffRevealDelayMs: 760,
+  payoffHoldMs: 2100,
+  progressionRevealDelayMs: 3140,
+  progressionInteractDelayMs: 360,
+  progressionPromptText: 'DESCEND THROUGH THE RUPTURE',
+  payoffTitle: 'THE PRECENTOR IS SILENCED',
+  payoffBody: 'Sector I stands complete.\nThe marrow route below has opened.',
+  holdingStateReason: 'sector-i-complete-holding-threshold'
+};
+
 export class Chamber03BossArenaScene extends Phaser.Scene {
   constructor() {
     super('Chamber03BossArenaScene');
@@ -117,6 +129,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.hasResolvedOmenBeat = false;
     this.hasActivatedBoss = false;
     this.bossAttackHitId = -1;
+    this.isSectorFinaleActive = false;
+    this.currentProgressionThresholdZone = null;
   }
 
   create() {
@@ -127,6 +141,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.createBossPresentation();
     this.createUiAndInput();
     this.configureCameraAndLayout();
+    this.createFinaleProgressionGate();
     this.registerLoreCutsceneReturn();
     this.cameras.main.fadeIn(420, 0, 0, 0);
     this.time.delayedCall(CHAMBER03_BOSS_ARENA.omenDelayMs, () => {
@@ -436,6 +451,22 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(36)
       .setVisible(false);
+
+    this.sectorPayoffText = this.add
+      .text(this.scale.width / 2, this.getBossPromptY() + 42, '', {
+        fontFamily: 'monospace',
+        fontSize: '18px',
+        color: '#d7ccb9',
+        align: 'center',
+        stroke: '#0c0908',
+        strokeThickness: 5,
+        lineSpacing: 8
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(37)
+      .setAlpha(0)
+      .setVisible(false);
   }
 
   createUiAndInput() {
@@ -457,6 +488,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+    this.keyInteract = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    this.keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -479,6 +512,48 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.mobileControls.setMode('gameplay');
     this.hud.update(this.player.health, PLAYER.maxHealth);
     this.updateBossHud(this.time.now);
+  }
+
+  createFinaleProgressionGate() {
+    const gateX = CHAMBER03_BOSS_ARENA.worldWidth - 202;
+    const gateY = WORLD.floorY - 116;
+
+    this.progressionGate = this.add.container(gateX, gateY).setDepth(5.7).setVisible(false).setAlpha(0);
+
+    const gateShadow = this.add.ellipse(0, 132, 248, 42, 0x050404, 0.32);
+    const gateAura = this.add.ellipse(0, 8, 136, 232, 0x89a274, 0.18);
+    const gateCore = this.add.ellipse(0, -10, 76, 186, 0xd5c3aa, 0.84).setStrokeStyle(3, 0xe4d5bc, 0.3);
+    const gateMaw = this.add.ellipse(0, -12, 28, 142, 0x090707, 0.94);
+    const leftSpine = this.add.rectangle(-44, 10, 18, 188, 0x2c201c, 0.82).setAngle(-8);
+    const rightSpine = this.add.rectangle(44, 10, 18, 188, 0x2c201c, 0.82).setAngle(8);
+
+    this.progressionGate.add([gateShadow, gateAura, gateCore, gateMaw, leftSpine, rightSpine]);
+
+    if (this.textures.exists(ASSET_KEYS.chamber03BackgroundThreshold)) {
+      const thresholdShell = this.add
+        .image(0, 0, ASSET_KEYS.chamber03BackgroundThreshold)
+        .setDisplaySize(236, 304)
+        .setTint(0xc7b197)
+        .setAlpha(0.86);
+      this.progressionGate.add(thresholdShell);
+    }
+
+    this.progressionGatePrompt = this.add
+      .text(gateX, gateY - 196, CHAMBER03_FINALE.progressionPromptText, {
+        fontFamily: 'monospace',
+        fontSize: '15px',
+        color: '#d8cfba',
+        align: 'center',
+        stroke: '#100c0b',
+        strokeThickness: 4
+      })
+      .setOrigin(0.5)
+      .setDepth(35)
+      .setVisible(false);
+
+    this.progressionThresholdZone = this.add.zone(gateX, WORLD.floorY - 42, 180, 212).setOrigin(0.5);
+    this.physics.add.existing(this.progressionThresholdZone, true);
+    this.progressionThresholdZone.body.enable = false;
   }
 
   registerLoreCutsceneReturn() {
@@ -590,6 +665,26 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       return;
     }
 
+    if (this.isSectorFinaleActive) {
+      this.restartText.setVisible(false);
+      this.mobileControls.setMode('gameplay');
+      const finaleInput = {
+        left: this.cursors.left.isDown || mobileInput.left,
+        right: this.cursors.right.isDown || mobileInput.right,
+        jumpPressed:
+          Phaser.Input.Keyboard.JustDown(this.cursors.up) ||
+          Phaser.Input.Keyboard.JustDown(this.cursors.space) ||
+          mobileInput.jumpPressed,
+        attackPressed: false
+      };
+      this.player.update(time, finaleInput);
+      this.refreshProgressionThresholdPresence();
+      this.tryUseProgressionThreshold(mobileInput);
+      this.updateBossHud(time);
+      this.updateFinaleGatePulse(time);
+      return;
+    }
+
     this.restartText.setVisible(false);
     this.mobileControls.setMode('gameplay');
 
@@ -605,6 +700,9 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
     this.player.update(time, input);
     this.updateBossPresence(time);
+    this.refreshProgressionThresholdPresence();
+    this.tryUseProgressionThreshold(mobileInput);
+    this.updateFinaleGatePulse(time);
     this.hud.update(this.player.health, PLAYER.maxHealth);
     this.updateBossHud(time);
   }
@@ -732,14 +830,18 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossBody.setVelocity(0, 0);
     this.audioDirector?.playEnemyDeath('miniboss');
     this.bossStatusPrompt
-      ?.setText('THE PRECENTOR IS BROKEN')
+      ?.setText(CHAMBER03_FINALE.payoffTitle)
       .setPosition(this.scale.width / 2, this.getBossPromptY())
       .setVisible(true);
+    this.sectorPayoffText
+      ?.setText(CHAMBER03_FINALE.payoffBody)
+      .setPosition(this.scale.width / 2, this.getBossPromptY() + 44);
+    this.triggerSectorFinalePayoff();
     this.tweens.add({
       targets: [this.bossSprite, this.bossFallbackLabel].filter(Boolean),
-      alpha: 0.14,
-      y: '-=24',
-      duration: 980,
+      alpha: 0.06,
+      y: '-=42',
+      duration: 1180,
       ease: 'Cubic.easeOut'
     });
     this.tweens.add({
@@ -754,6 +856,199 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       duration: 860,
       ease: 'Sine.out'
     });
+  }
+
+  triggerSectorFinalePayoff() {
+    this.isSectorFinaleActive = true;
+    this.currentProgressionThresholdZone = null;
+    this.player.attackHitbox?.body?.setEnable(false);
+    this.cameras.main.shake(920, 0.028, true);
+    this.time.delayedCall(150, () => this.cameras.main.shake(680, 0.024, true));
+    this.time.delayedCall(330, () => this.cameras.main.shake(560, 0.02, true));
+    this.time.delayedCall(90, () => {
+      this.spawnSectorFinaleAftermath(this.bossSprite.x, WORLD.floorY - 2);
+    });
+    this.time.delayedCall(220, () => {
+      this.audioDirector?.playBanishmentSting();
+    });
+    this.time.delayedCall(CHAMBER03_FINALE.payoffRevealDelayMs, () => {
+      this.showSectorPayoffText();
+    });
+    this.time.delayedCall(CHAMBER03_FINALE.progressionRevealDelayMs, () => {
+      this.revealProgressionGate();
+    });
+  }
+
+  spawnSectorFinaleAftermath(x, y) {
+    this.bossAftermathPool?.destroy(true);
+    this.bossAftermathBurst?.destroy(true);
+
+    const burst = this.add.container(x, y - 116).setDepth(6.12);
+    const splashA = this.add.ellipse(0, 0, 210, 118, 0x561517, 0.82).setAngle(-18);
+    const splashB = this.add.ellipse(-52, 8, 132, 80, 0x6e1b1c, 0.72).setAngle(-34);
+    const splashC = this.add.ellipse(64, 12, 126, 76, 0x3e1012, 0.68).setAngle(26);
+    const mist = this.add.ellipse(0, -22, 244, 126, 0xb97563, 0.14);
+    burst.add([splashA, splashB, splashC, mist]);
+    burst.setScale(0.32).setAlpha(0);
+
+    this.tweens.add({
+      targets: burst,
+      scaleX: 1.08,
+      scaleY: 1.04,
+      alpha: 0.94,
+      duration: 360,
+      ease: 'Cubic.easeOut',
+      yoyo: false
+    });
+    this.tweens.add({
+      targets: burst,
+      alpha: 0,
+      y: burst.y - 32,
+      duration: 980,
+      delay: 240,
+      ease: 'Sine.easeIn',
+      onComplete: () => burst.destroy()
+    });
+
+    const pool = this.add.container(x, y).setDepth(1.4);
+    const shadow = this.add.ellipse(0, 10, 324, 64, 0x090505, 0.5);
+    const outerPool = this.add.ellipse(0, 0, 294, 66, 0x3a1012, 0.9).setStrokeStyle(5, 0x724746, 0.24);
+    const midPool = this.add.ellipse(-18, -2, 236, 48, 0x631719, 0.78);
+    const tornGloss = this.add.ellipse(42, -10, 118, 18, 0xb97160, 0.2);
+    const clotA = this.add.ellipse(-78, 6, 82, 18, 0x220809, 0.5);
+    const clotB = this.add.ellipse(70, 8, 64, 16, 0x2b0c0d, 0.46);
+    pool.add([shadow, outerPool, midPool, tornGloss, clotA, clotB]);
+    pool.setScale(0.15, 0.15).setAlpha(0);
+
+    this.tweens.add({
+      targets: pool,
+      scaleX: 1.08,
+      scaleY: 1,
+      alpha: 1,
+      duration: 720,
+      ease: 'Cubic.easeOut'
+    });
+
+    this.bossAftermathBurst = burst;
+    this.bossAftermathPool = pool;
+  }
+
+  showSectorPayoffText() {
+    if (!this.bossStatusPrompt || !this.sectorPayoffText) {
+      return;
+    }
+
+    this.tweens.killTweensOf([this.bossStatusPrompt, this.sectorPayoffText]);
+    this.bossStatusPrompt.setVisible(true).setAlpha(0).setScale(0.94);
+    this.sectorPayoffText.setVisible(true).setAlpha(0).setScale(0.96);
+
+    this.tweens.add({
+      targets: [this.bossStatusPrompt, this.sectorPayoffText],
+      alpha: 1,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 360,
+      ease: 'Cubic.easeOut',
+      hold: CHAMBER03_FINALE.payoffHoldMs,
+      onComplete: () => {
+        this.tweens.add({
+          targets: [this.bossStatusPrompt, this.sectorPayoffText],
+          alpha: 0,
+          duration: 460,
+          ease: 'Cubic.easeIn',
+          onComplete: () => {
+            this.bossStatusPrompt?.setVisible(false);
+            this.sectorPayoffText?.setVisible(false);
+          }
+        });
+      }
+    });
+  }
+
+  revealProgressionGate() {
+    if (!this.progressionGate || !this.progressionThresholdZone) {
+      return;
+    }
+
+    this.progressionGate.setVisible(true);
+    this.progressionThresholdZone.body.enable = true;
+    this.audioDirector?.playGateUnlock();
+
+    this.tweens.add({
+      targets: this.progressionGate,
+      alpha: 1,
+      duration: 560,
+      ease: 'Sine.out'
+    });
+    this.tweens.add({
+      targets: this.progressionGate,
+      y: '-=16',
+      duration: 520,
+      ease: 'Cubic.easeOut'
+    });
+  }
+
+  refreshProgressionThresholdPresence() {
+    this.currentProgressionThresholdZone = null;
+
+    if (!this.progressionThresholdZone?.body?.enable) {
+      this.progressionGatePrompt?.setVisible(false);
+      return;
+    }
+
+    this.physics.overlap(this.player.sprite, this.progressionThresholdZone, () => {
+      this.currentProgressionThresholdZone = this.progressionThresholdZone;
+    });
+
+    this.progressionGatePrompt?.setVisible(Boolean(this.currentProgressionThresholdZone));
+  }
+
+  tryUseProgressionThreshold(mobileInput) {
+    if (!this.currentProgressionThresholdZone) {
+      return;
+    }
+
+    const interactPressed =
+      Phaser.Input.Keyboard.JustDown(this.keyInteract) ||
+      Phaser.Input.Keyboard.JustDown(this.keyEnter) ||
+      mobileInput.interactPressed;
+
+    if (!interactPressed) {
+      return;
+    }
+
+    this.beginSectorCompleteTransition();
+  }
+
+  beginSectorCompleteTransition() {
+    if (this.isTransitioningToSectorComplete) {
+      return;
+    }
+
+    this.isTransitioningToSectorComplete = true;
+    this.mobileControls.setMode('init');
+    this.progressionGatePrompt?.setVisible(false);
+    this.player.body.setVelocity(0, 0);
+    this.player.body.setEnable(false);
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.start('SectorCompleteScene', {
+        enteredFrom: 'chamber03-boss-arena',
+        progressionSource: 'ruptured-threshold-gate',
+        reason: CHAMBER03_FINALE.holdingStateReason
+      });
+    });
+    this.cameras.main.fadeOut(360, 0, 0, 0);
+  }
+
+  updateFinaleGatePulse(time) {
+    if (!this.progressionGate?.visible) {
+      return;
+    }
+
+    const [gateShadow, gateAura] = this.progressionGate.list;
+    gateAura?.setAlpha(0.12 + (Math.sin(time / 210) + 1) * 0.08).setScale(1 + Math.sin(time / 280) * 0.03, 1.02);
+    gateShadow?.setAlpha(0.26 + (Math.sin(time / 320) + 1) * 0.05);
   }
 
   handleBossContactPlayer(_playerSprite, bossSprite) {
@@ -1128,6 +1423,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY)
       );
       this.bossStatusPrompt?.setPosition(width / 2, this.getBossPromptY());
+      this.sectorPayoffText?.setPosition(width / 2, this.getBossPromptY() + 44);
       return;
     }
 
@@ -1137,6 +1433,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.mobileControls.setReservedBottomPx(0);
     this.restartText.setPosition(width / 2, 90);
     this.bossStatusPrompt?.setPosition(width / 2, this.getBossPromptY());
+    this.sectorPayoffText?.setPosition(width / 2, this.getBossPromptY() + 44);
   }
 
   applyGameplayReadabilitySupport(target, { fill = 0xd2c2ac, alpha = 0.16, scale = 1.08 } = {}) {
