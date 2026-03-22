@@ -3,6 +3,9 @@ import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { ASSET_URLS } from '../data/assetUrls.js';
 
+// Set to 'Chamber03Scene' for isolated rescue-pass verification, then restore to null for normal progression.
+const DIRECT_BOOT_SCENE_KEY = null;
+
 export class BootScene extends Phaser.Scene {
   constructor() {
     super('BootScene');
@@ -209,6 +212,6 @@ export class BootScene extends Phaser.Scene {
       });
     }
 
-    this.scene.start('Chamber01Scene');
+    this.scene.start(DIRECT_BOOT_SCENE_KEY ?? 'Chamber01Scene');
   }
 }

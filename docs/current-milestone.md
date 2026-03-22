@@ -43,7 +43,7 @@ Milestone 4 is now considered **complete / closed out** for the currently shippe
 7. Landscape usability remains intact.
 
 ## Known Remaining Rough Edges (Non-Blocking)
-- Chamber 03 currently exists as a deliberately minimal entry chamber: visible, playable, and stable, but not yet built out into its boss/threshold/finale layers.
+- Chamber 03 currently exists as a deliberately minimal rebuilt entry chamber that reuses proven Chamber 02 visual structure for a visible, playable, stable fallback room; boss/threshold/finale layers are still not built out.
 - Combat presentation remains intentionally restrained and should only expand when content work needs it.
 - Future milestone work should add new playable content without destabilizing the shipped Chamber 01 + Chamber 02 baseline.
 

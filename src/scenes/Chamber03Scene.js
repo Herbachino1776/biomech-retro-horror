@@ -10,15 +10,16 @@ import { AudioDirector } from '../audio/AudioDirector.js';
 
 const CHAMBER03_WORLD_WIDTH = 2800;
 const CHAMBER03_SPAWN = { x: 220, y: 360 };
-const CHAMBER03_FLOOR_BODY = {
-  y: WORLD.floorY + 32,
+const CHAMBER03_FLOOR = {
+  x: CHAMBER03_WORLD_WIDTH / 2,
+  y: WORLD.floorY + 28,
   width: CHAMBER03_WORLD_WIDTH,
-  height: 80
+  height: 72
 };
-const CHAMBER03_STEP_PLATFORMS = [
-  { x: 820, y: 412, width: 220, height: 18 },
-  { x: 1440, y: 386, width: 240, height: 18 },
-  { x: 2060, y: 420, width: 220, height: 18 }
+const CHAMBER03_PLATFORMS = [
+  { x: 820, y: 384, width: 180, height: 20 },
+  { x: 1420, y: 352, width: 170, height: 20 },
+  { x: 2040, y: 392, width: 220, height: 20 }
 ];
 
 export class Chamber03Scene extends Phaser.Scene {
@@ -32,27 +33,27 @@ export class Chamber03Scene extends Phaser.Scene {
 
   create() {
     this.physics.world.gravity.y = WORLD.gravityY;
-    this.physics.world.setBounds(0, 0, CHAMBER03_WORLD_WIDTH, WORLD.height);
     this.cameras.main.setBounds(0, 0, CHAMBER03_WORLD_WIDTH, WORLD.height);
-    this.cameras.main.setBackgroundColor('#090707');
+    this.physics.world.setBounds(0, 0, CHAMBER03_WORLD_WIDTH, WORLD.height);
+    this.cameras.main.setBackgroundColor('#070707');
     this.cameras.main.fadeIn(700, 0, 0, 0);
 
     this.isRestartingRun = false;
     this.platforms = this.physics.add.staticGroup();
 
-    this.renderBackdrop();
-    this.renderFloorBand();
+    this.renderProcessionalBackdrop();
     this.createPlatforms();
 
     this.audioDirector = new AudioDirector(this);
     this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01);
 
     this.player = new Player(this, CHAMBER03_SPAWN.x, CHAMBER03_SPAWN.y, PLAYER);
-    this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.08 });
+    this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
     this.physics.add.collider(this.player.sprite, this.platforms);
 
     this.hud = new HudOverlay(this);
     this.mobileControls = new MobileControls(this);
+    this.setupMobileUiCamera();
 
     this.restartText = this.add
       .text(this.scale.width / 2, 90, '', {
@@ -67,7 +68,7 @@ export class Chamber03Scene extends Phaser.Scene {
       .setVisible(false);
 
     this.chamberLabel = this.add
-      .text(this.scale.width / 2, 120, 'CHAMBER 03 // ENTRY NAVE', {
+      .text(this.scale.width / 2, 28, 'CHAMBER 03 // STABLE ENTRY CHAMBER', {
         fontFamily: 'monospace',
         fontSize: '14px',
         color: '#9bb085',
@@ -77,14 +78,11 @@ export class Chamber03Scene extends Phaser.Scene {
       .setDepth(34)
       .setOrigin(0.5);
 
-    this.setupMobileUiCamera();
-
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
     this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
-    this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08);
-
+    this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
     this.scale.on('resize', this.applyResponsiveLayout, this);
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
@@ -96,83 +94,70 @@ export class Chamber03Scene extends Phaser.Scene {
     this.hud.update(this.player.health, PLAYER.maxHealth);
   }
 
-  renderBackdrop() {
-    this.add.rectangle(CHAMBER03_WORLD_WIDTH / 2, WORLD.height / 2, CHAMBER03_WORLD_WIDTH, WORLD.height, 0x0a0807, 1).setDepth(-30);
+  renderProcessionalBackdrop() {
+    this.add
+      .rectangle(CHAMBER03_WORLD_WIDTH / 2, WORLD.height / 2, CHAMBER03_WORLD_WIDTH, WORLD.height, COLORS.backdrop, 1)
+      .setOrigin(0.5)
+      .setDepth(-14);
 
-    const hasEntryNaveArt = this.textures.exists(ASSET_KEYS.chamber03BackdropEntryNave);
-    const hasWallModuleArt = this.textures.exists(ASSET_KEYS.chamber03BackdropWallModule);
-    const panelWidth = 700;
-    const panelCount = Math.ceil(CHAMBER03_WORLD_WIDTH / panelWidth) + 1;
+    const segmentWidth = 560;
+    const segmentCount = Math.ceil(CHAMBER03_WORLD_WIDTH / segmentWidth) + 1;
 
-    for (let index = 0; index < panelCount; index += 1) {
-      const panelCenterX = index * panelWidth + panelWidth / 2;
+    for (let i = 0; i < segmentCount; i += 1) {
+      const segmentX = i * segmentWidth + segmentWidth / 2;
+      const panelTint = i % 2 === 0 ? 0xbfae95 : 0xb1a38e;
 
-      if (hasEntryNaveArt) {
+      if (this.textures.exists(ASSET_KEYS.chamber02BackgroundPlate)) {
         this.add
-          .image(panelCenterX, 212, ASSET_KEYS.chamber03BackdropEntryNave)
-          .setDisplaySize(panelWidth + 44, 424)
-          .setTint(index % 2 === 0 ? 0xd2c0a4 : 0xc1af96)
-          .setAlpha(0.56)
-          .setDepth(-29);
-      } else if (this.textures.exists(ASSET_KEYS.chamber02BackgroundPlate)) {
-        this.add
-          .image(panelCenterX, 212, ASSET_KEYS.chamber02BackgroundPlate)
-          .setDisplaySize(panelWidth + 44, 404)
-          .setTint(index % 2 === 0 ? 0xc1ab93 : 0xaf9a82)
+          .image(segmentX, 220, ASSET_KEYS.chamber02BackgroundPlate)
+          .setDisplaySize(segmentWidth + 40, 382)
+          .setTint(panelTint)
           .setAlpha(0.46)
-          .setDepth(-29);
+          .setDepth(-13);
       } else {
         this.add
-          .rectangle(panelCenterX, 212, panelWidth + 44, 404, COLORS.architecture, 0.58)
-          .setStrokeStyle(2, COLORS.rust, 0.28)
-          .setDepth(-29);
+          .rectangle(segmentX, 220, segmentWidth + 40, 382, COLORS.architecture, 0.5)
+          .setStrokeStyle(2, COLORS.rust, 0.25)
+          .setDepth(-13);
       }
 
-      if (hasWallModuleArt && index % 2 === 1) {
+      if (this.textures.exists(ASSET_KEYS.chamber02ForegroundHornArch) && i % 2 === 1) {
         this.add
-          .image(panelCenterX + 18, 236, ASSET_KEYS.chamber03BackdropWallModule)
-          .setDisplaySize(276, 290)
-          .setTint(0xc8b59d)
-          .setAlpha(0.22)
-          .setDepth(-28);
+          .image(segmentX + 28, 274, ASSET_KEYS.chamber02ForegroundHornArch)
+          .setDisplaySize(220, 214)
+          .setTint(0xb39f89)
+          .setAlpha(0.14)
+          .setDepth(-12);
       }
     }
 
-    this.add.ellipse(420, 210, 540, 320, 0x15100e, 0.32).setDepth(-27);
-    this.add.ellipse(1400, 196, 700, 340, 0x120d0c, 0.3).setDepth(-27);
-    this.add.ellipse(2360, 214, 580, 320, 0x15100e, 0.32).setDepth(-27);
-    this.add.rectangle(CHAMBER03_WORLD_WIDTH / 2, WORLD.floorY - 64, CHAMBER03_WORLD_WIDTH, 10, 0xd4c19f, 0.18).setDepth(-26);
-  }
-
-  renderFloorBand() {
-    if (this.textures.exists(ASSET_KEYS.chamber02FloorStrip)) {
-      this.add
-        .tileSprite(CHAMBER03_WORLD_WIDTH / 2, WORLD.floorY + 6, CHAMBER03_WORLD_WIDTH, 118, ASSET_KEYS.chamber02FloorStrip)
-        .setTint(0xd1c0a7)
-        .setAlpha(0.82)
-        .setDepth(-24);
-    } else {
-      this.add.rectangle(CHAMBER03_WORLD_WIDTH / 2, WORLD.floorY + 6, CHAMBER03_WORLD_WIDTH, 118, 0x241d19, 0.94).setDepth(-24);
-    }
-
-    this.add.rectangle(CHAMBER03_WORLD_WIDTH / 2, WORLD.floorY + 34, CHAMBER03_WORLD_WIDTH, 76, 0x140f0d, 0.48).setDepth(-23);
-    this.add.ellipse(380, WORLD.floorY - 8, 520, 58, 0x91a06f, 0.08).setDepth(-22);
-    this.add.ellipse(1310, WORLD.floorY - 18, 660, 66, 0x8f7d72, 0.1).setDepth(-22);
-    this.add.ellipse(2210, WORLD.floorY - 10, 520, 58, 0x91a06f, 0.08).setDepth(-22);
+    this.add.ellipse(460, 210, 540, 300, 0x15100e, 0.22).setDepth(-11);
+    this.add.ellipse(1420, 208, 620, 320, 0x15100e, 0.22).setDepth(-11);
+    this.add.ellipse(2280, 214, 540, 300, 0x15100e, 0.22).setDepth(-11);
   }
 
   createPlatforms() {
-    this.createInvisiblePlatform(
-      CHAMBER03_WORLD_WIDTH / 2,
-      CHAMBER03_FLOOR_BODY.y,
-      CHAMBER03_FLOOR_BODY.width,
-      CHAMBER03_FLOOR_BODY.height
-    );
+    this.createInvisiblePlatform(CHAMBER03_FLOOR.x, CHAMBER03_FLOOR.y, CHAMBER03_FLOOR.width, CHAMBER03_FLOOR.height);
 
-    CHAMBER03_STEP_PLATFORMS.forEach((platform) => {
+    if (this.textures.exists(ASSET_KEYS.chamber02FloorStrip)) {
+      this.add
+        .tileSprite(CHAMBER03_WORLD_WIDTH / 2, WORLD.floorY + 4, CHAMBER03_WORLD_WIDTH, 116, ASSET_KEYS.chamber02FloorStrip)
+        .setTint(0xd8cab4)
+        .setAlpha(0.78)
+        .setDepth(-10);
+    } else {
+      this.add
+        .rectangle(CHAMBER03_WORLD_WIDTH / 2, WORLD.floorY + 4, CHAMBER03_WORLD_WIDTH, 116, COLORS.foreground, 0.88)
+        .setDepth(-10);
+    }
+
+    this.add.rectangle(CHAMBER03_WORLD_WIDTH / 2, WORLD.floorY + 32, CHAMBER03_WORLD_WIDTH, 70, 0x120e0d, 0.42).setDepth(-9.8);
+    this.add.rectangle(CHAMBER03_WORLD_WIDTH / 2, WORLD.floorY - 46, CHAMBER03_WORLD_WIDTH, 8, 0xd4c19f, 0.16).setDepth(-9.7);
+
+    CHAMBER03_PLATFORMS.forEach((platform) => {
       this.createInvisiblePlatform(platform.x, platform.y, platform.width, platform.height);
-      this.add.rectangle(platform.x, platform.y + 4, platform.width, 22, 0x1a1412, 0.48).setDepth(-21.8);
-      this.add.rectangle(platform.x, platform.y - 4, platform.width, 6, 0xc9b89d, 0.16).setDepth(-21.7);
+      this.add.rectangle(platform.x, platform.y + 4, platform.width, 22, 0x1a1412, 0.48).setDepth(-9.4);
+      this.add.rectangle(platform.x, platform.y - 4, platform.width, 6, 0xc9b89d, 0.16).setDepth(-9.3);
     });
   }
 
@@ -200,8 +185,12 @@ export class Chamber03Scene extends Phaser.Scene {
 
     this.restartText.setVisible(false);
     this.mobileControls.setMode('gameplay');
+    this.player.update(time, this.getCombinedInput(mobileInput));
+    this.hud.update(this.player.health, PLAYER.maxHealth);
+  }
 
-    this.player.update(time, {
+  getCombinedInput(mobileInput) {
+    return {
       left: this.cursors.left.isDown || mobileInput.left,
       right: this.cursors.right.isDown || mobileInput.right,
       jumpPressed:
@@ -209,9 +198,7 @@ export class Chamber03Scene extends Phaser.Scene {
         Phaser.Input.Keyboard.JustDown(this.cursors.space) ||
         mobileInput.jumpPressed,
       attackPressed: Phaser.Input.Keyboard.JustDown(this.keyAttack) || mobileInput.attackPressed
-    });
-
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    };
   }
 
   setupMobileUiCamera() {
@@ -220,7 +207,6 @@ export class Chamber03Scene extends Phaser.Scene {
     }
 
     this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height, false, 'Chamber03MobileUiCamera');
-
     const mobileUiElements = this.mobileControls.getUiElements();
     const mobileUiSet = new Set(mobileUiElements);
     const nonMobileObjects = this.children.list.filter((element) => !mobileUiSet.has(element));
@@ -234,21 +220,32 @@ export class Chamber03Scene extends Phaser.Scene {
       return null;
     }
 
-    const shadow = this.add.ellipse(target.x, WORLD.floorY + 6, 104 * scale, 22 * scale, 0x050404, alpha * 1.05).setDepth(target.depth - 0.6);
-    const halo = this.add.ellipse(target.x, target.y - 6, 84 * scale, 118 * scale, fill, alpha).setDepth(target.depth - 0.4);
+    const shadow = this.add
+      .ellipse(target.x, WORLD.floorY + 6, 104 * scale, 22 * scale, 0x050404, alpha * 1.1)
+      .setDepth(target.depth - 0.6);
+    const halo = this.add
+      .ellipse(target.x, target.y - 6, 86 * scale, 120 * scale, fill, alpha)
+      .setDepth(target.depth - 0.4);
 
-    this.events.on(Phaser.Scenes.Events.UPDATE, () => {
+    target.__gameplayShadow = shadow;
+    target.__gameplayHalo = halo;
+
+    return this.events.on(Phaser.Scenes.Events.UPDATE, () => {
       if (!target.active) {
         halo.setVisible(false);
         shadow.setVisible(false);
         return;
       }
 
-      halo.setVisible(target.visible).setPosition(target.x, target.y - 8).setAlpha(target.visible ? alpha : 0);
-      shadow.setVisible(target.visible).setPosition(target.x, WORLD.floorY + 6).setAlpha(target.visible ? alpha * 1.05 : 0);
+      halo
+        .setVisible(target.visible)
+        .setPosition(target.x, target.y - 8)
+        .setAlpha(target.visible ? alpha : 0);
+      shadow
+        .setVisible(target.visible)
+        .setPosition(target.x, WORLD.floorY + 6)
+        .setAlpha(target.visible ? alpha * 1.1 : 0);
     });
-
-    return { halo, shadow };
   }
 
   cleanupSceneUi() {
@@ -290,6 +287,7 @@ export class Chamber03Scene extends Phaser.Scene {
         Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY)
       );
       this.chamberLabel.setPosition(width / 2, 26);
+      this.hud.layoutBossBar();
       return;
     }
 
@@ -299,5 +297,6 @@ export class Chamber03Scene extends Phaser.Scene {
     this.mobileControls.setReservedBottomPx(0);
     this.restartText.setPosition(width / 2, 90);
     this.chamberLabel.setPosition(width / 2, 28);
+    this.hud.layoutBossBar();
   }
 }

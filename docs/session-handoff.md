@@ -32,7 +32,7 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 
 ## What Still Needs Work Now
 - Chamber 02 now hands off through a real physical exit gate into a fresh minimal playable Chamber 03 entry nave.
-- Chamber 03 still needs its future threshold lore, encounter buildout, boss arena, and finale payoff layers.
+- Chamber 03 currently exists as a fresh minimal working chamber that reuses proven visuals/layout patterns; it still needs its future threshold lore, encounter buildout, boss arena, and finale payoff layers.
 - Content expansion beyond the shipped Chamber 01 + Chamber 02 slice is the next milestone focus.
 - Combat presentation can still be polished further later, but current readability is sufficient for the shipped baseline.
 
