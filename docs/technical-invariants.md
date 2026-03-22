@@ -22,6 +22,7 @@ Do-not-break checklist for milestone and deployment stability.
 
 ## Gameplay Stability Invariants
 - Chamber 01 playable loop remains stable.
+- Chamber 02 central lore beat and post-TOLL-KEEPER unlocked-gate endpoint remain stable.
 - Scene flow contract remains stable: start/boot → chamber → death/restart.
 - Combat timing contracts are not changed casually.
 - Floor grounding adjustments must preserve collision behavior.
@@ -33,6 +34,7 @@ Do-not-break checklist for milestone and deployment stability.
 - Lore screens should support distinct music/sound treatment from active gameplay.
 - Chamber 01 first lore beat pattern (Laughing Engine/furnace art prototype) remains stable; Chamber 02 now uses the reusable `LoreCutsceneScene` + `LORE_CUTSCENES` path.
 - New chamber lore beats should reuse that cutscene system by changing config/art/text/style values only.
+- The removed Chamber 02 exit-gate placeholder lore payoff must stay removed until a real Chamber 02 -> Chamber 03 gate/progression-object transition is implemented.
 - Lore writing remains cryptic, area-specific, and foreshadowing-oriented.
 
 ## Lore Trigger Invariants

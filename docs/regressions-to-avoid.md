@@ -42,11 +42,17 @@ Known failure patterns and what future tasks must protect.
 - Verify restart input works on both desktop and mobile paths.
 
 ## 8) Lore Presentation Backslide Regressions
-**Observed risk:** lore can regress from cinematic screen transitions back to generic always-on dialogue overlays.
+**Observed risk:** lore can regress from cinematic screen transitions back to generic always-on dialogue overlays, or removed placeholder flows can get reintroduced as fake progress.
 - Preserve dedicated lore-screen transition cadence where implemented.
 - Keep lore pacing discrete and ritual/cinematic in tone.
+- Do not reintroduce the removed Chamber 02 exit-gate placeholder lore payoff as a substitute for real Chamber 03 continuity.
 
 ## 9) Lore Trigger Presentation Regressions
 **Observed risk:** interactable lore markers can drift back toward debug-style UI objects.
 - Preserve in-world ritual shrine/ossuary-style lore trigger presentation.
 - Keep placeholders diegetic and in-world readable, not debug-box literal.
+
+## 10) Chamber 02 Endpoint Regression
+**Observed risk:** cleanup work around Chamber 03 planning can destabilize the shipped Chamber 02 endpoint.
+- Preserve the current post-TOLL-KEEPER unlocked gate end state.
+- Do not add a fake Chamber 03 boot, broken transition stub, or replacement placeholder cinematic during cleanup-only passes.
