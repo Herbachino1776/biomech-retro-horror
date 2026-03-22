@@ -207,3 +207,10 @@ export const CHAMBER01_MINIBOSS = {
 export const DEBUG_BOOT_OVERRIDES = {
   startScene: null
 };
+
+export const CHAMBER02_EXIT_GATE_TRANSITION = {
+  noFadeDiagnosticMode: false,
+  fadeOutDurationMs: 700,
+  fallbackDelayMs: 860,
+  noFadeStartDelayMs: 40
+};

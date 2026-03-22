@@ -4,7 +4,7 @@ import { SkitterServitor } from '../entities/SkitterServitor.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
-import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
+import { CHAMBER02_EXIT_GATE_TRANSITION, COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
@@ -138,6 +138,8 @@ export class Chamber02Scene extends Phaser.Scene {
     this.hasAppliedPostLoreReaction = false;
     this.exitGateUnlockAudioTimer = null;
     this.exitGatePromptText = null;
+    this.chamber03StartHasRun = false;
+    this.exitGateTransitionFallbackTimer = null;
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
@@ -185,6 +187,7 @@ export class Chamber02Scene extends Phaser.Scene {
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.exitGateUnlockAudioTimer?.remove(false);
       this.exitGateUnlockAudioTimer = null;
+      this.clearExitGateTransitionFallbackTimer();
       this.audioDirector?.shutdown();
       this.cleanupSceneUi();
     });
@@ -615,21 +618,65 @@ export class Chamber02Scene extends Phaser.Scene {
       return;
     }
 
+    console.log('[Chamber02->Chamber03] exit transition started', {
+      noFadeDiagnosticMode: CHAMBER02_EXIT_GATE_TRANSITION.noFadeDiagnosticMode,
+      fadeOutDurationMs: CHAMBER02_EXIT_GATE_TRANSITION.fadeOutDurationMs,
+      fallbackDelayMs: CHAMBER02_EXIT_GATE_TRANSITION.fallbackDelayMs
+    });
     this.isExitGateTransitionActive = true;
+    this.chamber03StartHasRun = false;
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
     this.enemies.forEach((enemy) => enemy.body.setVelocity(0, 0));
     this.audioDirector?.stopAmbientLoop();
 
+    if (CHAMBER02_EXIT_GATE_TRANSITION.noFadeDiagnosticMode) {
+      console.log('[Chamber02->Chamber03] no-fade diagnostic mode active');
+      this.clearExitGateTransitionFallbackTimer();
+      this.exitGateTransitionFallbackTimer = this.time.delayedCall(
+        CHAMBER02_EXIT_GATE_TRANSITION.noFadeStartDelayMs,
+        () => {
+          console.log('[Chamber02->Chamber03] fallback timer fired (no-fade diagnostic)');
+          this.startChamber03Once('fallback timer');
+        }
+      );
+      return;
+    }
+
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      console.log("[Chamber02Scene] scene.start('Chamber03Scene') imminent");
-      this.scene.start('Chamber03Scene', {
-        enteredFrom: 'chamber02-exit-gate',
-        progressionSource: 'toll-keeper-end-gate'
-      });
+      console.log('[Chamber02->Chamber03] fade callback fired');
+      this.startChamber03Once('fade callback');
     });
 
-    this.cameras.main.fadeOut(700, 0, 0, 0);
+    this.clearExitGateTransitionFallbackTimer();
+    this.exitGateTransitionFallbackTimer = this.time.delayedCall(CHAMBER02_EXIT_GATE_TRANSITION.fallbackDelayMs, () => {
+      console.log('[Chamber02->Chamber03] fallback timer fired');
+      this.startChamber03Once('fallback timer');
+    });
+
+    console.log('[Chamber02->Chamber03] fade started');
+    this.cameras.main.fadeOut(CHAMBER02_EXIT_GATE_TRANSITION.fadeOutDurationMs, 0, 0, 0);
+  }
+
+  clearExitGateTransitionFallbackTimer() {
+    this.exitGateTransitionFallbackTimer?.remove(false);
+    this.exitGateTransitionFallbackTimer = null;
+  }
+
+  startChamber03Once(triggerSource) {
+    if (this.chamber03StartHasRun) {
+      console.log('[Chamber02->Chamber03] startChamber03Once ignored; already ran', { triggerSource });
+      return;
+    }
+
+    this.chamber03StartHasRun = true;
+    this.clearExitGateTransitionFallbackTimer();
+    this.isExitGateTransitionActive = false;
+    console.log("[Chamber02->Chamber03] scene.start('Chamber03Scene') called", { triggerSource });
+    this.scene.start('Chamber03Scene', {
+      enteredFrom: 'chamber02-exit-gate',
+      progressionSource: 'toll-keeper-end-gate'
+    });
   }
 
   launchLoreCutscene(cutsceneId) {
