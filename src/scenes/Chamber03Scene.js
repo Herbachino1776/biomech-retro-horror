@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
 import { Player } from '../entities/Player.js';
+import { SkitterServitor } from '../entities/SkitterServitor.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
-import { COLORS, PLAYER, WORLD } from '../data/milestone1Config.js';
+import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 
@@ -162,6 +163,151 @@ const CHAMBER03_MARKERS = [
   }
 ];
 
+const CHAMBER03_TOLL_KEEPER_CONFIG = {
+  ...SKITTER,
+  textureKey: ASSET_KEYS.chamber02TollKeeperSkitter,
+  variantName: 'CHOIR TOLL-KEEPER',
+  health: 7,
+  speed: 46,
+  attackCooldownMs: 3000,
+  windupMs: 820,
+  attackActiveMs: 320,
+  attackRecoveryMs: 620,
+  hesitationMs: 560,
+  attackTriggerRange: 158,
+  attackRange: 192,
+  preferredRange: 136,
+  rangeBand: 20,
+  lungeSpeedBonus: 104,
+  lungeJumpVelocity: -92,
+  recoilVelocityX: 144,
+  recoilVelocityY: -84,
+  patrolDistance: 72,
+  body: { width: 74, height: 44, offsetX: 32, offsetY: 94 },
+  presentation: {
+    alpha: 1,
+    display: { width: 284, height: 218 },
+    origin: { x: 0.52, y: 0.965 },
+    stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.46 }
+  },
+  eyeGlowColor: 0xe9ffb4,
+  eyeGlowWidth: 44,
+  eyeGlowHeight: 22,
+  eyeGlowOffsetX: 24,
+  eyeGlowYOffset: 18,
+  eyeGlowAlphaBase: 0.42,
+  eyeGlowWindupAlphaGain: 0.46,
+  audioProfile: 'tollkeeper'
+};
+
+const CHAMBER03_ENCOUNTER_POCKETS = [
+  {
+    id: 'pocket-01-early-pressure',
+    label: 'POCKET I',
+    zoneX: 1120,
+    zoneY: WORLD.floorY - 68,
+    zoneWidth: 520,
+    zoneHeight: 232,
+    markerWidth: 318,
+    markerHeight: 72,
+    markerAlpha: 0.1,
+    promptOffsetY: -138,
+    enemies: [
+      {
+        type: 'skitter',
+        x: 1220,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 72,
+        wakeDelayMs: 0
+      },
+      {
+        type: 'skitter',
+        x: 1455,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 96,
+        wakeDelayMs: 120
+      }
+    ]
+  },
+  {
+    id: 'pocket-02-mid-escalation',
+    label: 'POCKET II',
+    zoneX: 2480,
+    zoneY: WORLD.floorY - 68,
+    zoneWidth: 640,
+    zoneHeight: 236,
+    markerWidth: 360,
+    markerHeight: 82,
+    markerAlpha: 0.12,
+    promptOffsetY: -142,
+    enemies: [
+      {
+        type: 'skitter',
+        x: 2320,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 120,
+        wakeDelayMs: 0
+      },
+      {
+        type: 'skitter',
+        x: 2550,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 84,
+        wakeDelayMs: 180
+      },
+      {
+        type: 'skitter',
+        x: 2790,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 132,
+        wakeDelayMs: 300
+      }
+    ]
+  },
+  {
+    id: 'pocket-03-threshold-guard',
+    label: 'POCKET III',
+    zoneX: 3840,
+    zoneY: WORLD.floorY - 70,
+    zoneWidth: 620,
+    zoneHeight: 240,
+    markerWidth: 396,
+    markerHeight: 90,
+    markerAlpha: 0.13,
+    promptOffsetY: -146,
+    enemies: [
+      {
+        type: 'skitter',
+        x: 3620,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 88,
+        wakeDelayMs: 0
+      },
+      {
+        type: 'skitter',
+        x: 3925,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 108,
+        wakeDelayMs: 140
+      },
+      {
+        type: 'tollkeeper',
+        x: 4160,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        wakeDelayMs: 280
+      }
+    ]
+  }
+];
+
 export class Chamber03Scene extends Phaser.Scene {
   constructor() {
     super('Chamber03Scene');
@@ -172,12 +318,14 @@ export class Chamber03Scene extends Phaser.Scene {
     this.isRestartingRun = false;
     this.isTransitioningToBossArena = false;
     this.currentBossThresholdZone = null;
+    this.currentEncounterPocket = null;
   }
 
   create() {
     this.createWorldBounds();
     this.createBackgroundAndFloor();
     this.createPlayerAndColliders();
+    this.createEncounterPockets();
     this.createBossThreshold();
     this.createUiAndInput();
     this.configureCameraAndLayout();
@@ -436,6 +584,93 @@ export class Chamber03Scene extends Phaser.Scene {
     this.player = new Player(this, CHAMBER03_BOOTSTRAP.spawnX, CHAMBER03_BOOTSTRAP.spawnY, PLAYER);
     this.applyGameplayReadabilitySupport(this.player.sprite, CHAMBER03_BOOTSTRAP.playerHalo);
     this.physics.add.collider(this.player.sprite, this.platforms);
+    this.enemies = [];
+    this.encounterPockets = [];
+    this.currentEncounterPocket = null;
+  }
+
+  createEncounterPockets() {
+    this.encounterPockets = CHAMBER03_ENCOUNTER_POCKETS.map((pocket) => this.createEncounterPocket(pocket));
+  }
+
+  createEncounterPocket(pocketConfig) {
+    const zone = this.add.zone(
+      pocketConfig.zoneX,
+      pocketConfig.zoneY,
+      pocketConfig.zoneWidth,
+      pocketConfig.zoneHeight
+    ).setOrigin(0.5);
+    this.physics.add.existing(zone, true);
+
+    const markerShadow = this.add
+      .ellipse(
+        pocketConfig.zoneX,
+        WORLD.floorY + 8,
+        pocketConfig.markerWidth,
+        pocketConfig.markerHeight,
+        0x050404,
+        pocketConfig.markerAlpha
+      )
+      .setDepth(-4.95);
+    const promptText = this.add
+      .text(pocketConfig.zoneX, pocketConfig.zoneY + pocketConfig.promptOffsetY, pocketConfig.label, {
+        fontFamily: 'monospace',
+        fontSize: '13px',
+        color: '#d2c4b2',
+        align: 'center',
+        stroke: '#130e0d',
+        strokeThickness: 4
+      })
+      .setOrigin(0.5)
+      .setDepth(-4.86)
+      .setAlpha(0.82)
+      .setVisible(false);
+
+    const enemies = pocketConfig.enemies.map((enemyConfig) => this.createEncounterEnemy(enemyConfig, pocketConfig));
+    const pocket = {
+      ...pocketConfig,
+      zone,
+      markerShadow,
+      promptText,
+      enemies,
+      activated: false,
+      resolved: false
+    };
+
+    return pocket;
+  }
+
+  createEncounterEnemy(enemyConfig, pocketConfig) {
+    const isTollKeeper = enemyConfig.type === 'tollkeeper';
+    const baseConfig = isTollKeeper ? CHAMBER03_TOLL_KEEPER_CONFIG : SKITTER;
+    const config = {
+      ...baseConfig,
+      awakenPlayerX: enemyConfig.awakenPlayerX,
+      wakeDelayMs: enemyConfig.wakeDelayMs ?? 0,
+      patrolDistance: enemyConfig.patrolDistance ?? baseConfig.patrolDistance,
+      health: enemyConfig.health ?? baseConfig.health
+    };
+
+    const enemy = new SkitterServitor(this, enemyConfig.x, enemyConfig.y, config);
+    enemy.encounterPocketId = pocketConfig.id;
+    enemy.awakened = false;
+    enemy.awakenAtTime = null;
+    enemy.pocketWakeAtTime = null;
+    enemy.isTollKeeper = isTollKeeper;
+
+    this.physics.add.collider(enemy.sprite, this.platforms);
+    this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (attackZone, enemySprite) => {
+      this.handlePlayerHitEnemy(attackZone, enemySprite, enemy);
+    });
+    this.physics.add.overlap(this.player.sprite, enemy.sprite, (playerSprite, enemySprite) => {
+      this.handleEnemyContactPlayer(playerSprite, enemySprite, enemy);
+    });
+
+    this.enemies.push(enemy);
+    this.applyGameplayReadabilitySupport(enemy.sprite, isTollKeeper
+      ? { fill: 0xe2d0ae, alpha: 0.16, scale: 1.26 }
+      : { fill: 0xcdbda6, alpha: 0.12, scale: 1.02 });
+    return enemy;
   }
 
   createBossThreshold() {
@@ -556,6 +791,7 @@ export class Chamber03Scene extends Phaser.Scene {
     if (this.player.isDead) {
       this.mobileControls.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
+      this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
 
       if ((Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) && !this.isRestartingRun) {
         this.isRestartingRun = true;
@@ -568,6 +804,7 @@ export class Chamber03Scene extends Phaser.Scene {
       this.mobileControls.setMode('init');
       this.player.body.setVelocity(0, 0);
       this.player.body.setEnable(false);
+      this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
       return;
     }
 
@@ -585,10 +822,100 @@ export class Chamber03Scene extends Phaser.Scene {
     };
 
     this.player.update(time, input);
+    this.refreshEncounterPocketPresence();
+    this.updateEncounterPockets(time);
+    this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
     this.refreshBossThresholdPresence();
     this.tryBeginBossArenaTransition(mobileInput);
     this.updateBossThresholdAura(time);
     this.hud.update(this.player.health, PLAYER.maxHealth);
+  }
+
+  refreshEncounterPocketPresence() {
+    this.currentEncounterPocket = null;
+
+    this.encounterPockets?.forEach((pocket) => {
+      if (pocket.resolved) {
+        pocket.promptText?.setVisible(false);
+        return;
+      }
+
+      this.physics.overlap(this.player.sprite, pocket.zone, () => {
+        this.currentEncounterPocket = pocket;
+      });
+    });
+  }
+
+  updateEncounterPockets(time) {
+    this.encounterPockets?.forEach((pocket) => {
+      if (!pocket.activated && this.currentEncounterPocket?.id === pocket.id) {
+        this.activateEncounterPocket(pocket, time);
+      }
+
+      pocket.enemies.forEach((enemy) => {
+        if (!enemy.dead && !enemy.awakened && enemy.pocketWakeAtTime !== null && time >= enemy.pocketWakeAtTime) {
+          enemy.awakened = true;
+          enemy.awakenAtTime = null;
+          enemy.pocketWakeAtTime = null;
+        }
+      });
+
+      const remainingEnemies = pocket.enemies.filter((enemy) => !enemy.dead);
+      if (pocket.activated && !pocket.resolved && remainingEnemies.length === 0) {
+        pocket.resolved = true;
+      }
+
+      const shouldShowPrompt = !pocket.resolved && this.currentEncounterPocket?.id === pocket.id;
+      pocket.promptText?.setVisible(shouldShowPrompt);
+      pocket.markerShadow?.setAlpha(pocket.resolved ? pocket.markerAlpha * 0.42 : shouldShowPrompt ? pocket.markerAlpha * 1.6 : pocket.markerAlpha);
+    });
+  }
+
+  activateEncounterPocket(pocket, time) {
+    pocket.activated = true;
+
+    pocket.enemies.forEach((enemy, index) => {
+      if (enemy.dead) {
+        return;
+      }
+
+      enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 60;
+    });
+  }
+
+  handlePlayerHitEnemy(_attackZone, enemySprite, enemy) {
+    if (!this.player.attackActive || enemy.dead || !this.isEnemyOverlapTarget(enemySprite, enemy)) {
+      return;
+    }
+
+    if (enemy.lastAttackHitId === this.player.attackId) {
+      return;
+    }
+
+    enemy.lastAttackHitId = this.player.attackId;
+    const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
+    enemy.setHitReactionDirection(knockDirection);
+    enemy.takeDamage(1, this.time.now);
+  }
+
+  handleEnemyContactPlayer(_playerSprite, enemySprite, enemy) {
+    if (enemy.dead || !this.isEnemyOverlapTarget(enemySprite, enemy)) {
+      return;
+    }
+    if (!enemy.canDealContactDamage(this.time.now)) {
+      return;
+    }
+
+    const tookDamage = this.player.receiveDamage(SKITTER.contactDamage, this.time.now);
+    if (tookDamage) {
+      const knockDirection = Math.sign(this.player.sprite.x - enemy.sprite.x) || 1;
+      this.player.body.setVelocityX(knockDirection * 220);
+      this.player.body.setVelocityY(-220);
+    }
+  }
+
+  isEnemyOverlapTarget(target, enemy) {
+    return target === enemy.sprite || target?.gameObject === enemy.sprite;
   }
 
   refreshBossThresholdPresence() {
