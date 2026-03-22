@@ -2,20 +2,19 @@ import Phaser from 'phaser';
 import { Player } from '../entities/Player.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
-import { ASSET_KEYS } from '../data/assetKeys.js';
-import { COLORS, PLAYER, WORLD } from '../data/milestone1Config.js';
+import { PLAYER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 
 const CHAMBER03_WORLD = {
-  width: 2800,
+  width: 2200,
   spawnX: 220,
   spawnY: 360,
-  floorHeight: 78,
-  floorBandY: WORLD.floorY + 6,
-  backdropY: 216,
-  gateX: 220,
-  gateY: 286
+  floorY: WORLD.floorY + 8,
+  floorHeight: 92,
+  floorColliderHeight: 72,
+  headerX: 32,
+  headerY: 28
 };
 
 export class Chamber03Scene extends Phaser.Scene {
@@ -28,70 +27,60 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   create() {
-    console.log('[Chamber03Scene] create() start', this.transitionContext);
+    console.log('[Chamber03Scene] BOOT OK create()', this.transitionContext);
 
-    try {
-      this.createBootstrapScene();
-    } catch (error) {
-      console.error('[Chamber03Scene] create() failed', error);
-      this.renderCreateFailureFallback(error);
-    }
-  }
-
-  createBootstrapScene() {
     this.physics.world.gravity.y = WORLD.gravityY;
     this.cameras.main.setBounds(0, 0, CHAMBER03_WORLD.width, WORLD.height);
     this.physics.world.setBounds(0, 0, CHAMBER03_WORLD.width, WORLD.height);
+    this.cameras.main.setBackgroundColor('#2d201c');
 
-    this.cameras.main.setBackgroundColor('#35211d');
+    this.add
+      .rectangle(CHAMBER03_WORLD.width / 2, WORLD.height / 2, CHAMBER03_WORLD.width, WORLD.height, 0x2d201c, 1)
+      .setDepth(-20);
+    this.add
+      .rectangle(CHAMBER03_WORLD.width / 2, WORLD.height / 2 - 22, CHAMBER03_WORLD.width - 160, WORLD.height - 120, 0x4c372f, 1)
+      .setStrokeStyle(6, 0x8c745f, 0.82)
+      .setDepth(-19);
+    this.add
+      .rectangle(CHAMBER03_WORLD.width / 2, CHAMBER03_WORLD.floorY, CHAMBER03_WORLD.width, CHAMBER03_WORLD.floorHeight, 0xa58b73, 1)
+      .setDepth(-11);
+    this.add
+      .rectangle(CHAMBER03_WORLD.width / 2, WORLD.floorY - 10, CHAMBER03_WORLD.width, 12, 0x8ea26d, 0.26)
+      .setDepth(-10.8);
 
-    this.add.rectangle(CHAMBER03_WORLD.width / 2, WORLD.height / 2, CHAMBER03_WORLD.width, WORLD.height, 0x35211d, 1).setDepth(-20);
-    this.add.text(32, 26, 'CHAMBER 03 BOOT OK', {
+    this.add.text(CHAMBER03_WORLD.headerX, CHAMBER03_WORLD.headerY, 'CHAMBER 03 BOOT OK', {
       fontFamily: 'monospace',
       fontSize: '28px',
       color: '#f4e6d2',
-      stroke: '#140d0c',
-      strokeThickness: 6
-    }).setScrollFactor(0).setDepth(40);
-    this.bootstrapFloor = this.add.rectangle(
-      CHAMBER03_WORLD.width / 2,
-      CHAMBER03_WORLD.floorBandY,
-      CHAMBER03_WORLD.width,
-      CHAMBER03_WORLD.floorHeight,
-      0x9b8468,
-      1
-    ).setDepth(-11);
-    this.bootstrapFloorGlow = this.add.rectangle(
-      CHAMBER03_WORLD.width / 2,
-      WORLD.floorY - 10,
-      CHAMBER03_WORLD.width,
-      12,
-      0xa3b27d,
-      0.2
-    ).setDepth(-10.9);
-    this.bootstrapLabel = this.add.text(CHAMBER03_WORLD.spawnX + 110, 112, 'CHAMBER 03', {
-      fontFamily: 'monospace',
-      fontSize: '32px',
-      color: '#e0d3c1',
       stroke: '#120c0b',
       strokeThickness: 6
-    }).setDepth(15);
-    this.bootstrapSubLabel = this.add.text(CHAMBER03_WORLD.spawnX + 110, 152, 'BOOTSTRAP CHAMBER // PLACEHOLDER REUSE ACTIVE', {
+    }).setScrollFactor(0).setDepth(40);
+
+    this.add.text(120, 128, 'CHAMBER 03', {
+      fontFamily: 'monospace',
+      fontSize: '36px',
+      color: '#eadac4',
+      stroke: '#120c0b',
+      strokeThickness: 6
+    }).setDepth(12);
+
+    this.add.text(120, 170, 'EMPTY BOOTSTRAP CHAMBER // RELIABILITY PASS', {
       fontFamily: 'monospace',
       fontSize: '14px',
-      color: '#98a97a'
-    }).setDepth(15);
-
-    this.renderReusedBackdrop();
+      color: '#9fb17f'
+    }).setDepth(12);
 
     this.platforms = this.physics.add.staticGroup();
-    this.createInvisiblePlatform(CHAMBER03_WORLD.width / 2, WORLD.floorY + 28, CHAMBER03_WORLD.width, 72);
+    this.createInvisiblePlatform(
+      CHAMBER03_WORLD.width / 2,
+      WORLD.floorY + 28,
+      CHAMBER03_WORLD.width,
+      CHAMBER03_WORLD.floorColliderHeight
+    );
 
     this.player = new Player(this, CHAMBER03_WORLD.spawnX, CHAMBER03_WORLD.spawnY, PLAYER);
     this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
     this.physics.add.collider(this.player.sprite, this.platforms);
-
-    this.cameras.main.centerOn(CHAMBER03_WORLD.spawnX, CHAMBER03_WORLD.spawnY - 60);
 
     this.hud = new HudOverlay(this);
     this.mobileControls = new MobileControls(this);
@@ -124,46 +113,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.hud.update(this.player.health, PLAYER.maxHealth);
   }
 
-  renderReusedBackdrop() {
-    if (this.textures.exists(ASSET_KEYS.chamber01Wall)) {
-      this.add.tileSprite(CHAMBER03_WORLD.width / 2, CHAMBER03_WORLD.backdropY, CHAMBER03_WORLD.width, 360, ASSET_KEYS.chamber01Wall)
-        .setTint(0xcdbca5)
-        .setAlpha(0.34)
-        .setDepth(-18);
-    }
-
-    if (this.textures.exists(ASSET_KEYS.chamber02BackgroundPlate)) {
-      this.add.tileSprite(CHAMBER03_WORLD.width / 2, CHAMBER03_WORLD.backdropY + 10, CHAMBER03_WORLD.width, 392, ASSET_KEYS.chamber02BackgroundPlate)
-        .setTint(0xb8a489)
-        .setAlpha(0.4)
-        .setDepth(-17);
-    }
-
-    if (this.textures.exists(ASSET_KEYS.chamber02VertebralHornGate)) {
-      this.add.image(CHAMBER03_WORLD.gateX, CHAMBER03_WORLD.gateY, ASSET_KEYS.chamber02VertebralHornGate)
-        .setDisplaySize(292, 350)
-        .setCrop(194, 166, 640, 1140)
-        .setTint(0xcdb79b)
-        .setAlpha(0.78)
-        .setDepth(-13);
-    }
-
-    if (this.textures.exists(ASSET_KEYS.chamber01FloorStrip)) {
-      this.add.tileSprite(CHAMBER03_WORLD.width / 2, WORLD.floorY + 10, CHAMBER03_WORLD.width, 86, ASSET_KEYS.chamber01FloorStrip)
-        .setTint(0xd6c7b1)
-        .setAlpha(0.5)
-        .setDepth(-10.5);
-    }
-
-    if (this.textures.exists(ASSET_KEYS.chamber02FloorStrip)) {
-      this.add.tileSprite(CHAMBER03_WORLD.width / 2, WORLD.floorY + 12, CHAMBER03_WORLD.width, 106, ASSET_KEYS.chamber02FloorStrip)
-        .setTint(0xd2c2a9)
-        .setAlpha(0.76)
-        .setDepth(-10.4);
-    }
-  }
-
-  update(_time) {
+  update(time) {
     if (!this.player || !this.mobileControls) {
       return;
     }
@@ -172,7 +122,7 @@ export class Chamber03Scene extends Phaser.Scene {
 
     if (this.player.isDead) {
       this.mobileControls.setMode('dead');
-      this.restartText.setVisible(true).setText(`VESSEL FAILURE\nPress [R] to re-seed chamber`);
+      this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
       if (Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) {
         this.cleanupSceneUi();
         restartRunFromDeath(this);
@@ -182,7 +132,7 @@ export class Chamber03Scene extends Phaser.Scene {
 
     this.mobileControls.setMode('gameplay');
     this.restartText.setVisible(false);
-    this.player.update(_time, {
+    this.player.update(time, {
       left: this.cursors.left.isDown || mobileInput.left,
       right: this.cursors.right.isDown || mobileInput.right,
       jumpPressed:
@@ -275,23 +225,5 @@ export class Chamber03Scene extends Phaser.Scene {
     camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
     camera.setFollowOffset(-140, PORTRAIT_LAYOUT.desktopFollowOffsetY);
     this.mobileControls.setReservedBottomPx(0);
-  }
-
-  renderCreateFailureFallback(error) {
-    this.cameras.main.setBackgroundColor('#3a1616');
-    this.add.rectangle(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 0x3a1616, 1).setScrollFactor(0);
-    this.add.text(this.scale.width / 2, this.scale.height / 2 - 22, 'CHAMBER 03 BOOT FAILED', {
-      fontFamily: 'monospace',
-      fontSize: '24px',
-      color: '#f0d7cf',
-      align: 'center'
-    }).setOrigin(0.5).setScrollFactor(0);
-    this.add.text(this.scale.width / 2, this.scale.height / 2 + 26, String(error?.message ?? error ?? 'Unknown create() error'), {
-      fontFamily: 'monospace',
-      fontSize: '14px',
-      color: '#f0d7cf',
-      align: 'center',
-      wordWrap: { width: Math.max(320, this.scale.width - 80) }
-    }).setOrigin(0.5).setScrollFactor(0);
   }
 }

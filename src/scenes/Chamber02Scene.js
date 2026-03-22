@@ -9,7 +9,20 @@ import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
 
-const CHAMBER02_WORLD_WIDTH = 3600;
+const CHAMBER02_WORLD_WIDTH = 4300;
+
+const CHAMBER02_EXIT_CORRIDOR = {
+  startX: 3560,
+  width: 620,
+  floorY: 424,
+  floorHeight: 96,
+  thresholdX: 4160,
+  thresholdY: 374,
+  thresholdWidth: 108,
+  thresholdHeight: 212,
+  thresholdLabelY: 278,
+  cameraHintX: 3910
+};
 
 const CHAMBER02_PLATFORMS = [
   { x: 700, y: 372, width: 170, height: 20 },
@@ -132,6 +145,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.triggeredLoreIds = new Set();
     this.currentLoreZone = null;
     this.currentExitGateZone = null;
+    this.currentExitThresholdZone = null;
     this.isLoreTransitionActive = false;
     this.isExitGateTransitionActive = false;
     this.isRestartingRun = false;
@@ -140,6 +154,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.exitGatePromptText = null;
     this.chamber03StartHasRun = false;
     this.exitGateTransitionFallbackTimer = null;
+    this.exitThresholdPromptText = null;
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
@@ -266,6 +281,7 @@ export class Chamber02Scene extends Phaser.Scene {
     }
 
     this.createExitGate();
+    this.createExitCorridor();
   }
 
 
@@ -309,7 +325,7 @@ export class Chamber02Scene extends Phaser.Scene {
       .setVisible(false);
 
     this.exitGatePromptText = this.add
-      .text(CHAMBER02_EXIT_GATE.x + CHAMBER02_EXIT_GATE.zoneOffsetX, CHAMBER02_EXIT_GATE.zoneY + CHAMBER02_EXIT_GATE.interactPromptOffsetY, 'ENTER CHAMBER 03', {
+      .text(CHAMBER02_EXIT_GATE.x + CHAMBER02_EXIT_GATE.zoneOffsetX, CHAMBER02_EXIT_GATE.zoneY + CHAMBER02_EXIT_GATE.interactPromptOffsetY, 'GATE SEALED', {
         fontFamily: 'monospace',
         fontSize: '14px',
         color: '#d6c9b8',
@@ -330,6 +346,72 @@ export class Chamber02Scene extends Phaser.Scene {
       )
       .setOrigin(0.5);
     this.physics.add.existing(this.exitGateZone, true);
+  }
+
+
+  createExitCorridor() {
+    this.exitCorridorFloorVisual = this.add
+      .rectangle(
+        CHAMBER02_EXIT_CORRIDOR.startX + CHAMBER02_EXIT_CORRIDOR.width / 2,
+        CHAMBER02_EXIT_CORRIDOR.floorY,
+        CHAMBER02_EXIT_CORRIDOR.width,
+        CHAMBER02_EXIT_CORRIDOR.floorHeight,
+        0x766553,
+        0.92
+      )
+      .setDepth(-9.8);
+
+    this.exitCorridorVein = this.add
+      .rectangle(
+        CHAMBER02_EXIT_CORRIDOR.startX + CHAMBER02_EXIT_CORRIDOR.width / 2,
+        CHAMBER02_EXIT_CORRIDOR.floorY - 28,
+        CHAMBER02_EXIT_CORRIDOR.width,
+        10,
+        COLORS.sickly,
+        0.2
+      )
+      .setDepth(-9.7);
+
+    this.exitCorridorArch = this.add
+      .rectangle(
+        CHAMBER02_EXIT_CORRIDOR.startX + 140,
+        WORLD.floorY - 126,
+        70,
+        244,
+        COLORS.architecture,
+        0.84
+      )
+      .setStrokeStyle(3, COLORS.bone, 0.48)
+      .setDepth(-5.2)
+      .setVisible(false);
+
+    this.exitThresholdAura = this.add
+      .ellipse(CHAMBER02_EXIT_CORRIDOR.thresholdX, CHAMBER02_EXIT_CORRIDOR.thresholdY + 28, 164, 228, COLORS.sickly, 0.1)
+      .setDepth(-5.05)
+      .setVisible(false);
+
+    this.exitThresholdZone = this.add
+      .zone(
+        CHAMBER02_EXIT_CORRIDOR.thresholdX,
+        CHAMBER02_EXIT_CORRIDOR.thresholdY,
+        CHAMBER02_EXIT_CORRIDOR.thresholdWidth,
+        CHAMBER02_EXIT_CORRIDOR.thresholdHeight
+      )
+      .setOrigin(0.5);
+    this.physics.add.existing(this.exitThresholdZone, true);
+
+    this.exitThresholdPromptText = this.add
+      .text(CHAMBER02_EXIT_CORRIDOR.thresholdX, CHAMBER02_EXIT_CORRIDOR.thresholdLabelY, 'THRESHOLD // CHAMBER 03', {
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        color: '#d6c9b8',
+        align: 'center',
+        stroke: '#140f0e',
+        strokeThickness: 4
+      })
+      .setOrigin(0.5)
+      .setDepth(-4.9)
+      .setVisible(false);
   }
 
   createTollKeeperEncounter() {
@@ -418,7 +500,8 @@ export class Chamber02Scene extends Phaser.Scene {
     this.tryBeginLoreSequence(mobileInput);
     this.refreshExitGateState();
     this.refreshExitGateZonePresence();
-    this.tryBeginExitGateTransition(mobileInput);
+    this.refreshExitThresholdZonePresence();
+    this.tryBeginExitGateTransition();
     this.updateExitGateAura(time);
 
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
@@ -510,6 +593,8 @@ export class Chamber02Scene extends Phaser.Scene {
     this.applyExitGateVisualState(unlocked);
     this.exitGateBarrier?.setVisible(!unlocked);
     this.exitGateReadyAura?.setVisible(unlocked);
+    this.exitCorridorArch?.setVisible(unlocked);
+    this.exitThresholdAura?.setVisible(unlocked);
 
     if (this.exitGateBarrier?.body) {
       this.exitGateBarrier.body.enable = !unlocked;
@@ -577,8 +662,8 @@ export class Chamber02Scene extends Phaser.Scene {
 
   refreshExitGateZonePresence() {
     this.currentExitGateZone = null;
-
-    if (!this.exitGateUnlocked || !this.exitGateZone) {
+    
+    if (!this.exitGateZone) {
       this.exitGatePromptText?.setVisible(false);
       return;
     }
@@ -587,24 +672,32 @@ export class Chamber02Scene extends Phaser.Scene {
       this.currentExitGateZone = this.exitGateZone;
     });
 
-    this.exitGatePromptText?.setVisible(Boolean(this.currentExitGateZone));
+    const promptVisible = Boolean(this.currentExitGateZone) && !this.exitGateUnlocked;
+    this.exitGatePromptText?.setVisible(promptVisible);
+    this.exitGatePromptText?.setText(this.exitGateUnlocked ? 'PATH OPEN' : 'GATE SEALED');
   }
 
-  tryBeginExitGateTransition(mobileInput) {
-    if (!this.currentExitGateZone || this.isExitGateTransitionActive) {
+  refreshExitThresholdZonePresence() {
+    this.currentExitThresholdZone = null;
+
+    if (!this.exitGateUnlocked || !this.exitThresholdZone) {
+      this.exitThresholdPromptText?.setVisible(false);
       return;
     }
 
-    const interactPressed =
-      Phaser.Input.Keyboard.JustDown(this.keyInteract) ||
-      Phaser.Input.Keyboard.JustDown(this.keyEnter) ||
-      mobileInput.interactPressed;
+    this.physics.overlap(this.player.sprite, this.exitThresholdZone, () => {
+      this.currentExitThresholdZone = this.exitThresholdZone;
+    });
 
-    if (!interactPressed) {
+    this.exitThresholdPromptText?.setVisible(Boolean(this.currentExitThresholdZone));
+  }
+
+  tryBeginExitGateTransition() {
+    if (!this.currentExitThresholdZone || this.isExitGateTransitionActive) {
       return;
     }
 
-    console.log('[Chamber02Scene] Chamber 03 gate interaction accepted', {
+    console.log('[Chamber02Scene] Chamber 03 threshold crossed', {
       playerX: this.player.sprite.x,
       playerY: this.player.sprite.y,
       transitionContext: this.transitionContext
@@ -674,8 +767,8 @@ export class Chamber02Scene extends Phaser.Scene {
     this.isExitGateTransitionActive = false;
     console.log("[Chamber02->Chamber03] scene.start('Chamber03Scene') called", { triggerSource });
     this.scene.start('Chamber03Scene', {
-      enteredFrom: 'chamber02-exit-gate',
-      progressionSource: 'toll-keeper-end-gate'
+      enteredFrom: 'chamber02-physical-threshold',
+      progressionSource: 'toll-keeper-corridor-threshold'
     });
   }
 
@@ -797,17 +890,21 @@ export class Chamber02Scene extends Phaser.Scene {
   cleanupSceneUi() {
     this.restartText?.setVisible(false);
     this.exitGatePromptText?.setVisible(false);
+    this.exitThresholdPromptText?.setVisible(false);
     this.mobileControls?.setMode('init');
     this.hud?.setVisible(false);
   }
 
   updateExitGateAura(time) {
-    if (!this.exitGateReadyAura?.visible) {
-      return;
+    if (this.exitGateReadyAura?.visible) {
+      const gatePulse = 0.12 + (Math.sin(time / 180) + 1) * 0.045;
+      this.exitGateReadyAura.setAlpha(gatePulse).setScale(1 + Math.sin(time / 320) * 0.04, 1);
     }
 
-    const pulse = 0.12 + (Math.sin(time / 180) + 1) * 0.045;
-    this.exitGateReadyAura.setAlpha(pulse).setScale(1 + Math.sin(time / 320) * 0.04, 1);
+    if (this.exitThresholdAura?.visible) {
+      const thresholdPulse = 0.14 + (Math.sin(time / 210) + 1) * 0.06;
+      this.exitThresholdAura.setAlpha(thresholdPulse).setScale(1 + Math.sin(time / 290) * 0.03, 1.02);
+    }
   }
 
   applyResponsiveLayout() {
