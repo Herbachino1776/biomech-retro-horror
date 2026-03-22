@@ -31,8 +31,8 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Texture-first asset loading with fallback resilience remains stable.
 
 ## What Still Needs Work Now
-- Chamber 03 work currently in the repo is not trusted gameplay content and should not be used as the active baseline.
-- Chamber 03 will be rebuilt from scratch in a later pass rather than debugged forward from the current emergency scene.
+- Chamber 03 has been rebuilt into a minimal trustworthy bootstrap room and can now be used as the implementation baseline for future Chamber 03 work.
+- That bootstrap room is intentionally sparse: stable background/floor/player/camera/HUD/mobile-controls only, with future Ossuary Choir Hall content still pending.
 - Content expansion beyond the shipped Chamber 01 + Chamber 02 slice is the next milestone focus.
 - Combat presentation can still be polished further later, but current readability is sufficient for the shipped baseline.
 
@@ -45,11 +45,11 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Constraints: preserve mobile playability, preserve keyboard parity, and do not destabilize the current shipped baseline while expanding content.
 
 ## Latest Completed Task
-- Emergency Chamber 03 direct-boot overrides were removed from the active app path.
-- Normal BootScene title flow was restored as the trusted default entry.
-- Chamber 01 + Chamber 02 are again the active reliable baseline.
-- Chamber 02 now ends safely at its unlocked threshold instead of handing off into the current Chamber 03 emergency debug scene.
-- Docs/status files now reflect the restored baseline and the requirement to rebuild Chamber 03 from scratch later.
+- Emergency Chamber 03 direct-boot overrides remain removed from the active app path.
+- Normal BootScene title flow remains the trusted default entry.
+- Chamber 01 + Chamber 02 remain the active reliable baseline.
+- Chamber 03 has now been rebuilt into a clean bootstrap room using the shared HUD/mobile-controls path instead of scene-local emergency controls.
+- Chamber 02 still ends safely at its unlocked threshold while Chamber 03 progression wiring stays deferred for stability in this pass.
 
 ## Exact Next Best Step After This Task
 Use the Chamber 03 chunked planning docs as the implementation contract:
@@ -58,8 +58,8 @@ Use the Chamber 03 chunked planning docs as the implementation contract:
 
 Immediate follow-through:
 - begin from the restored title -> Chamber 01 -> Chamber 02 baseline,
-- rebuild Chamber 03 in small milestone-disciplined slices,
-- do not treat the current Chamber 03 emergency implementation as a stable starting point.
+- expand Chamber 03 from the new minimal bootstrap room in small milestone-disciplined slices,
+- keep using the rebuilt Chamber 03 scene rather than reviving any emergency debug implementation.
 
 ## Most Important Constraints
 1. Do not regress GitHub Pages/Vite base-path behavior.

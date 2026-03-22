@@ -35,6 +35,7 @@ Do-not-break checklist for milestone and deployment stability.
 - Chamber 01 first lore beat pattern (Laughing Engine/furnace art prototype) remains stable; Chamber 02 now uses the reusable `LoreCutsceneScene` + `LORE_CUTSCENES` path.
 - New chamber lore beats should reuse that cutscene system by changing config/art/text/style values only.
 - The removed Chamber 02 exit-gate placeholder lore payoff must stay removed until a real Chamber 02 -> Chamber 03 gate/progression-object transition is implemented.
+- Chamber 03 bootstrap work must keep using the shared HUD/mobile-controls path rather than scene-local emergency touch controls.
 - Lore writing remains cryptic, area-specific, and foreshadowing-oriented.
 
 ## Lore Trigger Invariants
