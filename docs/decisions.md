@@ -56,8 +56,8 @@ Concise record of technical/design decisions currently in force.
 - Every future chamber should include substantial encounter design plus a climax entity: miniboss, elite/high-level enemy, or true boss.
 - Chambers should differentiate through art/theme, trigger placement, pacing, enemy placement, and climax tier rather than by lowering stakes.
 - Chamber 02's old exit-gate placeholder lore-screen payoff has been intentionally removed from the trusted baseline.
-- Chamber 02 -> Chamber 03 continuity now uses a real gate/progression-object transition at Chamber 02's unlocked end gate, not a lore-screen-only handoff.
-- Chamber 03 bootstrap work reuses safe Chamber 01 / Chamber 02 art for backdrop/floor threshold readability until dedicated Chamber 03 art/content is ready; reliability wins over spectacle in this slice.
+- Chamber 02 -> Chamber 03 continuity now uses a physical right-side corridor plus threshold crossing after the unlocked end gate, not the old endpoint-style interaction handoff.
+- Chamber 03 bootstrap work must remain visibly self-proving even if all reused art is removed; reliability wins over spectacle in this slice.
 
 ## Lore Presentation Direction
 - Lore is a core identity system, not optional garnish.
