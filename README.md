@@ -18,7 +18,7 @@ Create a playable vertical slice first:
 - Chamber 01 also uses `LoreCutsceneScene` for the later dead-god witness beat.
 - Chamber 01 culminates in the Half-Skull Ascendant miniboss encounter and gate-release payoff.
 - Chamber 02 uses `LoreCutsceneScene` for its shrine/exit-gate lore flow and post-lore reaction state.
-- Chamber 02 ends on a TOLL-KEEPER-gated exit lore payoff rather than a playable Chamber 03, which is the current intentional scope boundary.
+- Chamber 02 now hands off through a TOLL-KEEPER-gated threshold into a minimal playable Chamber 03 bootstrap scene.
 - Restart/reset flow safely handles both lore-scene types because both are live in the shipped game.
 
 ## Tech Stack (Current Scaffold)

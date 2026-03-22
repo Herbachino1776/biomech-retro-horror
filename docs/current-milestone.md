@@ -43,7 +43,7 @@ Milestone 4 is now considered **complete / closed out** for the currently shippe
 7. Landscape usability remains intact.
 
 ## Known Remaining Rough Edges (Non-Blocking)
-- Chamber 02 still ends on an exit-gate lore payoff rather than entering a playable Chamber 03, which is acceptable because new chambers remain out of scope for the shipped slice.
+- Chamber 03 now has a minimal playable bootstrap entry reached through the Chamber 02 threshold gate; the full Ossuary Choir Hall buildout, encounters, boss, and payoff still remain future Milestone 5 slices.
 - Combat presentation remains intentionally restrained and should only expand when content work needs it.
 - Future milestone work should add new playable content without destabilizing the shipped Chamber 01 + Chamber 02 baseline.
 
@@ -54,9 +54,9 @@ Milestone 4 is now considered **complete / closed out** for the currently shippe
 Extend the shipped Chamber 01 + Chamber 02 baseline into the next playable content step while preserving the now-complete audio-integrated slice.
 
 ### Immediate Milestone 5 Direction
-- Chamber 03 is the next major content target under Milestone 5.
-- Chamber 03 planning remains anchored to the **Ossuary Choir Hall** sector-finale vision.
-- Chamber 03 should be delivered in chunked implementation slices, not one giant pass.
+- Chamber 03 remains the active Milestone 5 content-expansion target.
+- The first shipped Milestone 5 slice is a minimal Chamber 03 bootstrap entered from Chamber 02 through a real threshold gate.
+- Chamber 03 planning remains anchored to the **Ossuary Choir Hall** sector-finale vision and should continue in chunked implementation slices, not one giant pass.
 
 ## Do Not Change Casually
 - Base-path deployment contract (`/biomech-retro-horror/` prod, `/` dev).

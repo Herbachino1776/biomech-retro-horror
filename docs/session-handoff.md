@@ -31,9 +31,9 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Texture-first asset loading with fallback resilience remains stable.
 
 ## What Still Needs Work Now
-- Chamber 02 still ends with lore payoff rather than a playable Chamber 03 transition.
-- The Chamber 02 -> Chamber 03 continuity contract needs a real gate/progression-object handoff.
-- Content expansion beyond the shipped Chamber 01 + Chamber 02 slice is the next milestone focus.
+- Chamber 02 now hands off into a minimal playable Chamber 03 bootstrap through the exit threshold gate.
+- Chamber 03 still needs its larger Ossuary Choir Hall buildout, encounter layer, boss threshold, and finale payoff slices.
+- Content expansion beyond the shipped Chamber 01 + Chamber 02 baseline remains the next milestone focus.
 - Combat presentation can still be polished further later, but current readability is sufficient for the shipped baseline.
 
 ## Active Milestone
@@ -57,8 +57,8 @@ Use the Chamber 03 chunked planning docs as the implementation contract:
 - `docs/chamber-03-implementation-roadmap.md`
 
 Immediate follow-through:
-- correct Chamber 02 -> Chamber 03 continuity to use a real gate/progression object,
-- begin with the smallest Chamber 03 bootstrap slice rather than a full grand implementation.
+- extend the Chamber 03 bootstrap into a readable Ossuary Choir Hall spatial buildout,
+- preserve the real Chamber 02 -> Chamber 03 gate handoff while layering in milestone-safe content slices.
 
 ## Most Important Constraints
 1. Do not regress GitHub Pages/Vite base-path behavior.
