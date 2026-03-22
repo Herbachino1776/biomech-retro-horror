@@ -4,7 +4,7 @@ import { SkitterServitor } from '../entities/SkitterServitor.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
-import { CHAMBER02_EXIT_GATE_TRANSITION, COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
+import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
@@ -148,12 +148,12 @@ export class Chamber02Scene extends Phaser.Scene {
     this.currentExitThresholdZone = null;
     this.isLoreTransitionActive = false;
     this.isExitGateTransitionActive = false;
+    this.isHandingOffToChamber03 = false;
     this.isRestartingRun = false;
     this.hasAppliedPostLoreReaction = false;
     this.exitGateUnlockAudioTimer = null;
     this.exitGatePromptText = null;
     this.chamber03StartHasRun = false;
-    this.exitGateTransitionFallbackTimer = null;
     this.exitThresholdPromptText = null;
 
     this.renderProcessionalBackdrop();
@@ -202,7 +202,7 @@ export class Chamber02Scene extends Phaser.Scene {
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.exitGateUnlockAudioTimer?.remove(false);
       this.exitGateUnlockAudioTimer = null;
-      this.clearExitGateTransitionFallbackTimer();
+      console.log('[Chamber02Scene] shutdown event fired');
       this.audioDirector?.shutdown();
       this.cleanupSceneUi();
     });
@@ -477,6 +477,14 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.restartText.setVisible(false);
 
+    if (this.isHandingOffToChamber03) {
+      this.mobileControls.setMode('init');
+      this.player.body.setVelocity(0, 0);
+      this.player.body.setEnable(false);
+      this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+      return;
+    }
+
     if (this.isLoreTransitionActive || this.isExitGateTransitionActive) {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
@@ -680,7 +688,7 @@ export class Chamber02Scene extends Phaser.Scene {
   refreshExitThresholdZonePresence() {
     this.currentExitThresholdZone = null;
 
-    if (!this.exitGateUnlocked || !this.exitThresholdZone) {
+    if (!this.exitGateUnlocked || !this.exitThresholdZone || this.isHandingOffToChamber03) {
       this.exitThresholdPromptText?.setVisible(false);
       return;
     }
@@ -693,7 +701,7 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   tryBeginExitGateTransition() {
-    if (!this.currentExitThresholdZone || this.isExitGateTransitionActive) {
+    if (!this.currentExitThresholdZone || this.isExitGateTransitionActive || this.isHandingOffToChamber03) {
       return;
     }
 
@@ -707,68 +715,56 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   beginExitGateTransitionToChamber03() {
-    if (this.isExitGateTransitionActive) {
+    if (this.isExitGateTransitionActive || this.isHandingOffToChamber03) {
+      return;
+    }
+    this.hardStartChamber03();
+  }
+
+  hardStartChamber03() {
+    if (this.chamber03StartHasRun || this.isHandingOffToChamber03) {
       return;
     }
 
-    console.log('[Chamber02->Chamber03] exit transition started', {
-      noFadeDiagnosticMode: CHAMBER02_EXIT_GATE_TRANSITION.noFadeDiagnosticMode,
-      fadeOutDurationMs: CHAMBER02_EXIT_GATE_TRANSITION.fadeOutDurationMs,
-      fallbackDelayMs: CHAMBER02_EXIT_GATE_TRANSITION.fallbackDelayMs
-    });
     this.isExitGateTransitionActive = true;
-    this.chamber03StartHasRun = false;
-    this.mobileControls.setMode('dialogue');
+    this.isHandingOffToChamber03 = true;
+    this.chamber03StartHasRun = true;
+
+    console.log('[Chamber02->Chamber03] handoff lock engaged');
+
+    this.currentExitThresholdZone = null;
+    this.currentExitGateZone = null;
+    this.currentLoreZone = null;
+
+    this.exitThresholdZone?.disableBody?.(true, true);
+    this.exitThresholdPromptText?.setVisible(false);
+    this.exitThresholdAura?.setVisible(false);
+    this.exitGatePromptText?.setVisible(false);
+    this.exitGateReadyAura?.setVisible(false);
+
+    this.mobileControls.setMode('init');
     this.player.body.setVelocity(0, 0);
-    this.enemies.forEach((enemy) => enemy.body.setVelocity(0, 0));
+    this.player.body.setEnable(false);
+    this.player.attackHitbox?.body?.setEnable(false);
+
+    this.enemies.forEach((enemy) => {
+      enemy.body?.setVelocity(0, 0);
+      enemy.body?.setEnable(false);
+      enemy.attackHitbox?.body?.setEnable(false);
+    });
+
     this.audioDirector?.stopAmbientLoop();
 
-    if (CHAMBER02_EXIT_GATE_TRANSITION.noFadeDiagnosticMode) {
-      console.log('[Chamber02->Chamber03] no-fade diagnostic mode active');
-      this.clearExitGateTransitionFallbackTimer();
-      this.exitGateTransitionFallbackTimer = this.time.delayedCall(
-        CHAMBER02_EXIT_GATE_TRANSITION.noFadeStartDelayMs,
-        () => {
-          console.log('[Chamber02->Chamber03] fallback timer fired (no-fade diagnostic)');
-          this.startChamber03Once('fallback timer');
-        }
-      );
-      return;
-    }
-
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      console.log('[Chamber02->Chamber03] fade callback fired');
-      this.startChamber03Once('fade callback');
-    });
-
-    this.clearExitGateTransitionFallbackTimer();
-    this.exitGateTransitionFallbackTimer = this.time.delayedCall(CHAMBER02_EXIT_GATE_TRANSITION.fallbackDelayMs, () => {
-      console.log('[Chamber02->Chamber03] fallback timer fired');
-      this.startChamber03Once('fallback timer');
-    });
-
-    console.log('[Chamber02->Chamber03] fade started');
-    this.cameras.main.fadeOut(CHAMBER02_EXIT_GATE_TRANSITION.fadeOutDurationMs, 0, 0, 0);
-  }
-
-  clearExitGateTransitionFallbackTimer() {
-    this.exitGateTransitionFallbackTimer?.remove(false);
-    this.exitGateTransitionFallbackTimer = null;
-  }
-
-  startChamber03Once(triggerSource) {
-    if (this.chamber03StartHasRun) {
-      console.log('[Chamber02->Chamber03] startChamber03Once ignored; already ran', { triggerSource });
-      return;
-    }
-
-    this.chamber03StartHasRun = true;
-    this.clearExitGateTransitionFallbackTimer();
-    this.isExitGateTransitionActive = false;
-    console.log("[Chamber02->Chamber03] scene.start('Chamber03Scene') called", { triggerSource });
-    this.scene.start('Chamber03Scene', {
-      enteredFrom: 'chamber02-physical-threshold',
-      progressionSource: 'toll-keeper-corridor-threshold'
+    this.time.delayedCall(20, () => {
+      console.log("[Chamber02Scene] calling scene.start('Chamber03Scene')");
+      try {
+        this.scene.start('Chamber03Scene', {
+          enteredFrom: 'chamber02-physical-threshold',
+          progressionSource: 'toll-keeper-corridor-threshold'
+        });
+      } catch (error) {
+        console.error("[Chamber02Scene] scene.start('Chamber03Scene') failed", error);
+      }
     });
   }
 
