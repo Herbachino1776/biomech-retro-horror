@@ -69,10 +69,6 @@ export class SkitterServitor {
     this.baseScaleY = this.sprite.scaleY || 1;
     this.baseAlpha = spritePresentation.alpha ?? defaultPresentation.alpha ?? 0.92;
     this.stateAlphas = spritePresentation.stateAlpha ?? {};
-    this.rangeTell = scene.add
-      .ellipse(x, y + 8, config.attackRange * 2, 26, config.rangeTellColor ?? 0xbfa878, 0)
-      .setDepth(4.5)
-      .setVisible(false);
     this.eyeGlow = scene.add
       .ellipse(x, y - (config.eyeGlowYOffset ?? 18), config.eyeGlowWidth ?? 24, config.eyeGlowHeight ?? 12, config.eyeGlowColor ?? 0x6f8c59, 0)
       .setDepth(6.4)
@@ -269,7 +265,6 @@ export class SkitterServitor {
       this.body.stop();
       this.body.setAllowGravity(false);
       this.body.enable = false;
-      this.rangeTell.setVisible(false);
       this.eyeGlow.setVisible(false);
       this.setVisualTint(0x1f1714);
       this.scene.tweens.add({
@@ -278,11 +273,10 @@ export class SkitterServitor {
         duration: 380
       });
       this.scene.tweens.add({
-        targets: [this.rangeTell, this.eyeGlow],
+        targets: [this.eyeGlow],
         alpha: 0,
         duration: 180,
         onComplete: () => {
-          this.rangeTell.destroy();
           this.eyeGlow.destroy();
         }
       });
@@ -296,8 +290,6 @@ export class SkitterServitor {
   }
 
   updateVisuals(time) {
-    this.updateRangeTell(time);
-
     if (this.dead) {
       this.updateEyeGlow(time);
       return;
@@ -347,22 +339,6 @@ export class SkitterServitor {
     return this.stateAlphas[state] ?? fallbackAlpha;
   }
 
-  updateRangeTell(time) {
-    if (this.dead || this.combatState !== 'windup') {
-      this.rangeTell.setVisible(false);
-      return;
-    }
-
-    const windupProgress = Phaser.Math.Clamp((time - this.stateStartedAt) / this.config.windupMs, 0, 1);
-    const centerX = this.sprite.x + this.direction * (this.config.attackRange * 0.42);
-
-    this.rangeTell
-      .setVisible(true)
-      .setPosition(centerX, this.sprite.y + 12)
-      .setScale(0.78 + windupProgress * 0.22, 0.88 + windupProgress * 0.12)
-      .setAlpha((this.config.rangeTellAlphaBase ?? 0.08) + windupProgress * (this.config.rangeTellAlphaGain ?? 0.14))
-      .setStrokeStyle(2, this.config.rangeTellStrokeColor ?? 0xd9c9b2, (this.config.rangeTellStrokeAlphaBase ?? 0.12) + windupProgress * (this.config.rangeTellStrokeAlphaGain ?? 0.18));
-  }
 
   updateEyeGlow(time) {
     if (!this.eyeGlow) {

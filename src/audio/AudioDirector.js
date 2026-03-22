@@ -88,7 +88,7 @@ const SOUND_GROUPS = {
   tollKeeperDeath: {
     keys: [ASSET_KEYS.tollKeeperDeath],
     fallbackKeys: [ASSET_KEYS.enemyDeathFallback],
-    volume: 0.3,
+    volume: 0.4,
     detuneRange: 0,
     minIntervalMs: 400,
     allowOverlap: false

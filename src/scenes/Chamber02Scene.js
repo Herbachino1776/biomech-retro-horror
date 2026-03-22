@@ -60,12 +60,6 @@ const CHAMBER02_TOLL_KEEPER_CONFIG = {
     origin: { x: 0.52, y: 0.965 },
     stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.46 }
   },
-  rangeTellColor: 0xe8d78f,
-  rangeTellAlphaBase: 0.32,
-  rangeTellAlphaGain: 0.42,
-  rangeTellStrokeColor: 0xfff1bd,
-  rangeTellStrokeAlphaBase: 0.46,
-  rangeTellStrokeAlphaGain: 0.32,
   eyeGlowColor: 0xe9ffb4,
   eyeGlowWidth: 44,
   eyeGlowHeight: 22,
@@ -481,11 +475,6 @@ export class Chamber02Scene extends Phaser.Scene {
 
   createSkitterEnemy(x, y, config) {
     const enemy = new SkitterServitor(this, x, y, config);
-    this.applyGameplayReadabilitySupport(enemy.sprite, {
-      fill: config.variantName === 'TOLL-KEEPER' ? 0xc2b07d : 0x9eb26d,
-      alpha: config.variantName === 'TOLL-KEEPER' ? 0.14 : 0.12,
-      scale: config.variantName === 'TOLL-KEEPER' ? 1.1 : 1.04
-    });
     this.physics.add.collider(enemy.sprite, this.platforms);
     this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (attackZone, enemySprite) => {
       this.handlePlayerHitEnemy(attackZone, enemySprite, enemy);
