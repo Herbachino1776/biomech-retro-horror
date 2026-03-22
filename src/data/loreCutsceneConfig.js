@@ -30,6 +30,35 @@ export const LORE_CUTSCENES = {
       }
     }
   },
+  'chamber03-precentor-threshold': {
+    id: 'chamber03-precentor-threshold',
+    imageKey: ASSET_KEYS.chamber03Lore01,
+    title: 'CHAMBER 03 // THRESHOLD OF THE PRECENTOR',
+    body: [
+      'The threshold opens like a choir wound and exhales a patient verdict.',
+      'Behind the veil, the Precentor braids your name into the rusted liturgy.',
+      'When the black returns to bone, the dais will no longer be empty.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xbba991,
+      titleColor: '#9eb183',
+      bodyColor: '#d2c2ac',
+      promptColor: '#8aa074',
+      imageTint: 0xd7c0ab,
+      imageAlpha: 0.95,
+      backgroundColor: '#000000',
+      motion: {
+        panX: 16,
+        panY: -10,
+        zoom: 1.04,
+        duration: 8600,
+        shakeX: 3,
+        shakeY: 2,
+        shakeDuration: 3400
+      }
+    }
+  },
   'chamber02-horn-arch': {
     id: 'chamber02-horn-arch',
     imageKey: ASSET_KEYS.chamber02VertebralHornGate,

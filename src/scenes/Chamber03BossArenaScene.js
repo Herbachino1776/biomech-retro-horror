@@ -16,20 +16,32 @@ const CHAMBER03_BOSS_ARENA = {
   floorDepthY: WORLD.floorY - 42,
   floorStripYOffset: 16,
   backdropY: 206,
-  backdropWidth: 1200,
+  backdropWidth: 1060,
   backdropHeight: 560,
+  sideWallWidth: 430,
+  sideWallHeight: 540,
+  sideWallInset: 82,
   cameraLerp: { x: 0.08, y: 0.08 },
   portraitFollowOffsetX: -96,
   desktopFollowOffsetX: -126,
   lowerDepthBandHeight: 280,
   lowerDepthBandAlpha: 0.18,
   floorShadowAlpha: 0.34,
+  bossAnchorX: 1464,
+  bossAnchorY: WORLD.floorY - 152,
+  bossWidth: 364,
+  bossHeight: 418,
+  bossPromptOffsetY: -236,
+  bossRevealPromptDuration: 1800,
+  omenDelayMs: 260,
   playerHalo: {
     fill: 0xd8cfbb,
     alpha: 0.18,
     scale: 1.1
   }
 };
+
+const CHAMBER03_BOSS_OMEN_CUTSCENE_ID = 'chamber03-precentor-threshold';
 
 export class Chamber03BossArenaScene extends Phaser.Scene {
   constructor() {
@@ -39,15 +51,23 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
   init(data) {
     this.transitionContext = data ?? {};
     this.isRestartingRun = false;
+    this.isOmenBeatActive = false;
+    this.hasResolvedOmenBeat = false;
+    this.hasActivatedBoss = false;
   }
 
   create() {
     this.createWorldBounds();
     this.createArenaEnvironment();
     this.createPlayerAndColliders();
+    this.createBossPresentation();
     this.createUiAndInput();
     this.configureCameraAndLayout();
+    this.registerLoreCutsceneReturn();
     this.cameras.main.fadeIn(420, 0, 0, 0);
+    this.time.delayedCall(CHAMBER03_BOSS_ARENA.omenDelayMs, () => {
+      this.beginPreBossOmenBeat();
+    });
   }
 
   createWorldBounds() {
@@ -89,9 +109,44 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
   }
 
   renderBossBackdrop() {
+    const centerX = CHAMBER03_BOSS_ARENA.worldWidth / 2;
+    const sideWallKey = ASSET_KEYS.chamber03BackgroundWallModule;
+    const hasSideWallArt = this.textures.exists(sideWallKey);
+    const sideWallOffset = CHAMBER03_BOSS_ARENA.backdropWidth / 2 + CHAMBER03_BOSS_ARENA.sideWallInset;
+
+    [-1, 1].forEach((direction, index) => {
+      const wallX = centerX + sideWallOffset * direction;
+      const wallDepth = -14.82 + index * 0.01;
+
+      if (hasSideWallArt) {
+        this.add
+          .image(wallX, CHAMBER03_BOSS_ARENA.backdropY + 12, sideWallKey)
+          .setDisplaySize(CHAMBER03_BOSS_ARENA.sideWallWidth, CHAMBER03_BOSS_ARENA.sideWallHeight)
+          .setTint(index === 0 ? 0xb8a48f : 0xc1ad96)
+          .setAlpha(0.76)
+          .setFlipX(direction > 0)
+          .setDepth(wallDepth);
+      } else {
+        this.add
+          .rectangle(
+            wallX,
+            CHAMBER03_BOSS_ARENA.backdropY + 18,
+            CHAMBER03_BOSS_ARENA.sideWallWidth,
+            CHAMBER03_BOSS_ARENA.sideWallHeight,
+            0x473a31,
+            0.8
+          )
+          .setDepth(wallDepth);
+      }
+
+      this.add
+        .ellipse(wallX, WORLD.floorY - 42, CHAMBER03_BOSS_ARENA.sideWallWidth * 0.88, 108, 0x090707, 0.16)
+        .setDepth(-13.95);
+    });
+
     if (this.textures.exists(ASSET_KEYS.chamber03BackgroundBossDais)) {
       this.add
-        .image(CHAMBER03_BOSS_ARENA.worldWidth / 2, CHAMBER03_BOSS_ARENA.backdropY, ASSET_KEYS.chamber03BackgroundBossDais)
+        .image(centerX, CHAMBER03_BOSS_ARENA.backdropY, ASSET_KEYS.chamber03BackgroundBossDais)
         .setDisplaySize(CHAMBER03_BOSS_ARENA.backdropWidth, CHAMBER03_BOSS_ARENA.backdropHeight)
         .setTint(0xcfbea5)
         .setAlpha(0.8)
@@ -99,7 +154,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     } else {
       this.add
         .rectangle(
-          CHAMBER03_BOSS_ARENA.worldWidth / 2,
+          centerX,
           CHAMBER03_BOSS_ARENA.backdropY + 14,
           CHAMBER03_BOSS_ARENA.backdropWidth,
           CHAMBER03_BOSS_ARENA.backdropHeight,
@@ -109,7 +164,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         .setDepth(-14.7);
 
       this.add
-        .text(CHAMBER03_BOSS_ARENA.worldWidth / 2, CHAMBER03_BOSS_ARENA.backdropY + 4, 'CHAMBER 03\nBOSS DAIS', {
+        .text(centerX, CHAMBER03_BOSS_ARENA.backdropY + 4, 'CHAMBER 03\nBOSS DAIS', {
           fontFamily: 'monospace',
           fontSize: '18px',
           color: '#d7c8b3',
@@ -120,8 +175,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         .setDepth(-14.6);
     }
 
-    this.add.ellipse(CHAMBER03_BOSS_ARENA.worldWidth / 2, WORLD.floorY - 40, 860, 132, 0x130f0e, 0.26).setDepth(-13.9);
-    this.add.ellipse(CHAMBER03_BOSS_ARENA.worldWidth / 2, WORLD.floorY - 10, 420, 86, COLORS.sickly, 0.1).setDepth(-13.7);
+    this.add.ellipse(centerX, WORLD.floorY - 40, 860, 132, 0x130f0e, 0.26).setDepth(-13.9);
+    this.add.ellipse(centerX, WORLD.floorY - 10, 420, 86, COLORS.sickly, 0.1).setDepth(-13.7);
   }
 
   renderArenaFloor() {
@@ -191,6 +246,55 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.physics.add.collider(this.player.sprite, this.platforms);
   }
 
+  createBossPresentation() {
+    const bossX = CHAMBER03_BOSS_ARENA.bossAnchorX;
+    const bossY = CHAMBER03_BOSS_ARENA.bossAnchorY;
+
+    this.bossArrivalShadow = this.add.ellipse(bossX, WORLD.floorY + 8, 240, 38, 0x050404, 0).setDepth(-4.2);
+    this.bossArrivalAura = this.add.ellipse(bossX, bossY + 18, 228, 312, COLORS.sickly, 0).setDepth(-4.1);
+    this.bossArrivalHalo = this.add.ellipse(bossX, bossY - 16, 170, 244, 0xdcccae, 0).setDepth(-4.05);
+
+    if (this.textures.exists(ASSET_KEYS.chamber03BossPrecentor)) {
+      this.bossSprite = this.add
+        .image(bossX, bossY, ASSET_KEYS.chamber03BossPrecentor)
+        .setDisplaySize(CHAMBER03_BOSS_ARENA.bossWidth, CHAMBER03_BOSS_ARENA.bossHeight)
+        .setTint(0xd2c1aa)
+        .setAlpha(0)
+        .setDepth(-3.9)
+        .setVisible(false);
+    } else {
+      this.bossSprite = this.add
+        .ellipse(bossX, bossY + 6, 212, 312, 0x4d3c34, 0)
+        .setStrokeStyle(3, 0xd7c8b2, 0)
+        .setDepth(-3.9)
+        .setVisible(false);
+
+      this.bossFallbackLabel = this.add
+        .text(bossX, bossY - 12, 'PRECENTOR', {
+          fontFamily: 'monospace',
+          fontSize: '16px',
+          color: '#d7c8b2',
+          align: 'center'
+        })
+        .setOrigin(0.5)
+        .setDepth(-3.88)
+        .setVisible(false);
+    }
+
+    this.bossStatusPrompt = this.add
+      .text(bossX, bossY + CHAMBER03_BOSS_ARENA.bossPromptOffsetY, '', {
+        fontFamily: 'monospace',
+        fontSize: '16px',
+        color: '#a4b687',
+        align: 'center',
+        stroke: '#0f0b0a',
+        strokeThickness: 4
+      })
+      .setOrigin(0.5)
+      .setDepth(12)
+      .setVisible(false);
+  }
+
   createUiAndInput() {
     this.hud = new HudOverlay(this);
     this.mobileControls = new MobileControls(this);
@@ -214,6 +318,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
+      this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
     });
   }
 
@@ -232,6 +337,10 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.hud.update(this.player.health, PLAYER.maxHealth);
   }
 
+  registerLoreCutsceneReturn() {
+    this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+  }
+
   update(time) {
     const mobileInput = this.mobileControls.getInputState();
 
@@ -243,6 +352,12 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         this.isRestartingRun = true;
         restartRunFromDeath(this);
       }
+      return;
+    }
+
+    if (this.isOmenBeatActive) {
+      this.mobileControls.setMode('dialogue');
+      this.player.body.setVelocity(0, 0);
       return;
     }
 
@@ -259,7 +374,137 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       attackPressed: Phaser.Input.Keyboard.JustDown(this.keyAttack) || mobileInput.attackPressed
     });
 
+    this.updateBossPresence(time);
     this.hud.update(this.player.health, PLAYER.maxHealth);
+  }
+
+  beginPreBossOmenBeat() {
+    if (this.hasResolvedOmenBeat || this.isOmenBeatActive) {
+      return;
+    }
+
+    this.isOmenBeatActive = true;
+    this.mobileControls.setMode('dialogue');
+    this.player.body.setVelocity(0, 0);
+    this.player.body.setEnable(false);
+    this.player.attackHitbox?.body?.setEnable(false);
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.pause();
+      this.scene.launch('LoreCutsceneScene', {
+        cutsceneId: CHAMBER03_BOSS_OMEN_CUTSCENE_ID,
+        returnSceneKey: this.scene.key
+      });
+    });
+
+    this.cameras.main.fadeOut(380, 0, 0, 0);
+  }
+
+  handleLoreCutsceneComplete({ cutsceneId } = {}) {
+    if (cutsceneId !== CHAMBER03_BOSS_OMEN_CUTSCENE_ID) {
+      return;
+    }
+
+    this.resolvePreBossOmenBeat();
+  }
+
+  resolvePreBossOmenBeat() {
+    this.isOmenBeatActive = false;
+    this.hasResolvedOmenBeat = true;
+    this.player.body.setEnable(true);
+    this.mobileControls.setMode('gameplay');
+    this.cameras.main.fadeIn(500, 0, 0, 0);
+    this.activateBossEncounterContract();
+  }
+
+  activateBossEncounterContract() {
+    if (this.hasActivatedBoss || !this.bossSprite) {
+      return;
+    }
+
+    this.hasActivatedBoss = true;
+    this.bossSprite.setVisible(true);
+
+    if (typeof this.bossSprite.setStrokeStyle === 'function') {
+      this.bossSprite.setStrokeStyle(3, 0xd7c8b2, 0.65);
+    }
+
+    this.bossFallbackLabel?.setVisible(true).setAlpha(0);
+
+    this.tweens.add({
+      targets: this.bossSprite,
+      alpha: 0.95,
+      duration: 640,
+      ease: 'Sine.out'
+    });
+    this.tweens.add({
+      targets: this.bossArrivalAura,
+      alpha: 0.2,
+      duration: 640,
+      ease: 'Sine.out'
+    });
+    this.tweens.add({
+      targets: this.bossArrivalHalo,
+      alpha: 0.14,
+      duration: 640,
+      ease: 'Sine.out'
+    });
+    this.tweens.add({
+      targets: this.bossArrivalShadow,
+      alpha: 0.28,
+      duration: 640,
+      ease: 'Sine.out'
+    });
+    if (this.bossFallbackLabel) {
+      this.tweens.add({
+        targets: this.bossFallbackLabel,
+        alpha: 0.76,
+        duration: 640,
+        ease: 'Sine.out'
+      });
+    }
+
+    this.tweens.add({
+      targets: this.bossArrivalAura,
+      scaleX: 1.04,
+      scaleY: 1.02,
+      duration: 1200,
+      ease: 'Sine.inOut',
+      yoyo: true,
+      repeat: -1
+    });
+
+    this.tweens.add({
+      targets: this.bossArrivalHalo,
+      scaleX: 1.03,
+      scaleY: 1.05,
+      duration: 1700,
+      ease: 'Sine.inOut',
+      yoyo: true,
+      repeat: -1
+    });
+
+    this.bossStatusPrompt
+      ?.setText('THE PRECENTOR TAKES THE DAIS')
+      .setScrollFactor(0)
+      .setPosition(this.scale.width / 2, Math.max(80, this.cameras.main.height * 0.16))
+      .setVisible(true);
+
+    this.time.delayedCall(CHAMBER03_BOSS_ARENA.bossRevealPromptDuration, () => {
+      this.bossStatusPrompt?.setVisible(false);
+    });
+  }
+
+  updateBossPresence(time) {
+    if (!this.hasActivatedBoss || !this.bossSprite?.visible) {
+      return;
+    }
+
+    const floatOffset = Math.sin(time / 420) * 5;
+    this.bossSprite.setY(CHAMBER03_BOSS_ARENA.bossAnchorY + floatOffset);
+    this.bossArrivalAura?.setPosition(CHAMBER03_BOSS_ARENA.bossAnchorX, CHAMBER03_BOSS_ARENA.bossAnchorY + 18 + floatOffset * 0.35);
+    this.bossArrivalHalo?.setPosition(CHAMBER03_BOSS_ARENA.bossAnchorX, CHAMBER03_BOSS_ARENA.bossAnchorY - 16 + floatOffset * 0.45);
+    this.bossArrivalShadow?.setAlpha(0.22 + (Math.sin(time / 320) + 1) * 0.03);
   }
 
   createInvisiblePlatform(x, y, width, height) {
@@ -315,6 +560,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         width / 2,
         Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY)
       );
+      this.bossStatusPrompt?.setPosition(width / 2, Math.max(72, worldBandHeight * 0.16));
       return;
     }
 
@@ -323,6 +569,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     camera.setFollowOffset(CHAMBER03_BOSS_ARENA.desktopFollowOffsetX, PORTRAIT_LAYOUT.desktopFollowOffsetY);
     this.mobileControls.setReservedBottomPx(0);
     this.restartText.setPosition(width / 2, 90);
+    this.bossStatusPrompt?.setPosition(width / 2, Math.max(80, height * 0.16));
   }
 
   applyGameplayReadabilitySupport(target, { fill = 0xd2c2ac, alpha = 0.16, scale = 1.08 } = {}) {
