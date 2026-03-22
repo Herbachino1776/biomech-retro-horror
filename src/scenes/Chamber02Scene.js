@@ -108,7 +108,8 @@ const CHAMBER02_EXIT_GATE = {
   lockedAlpha: 0.76,
   unlockedTint: 0xd7c5ac,
   unlockedAlpha: 0.96,
-  loreCutsceneId: 'chamber02-exit-gate'
+  readyAuraAlpha: 0.16,
+  thresholdLabel: 'THRESHOLD TO CHAMBER 03'
 };
 
 export class Chamber02Scene extends Phaser.Scene {
@@ -137,7 +138,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.isExitGateTransitionActive = false;
     this.isRestartingRun = false;
     this.hasAppliedPostLoreReaction = false;
-    this.hasTriggeredExitGateLore = false;
+    this.hasUsedExitGate = false;
     this.exitGateUnlockAudioTimer = null;
 
     this.renderProcessionalBackdrop();
@@ -305,6 +306,16 @@ export class Chamber02Scene extends Phaser.Scene {
       .ellipse(CHAMBER02_EXIT_GATE.x - 96, CHAMBER02_EXIT_GATE.zoneY, 138, 88, COLORS.sickly, 0.1)
       .setDepth(-5.25)
       .setVisible(false);
+    this.exitGateThresholdLabel = this.add
+      .text(CHAMBER02_EXIT_GATE.x - 130, CHAMBER02_EXIT_GATE.zoneY - 92, CHAMBER02_EXIT_GATE.thresholdLabel, {
+        fontFamily: 'monospace',
+        fontSize: '11px',
+        color: '#b8ab8c',
+        align: 'center'
+      })
+      .setDepth(-5.22)
+      .setAlpha(0.74)
+      .setVisible(false);
 
     this.exitGateZone = this.add
       .zone(
@@ -315,6 +326,9 @@ export class Chamber02Scene extends Phaser.Scene {
       )
       .setOrigin(0.5);
     this.physics.add.existing(this.exitGateZone, true);
+    this.add
+      .ellipse(CHAMBER02_EXIT_GATE.x - 8, WORLD.floorY - 178, 142, 202, COLORS.bone, 0.08)
+      .setDepth(-5.32);
   }
 
   createTollKeeperEncounter() {
@@ -492,7 +506,9 @@ export class Chamber02Scene extends Phaser.Scene {
     this.exitGateSigil?.setAlpha(unlocked ? 0.3 : 0.14);
     this.applyExitGateVisualState(unlocked);
     this.exitGateBarrier?.setVisible(!unlocked);
-    this.exitGateReadyAura?.setVisible(unlocked && !this.hasTriggeredExitGateLore);
+    this.exitGateReadyAura?.setVisible(unlocked && !this.hasUsedExitGate);
+    this.exitGateReadyAura?.setFillStyle(COLORS.sickly, unlocked ? CHAMBER02_EXIT_GATE.readyAuraAlpha : 0.1);
+    this.exitGateThresholdLabel?.setVisible(unlocked && !this.hasUsedExitGate);
 
     if (this.exitGateBarrier?.body) {
       this.exitGateBarrier.body.enable = !unlocked;
@@ -538,7 +554,7 @@ export class Chamber02Scene extends Phaser.Scene {
   refreshExitGatePresence() {
     this.currentGateZone = null;
 
-    if (!this.exitGateZone || this.hasTriggeredExitGateLore || !this.areAllTollKeepersDefeated()) {
+    if (!this.exitGateZone || this.hasUsedExitGate || !this.areAllTollKeepersDefeated()) {
       return;
     }
 
@@ -571,7 +587,7 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   tryUseExitGate(mobileInput) {
-    if (!this.currentGateZone || this.isLoreTransitionActive || this.isExitGateTransitionActive || this.hasTriggeredExitGateLore) {
+    if (!this.currentGateZone || this.isLoreTransitionActive || this.isExitGateTransitionActive || this.hasUsedExitGate) {
       return;
     }
 
@@ -588,17 +604,18 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   beginExitGateTransition() {
-    if (this.isExitGateTransitionActive || this.hasTriggeredExitGateLore) {
+    if (this.isExitGateTransitionActive || this.hasUsedExitGate) {
       return;
     }
 
     console.log(
-      `[Chamber02Scene] Exit gate transition requested. disableFade=${CHAMBER02_EXIT_GATE_DISABLE_FADE_FOR_DIAGNOSTICS}`
+      `[Chamber02Scene] Exit gate transition requested. disableFade=${CHAMBER03_NO_FADE_DIAGNOSTIC}`
     );
 
-    this.hasTriggeredExitGateLore = true;
+    this.hasUsedExitGate = true;
     this.isExitGateTransitionActive = true;
     this.exitGateReadyAura?.setVisible(false);
+    this.exitGateThresholdLabel?.setVisible(false);
     this.exitGateSigil?.setAlpha(0.38);
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
