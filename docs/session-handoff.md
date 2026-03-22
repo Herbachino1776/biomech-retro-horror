@@ -22,7 +22,7 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Chamber 02 central shrine/ossuary lore trigger runs through `LoreCutsceneScene` and preserves diegetic presentation.
 - Chamber 02 post-lore reaction state is implemented: environmental ritual shift plus enemy wake/activation.
 - Chamber 02 TOLL-KEEPER encounter pair gates the exit and unlocks the end gate on defeat.
-- Chamber 02 exit gate lore trigger/payoff is active after unlock.
+- Chamber 02 exit gate unlock state remains active after the TOLL-KEEPER fight, but the old placeholder lore payoff has been intentionally removed.
 - Chamber 01 + Chamber 02 ambience is integrated in the shipped slice.
 - Player footsteps/combat/death audio is present.
 - Skitter, TOLL-KEEPER, miniboss, lore/gate, and banishment cues are present.
@@ -31,8 +31,8 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Texture-first asset loading with fallback resilience remains stable.
 
 ## What Still Needs Work Now
-- Chamber 02 still ends with lore payoff rather than a playable Chamber 03 transition.
-- The Chamber 02 -> Chamber 03 continuity contract needs a real gate/progression-object handoff.
+- Chamber 02 now ends at a stable unlocked gate state rather than a placeholder lore-screen payoff.
+- The Chamber 02 -> Chamber 03 continuity contract still needs a real gate/progression-object handoff.
 - Content expansion beyond the shipped Chamber 01 + Chamber 02 slice is the next milestone focus.
 - Combat presentation can still be polished further later, but current readability is sufficient for the shipped baseline.
 
@@ -45,11 +45,12 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Constraints: preserve mobile playability, preserve keyboard parity, and do not destabilize the current shipped baseline while expanding content.
 
 ## Latest Completed Task
-- The repo has been intentionally rolled back to the state just before the failed oversized Chamber 03 implementation attempt.
+- The repo has been intentionally rolled back to the state just before the failed oversized Chamber 03 implementation attempt and is trusted as the new baseline.
 - Milestone 4 audio identity pass is shipped and closed out.
 - Chamber 01 + Chamber 02 ambience, player footsteps/combat/death audio, skitter/TOLL-KEEPER/miniboss cues, and lore/gate/banishment cues are integrated in the current playable slice.
+- The Chamber 02 exit-gate placeholder lore handoff has now been removed so Chamber 03 can restart cleanly from this baseline.
 - Recent audio QA/polish has already been folded into the shipped baseline without changing the slice scope.
-- Docs/status files now reflect Milestone 4 completion and Milestone 5 activation.
+- Docs/status files now reflect Milestone 4 completion, the cleanup reset, and Milestone 5 activation.
 
 ## Exact Next Best Step After This Task
 Use the Chamber 03 chunked planning docs as the implementation contract:
@@ -57,8 +58,8 @@ Use the Chamber 03 chunked planning docs as the implementation contract:
 - `docs/chamber-03-implementation-roadmap.md`
 
 Immediate follow-through:
-- correct Chamber 02 -> Chamber 03 continuity to use a real gate/progression object,
-- begin with the smallest Chamber 03 bootstrap slice rather than a full grand implementation.
+- begin with the smallest milestone-disciplined Chamber 03 bootstrap slice rather than a full grand implementation,
+- implement the real Chamber 02 -> Chamber 03 gate/progression-object transition in that follow-up work instead of reviving placeholder lore-screen handoff behavior.
 
 ## Most Important Constraints
 1. Do not regress GitHub Pages/Vite base-path behavior.

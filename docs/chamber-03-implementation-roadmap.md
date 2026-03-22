@@ -1,6 +1,6 @@
 # Chamber 03 Implementation Roadmap
 
-Status: planning-only. **This roadmap exists to prevent another oversized implementation attempt.**
+Status: planning-only. **This roadmap exists to prevent another oversized implementation attempt.** The trusted rolled-back Chamber 01 + Chamber 02 repo is the clean restart baseline, and the old Chamber 02 exit-gate placeholder lore payoff has been intentionally removed.
 
 ## Warning from the Future
 The prior Chamber 03 mistake was trying to build the full chamber in one pass.
@@ -48,10 +48,10 @@ Build Chamber 03 in milestone-safe slices. Each slice should preserve the shippe
 - Create the smallest stable playable scaffold for entering Chamber 03 without pretending the full chamber is done.
 
 **Allowed Scope**
-- Chamber 02 end-state correction needed to support a real gate/progression-object handoff,
+- Chamber 02 end-state correction needed to support a real gate/progression-object handoff from the new stable unlocked-gate baseline,
 - minimal Chamber 03 scene/bootstrap setup,
 - stable entry/exit plumbing,
-- placeholder-safe continuity hooks.
+- minimal continuity hooks that do not reintroduce a placeholder lore-screen payoff.
 
 **Must NOT Be Attempted Yet**
 - large room buildout,
@@ -61,7 +61,7 @@ Build Chamber 03 in milestone-safe slices. Each slice should preserve the shippe
 - broad new systems.
 
 **Acceptance Target**
-- player can cross a stable in-world threshold from Chamber 02 into an intentionally minimal Chamber 03 bootstrap state without breaking the shipped slice.
+- player can cross a stable in-world threshold from Chamber 02's stable unlocked-gate endpoint into an intentionally minimal Chamber 03 bootstrap state without breaking the shipped slice.
 
 ## Milestone 5C — Chamber 03 Spatial Buildout
 **Purpose**

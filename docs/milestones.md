@@ -27,7 +27,7 @@
 - deepen regular enemy readability and commitment pacing in the existing slice
 - ship the chamber 01 miniboss refinement and payoff gate release
 - preserve chamber 01 -> chamber 02 continuity
-- ship chamber 02 TOLL-KEEPER gate unlock + exit lore payoff
+- ship chamber 02 TOLL-KEEPER gate unlock state while preserving room for a later real Chamber 03 gate transition
 - preserve death/restart/reset plus portrait/landscape usability
 
 ## Milestone 4 — Audio Identity (Completed / Closed Out)
@@ -37,7 +37,9 @@
 
 ## Milestone 5 — Content Expansion (Active)
 - extend beyond the shipped chamber 01 + chamber 02 baseline
+- restart Chamber 03 cleanly from the trusted rolled-back baseline
 - add the next playable area progression using established patterns
+- replace the old Chamber 02 placeholder lore handoff with a real gate/progression transition in a later scoped pass
 - preserve the shipped audio-integrated slice while expanding content
 
 ## Milestone 6 — Polish + Stability (Planned)
