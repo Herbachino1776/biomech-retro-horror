@@ -30,6 +30,22 @@ const CHAMBER03_BOOTSTRAP = {
   }
 };
 
+const CHAMBER03_BOSS_THRESHOLD = {
+  portalX: 4540,
+  portalY: WORLD.floorY - 112,
+  portalWidth: 178,
+  portalHeight: 248,
+  zoneWidth: 180,
+  zoneHeight: 212,
+  promptOffsetY: -162,
+  shellTint: 0xcbb79f,
+  shellAlpha: 0.82,
+  auraTint: COLORS.sickly,
+  auraAlpha: 0.18,
+  fallbackVeinTint: 0xa88e71,
+  fallbackVeinAlpha: 0.76
+};
+
 const CHAMBER03_PROCESSION = [
   {
     key: ASSET_KEYS.chamber03BackgroundEntryNave,
@@ -84,15 +100,6 @@ const CHAMBER03_PROCESSION = [
     tint: 0xc7b49f,
     alpha: 0.68,
     depth: -14.62
-  },
-  {
-    key: ASSET_KEYS.chamber03BackgroundBossDais,
-    width: 960,
-    height: 454,
-    y: 214,
-    tint: 0xd2c2aa,
-    alpha: 0.72,
-    depth: -14.66
   }
 ];
 
@@ -116,11 +123,11 @@ const CHAMBER03_MARKERS = [
     depth: -11.85
   },
   {
-    x: 3690,
-    ribWidth: 22,
-    ribHeight: 304,
-    archWidth: 206,
-    archHeight: 132,
+    x: 4050,
+    ribWidth: 24,
+    ribHeight: 316,
+    archWidth: 220,
+    archHeight: 138,
     alpha: 0.24,
     depth: -11.9
   }
@@ -134,12 +141,15 @@ export class Chamber03Scene extends Phaser.Scene {
   init(data) {
     this.transitionContext = data ?? {};
     this.isRestartingRun = false;
+    this.isTransitioningToBossArena = false;
+    this.currentBossThresholdZone = null;
   }
 
   create() {
     this.createWorldBounds();
     this.createBackgroundAndFloor();
     this.createPlayerAndColliders();
+    this.createBossThreshold();
     this.createUiAndInput();
     this.configureCameraAndLayout();
   }
@@ -220,7 +230,7 @@ export class Chamber03Scene extends Phaser.Scene {
       .setDepth(segment.depth + 0.02);
 
     this.add
-      .text(x, segment.y + 12, `CHAMBER 03\\nSEGMENT ${index + 1}`, {
+      .text(x, segment.y + 12, `CHAMBER 03\nSEGMENT ${index + 1}`, {
         fontFamily: 'monospace',
         fontSize: '16px',
         color: '#d6c7b2',
@@ -321,6 +331,58 @@ export class Chamber03Scene extends Phaser.Scene {
     this.physics.add.collider(this.player.sprite, this.platforms);
   }
 
+  createBossThreshold() {
+    const baseX = CHAMBER03_BOSS_THRESHOLD.portalX;
+    const baseY = CHAMBER03_BOSS_THRESHOLD.portalY;
+    const hasThresholdArt = this.textures.exists(ASSET_KEYS.chamber03BackgroundThreshold);
+
+    this.add.ellipse(baseX, WORLD.floorY + 10, 248, 40, 0x050404, 0.32).setDepth(-4.6);
+    this.bossThresholdAura = this.add
+      .ellipse(baseX, baseY + 22, 124, 196, CHAMBER03_BOSS_THRESHOLD.auraTint, CHAMBER03_BOSS_THRESHOLD.auraAlpha)
+      .setDepth(-4.5);
+    this.bossThresholdInnerAura = this.add
+      .ellipse(baseX, baseY + 10, 74, 156, 0xe0d0a2, 0.14)
+      .setDepth(-4.45);
+
+    if (hasThresholdArt) {
+      this.bossThresholdShell = this.add
+        .image(baseX, baseY, ASSET_KEYS.chamber03BackgroundThreshold)
+        .setDisplaySize(CHAMBER03_BOSS_THRESHOLD.portalWidth, CHAMBER03_BOSS_THRESHOLD.portalHeight)
+        .setTint(CHAMBER03_BOSS_THRESHOLD.shellTint)
+        .setAlpha(CHAMBER03_BOSS_THRESHOLD.shellAlpha)
+        .setDepth(-4.35);
+    } else {
+      this.bossThresholdShell = this.add
+        .ellipse(baseX, baseY, CHAMBER03_BOSS_THRESHOLD.portalWidth, CHAMBER03_BOSS_THRESHOLD.portalHeight, 0x3e322b, 0.92)
+        .setStrokeStyle(3, 0xd2c2ac, 0.5)
+        .setDepth(-4.35);
+
+      this.add
+        .ellipse(baseX, baseY, 52, 164, CHAMBER03_BOSS_THRESHOLD.fallbackVeinTint, CHAMBER03_BOSS_THRESHOLD.fallbackVeinAlpha)
+        .setDepth(-4.3);
+      this.add.rectangle(baseX - 44, baseY + 6, 10, 156, 0x2b211d, 0.8).setAngle(-8).setDepth(-4.28);
+      this.add.rectangle(baseX + 44, baseY + 6, 10, 156, 0x2b211d, 0.8).setAngle(8).setDepth(-4.28);
+    }
+
+    this.bossThresholdPrompt = this.add
+      .text(baseX, baseY + CHAMBER03_BOSS_THRESHOLD.promptOffsetY, 'CROSS THE DAIS', {
+        fontFamily: 'monospace',
+        fontSize: '15px',
+        color: '#d9cbb8',
+        align: 'center',
+        stroke: '#120d0c',
+        strokeThickness: 4
+      })
+      .setOrigin(0.5)
+      .setDepth(-4.2)
+      .setVisible(false);
+
+    this.bossThresholdZone = this.add
+      .zone(baseX, WORLD.floorY - 44, CHAMBER03_BOSS_THRESHOLD.zoneWidth, CHAMBER03_BOSS_THRESHOLD.zoneHeight)
+      .setOrigin(0.5);
+    this.physics.add.existing(this.bossThresholdZone, true);
+  }
+
   createUiAndInput() {
     this.hud = new HudOverlay(this);
     this.mobileControls = new MobileControls(this);
@@ -340,6 +402,8 @@ export class Chamber03Scene extends Phaser.Scene {
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+    this.keyInteract = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    this.keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -376,6 +440,13 @@ export class Chamber03Scene extends Phaser.Scene {
       return;
     }
 
+    if (this.isTransitioningToBossArena) {
+      this.mobileControls.setMode('init');
+      this.player.body.setVelocity(0, 0);
+      this.player.body.setEnable(false);
+      return;
+    }
+
     this.restartText.setVisible(false);
     this.mobileControls.setMode('gameplay');
 
@@ -390,7 +461,78 @@ export class Chamber03Scene extends Phaser.Scene {
     };
 
     this.player.update(time, input);
+    this.refreshBossThresholdPresence();
+    this.tryBeginBossArenaTransition(mobileInput);
+    this.updateBossThresholdAura(time);
     this.hud.update(this.player.health, PLAYER.maxHealth);
+  }
+
+  refreshBossThresholdPresence() {
+    this.currentBossThresholdZone = null;
+
+    if (!this.bossThresholdZone || this.isTransitioningToBossArena) {
+      this.bossThresholdPrompt?.setVisible(false);
+      return;
+    }
+
+    this.physics.overlap(this.player.sprite, this.bossThresholdZone, () => {
+      this.currentBossThresholdZone = this.bossThresholdZone;
+    });
+
+    this.bossThresholdPrompt?.setVisible(Boolean(this.currentBossThresholdZone));
+  }
+
+  tryBeginBossArenaTransition(mobileInput) {
+    if (!this.currentBossThresholdZone || this.isTransitioningToBossArena) {
+      return;
+    }
+
+    const interactPressed =
+      Phaser.Input.Keyboard.JustDown(this.keyInteract) ||
+      Phaser.Input.Keyboard.JustDown(this.keyEnter) ||
+      mobileInput.interactPressed;
+
+    if (!interactPressed) {
+      return;
+    }
+
+    this.beginBossArenaTransition();
+  }
+
+  beginBossArenaTransition() {
+    if (this.isTransitioningToBossArena) {
+      return;
+    }
+
+    this.isTransitioningToBossArena = true;
+    this.currentBossThresholdZone = null;
+    this.bossThresholdPrompt?.setVisible(false);
+    this.mobileControls.setMode('init');
+    this.player.body.setVelocity(0, 0);
+    this.player.body.setEnable(false);
+    this.player.attackHitbox?.body?.setEnable(false);
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.start('Chamber03BossArenaScene', {
+        enteredFrom: 'chamber03-boss-threshold',
+        progressionSource: 'processional-threshold-gate'
+      });
+    });
+
+    this.cameras.main.fadeOut(420, 0, 0, 0);
+  }
+
+  updateBossThresholdAura(time) {
+    if (!this.bossThresholdAura || !this.bossThresholdInnerAura) {
+      return;
+    }
+
+    const occupied = Boolean(this.currentBossThresholdZone);
+    const outerPulse = 0.14 + (Math.sin(time / 190) + 1) * 0.045 + (occupied ? 0.08 : 0);
+    const innerPulse = 0.08 + (Math.sin(time / 240) + 1) * 0.03 + (occupied ? 0.06 : 0);
+
+    this.bossThresholdAura.setAlpha(outerPulse).setScale(1 + Math.sin(time / 280) * 0.03, 1.02);
+    this.bossThresholdInnerAura.setAlpha(innerPulse).setScale(1 + Math.sin(time / 220) * 0.025, 1.01);
   }
 
   createInvisiblePlatform(x, y, width, height) {
