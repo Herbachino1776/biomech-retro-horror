@@ -26,17 +26,6 @@ export class HalfSkullMiniboss {
     this.attackAudioLocked = false;
 
     this.usingTexture = scene.textures.exists(ASSET_KEYS.chamber01HalfSkullMiniboss);
-    this.solidUnderlay = null;
-
-    if (this.usingTexture) {
-      this.solidUnderlay = scene.add
-        .image(x - 4, y + 4, ASSET_KEYS.chamber01HalfSkullMiniboss)
-        .setOrigin(config.presentation.origin.x, config.presentation.origin.y)
-        .setDisplaySize(config.presentation.display.width * 1.02, config.presentation.display.height * 1.02)
-        .setTint(0x5e5148)
-        .setAlpha(0.42)
-        .setDepth(5.7);
-    }
 
     this.sprite = this.usingTexture
       ? scene.add
@@ -66,7 +55,6 @@ export class HalfSkullMiniboss {
 
   setActive(active) {
     this.active = active;
-    this.syncSolidPresentation();
     if (!active && !this.dead) {
       this.clearAttackState();
       this.body.setVelocityX(0);
@@ -203,12 +191,11 @@ export class HalfSkullMiniboss {
 
     this.deathEffectStarted = true;
     if (this.usingTexture) {
-      this.solidUnderlay?.setTint(0xc4b292).setAlpha(0.5);
       this.sprite.setTint(0xe7dcc6);
     } else {
       this.sprite.setFillStyle(0xdccfbc, 0.72);
     }
-    const deathTargets = [this.sprite, this.solidUnderlay].filter(Boolean);
+    const deathTargets = [this.sprite];
     deathTargets.forEach((target) => {
       this.scene.tweens.add({
         targets: target,
@@ -222,17 +209,6 @@ export class HalfSkullMiniboss {
     });
   }
 
-  syncSolidPresentation() {
-    if (!this.solidUnderlay) {
-      return;
-    }
-
-    this.solidUnderlay
-      .setVisible(this.sprite.visible)
-      .setPosition(this.sprite.x - 5, this.sprite.y + 5)
-      .setScale(this.sprite.scaleX * 1.03, this.sprite.scaleY * 1.03)
-      .setAngle(this.sprite.angle);
-  }
 
   updateVisuals(time) {
     const telegraphing = this.isTelegraphing(time);
@@ -243,12 +219,10 @@ export class HalfSkullMiniboss {
 
     if (this.dead) {
       if (this.usingTexture) {
-        this.solidUnderlay?.setTint(0x7d6f63);
         this.sprite.setTint(0x8f8377);
       } else {
         this.sprite.setFillStyle(0x8d8176, 0.3);
       }
-      this.syncSolidPresentation();
       return;
     }
 
@@ -256,8 +230,6 @@ export class HalfSkullMiniboss {
     let scaleY = this.baseScaleY * this.config.presentation.scaleY;
     let angle = 0;
     let tint = this.config.presentation.tint;
-    let underlayTint = 0x5e5148;
-    let underlayAlpha = 0.42;
 
     if (telegraphing) {
       const pulse = 0.96 + Math.sin(time / 60) * 0.03 + telegraphProgress * 0.11;
@@ -270,16 +242,12 @@ export class HalfSkullMiniboss {
         100,
         Math.round(telegraphProgress * 100)
       ).color;
-      underlayTint = 0x8a5f36;
-      underlayAlpha = 0.55 + telegraphProgress * 0.08;
     } else if (takingHit || hurtRecovering) {
       const recoilPulse = takingHit ? 1.03 : 1 + Math.sin(time / 42) * 0.02;
       scaleX *= 1.01;
       scaleY *= recoilPulse * 0.98;
       angle = this.direction * (takingHit ? 8 : 4);
       tint = takingHit ? 0xd9efae : 0xb8c987;
-      underlayTint = 0x99a567;
-      underlayAlpha = takingHit ? 0.62 : 0.5;
     } else if (hitPulsing) {
       const pulse = 1 + Math.sin(time / 36) * 0.03;
       scaleX *= pulse;
@@ -290,11 +258,9 @@ export class HalfSkullMiniboss {
     this.sprite.setAngle(angle);
     if (this.usingTexture) {
       this.sprite.setTint(tint);
-      this.solidUnderlay?.setTint(underlayTint).setAlpha(underlayAlpha);
     } else {
       this.sprite.setFillStyle(telegraphing ? 0xd6bb7a : takingHit ? 0xc5d89a : COLORS.bone, telegraphing ? 0.96 : 0.94);
     }
 
-    this.syncSolidPresentation();
   }
 }
