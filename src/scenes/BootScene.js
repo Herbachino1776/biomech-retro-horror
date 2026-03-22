@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { ASSET_URLS } from '../data/assetUrls.js';
+import { BOOT_SCENE_OVERRIDE } from '../data/gameConfig.js';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -199,6 +200,6 @@ export class BootScene extends Phaser.Scene {
       });
     }
 
-    this.scene.start('Chamber01Scene');
+    this.scene.start(BOOT_SCENE_OVERRIDE ?? 'Chamber01Scene');
   }
 }

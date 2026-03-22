@@ -21,3 +21,6 @@ export const gameConfig = {
     autoCenter: Phaser.Scale.CENTER_BOTH
   }
 };
+
+
+export const BOOT_SCENE_OVERRIDE = null;
