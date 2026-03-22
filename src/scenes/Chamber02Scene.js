@@ -20,13 +20,7 @@ const CHAMBER02_EXIT_CORRIDOR = {
   thresholdY: 374,
   thresholdWidth: 108,
   thresholdHeight: 212,
-  thresholdLabelY: 278,
   cameraHintX: 3910
-};
-
-const CHAMBER02_RESTORATION_END_STATE = {
-  thresholdLabel: 'THRESHOLD SEALED // CHAMBER 03 REBUILD PENDING',
-  thresholdDescription: 'Chamber 02 ends here for the restored baseline.'
 };
 
 const CHAMBER02_PLATFORMS = [
@@ -159,7 +153,6 @@ export class Chamber02Scene extends Phaser.Scene {
     this.exitGateUnlockAudioTimer = null;
     this.exitGatePromptText = null;
     this.chamber03StartHasRun = false;
-    this.exitThresholdPromptText = null;
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
@@ -355,45 +348,95 @@ export class Chamber02Scene extends Phaser.Scene {
 
 
   createExitCorridor() {
-    this.exitCorridorFloorVisual = this.add
-      .rectangle(
-        CHAMBER02_EXIT_CORRIDOR.startX + CHAMBER02_EXIT_CORRIDOR.width / 2,
-        CHAMBER02_EXIT_CORRIDOR.floorY,
-        CHAMBER02_EXIT_CORRIDOR.width,
-        CHAMBER02_EXIT_CORRIDOR.floorHeight,
-        0x766553,
-        0.92
-      )
-      .setDepth(-9.8);
+    const corridorCenterX = CHAMBER02_EXIT_CORRIDOR.startX + CHAMBER02_EXIT_CORRIDOR.width / 2;
 
-    this.exitCorridorVein = this.add
-      .rectangle(
-        CHAMBER02_EXIT_CORRIDOR.startX + CHAMBER02_EXIT_CORRIDOR.width / 2,
-        CHAMBER02_EXIT_CORRIDOR.floorY - 28,
-        CHAMBER02_EXIT_CORRIDOR.width,
-        10,
-        COLORS.sickly,
-        0.2
-      )
-      .setDepth(-9.7);
+    this.add
+      .rectangle(corridorCenterX, WORLD.floorY - 34, CHAMBER02_EXIT_CORRIDOR.width + 56, 172, COLORS.oil, 0.22)
+      .setDepth(-10.4);
 
-    this.exitCorridorArch = this.add
-      .rectangle(
-        CHAMBER02_EXIT_CORRIDOR.startX + 140,
-        WORLD.floorY - 126,
-        70,
-        244,
-        COLORS.architecture,
-        0.84
-      )
-      .setStrokeStyle(3, COLORS.bone, 0.48)
-      .setDepth(-5.2)
-      .setVisible(false);
+    if (this.textures.exists(ASSET_KEYS.chamber02BackgroundPlate)) {
+      this.exitCorridorFloorVisual = this.add
+        .tileSprite(
+          corridorCenterX,
+          CHAMBER02_EXIT_CORRIDOR.floorY - 8,
+          CHAMBER02_EXIT_CORRIDOR.width,
+          168,
+          ASSET_KEYS.chamber02BackgroundPlate
+        )
+        .setTint(0xb8a58e)
+        .setAlpha(0.22)
+        .setDepth(-10.2);
+    } else {
+      this.exitCorridorFloorVisual = this.add
+        .rectangle(
+          corridorCenterX,
+          CHAMBER02_EXIT_CORRIDOR.floorY,
+          CHAMBER02_EXIT_CORRIDOR.width,
+          CHAMBER02_EXIT_CORRIDOR.floorHeight,
+          0x6e5f50,
+          0.72
+        )
+        .setDepth(-10.2);
+    }
 
-    this.exitThresholdAura = this.add
-      .ellipse(CHAMBER02_EXIT_CORRIDOR.thresholdX, CHAMBER02_EXIT_CORRIDOR.thresholdY + 28, 164, 228, COLORS.sickly, 0.1)
-      .setDepth(-5.05)
-      .setVisible(false);
+    if (this.textures.exists(ASSET_KEYS.chamber02FloorStrip)) {
+      this.exitCorridorVein = this.add
+        .tileSprite(
+          corridorCenterX,
+          WORLD.floorY + 18,
+          CHAMBER02_EXIT_CORRIDOR.width,
+          84,
+          ASSET_KEYS.chamber02FloorStrip
+        )
+        .setTint(0xd0c1ab)
+        .setAlpha(0.8)
+        .setDepth(-9.7);
+    } else {
+      this.exitCorridorVein = this.add
+        .rectangle(corridorCenterX, CHAMBER02_EXIT_CORRIDOR.floorY - 10, CHAMBER02_EXIT_CORRIDOR.width, 20, COLORS.bone, 0.18)
+        .setDepth(-9.7);
+    }
+
+    this.add
+      .ellipse(corridorCenterX, WORLD.floorY + 10, CHAMBER02_EXIT_CORRIDOR.width, 42, 0x050404, 0.24)
+      .setDepth(-9.6);
+
+    if (this.textures.exists(ASSET_KEYS.chamber02ForegroundHornArch)) {
+      this.exitCorridorArch = this.add
+        .image(CHAMBER02_EXIT_CORRIDOR.startX + 176, WORLD.floorY - 116, ASSET_KEYS.chamber02ForegroundHornArch)
+        .setDisplaySize(196, 258)
+        .setTint(0xc7b39b)
+        .setAlpha(0.32)
+        .setDepth(-5.2)
+        .setVisible(false);
+
+      this.exitThresholdAura = this.add
+        .image(CHAMBER02_EXIT_CORRIDOR.thresholdX - 24, WORLD.floorY - 118, ASSET_KEYS.chamber02ForegroundHornArch)
+        .setDisplaySize(220, 286)
+        .setTint(0xd7c4ad)
+        .setAlpha(0.38)
+        .setDepth(-5.05)
+        .setFlipX(true)
+        .setVisible(false);
+    } else {
+      this.exitCorridorArch = this.add
+        .rectangle(
+          CHAMBER02_EXIT_CORRIDOR.startX + 140,
+          WORLD.floorY - 126,
+          70,
+          244,
+          COLORS.architecture,
+          0.7
+        )
+        .setStrokeStyle(2, COLORS.bone, 0.3)
+        .setDepth(-5.2)
+        .setVisible(false);
+
+      this.exitThresholdAura = this.add
+        .ellipse(CHAMBER02_EXIT_CORRIDOR.thresholdX, CHAMBER02_EXIT_CORRIDOR.thresholdY + 28, 132, 204, COLORS.sickly, 0.05)
+        .setDepth(-5.05)
+        .setVisible(false);
+    }
 
     this.exitThresholdZone = this.add
       .zone(
@@ -404,36 +447,6 @@ export class Chamber02Scene extends Phaser.Scene {
       )
       .setOrigin(0.5);
     this.physics.add.existing(this.exitThresholdZone, true);
-
-    this.exitThresholdPromptText = this.add
-      .text(CHAMBER02_EXIT_CORRIDOR.thresholdX, CHAMBER02_EXIT_CORRIDOR.thresholdLabelY, CHAMBER02_RESTORATION_END_STATE.thresholdLabel, {
-        fontFamily: 'monospace',
-        fontSize: '13px',
-        color: '#d6c9b8',
-        align: 'center',
-        stroke: '#140f0e',
-        strokeThickness: 4
-      })
-      .setOrigin(0.5)
-      .setDepth(-4.9)
-      .setVisible(false);
-    this.exitThresholdDescriptionText = this.add
-      .text(
-        CHAMBER02_EXIT_CORRIDOR.thresholdX,
-        CHAMBER02_EXIT_CORRIDOR.thresholdLabelY + 42,
-        CHAMBER02_RESTORATION_END_STATE.thresholdDescription,
-        {
-          fontFamily: 'monospace',
-          fontSize: '11px',
-          color: '#9f9387',
-          align: 'center',
-          stroke: '#140f0e',
-          strokeThickness: 3
-        }
-      )
-      .setOrigin(0.5)
-      .setDepth(-4.88)
-      .setVisible(false);
   }
 
   createTollKeeperEncounter() {
@@ -711,18 +724,12 @@ export class Chamber02Scene extends Phaser.Scene {
     this.currentExitThresholdZone = null;
 
     if (!this.exitGateUnlocked || !this.exitThresholdZone || this.isHandingOffToChamber03) {
-      this.exitThresholdPromptText?.setVisible(false);
-      this.exitThresholdDescriptionText?.setVisible(false);
       return;
     }
 
     this.physics.overlap(this.player.sprite, this.exitThresholdZone, () => {
       this.currentExitThresholdZone = this.exitThresholdZone;
     });
-
-    const isAtRestoredEndpoint = Boolean(this.currentExitThresholdZone);
-    this.exitThresholdPromptText?.setVisible(isAtRestoredEndpoint);
-    this.exitThresholdDescriptionText?.setVisible(isAtRestoredEndpoint);
   }
 
   tryBeginExitGateTransition() {
@@ -756,7 +763,6 @@ export class Chamber02Scene extends Phaser.Scene {
     this.currentLoreZone = null;
 
     this.exitThresholdZone?.disableBody?.(true, true);
-    this.exitThresholdPromptText?.setVisible(false);
     this.exitThresholdAura?.setVisible(false);
     this.exitGatePromptText?.setVisible(false);
     this.exitGateReadyAura?.setVisible(false);
@@ -905,8 +911,6 @@ export class Chamber02Scene extends Phaser.Scene {
   cleanupSceneUi() {
     this.restartText?.setVisible(false);
     this.exitGatePromptText?.setVisible(false);
-    this.exitThresholdPromptText?.setVisible(false);
-    this.exitThresholdDescriptionText?.setVisible(false);
     this.mobileControls?.setMode('init');
     this.hud?.setVisible(false);
   }
