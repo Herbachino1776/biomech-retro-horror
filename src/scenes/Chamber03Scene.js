@@ -23,7 +23,11 @@ const CHAMBER03_BOOTSTRAP = {
   floorTint: 0xd2c2ac,
   floorAlpha: 0.82,
   landmarkX: 1680,
-  landmarkY: 286
+  landmarkY: 286,
+  proofBackgroundTint: 0x2d0f12,
+  proofBackgroundAlpha: 1,
+  proofFloorTint: 0xc89b62,
+  proofFloorAlpha: 0.94
 };
 
 export class Chamber03Scene extends Phaser.Scene {
@@ -36,62 +40,176 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   create() {
-    this.physics.world.gravity.y = WORLD.gravityY;
-    this.cameras.main.setBounds(0, 0, CHAMBER03_WORLD.width, CHAMBER03_WORLD.height);
-    this.physics.world.setBounds(0, 0, CHAMBER03_WORLD.width, CHAMBER03_WORLD.height);
-    this.cameras.main.setBackgroundColor('#090706');
-    this.cameras.main.fadeIn(450, 0, 0, 0);
-
+    this.bootError = null;
+    this.player = null;
+    this.hud = null;
+    this.mobileControls = null;
+    this.uiCamera = null;
     this.platforms = this.physics.add.staticGroup();
-    this.renderBackdrop();
-    this.createPlatforms();
 
-    this.player = new Player(this, CHAMBER03_BOOTSTRAP.spawnX, CHAMBER03_BOOTSTRAP.spawnY, PLAYER);
-    this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
-    this.physics.add.collider(this.player.sprite, this.platforms);
+    this.renderBootProof();
+    this.logBootPhase('create:start', this.transitionContext);
 
-    this.hud = new HudOverlay(this);
-    this.mobileControls = new MobileControls(this);
-    this.setupMobileUiCamera();
+    try {
+      this.runBootPhase('phase 1: world/camera bounds', () => {
+        this.physics.world.gravity.y = WORLD.gravityY;
+        this.cameras.main.setBounds(0, 0, CHAMBER03_WORLD.width, CHAMBER03_WORLD.height);
+        this.physics.world.setBounds(0, 0, CHAMBER03_WORLD.width, CHAMBER03_WORLD.height);
+        this.cameras.main.setBackgroundColor('#090706');
+        this.cameras.main.fadeIn(450, 0, 0, 0);
+      });
 
-    this.restartText = this.add
-      .text(this.scale.width / 2, 90, '', {
-        fontFamily: 'monospace',
-        fontSize: '22px',
-        color: '#d2c2ac',
-        align: 'center'
-      })
-      .setScrollFactor(0)
-      .setDepth(35)
+      this.runBootPhase('phase 2: backdrop/floor', () => {
+        this.renderBackdrop();
+        this.createPlatforms();
+      });
+
+      this.runBootPhase('phase 3: player spawn + collider', () => {
+        this.player = new Player(this, CHAMBER03_BOOTSTRAP.spawnX, CHAMBER03_BOOTSTRAP.spawnY, PLAYER);
+        this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
+        this.physics.add.collider(this.player.sprite, this.platforms);
+      });
+
+      this.runBootPhase('phase 4: HUD/mobile controls', () => {
+        this.hud = new HudOverlay(this);
+        this.mobileControls = new MobileControls(this);
+        this.setupMobileUiCamera();
+      });
+
+      this.runBootPhase('phase 5: camera follow/layout', () => {
+        this.restartText = this.add
+          .text(this.scale.width / 2, 90, '', {
+            fontFamily: 'monospace',
+            fontSize: '22px',
+            color: '#d2c2ac',
+            align: 'center'
+          })
+          .setScrollFactor(0)
+          .setDepth(35)
+          .setOrigin(0.5)
+          .setVisible(false);
+
+        this.chamberLabel = this.add
+          .text(this.scale.width / 2, 44, 'CHAMBER 03 // OSSUARY CHOIR HALL // BOOTSTRAP', {
+            fontFamily: 'monospace',
+            fontSize: '13px',
+            color: '#8f7d72',
+            align: 'center'
+          })
+          .setScrollFactor(0)
+          .setDepth(30)
+          .setOrigin(0.5);
+
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+        this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+
+        this.applyResponsiveLayout();
+        this.cameras.main.centerOn(CHAMBER03_BOOTSTRAP.spawnX + 120, WORLD.floorY - 84);
+        this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
+
+        this.scale.on('resize', this.applyResponsiveLayout, this);
+        this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
+          this.scale.off('resize', this.applyResponsiveLayout, this);
+          this.cleanupSceneUi();
+        });
+
+        this.hud.update(this.player.health, PLAYER.maxHealth);
+      });
+
+      this.hideBootFailureText();
+      this.logBootPhase('create:complete');
+    } catch (error) {
+      this.handleBootFailure(error);
+    }
+  }
+
+  renderBootProof() {
+    this.bootProofBackground = this.add
+      .rectangle(
+        CHAMBER03_WORLD.width / 2,
+        CHAMBER03_WORLD.height / 2,
+        CHAMBER03_WORLD.width,
+        CHAMBER03_WORLD.height,
+        CHAMBER03_BOOTSTRAP.proofBackgroundTint,
+        CHAMBER03_BOOTSTRAP.proofBackgroundAlpha
+      )
       .setOrigin(0.5)
-      .setVisible(false);
+      .setDepth(-100);
 
-    this.chamberLabel = this.add
-      .text(this.scale.width / 2, 44, 'CHAMBER 03 // OSSUARY CHOIR HALL // BOOTSTRAP', {
+    this.bootProofFloor = this.add
+      .rectangle(
+        CHAMBER03_WORLD.width / 2,
+        WORLD.floorY + 14,
+        CHAMBER03_WORLD.width,
+        112,
+        CHAMBER03_BOOTSTRAP.proofFloorTint,
+        CHAMBER03_BOOTSTRAP.proofFloorAlpha
+      )
+      .setDepth(-99);
+
+    this.bootProofText = this.add
+      .text(20, 20, 'CHAMBER 03 BOOT OK', {
         fontFamily: 'monospace',
-        fontSize: '13px',
-        color: '#8f7d72',
-        align: 'center'
+        fontSize: '28px',
+        color: '#fff1bf',
+        backgroundColor: '#3a1416',
+        padding: { x: 14, y: 8 }
       })
       .setScrollFactor(0)
-      .setDepth(30)
-      .setOrigin(0.5);
+      .setDepth(100)
+      .setOrigin(0, 0);
+  }
 
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
-    this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+  runBootPhase(label, callback) {
+    this.logBootPhase(label + ':start');
+    callback();
+    this.logBootPhase(label + ':ok');
+  }
 
-    this.applyResponsiveLayout();
-    this.cameras.main.centerOn(CHAMBER03_BOOTSTRAP.spawnX + 120, WORLD.floorY - 84);
-    this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
+  logBootPhase(label, payload) {
+    if (payload !== undefined) {
+      console.log(`[Chamber03Scene] ${label}`, payload);
+      return;
+    }
 
-    this.scale.on('resize', this.applyResponsiveLayout, this);
-    this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.scale.off('resize', this.applyResponsiveLayout, this);
-      this.cleanupSceneUi();
-    });
+    console.log(`[Chamber03Scene] ${label}`);
+  }
 
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+  handleBootFailure(error) {
+    this.bootError = error;
+    console.error('[Chamber03Scene] boot failure', error);
+    this.showBootFailureText(error);
+    this.mobileControls?.setMode('dialogue');
+    this.hud?.setVisible(false);
+  }
+
+  showBootFailureText(error) {
+    const errorMessage = error instanceof Error ? error.message : String(error ?? 'Unknown Chamber 03 boot error');
+    const failureCopy = `CHAMBER 03 BOOT FAILURE\n${errorMessage}`;
+
+    if (!this.bootFailureText) {
+      this.bootFailureText = this.add
+        .text(this.scale.width / 2, this.scale.height / 2, failureCopy, {
+          fontFamily: 'monospace',
+          fontSize: '20px',
+          color: '#ffe4d2',
+          backgroundColor: '#2a0608',
+          align: 'center',
+          wordWrap: { width: Math.max(320, this.scale.width - 60) },
+          padding: { x: 18, y: 12 }
+        })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(120);
+      return;
+    }
+
+    this.bootFailureText.setText(failureCopy).setVisible(true);
+  }
+
+  hideBootFailureText() {
+    this.bootFailureText?.setVisible(false);
   }
 
   renderBackdrop() {
@@ -183,10 +301,24 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   update(time) {
-    const mobileInput = this.mobileControls.getInputState();
+    if (this.bootError) {
+      return;
+    }
+
+    const mobileInput = this.mobileControls?.getInputState?.() ?? {
+      left: false,
+      right: false,
+      jumpPressed: false,
+      attackPressed: false,
+      interactPressed: false
+    };
+
+    if (!this.player || !this.cursors || !this.keyAttack || !this.keyRestart || !this.restartText) {
+      return;
+    }
 
     if (this.player.isDead) {
-      this.mobileControls.setMode('dead');
+      this.mobileControls?.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
       if (Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) {
         this.cleanupSceneUi();
@@ -196,7 +328,7 @@ export class Chamber03Scene extends Phaser.Scene {
     }
 
     this.restartText.setVisible(false);
-    this.mobileControls.setMode('gameplay');
+    this.mobileControls?.setMode('gameplay');
 
     this.player.update(time, {
       left: this.cursors.left.isDown || mobileInput.left,
@@ -208,11 +340,11 @@ export class Chamber03Scene extends Phaser.Scene {
       attackPressed: Phaser.Input.Keyboard.JustDown(this.keyAttack) || mobileInput.attackPressed
     });
 
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud?.update(this.player.health, PLAYER.maxHealth);
   }
 
   setupMobileUiCamera() {
-    if (!this.mobileControls.enabled) {
+    if (!this.mobileControls?.enabled) {
       return;
     }
 
@@ -255,6 +387,7 @@ export class Chamber03Scene extends Phaser.Scene {
   cleanupSceneUi() {
     this.restartText?.setVisible(false);
     this.chamberLabel?.setVisible(false);
+    this.bootFailureText?.setVisible(false);
     this.mobileControls?.setMode('init');
     this.hud?.setVisible(false);
   }
@@ -263,13 +396,15 @@ export class Chamber03Scene extends Phaser.Scene {
     const camera = this.cameras.main;
     const width = this.scale.width;
     const height = this.scale.height;
-    const isPortraitMobile = this.mobileControls.enabled && height >= width;
+    const isPortraitMobile = this.mobileControls?.enabled && height >= width;
 
     if (this.uiCamera) {
       this.uiCamera.setViewport(0, 0, width, height);
     }
 
     this.chamberLabel?.setPosition(width / 2, 44);
+    this.bootProofText?.setPosition(20, 20);
+    this.bootFailureText?.setPosition(width / 2, height / 2).setWordWrapWidth(Math.max(320, width - 60));
 
     if (isPortraitMobile) {
       const safeAreaBottom = this.mobileControls.getSafeAreaInsetPx('bottom');
@@ -287,7 +422,7 @@ export class Chamber03Scene extends Phaser.Scene {
       camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
       camera.setFollowOffset(-120, PORTRAIT_LAYOUT.portraitFollowOffsetY);
       this.mobileControls.setReservedBottomPx(height - worldBandHeight);
-      this.restartText.setPosition(
+      this.restartText?.setPosition(
         width / 2,
         Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY)
       );
@@ -297,7 +432,7 @@ export class Chamber03Scene extends Phaser.Scene {
     camera.setViewport(0, 0, width, height);
     camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
     camera.setFollowOffset(-140, PORTRAIT_LAYOUT.desktopFollowOffsetY);
-    this.mobileControls.setReservedBottomPx(0);
-    this.restartText.setPosition(width / 2, 90);
+    this.mobileControls?.setReservedBottomPx(0);
+    this.restartText?.setPosition(width / 2, 90);
   }
 }
