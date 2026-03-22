@@ -400,6 +400,176 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       .setVisible(false);
   }
 
+  createUiAndInput() {
+    this.hud = new HudOverlay(this);
+    this.mobileControls = new MobileControls(this);
+    this.setupMobileUiCamera();
+
+    this.restartText = this.add
+      .text(this.scale.width / 2, 90, '', {
+        fontFamily: 'monospace',
+        fontSize: '22px',
+        color: '#d2c2ac',
+        align: 'center'
+      })
+      .setScrollFactor(0)
+      .setDepth(35)
+      .setOrigin(0.5)
+      .setVisible(false);
+
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+    this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+
+    this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.scale.off('resize', this.applyResponsiveLayout, this);
+      this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+    });
+  }
+
+  configureCameraAndLayout() {
+    this.cameras.main.startFollow(
+      this.player.sprite,
+      true,
+      CHAMBER03_BOSS_ARENA.cameraLerp.x,
+      CHAMBER03_BOSS_ARENA.cameraLerp.y,
+      CHAMBER03_BOSS_ARENA.desktopFollowOffsetX,
+      0
+    );
+    this.scale.on('resize', this.applyResponsiveLayout, this);
+    this.applyResponsiveLayout();
+    this.mobileControls.setMode('gameplay');
+    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.updateBossHud(this.time.now);
+  }
+
+  registerLoreCutsceneReturn() {
+    this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+  }
+
+  beginPreBossOmenBeat() {
+    if (this.hasResolvedOmenBeat || this.isOmenBeatActive) {
+      return;
+    }
+
+    const omenCutscene = this.scene.get('LoreCutsceneScene');
+    const hasOmenCutscene = Boolean(omenCutscene) && omenCutscene.sys.settings.status !== Phaser.Scenes.STOPPED;
+
+    this.isOmenBeatActive = true;
+    this.mobileControls.setMode('init');
+    this.player.body.setVelocity(0, 0);
+    this.player.body.setEnable(false);
+    this.player.attackHitbox?.body?.setEnable(false);
+
+    if (!hasOmenCutscene) {
+      this.resolvePreBossOmenBeat({ usedFallback: true });
+      return;
+    }
+
+    this.scene.pause();
+    this.scene.launch('LoreCutsceneScene', {
+      cutsceneId: CHAMBER03_BOSS_OMEN_CUTSCENE_ID,
+      returnSceneKey: this.scene.key
+    });
+  }
+
+  handleLoreCutsceneComplete({ cutsceneId } = {}) {
+    if (cutsceneId !== CHAMBER03_BOSS_OMEN_CUTSCENE_ID || this.hasResolvedOmenBeat) {
+      return;
+    }
+
+    this.resolvePreBossOmenBeat({ usedFallback: false });
+  }
+
+  resolvePreBossOmenBeat({ usedFallback = false } = {}) {
+    if (this.hasResolvedOmenBeat) {
+      return;
+    }
+
+    this.hasResolvedOmenBeat = true;
+    this.isOmenBeatActive = false;
+    this.player.body.setEnable(true);
+    this.activateBoss({ usedFallback });
+  }
+
+  activateBoss({ usedFallback = false } = {}) {
+    if (this.hasActivatedBoss) {
+      return;
+    }
+
+    this.hasActivatedBoss = true;
+    this.bossCombat.state = 'idle';
+    this.bossCombat.attackLabel = '';
+    this.bossBody.enable = true;
+    this.bossBody.setVelocity(0, 0);
+    this.bossSprite.setVisible(true).setAlpha(1);
+    this.bossFallbackLabel?.setVisible(true).setAlpha(0.8);
+    this.bossArrivalShadow?.setAlpha(0.22);
+    this.bossArrivalAura?.setAlpha(usedFallback ? 0.16 : 0.12);
+    this.bossArrivalHalo?.setAlpha(usedFallback ? 0.1 : 0.08);
+    this.bossStatusPrompt
+      ?.setText(usedFallback ? 'THE PRECENTOR ARRIVES WITHOUT OMEN' : 'THE PRECENTOR DESCENDS')
+      .setPosition(this.scale.width / 2, this.getBossPromptY())
+      .setVisible(true);
+
+    this.time.delayedCall(CHAMBER03_BOSS_ARENA.bossRevealPromptDuration, () => {
+      this.bossStatusPrompt?.setVisible(false);
+    });
+
+    this.tweens.add({
+      targets: [this.bossSprite, this.bossFallbackLabel].filter(Boolean),
+      alpha: { from: 0, to: 1 },
+      duration: 520,
+      ease: 'Sine.out'
+    });
+
+    this.mobileControls.setMode('gameplay');
+    this.updateBossHud(this.time.now);
+  }
+
+  update(time) {
+    const mobileInput = this.mobileControls.getInputState();
+
+    if (this.player.isDead) {
+      this.mobileControls.setMode('dead');
+      this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
+
+      if ((Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) && !this.isRestartingRun) {
+        this.isRestartingRun = true;
+        restartRunFromDeath(this);
+      }
+
+      this.updateBossHud(time);
+      return;
+    }
+
+    if (this.isOmenBeatActive) {
+      this.restartText.setVisible(false);
+      this.mobileControls.setMode('init');
+      this.player.body.setVelocity(0, 0);
+      this.updateBossHud(time);
+      return;
+    }
+
+    this.restartText.setVisible(false);
+    this.mobileControls.setMode('gameplay');
+
+    const input = {
+      left: this.cursors.left.isDown || mobileInput.left,
+      right: this.cursors.right.isDown || mobileInput.right,
+      jumpPressed:
+        Phaser.Input.Keyboard.JustDown(this.cursors.up) ||
+        Phaser.Input.Keyboard.JustDown(this.cursors.space) ||
+        mobileInput.jumpPressed,
+      attackPressed: Phaser.Input.Keyboard.JustDown(this.keyAttack) || mobileInput.attackPressed
+    };
+
+    this.player.update(time, input);
+    this.updateBossPresence(time);
+    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.updateBossHud(time);
+  }
+
   getBossPhaseConfig() {
     return this.bossCombat?.phase === 2 ? CHAMBER03_BOSS_COMBAT.phaseTwo : CHAMBER03_BOSS_COMBAT.phaseOne;
   }
