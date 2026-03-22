@@ -18,6 +18,13 @@ export class SectorCompleteScene extends Phaser.Scene {
   }
 
   create() {
+    this.sound?.getAll?.().forEach((sound) => {
+      if (sound?.key === ASSET_KEYS.ambientChamber01Loop01 || sound?.key === ASSET_KEYS.ambientChamber02Loop01) {
+        sound.stop();
+        sound.destroy();
+      }
+    });
+
     const width = this.scale.width;
     const height = this.scale.height;
     const centerX = width / 2;

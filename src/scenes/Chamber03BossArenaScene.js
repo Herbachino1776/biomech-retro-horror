@@ -348,6 +348,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
   createAudio() {
     this.audioDirector = new AudioDirector(this);
+    // Boss arena also uses the current intentional fallback until a dedicated arena loop is authored.
+    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.1 });
   }
 
   createPlayerAndColliders() {
@@ -496,6 +498,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+      this.audioDirector?.shutdown();
     });
   }
 
@@ -1031,6 +1034,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.progressionGatePrompt?.setVisible(false);
     this.player.body.setVelocity(0, 0);
     this.player.body.setEnable(false);
+    this.audioDirector?.stopAmbientLoop({ fadeOut: false });
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.start('SectorCompleteScene', {

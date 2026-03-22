@@ -7,6 +7,7 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
+import { AudioDirector } from '../audio/AudioDirector.js';
 
 const CHAMBER03_BOOTSTRAP = {
   worldWidth: 4800,
@@ -323,6 +324,7 @@ export class Chamber03Scene extends Phaser.Scene {
 
   create() {
     this.createWorldBounds();
+    this.createAudio();
     this.createBackgroundAndFloor();
     this.createPlayerAndColliders();
     this.createEncounterPockets();
@@ -338,6 +340,12 @@ export class Chamber03Scene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#080707');
 
     this.platforms = this.physics.add.staticGroup();
+  }
+
+  createAudio() {
+    this.audioDirector = new AudioDirector(this);
+    // Chamber 03 does not yet ship with a dedicated ambient asset, so route an intentional Chamber 02 fallback.
+    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.12 });
   }
 
   createBackgroundAndFloor() {
@@ -767,6 +775,7 @@ export class Chamber03Scene extends Phaser.Scene {
 
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
+      this.audioDirector?.shutdown();
     });
   }
 
@@ -962,6 +971,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.player.body.setVelocity(0, 0);
     this.player.body.setEnable(false);
     this.player.attackHitbox?.body?.setEnable(false);
+    this.audioDirector?.stopAmbientLoop({ fadeOut: false });
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.start('Chamber03BossArenaScene', {

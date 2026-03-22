@@ -35,7 +35,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.createPlatforms();
 
     this.audioDirector = new AudioDirector(this);
-    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.18 });
+    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.252 });
 
     this.player = new Player(this, PLAYER.startX, PLAYER.startY, PLAYER);
     this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
@@ -569,7 +569,7 @@ export class Chamber01Scene extends Phaser.Scene {
   resumeFromLore() {
     this.isLoreTransitionActive = false;
     this.mobileControls.setMode('gameplay');
-    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.18 });
+    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.252 });
     this.cameras.main.fadeIn(500, 0, 0, 0);
   }
 
@@ -779,7 +779,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.enemy.body.setVelocity(0, 0);
     this.miniboss.body.setVelocity(0, 0);
 
-    this.audioDirector?.stopAmbientLoop();
+    this.audioDirector?.stopAmbientLoop({ fadeOut: false });
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.start('Chamber02Scene', {
