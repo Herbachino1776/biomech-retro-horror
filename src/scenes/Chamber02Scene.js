@@ -592,6 +592,10 @@ export class Chamber02Scene extends Phaser.Scene {
       return;
     }
 
+    console.log(
+      `[Chamber02Scene] Exit gate transition requested. disableFade=${CHAMBER02_EXIT_GATE_DISABLE_FADE_FOR_DIAGNOSTICS}`
+    );
+
     this.hasTriggeredExitGateLore = true;
     this.isExitGateTransitionActive = true;
     this.exitGateReadyAura?.setVisible(false);
