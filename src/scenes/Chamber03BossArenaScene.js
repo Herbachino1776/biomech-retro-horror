@@ -6,6 +6,7 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { COLORS, PLAYER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
+import { AudioDirector } from '../audio/AudioDirector.js';
 
 const CHAMBER03_BOSS_ARENA = {
   worldWidth: 1920,
@@ -43,6 +44,64 @@ const CHAMBER03_BOSS_ARENA = {
 
 const CHAMBER03_BOSS_OMEN_CUTSCENE_ID = 'chamber03-precentor-threshold';
 
+const CHAMBER03_BOSS_COMBAT = {
+  name: 'THE PRECENTOR OF MARROW',
+  subtitle: 'Choir Hall Adjudicator',
+  maxHealth: 24,
+  phaseTwoThreshold: 10,
+  approachRange: 248,
+  idealRange: 172,
+  closeRetreatRange: 112,
+  phaseOne: {
+    driftSpeed: 52,
+    retreatSpeed: 68,
+    lungeTelegraphMs: 760,
+    lungeSpeed: 314,
+    lungeLiftVelocity: -126,
+    lungeDurationMs: 330,
+    lungeRecoveryMs: 720,
+    lungeCooldownMs: 2150,
+    pulseTelegraphMs: 880,
+    pulseRecoveryMs: 620,
+    pulseCooldownMs: 2650,
+    pulseSpeed: 236,
+    pulseDamage: 1,
+    contactDamage: 1,
+    contactDamageCooldownMs: 980
+  },
+  phaseTwo: {
+    driftSpeed: 76,
+    retreatSpeed: 92,
+    lungeTelegraphMs: 520,
+    lungeSpeed: 386,
+    lungeLiftVelocity: -168,
+    lungeDurationMs: 380,
+    lungeRecoveryMs: 440,
+    lungeCooldownMs: 1460,
+    pulseTelegraphMs: 620,
+    pulseRecoveryMs: 360,
+    pulseCooldownMs: 1980,
+    pulseSpeed: 274,
+    pulseDamage: 1,
+    contactDamage: 2,
+    contactDamageCooldownMs: 860
+  },
+  body: { width: 112, height: 230, offsetX: 126, offsetY: 150 },
+  hurtFlashMs: 220,
+  hitPulseMs: 260,
+  hurtRecoverMs: 180,
+  hurtRecoilVelocityX: 108,
+  hurtRecoilVelocityY: -76,
+  projectileIntervalMs: 170,
+  projectileWidth: 60,
+  projectileHeight: 28,
+  projectileLifetimeMs: 2100,
+  projectileSpawnOffsetX: 118,
+  projectileSpawnOffsetY: 26,
+  projectilePhaseTwoSpreadY: 22,
+  arenaPaddingX: 164
+};
+
 export class Chamber03BossArenaScene extends Phaser.Scene {
   constructor() {
     super('Chamber03BossArenaScene');
@@ -54,11 +113,13 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.isOmenBeatActive = false;
     this.hasResolvedOmenBeat = false;
     this.hasActivatedBoss = false;
+    this.bossAttackHitId = -1;
   }
 
   create() {
     this.createWorldBounds();
     this.createArenaEnvironment();
+    this.createAudio();
     this.createPlayerAndColliders();
     this.createBossPresentation();
     this.createUiAndInput();
@@ -240,6 +301,10 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       .setDepth(-5);
   }
 
+  createAudio() {
+    this.audioDirector = new AudioDirector(this);
+  }
+
   createPlayerAndColliders() {
     this.player = new Player(this, CHAMBER03_BOSS_ARENA.spawnX, CHAMBER03_BOSS_ARENA.spawnY, PLAYER);
     this.applyGameplayReadabilitySupport(this.player.sprite, CHAMBER03_BOSS_ARENA.playerHalo);
@@ -250,6 +315,30 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     const bossX = CHAMBER03_BOSS_ARENA.bossAnchorX;
     const bossY = CHAMBER03_BOSS_ARENA.bossAnchorY;
 
+    this.bossCombat = {
+      health: CHAMBER03_BOSS_COMBAT.maxHealth,
+      maxHealth: CHAMBER03_BOSS_COMBAT.maxHealth,
+      phase: 1,
+      state: 'dormant',
+      facing: -1,
+      lastAttackAt: -Infinity,
+      lastLungeAt: -Infinity,
+      lastPulseAt: -Infinity,
+      stateUntil: -Infinity,
+      telegraphStartedAt: -Infinity,
+      telegraphDurationMs: 0,
+      hitPulseUntil: -Infinity,
+      hurtUntil: -Infinity,
+      lastDamageFlashTime: -Infinity,
+      lastContactDamageTime: -Infinity,
+      projectileTimer: null,
+      activeProjectiles: [],
+      defeated: false,
+      attackPatternIndex: 0,
+      attackLabel: '',
+      phaseShiftAnnounced: false
+    };
+
     this.bossArrivalShadow = this.add.ellipse(bossX, WORLD.floorY + 8, 240, 38, 0x050404, 0).setDepth(-4.2);
     this.bossArrivalAura = this.add.ellipse(bossX, bossY + 18, 228, 312, COLORS.sickly, 0).setDepth(-4.1);
     this.bossArrivalHalo = this.add.ellipse(bossX, bossY - 16, 170, 244, 0xdcccae, 0).setDepth(-4.05);
@@ -258,15 +347,16 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       this.bossSprite = this.add
         .image(bossX, bossY, ASSET_KEYS.chamber03BossPrecentor)
         .setDisplaySize(CHAMBER03_BOSS_ARENA.bossWidth, CHAMBER03_BOSS_ARENA.bossHeight)
+        .setOrigin(0.56, 0.99)
         .setTint(0xd2c1aa)
         .setAlpha(0)
-        .setDepth(-3.9)
+        .setDepth(6.2)
         .setVisible(false);
     } else {
       this.bossSprite = this.add
         .ellipse(bossX, bossY + 6, 212, 312, 0x4d3c34, 0)
         .setStrokeStyle(3, 0xd7c8b2, 0)
-        .setDepth(-3.9)
+        .setDepth(6.2)
         .setVisible(false);
 
       this.bossFallbackLabel = this.add
@@ -277,9 +367,23 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
           align: 'center'
         })
         .setOrigin(0.5)
-        .setDepth(-3.88)
+        .setDepth(6.24)
         .setVisible(false);
     }
+
+    this.physics.add.existing(this.bossSprite);
+    this.bossBody = this.bossSprite.body;
+    this.bossBody.setCollideWorldBounds(true);
+    this.bossBody.setAllowGravity(true);
+    const scaleX = Math.abs(this.bossSprite.scaleX) || 1;
+    const scaleY = Math.abs(this.bossSprite.scaleY) || 1;
+    this.bossBody.setSize(CHAMBER03_BOSS_COMBAT.body.width / scaleX, CHAMBER03_BOSS_COMBAT.body.height / scaleY);
+    this.bossBody.setOffset(CHAMBER03_BOSS_COMBAT.body.offsetX / scaleX, CHAMBER03_BOSS_COMBAT.body.offsetY / scaleY);
+    this.bossBody.enable = false;
+
+    this.physics.add.collider(this.bossSprite, this.platforms);
+    this.physics.add.overlap(this.player.attackHitbox, this.bossSprite, this.handlePlayerHitBoss, null, this);
+    this.physics.add.overlap(this.player.sprite, this.bossSprite, this.handleBossContactPlayer, null, this);
 
     this.bossStatusPrompt = this.add
       .text(bossX, bossY + CHAMBER03_BOSS_ARENA.bossPromptOffsetY, '', {
@@ -291,220 +395,437 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         strokeThickness: 4
       })
       .setOrigin(0.5)
-      .setDepth(12)
-      .setVisible(false);
-  }
-
-  createUiAndInput() {
-    this.hud = new HudOverlay(this);
-    this.mobileControls = new MobileControls(this);
-    this.setupMobileUiCamera();
-
-    this.restartText = this.add
-      .text(this.scale.width / 2, 90, '', {
-        fontFamily: 'monospace',
-        fontSize: '22px',
-        color: '#d2c2ac',
-        align: 'center'
-      })
       .setScrollFactor(0)
-      .setDepth(35)
-      .setOrigin(0.5)
+      .setDepth(36)
       .setVisible(false);
-
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
-    this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-
-    this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.scale.off('resize', this.applyResponsiveLayout, this);
-      this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
-    });
   }
 
-  configureCameraAndLayout() {
-    this.cameras.main.startFollow(
-      this.player.sprite,
-      true,
-      CHAMBER03_BOSS_ARENA.cameraLerp.x,
-      CHAMBER03_BOSS_ARENA.cameraLerp.y,
-      CHAMBER03_BOSS_ARENA.desktopFollowOffsetX,
-      0
+  getBossPhaseConfig() {
+    return this.bossCombat?.phase === 2 ? CHAMBER03_BOSS_COMBAT.phaseTwo : CHAMBER03_BOSS_COMBAT.phaseOne;
+  }
+
+  getBossTelegraphProgress(time = this.time.now) {
+    if (!this.bossCombat || !this.bossCombat.telegraphDurationMs || !this.isBossTelegraphing()) {
+      return 0;
+    }
+
+    return Phaser.Math.Clamp(
+      (time - this.bossCombat.telegraphStartedAt) / this.bossCombat.telegraphDurationMs,
+      0,
+      1
     );
-    this.scale.on('resize', this.applyResponsiveLayout, this);
-    this.applyResponsiveLayout();
-    this.mobileControls.setMode('gameplay');
-    this.hud.update(this.player.health, PLAYER.maxHealth);
   }
 
-  registerLoreCutsceneReturn() {
-    this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+  isBossTelegraphing() {
+    return this.bossCombat && (this.bossCombat.state === 'telegraph-lunge' || this.bossCombat.state === 'telegraph-pulse');
   }
 
-  update(time) {
-    const mobileInput = this.mobileControls.getInputState();
+  updateBossHud(time) {
+    this.hud.setBossBarState({
+      visible: this.hasActivatedBoss && !this.bossCombat?.defeated,
+      name: CHAMBER03_BOSS_COMBAT.name,
+      subtitle: this.bossCombat?.phase === 2 ? 'Ruptured Verdict' : CHAMBER03_BOSS_COMBAT.subtitle,
+      current: this.bossCombat?.health ?? 0,
+      max: this.bossCombat?.maxHealth ?? CHAMBER03_BOSS_COMBAT.maxHealth,
+      telegraph: this.getBossTelegraphProgress(time),
+      wounded: time < (this.bossCombat?.lastDamageFlashTime ?? -Infinity) + CHAMBER03_BOSS_COMBAT.hurtFlashMs
+    });
+  }
 
-    if (this.player.isDead) {
-      this.mobileControls.setMode('dead');
-      this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
-
-      if ((Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) && !this.isRestartingRun) {
-        this.isRestartingRun = true;
-        restartRunFromDeath(this);
-      }
+  handlePlayerHitBoss(_hitbox, bossSprite) {
+    if (!this.player.attackActive || !this.hasActivatedBoss || this.bossCombat?.defeated || bossSprite !== this.bossSprite) {
       return;
     }
 
-    if (this.isOmenBeatActive) {
-      this.mobileControls.setMode('dialogue');
-      this.player.body.setVelocity(0, 0);
+    if (this.bossAttackHitId === this.player.attackId) {
       return;
     }
 
-    this.restartText.setVisible(false);
-    this.mobileControls.setMode('gameplay');
-
-    this.player.update(time, {
-      left: this.cursors.left.isDown || mobileInput.left,
-      right: this.cursors.right.isDown || mobileInput.right,
-      jumpPressed:
-        Phaser.Input.Keyboard.JustDown(this.cursors.up) ||
-        Phaser.Input.Keyboard.JustDown(this.cursors.space) ||
-        mobileInput.jumpPressed,
-      attackPressed: Phaser.Input.Keyboard.JustDown(this.keyAttack) || mobileInput.attackPressed
-    });
-
-    this.updateBossPresence(time);
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.bossAttackHitId = this.player.attackId;
+    this.damageBoss(1, this.time.now, Math.sign(this.bossSprite.x - this.player.sprite.x) || this.player.facing);
+    this.audioDirector?.playPlayerHit();
   }
 
-  beginPreBossOmenBeat() {
-    if (this.hasResolvedOmenBeat || this.isOmenBeatActive) {
-      return;
+  damageBoss(amount, time, knockDirection = 1) {
+    if (!this.bossCombat || this.bossCombat.defeated) {
+      return false;
     }
 
-    this.isOmenBeatActive = true;
-    this.mobileControls.setMode('dialogue');
-    this.player.body.setVelocity(0, 0);
-    this.player.body.setEnable(false);
-    this.player.attackHitbox?.body?.setEnable(false);
+    this.bossCombat.health = Math.max(0, this.bossCombat.health - amount);
+    this.bossCombat.lastDamageFlashTime = time;
+    this.bossCombat.hitPulseUntil = time + CHAMBER03_BOSS_COMBAT.hitPulseMs;
+    this.bossCombat.hurtUntil = time + CHAMBER03_BOSS_COMBAT.hurtRecoverMs;
+    this.bossCombat.state = 'hurt';
+    this.bossCombat.stateUntil = this.bossCombat.hurtUntil;
+    this.bossCombat.attackLabel = 'RECOIL';
+    this.cancelBossProjectileTimer();
+    this.bossBody.setVelocityX(-knockDirection * CHAMBER03_BOSS_COMBAT.hurtRecoilVelocityX);
+    this.bossBody.setVelocityY(CHAMBER03_BOSS_COMBAT.hurtRecoilVelocityY);
+    this.audioDirector?.playEnemyHurt('miniboss');
 
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.pause();
-      this.scene.launch('LoreCutsceneScene', {
-        cutsceneId: CHAMBER03_BOSS_OMEN_CUTSCENE_ID,
-        returnSceneKey: this.scene.key
-      });
-    });
+    if (this.bossCombat.phase === 1 && this.bossCombat.health <= CHAMBER03_BOSS_COMBAT.phaseTwoThreshold) {
+      this.triggerBossPhaseShift(time);
+    }
 
-    this.cameras.main.fadeOut(380, 0, 0, 0);
+    if (this.bossCombat.health <= 0) {
+      this.defeatBoss();
+    }
+
+    return true;
   }
 
-  handleLoreCutsceneComplete({ cutsceneId } = {}) {
-    if (cutsceneId !== CHAMBER03_BOSS_OMEN_CUTSCENE_ID) {
-      return;
-    }
-
-    this.resolvePreBossOmenBeat();
-  }
-
-  resolvePreBossOmenBeat() {
-    this.isOmenBeatActive = false;
-    this.hasResolvedOmenBeat = true;
-    this.player.body.setEnable(true);
-    this.mobileControls.setMode('gameplay');
-    this.cameras.main.fadeIn(500, 0, 0, 0);
-    this.activateBossEncounterContract();
-  }
-
-  activateBossEncounterContract() {
-    if (this.hasActivatedBoss || !this.bossSprite) {
-      return;
-    }
-
-    this.hasActivatedBoss = true;
-    this.bossSprite.setVisible(true);
-
-    if (typeof this.bossSprite.setStrokeStyle === 'function') {
-      this.bossSprite.setStrokeStyle(3, 0xd7c8b2, 0.65);
-    }
-
-    this.bossFallbackLabel?.setVisible(true).setAlpha(0);
-
-    this.tweens.add({
-      targets: this.bossSprite,
-      alpha: 0.95,
-      duration: 640,
-      ease: 'Sine.out'
-    });
-    this.tweens.add({
-      targets: this.bossArrivalAura,
-      alpha: 0.2,
-      duration: 640,
-      ease: 'Sine.out'
-    });
-    this.tweens.add({
-      targets: this.bossArrivalHalo,
-      alpha: 0.14,
-      duration: 640,
-      ease: 'Sine.out'
-    });
-    this.tweens.add({
-      targets: this.bossArrivalShadow,
-      alpha: 0.28,
-      duration: 640,
-      ease: 'Sine.out'
-    });
-    if (this.bossFallbackLabel) {
-      this.tweens.add({
-        targets: this.bossFallbackLabel,
-        alpha: 0.76,
-        duration: 640,
-        ease: 'Sine.out'
-      });
-    }
-
-    this.tweens.add({
-      targets: this.bossArrivalAura,
-      scaleX: 1.04,
-      scaleY: 1.02,
-      duration: 1200,
-      ease: 'Sine.inOut',
-      yoyo: true,
-      repeat: -1
-    });
-
-    this.tweens.add({
-      targets: this.bossArrivalHalo,
-      scaleX: 1.03,
-      scaleY: 1.05,
-      duration: 1700,
-      ease: 'Sine.inOut',
-      yoyo: true,
-      repeat: -1
-    });
-
+  triggerBossPhaseShift(time) {
+    this.bossCombat.phase = 2;
+    this.bossCombat.phaseShiftAnnounced = true;
+    this.bossCombat.state = 'phase-shift';
+    this.bossCombat.stateUntil = time + 720;
+    this.bossCombat.lastAttackAt = time - 520;
+    this.bossCombat.attackLabel = 'RUPTURE';
     this.bossStatusPrompt
-      ?.setText('THE PRECENTOR TAKES THE DAIS')
-      .setScrollFactor(0)
-      .setPosition(this.scale.width / 2, Math.max(80, this.cameras.main.height * 0.16))
+      ?.setText('THE PRECENTOR SHREDS ITS LITURGY')
+      .setPosition(this.scale.width / 2, this.getBossPromptY())
       .setVisible(true);
-
-    this.time.delayedCall(CHAMBER03_BOSS_ARENA.bossRevealPromptDuration, () => {
+    this.time.delayedCall(1600, () => {
       this.bossStatusPrompt?.setVisible(false);
     });
+    this.tweens.add({
+      targets: this.bossArrivalAura,
+      alpha: 0.28,
+      scaleX: 1.12,
+      scaleY: 1.08,
+      duration: 320,
+      yoyo: true,
+      repeat: 1,
+      ease: 'Sine.inOut'
+    });
+    this.tweens.add({
+      targets: this.bossArrivalHalo,
+      alpha: 0.2,
+      duration: 280,
+      yoyo: true,
+      repeat: 1,
+      ease: 'Sine.inOut'
+    });
+  }
+
+  defeatBoss() {
+    if (!this.bossCombat || this.bossCombat.defeated) {
+      return;
+    }
+
+    this.bossCombat.defeated = true;
+    this.bossCombat.state = 'defeated';
+    this.cancelBossProjectileTimer();
+    this.clearBossProjectiles();
+    this.bossBody.enable = false;
+    this.bossBody.setVelocity(0, 0);
+    this.audioDirector?.playEnemyDeath('miniboss');
+    this.bossStatusPrompt
+      ?.setText('THE PRECENTOR IS BROKEN')
+      .setPosition(this.scale.width / 2, this.getBossPromptY())
+      .setVisible(true);
+    this.tweens.add({
+      targets: [this.bossSprite, this.bossFallbackLabel].filter(Boolean),
+      alpha: 0.14,
+      y: '-=24',
+      duration: 980,
+      ease: 'Cubic.easeOut'
+    });
+    this.tweens.add({
+      targets: this.bossArrivalAura,
+      alpha: 0.06,
+      duration: 860,
+      ease: 'Sine.out'
+    });
+    this.tweens.add({
+      targets: this.bossArrivalHalo,
+      alpha: 0.05,
+      duration: 860,
+      ease: 'Sine.out'
+    });
+  }
+
+  handleBossContactPlayer(_playerSprite, bossSprite) {
+    if (!this.hasActivatedBoss || this.bossCombat?.defeated || bossSprite !== this.bossSprite) {
+      return;
+    }
+
+    const phase = this.getBossPhaseConfig();
+    if (this.time.now < this.bossCombat.lastContactDamageTime + phase.contactDamageCooldownMs) {
+      return;
+    }
+
+    const tookDamage = this.player.receiveDamage(phase.contactDamage, this.time.now);
+    if (!tookDamage) {
+      return;
+    }
+
+    this.bossCombat.lastContactDamageTime = this.time.now;
+    const knockDirection = Math.sign(this.player.sprite.x - this.bossSprite.x) || 1;
+    this.player.body.setVelocityX(knockDirection * 228);
+    this.player.body.setVelocityY(-188);
+  }
+
+  chooseBossAttack(time, absDx) {
+    const phase = this.getBossPhaseConfig();
+    const pulseReady = time >= this.bossCombat.lastPulseAt + phase.pulseCooldownMs;
+    const lungeReady = time >= this.bossCombat.lastLungeAt + phase.lungeCooldownMs;
+    const shouldPulse = pulseReady && (absDx > CHAMBER03_BOSS_COMBAT.idealRange + 24 || this.bossCombat.attackPatternIndex % 3 === 2);
+
+    if (shouldPulse) {
+      this.startBossTelegraph('telegraph-pulse', phase.pulseTelegraphMs, time, 'CHOIR PULSE');
+      return;
+    }
+
+    if (lungeReady) {
+      this.startBossTelegraph('telegraph-lunge', phase.lungeTelegraphMs, time, this.bossCombat.phase === 1 ? 'JUDGMENT DESCENDS' : 'MARROW REND');
+    }
+  }
+
+  startBossTelegraph(state, durationMs, time, label) {
+    this.bossCombat.state = state;
+    this.bossCombat.telegraphStartedAt = time;
+    this.bossCombat.telegraphDurationMs = durationMs;
+    this.bossCombat.stateUntil = time + durationMs;
+    this.bossCombat.attackLabel = label;
+    this.bossBody.setVelocityX(0);
+    this.audioDirector?.playEnemyAttack('miniboss');
+  }
+
+  beginBossLunge(time) {
+    const phase = this.getBossPhaseConfig();
+    this.bossCombat.state = 'lunge';
+    this.bossCombat.stateUntil = time + phase.lungeDurationMs;
+    this.bossCombat.lastAttackAt = time;
+    this.bossCombat.lastLungeAt = time;
+    this.bossCombat.attackPatternIndex += 1;
+    this.bossCombat.telegraphDurationMs = 0;
+    this.bossBody.setVelocityX(this.bossCombat.facing * phase.lungeSpeed);
+    this.bossBody.setVelocityY(phase.lungeLiftVelocity);
+  }
+
+  beginBossPulse(time) {
+    const phase = this.getBossPhaseConfig();
+    this.bossCombat.state = 'pulse';
+    this.bossCombat.stateUntil = time + phase.pulseRecoveryMs;
+    this.bossCombat.lastAttackAt = time;
+    this.bossCombat.lastPulseAt = time;
+    this.bossCombat.attackPatternIndex += 1;
+    this.bossCombat.telegraphDurationMs = 0;
+    this.bossBody.setVelocityX(0);
+    this.firePulseVolley(time);
+  }
+
+  firePulseVolley(time) {
+    const phase = this.getBossPhaseConfig();
+    const bursts = this.bossCombat.phase === 2 ? 2 : 1;
+    for (let burstIndex = 0; burstIndex < bursts; burstIndex += 1) {
+      const delay = burstIndex * CHAMBER03_BOSS_COMBAT.projectileIntervalMs;
+      this.time.delayedCall(delay, () => {
+        if (!this.bossCombat || this.bossCombat.defeated) {
+          return;
+        }
+
+        const spreadY = burstIndex === 0 ? 0 : -CHAMBER03_BOSS_COMBAT.projectilePhaseTwoSpreadY;
+        this.spawnBossProjectile(this.bossCombat.facing, phase.pulseDamage, phase.pulseSpeed, spreadY, time + delay);
+      });
+    }
+  }
+
+  spawnBossProjectile(direction, damage, speed, offsetY = 0, firedAt = this.time.now) {
+    const projectile = this.add.ellipse(
+      this.bossSprite.x + direction * CHAMBER03_BOSS_COMBAT.projectileSpawnOffsetX,
+      this.bossSprite.y + CHAMBER03_BOSS_COMBAT.projectileSpawnOffsetY + offsetY,
+      CHAMBER03_BOSS_COMBAT.projectileWidth,
+      CHAMBER03_BOSS_COMBAT.projectileHeight,
+      0x9e885f,
+      0.92
+    ).setDepth(6.05);
+
+    this.physics.add.existing(projectile);
+    projectile.body.setAllowGravity(false);
+    projectile.body.setVelocityX(direction * speed);
+    projectile.body.setSize(CHAMBER03_BOSS_COMBAT.projectileWidth, CHAMBER03_BOSS_COMBAT.projectileHeight);
+    projectile.damage = damage;
+    projectile.expiresAt = firedAt + CHAMBER03_BOSS_COMBAT.projectileLifetimeMs;
+    this.bossCombat.activeProjectiles.push(projectile);
+  }
+
+  updateBossProjectiles(time) {
+    if (!this.bossCombat?.activeProjectiles?.length) {
+      return;
+    }
+
+    this.bossCombat.activeProjectiles = this.bossCombat.activeProjectiles.filter((projectile) => {
+      const expired = !projectile.active || time >= projectile.expiresAt || projectile.x < -80 || projectile.x > CHAMBER03_BOSS_ARENA.worldWidth + 80;
+      if (expired) {
+        projectile.destroy();
+        return false;
+      }
+
+      if (Phaser.Geom.Intersects.RectangleToRectangle(this.player.sprite.getBounds(), projectile.getBounds())) {
+        const tookDamage = this.player.receiveDamage(projectile.damage, time);
+        if (tookDamage) {
+          const knockDirection = Math.sign(this.player.sprite.x - projectile.x) || 1;
+          this.player.body.setVelocityX(knockDirection * 188);
+          this.player.body.setVelocityY(-132);
+        }
+        projectile.destroy();
+        return false;
+      }
+
+      projectile.setAlpha(0.72 + Math.sin(time / 80) * 0.12);
+      return true;
+    });
+  }
+
+  clearBossProjectiles() {
+    if (!this.bossCombat?.activeProjectiles) {
+      return;
+    }
+
+    this.bossCombat.activeProjectiles.forEach((projectile) => projectile.destroy());
+    this.bossCombat.activeProjectiles.length = 0;
+  }
+
+  cancelBossProjectileTimer() {
+    this.bossCombat?.projectileTimer?.remove?.(false);
+    if (this.bossCombat) {
+      this.bossCombat.projectileTimer = null;
+    }
   }
 
   updateBossPresence(time) {
-    if (!this.hasActivatedBoss || !this.bossSprite?.visible) {
+    if (!this.hasActivatedBoss || !this.bossSprite?.visible || !this.bossCombat) {
       return;
     }
 
-    const floatOffset = Math.sin(time / 420) * 5;
-    this.bossSprite.setY(CHAMBER03_BOSS_ARENA.bossAnchorY + floatOffset);
-    this.bossArrivalAura?.setPosition(CHAMBER03_BOSS_ARENA.bossAnchorX, CHAMBER03_BOSS_ARENA.bossAnchorY + 18 + floatOffset * 0.35);
-    this.bossArrivalHalo?.setPosition(CHAMBER03_BOSS_ARENA.bossAnchorX, CHAMBER03_BOSS_ARENA.bossAnchorY - 16 + floatOffset * 0.45);
-    this.bossArrivalShadow?.setAlpha(0.22 + (Math.sin(time / 320) + 1) * 0.03);
+    this.updateBossProjectiles(time);
+
+    const phase = this.getBossPhaseConfig();
+    const boss = this.bossCombat;
+    const dx = this.player.sprite.x - this.bossSprite.x;
+    const absDx = Math.abs(dx);
+    boss.facing = Math.sign(dx) || boss.facing;
+
+    if (boss.defeated) {
+      this.updateBossVisuals(time, absDx);
+      return;
+    }
+
+    if (boss.state === 'phase-shift' && time >= boss.stateUntil) {
+      boss.state = 'idle';
+      boss.attackLabel = '';
+    }
+
+    if (boss.state === 'hurt') {
+      if (time >= boss.stateUntil) {
+        boss.state = 'idle';
+        boss.attackLabel = '';
+      } else {
+        this.bossBody.setVelocityX(-boss.facing * CHAMBER03_BOSS_COMBAT.hurtRecoilVelocityX * 0.48);
+        this.updateBossVisuals(time, absDx);
+        return;
+      }
+    }
+
+    if (boss.state === 'telegraph-lunge' && time >= boss.stateUntil) {
+      this.beginBossLunge(time);
+    } else if (boss.state === 'telegraph-pulse' && time >= boss.stateUntil) {
+      this.beginBossPulse(time);
+    } else if (boss.state === 'lunge' && time >= boss.stateUntil) {
+      boss.state = 'recover';
+      boss.stateUntil = time + phase.lungeRecoveryMs;
+      this.bossBody.setVelocityX(0);
+      boss.attackLabel = 'RECOVER';
+    } else if (boss.state === 'pulse' && time >= boss.stateUntil) {
+      boss.state = 'recover';
+      boss.stateUntil = time + phase.pulseRecoveryMs;
+      boss.attackLabel = 'REPOSITION';
+    } else if (boss.state === 'recover' && time >= boss.stateUntil) {
+      boss.state = 'idle';
+      boss.attackLabel = '';
+    }
+
+    if (boss.state === 'idle') {
+      const minX = CHAMBER03_BOSS_COMBAT.arenaPaddingX;
+      const maxX = CHAMBER03_BOSS_ARENA.worldWidth - CHAMBER03_BOSS_COMBAT.arenaPaddingX;
+
+      if (absDx <= CHAMBER03_BOSS_COMBAT.closeRetreatRange) {
+        this.bossBody.setVelocityX(-boss.facing * phase.retreatSpeed);
+        boss.attackLabel = boss.phase === 1 ? 'MEASURE' : 'RIPOSTE';
+      } else if (absDx > CHAMBER03_BOSS_COMBAT.approachRange || this.bossSprite.x < minX || this.bossSprite.x > maxX) {
+        this.bossBody.setVelocityX(boss.facing * phase.driftSpeed);
+        boss.attackLabel = boss.phase === 1 ? 'APPROACH' : 'HUNT';
+      } else {
+        this.bossBody.setVelocityX(boss.facing * Math.max(phase.driftSpeed * 0.42, 20));
+        this.chooseBossAttack(time, absDx);
+      }
+    }
+
+    this.updateBossVisuals(time, absDx);
+  }
+
+  updateBossVisuals(time, absDx) {
+    const telegraphing = this.isBossTelegraphing();
+    const telegraphProgress = this.getBossTelegraphProgress(time);
+    const takingHit = time < this.bossCombat.lastDamageFlashTime + CHAMBER03_BOSS_COMBAT.hurtFlashMs;
+    const hitPulsing = time < this.bossCombat.hitPulseUntil;
+    const phaseTwo = this.bossCombat.phase === 2;
+    const floatOffset = this.bossCombat.defeated ? 0 : Math.sin(time / (phaseTwo ? 240 : 420)) * (phaseTwo ? 8 : 5);
+
+    let scaleX = phaseTwo ? 1.02 : 1;
+    let scaleY = phaseTwo ? 1.01 : 1;
+    let angle = 0;
+    let tint = phaseTwo ? 0xcab192 : 0xd2c1aa;
+
+    if (telegraphing) {
+      const swell = 1.02 + telegraphProgress * (phaseTwo ? 0.08 : 0.05);
+      scaleX *= swell;
+      scaleY *= swell * 1.03;
+      angle = -this.bossCombat.facing * (phaseTwo ? 8 : 5 + telegraphProgress * 6);
+      tint = phaseTwo ? 0xe0c27e : 0xd9c6a1;
+    } else if (takingHit) {
+      scaleX *= 0.98;
+      scaleY *= 1.04;
+      angle = this.bossCombat.facing * 9;
+      tint = 0xd7efaa;
+    } else if (hitPulsing) {
+      const pulse = 1 + Math.sin(time / 42) * 0.024;
+      scaleX *= pulse;
+      scaleY *= pulse * 1.01;
+    } else if (phaseTwo) {
+      angle = Math.sin(time / 130) * 1.8;
+    }
+
+    this.bossSprite.setY(CHAMBER03_BOSS_ARENA.bossAnchorY + floatOffset + (this.bossBody.enable ? this.bossBody.velocity.y * 0.01 : 0));
+    this.bossSprite.setScale(scaleX, scaleY);
+    this.bossSprite.setAngle(angle);
+    if (typeof this.bossSprite.setFlipX === 'function') {
+      this.bossSprite.setFlipX(this.bossCombat.facing > 0);
+    }
+    if (typeof this.bossSprite.setTint === 'function') {
+      this.bossSprite.setTint(tint);
+    }
+    this.bossFallbackLabel
+      ?.setPosition(this.bossSprite.x, this.bossSprite.y - 12)
+      .setAlpha(this.bossSprite.alpha * 0.8);
+
+    const distanceFactor = Phaser.Math.Clamp(absDx / 320, 0.2, 1);
+    this.bossArrivalAura
+      ?.setPosition(this.bossSprite.x, this.bossSprite.y + 18 + floatOffset * 0.25)
+      .setAlpha((phaseTwo ? 0.18 : 0.12) + (telegraphing ? 0.16 : 0) + distanceFactor * 0.04);
+    this.bossArrivalHalo
+      ?.setPosition(this.bossSprite.x, this.bossSprite.y - 16 + floatOffset * 0.28)
+      .setAlpha((phaseTwo ? 0.12 : 0.08) + (telegraphing ? 0.08 : 0));
+    this.bossArrivalShadow
+      ?.setPosition(this.bossSprite.x, WORLD.floorY + 8)
+      .setAlpha(this.bossCombat.defeated ? 0.08 : 0.2 + (Math.sin(time / (phaseTwo ? 160 : 320)) + 1) * 0.04);
+  }
+
+  getBossPromptY() {
+    const cameraHeight = this.cameras.main.height || this.scale.height;
+    return Math.max(72, cameraHeight * 0.16);
   }
 
   createInvisiblePlatform(x, y, width, height) {
@@ -560,7 +881,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         width / 2,
         Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY)
       );
-      this.bossStatusPrompt?.setPosition(width / 2, Math.max(72, worldBandHeight * 0.16));
+      this.bossStatusPrompt?.setPosition(width / 2, this.getBossPromptY());
       return;
     }
 
@@ -569,7 +890,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     camera.setFollowOffset(CHAMBER03_BOSS_ARENA.desktopFollowOffsetX, PORTRAIT_LAYOUT.desktopFollowOffsetY);
     this.mobileControls.setReservedBottomPx(0);
     this.restartText.setPosition(width / 2, 90);
-    this.bossStatusPrompt?.setPosition(width / 2, Math.max(80, height * 0.16));
+    this.bossStatusPrompt?.setPosition(width / 2, this.getBossPromptY());
   }
 
   applyGameplayReadabilitySupport(target, { fill = 0xd2c2ac, alpha = 0.16, scale = 1.08 } = {}) {

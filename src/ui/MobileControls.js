@@ -250,10 +250,13 @@ export class MobileControls {
     this.joystickMarkLeft.setFontSize(joystickBaseRadius > 50 ? '12px' : '11px');
     this.joystickMarkRight.setFontSize(joystickBaseRadius > 50 ? '12px' : '11px');
 
-    const hitMultiplier = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.hitMultiplier);
-    this.attackControl.setRadius(this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.attackRadius), hitMultiplier);
-    this.jumpControl.setRadius(this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.jumpRadius), hitMultiplier);
-    this.interactControl.setRadius(this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.interactRadius), hitMultiplier);
+    const defaultHitMultiplier = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.hitMultiplier);
+    const jumpHitMultiplier = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.jumpHitMultiplier ?? MOBILE_CONTROLS_LAYOUT.actionButtons.hitMultiplier);
+    const attackHitMultiplier = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.attackHitMultiplier ?? MOBILE_CONTROLS_LAYOUT.actionButtons.hitMultiplier);
+    const interactHitMultiplier = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.interactHitMultiplier ?? MOBILE_CONTROLS_LAYOUT.actionButtons.hitMultiplier);
+    this.attackControl.setRadius(this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.attackRadius), attackHitMultiplier ?? defaultHitMultiplier);
+    this.jumpControl.setRadius(this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.jumpRadius), jumpHitMultiplier ?? defaultHitMultiplier);
+    this.interactControl.setRadius(this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.interactRadius), interactHitMultiplier ?? defaultHitMultiplier);
   }
 
   startJoystick(pointer) {

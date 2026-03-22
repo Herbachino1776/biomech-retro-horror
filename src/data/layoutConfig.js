@@ -27,7 +27,10 @@ export const MOBILE_CONTROLS_LAYOUT = {
     jumpRadius: { portrait: 34, landscape: 28 },
     attackRadius: { portrait: 42, landscape: 38 },
     interactRadius: { portrait: 32, landscape: 28 },
-    hitMultiplier: { portrait: 2.55, landscape: 2.45 }
+    hitMultiplier: { portrait: 2.55, landscape: 2.45 },
+    jumpHitMultiplier: { portrait: 2.1, landscape: 2.05 },
+    attackHitMultiplier: { portrait: 2.3, landscape: 2.25 },
+    interactHitMultiplier: { portrait: 2.18, landscape: 2.12 }
   },
   portrait: {
     baseBandHeight: 180,
@@ -36,7 +39,7 @@ export const MOBILE_CONTROLS_LAYOUT = {
     rightAnchorRatio: 0.84,
     anchorBandRatioY: 0.5,
     attackYOffset: 0,
-    jumpOffsetX: 68,
+    jumpOffsetX: 76,
     jumpOffsetY: 52,
     interactOffsetX: 8,
     interactOffsetY: 110,
@@ -50,7 +53,7 @@ export const MOBILE_CONTROLS_LAYOUT = {
     rightAnchorRatio: 0.88,
     anchorRatioY: 0.84,
     attackYOffset: 2,
-    jumpOffsetX: 62,
+    jumpOffsetX: 66,
     jumpOffsetY: 50,
     interactOffsetX: 2,
     interactOffsetY: 88,
