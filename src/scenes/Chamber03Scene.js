@@ -3,31 +3,128 @@ import { Player } from '../entities/Player.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
-import { COLORS, CONCEPT_PRESENTATION, PLAYER, WORLD } from '../data/milestone1Config.js';
+import { COLORS, PLAYER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 
 const CHAMBER03_BOOTSTRAP = {
-  worldWidth: 1920,
+  worldWidth: 4800,
   floorColliderHeight: 72,
-  floorDisplayHeight: 116,
-  floorDepthY: WORLD.floorY - 46,
-  spawnX: 180,
-  spawnY: PLAYER.startY,
-  backgroundPanelY: 224,
-  backgroundPanelHeight: 372,
-  foregroundArchY: 212,
-  foregroundArchHeight: 332,
+  floorDisplayHeight: 118,
+  floorDepthY: WORLD.floorY - 48,
   floorStripYOffset: 18,
+  spawnX: 208,
+  spawnY: PLAYER.startY,
   cameraLerp: { x: 0.08, y: 0.08 },
   portraitFollowOffsetX: -120,
-  desktopFollowOffsetX: -140,
+  desktopFollowOffsetX: -160,
+  segmentWidth: 640,
+  segmentSpacing: 24,
+  lowerDepthBandHeight: 252,
+  lowerDepthBandAlpha: 0.18,
+  floorShadowAlpha: 0.34,
   playerHalo: {
     fill: 0xd8cfbb,
     alpha: 0.18,
     scale: 1.1
   }
 };
+
+const CHAMBER03_PROCESSION = [
+  {
+    key: ASSET_KEYS.chamber03BackgroundEntryNave,
+    width: 900,
+    height: 444,
+    y: 208,
+    tint: 0xcfc0ab,
+    alpha: 0.74,
+    depth: -14.7
+  },
+  {
+    key: ASSET_KEYS.chamber03BackgroundWallModule,
+    width: 660,
+    height: 362,
+    y: 228,
+    tint: 0xc4b29b,
+    alpha: 0.54,
+    depth: -14.45
+  },
+  {
+    key: ASSET_KEYS.chamber03BackgroundWallModule,
+    width: 660,
+    height: 362,
+    y: 232,
+    tint: 0xbba893,
+    alpha: 0.5,
+    depth: -14.42
+  },
+  {
+    key: ASSET_KEYS.chamber03BackgroundChoirOpening,
+    width: 900,
+    height: 416,
+    y: 220,
+    tint: 0xcbb9a1,
+    alpha: 0.64,
+    depth: -14.6
+  },
+  {
+    key: ASSET_KEYS.chamber03BackgroundWallModule,
+    width: 660,
+    height: 362,
+    y: 228,
+    tint: 0xb8a48e,
+    alpha: 0.5,
+    depth: -14.38
+  },
+  {
+    key: ASSET_KEYS.chamber03BackgroundThreshold,
+    width: 860,
+    height: 430,
+    y: 214,
+    tint: 0xc7b49f,
+    alpha: 0.68,
+    depth: -14.62
+  },
+  {
+    key: ASSET_KEYS.chamber03BackgroundBossDais,
+    width: 960,
+    height: 454,
+    y: 214,
+    tint: 0xd2c2aa,
+    alpha: 0.72,
+    depth: -14.66
+  }
+];
+
+const CHAMBER03_MARKERS = [
+  {
+    x: 1450,
+    ribWidth: 18,
+    ribHeight: 260,
+    archWidth: 168,
+    archHeight: 114,
+    alpha: 0.2,
+    depth: -11.8
+  },
+  {
+    x: 2800,
+    ribWidth: 20,
+    ribHeight: 286,
+    archWidth: 182,
+    archHeight: 124,
+    alpha: 0.22,
+    depth: -11.85
+  },
+  {
+    x: 3690,
+    ribWidth: 22,
+    ribHeight: 304,
+    archWidth: 206,
+    archHeight: 132,
+    alpha: 0.24,
+    depth: -11.9
+  }
+];
 
 export class Chamber03Scene extends Phaser.Scene {
   constructor() {
@@ -66,87 +163,110 @@ export class Chamber03Scene extends Phaser.Scene {
       1
     ).setDepth(-16);
 
-    const hasChamber03EntryArt = this.textures.exists(ASSET_KEYS.chamber03BackgroundEntryNave);
-    const hasChamber03WallModuleArt = this.textures.exists(ASSET_KEYS.chamber03BackgroundWallModule);
+    this.add.rectangle(
+      CHAMBER03_BOOTSTRAP.worldWidth / 2,
+      WORLD.floorY - 98,
+      CHAMBER03_BOOTSTRAP.worldWidth,
+      CHAMBER03_BOOTSTRAP.lowerDepthBandHeight,
+      COLORS.oil,
+      CHAMBER03_BOOTSTRAP.lowerDepthBandAlpha
+    ).setDepth(-14.25);
 
-    if (hasChamber03EntryArt) {
-      this.add
-        .image(960, 212, ASSET_KEYS.chamber03BackgroundEntryNave)
-        .setDisplaySize(1740, 432)
-        .setTint(0xd1c1ac)
-        .setAlpha(0.64)
-        .setDepth(-14.6);
+    this.renderProcessionBackdrop();
+    this.renderArchitecturalMarkers();
+    this.renderFloor();
+    this.createInvisiblePlatform(
+      CHAMBER03_BOOTSTRAP.worldWidth / 2,
+      WORLD.floorY + 28,
+      CHAMBER03_BOOTSTRAP.worldWidth,
+      CHAMBER03_BOOTSTRAP.floorColliderHeight
+    );
+  }
 
-      this.add
-        .rectangle(CHAMBER03_BOOTSTRAP.worldWidth / 2, WORLD.floorY - 92, CHAMBER03_BOOTSTRAP.worldWidth, 248, COLORS.oil, 0.18)
-        .setDepth(-14.4);
-    } else {
-      for (const anchorX of CONCEPT_PRESENTATION.chamberBackdrop.anchorXs) {
-        if (anchorX > CHAMBER03_BOOTSTRAP.worldWidth + CONCEPT_PRESENTATION.chamberBackdrop.panelWidth) {
-          continue;
-        }
+  renderProcessionBackdrop() {
+    const startX = 360;
 
-        if (this.textures.exists(ASSET_KEYS.chamber02BackgroundPlate)) {
-          this.add
-            .image(anchorX, CHAMBER03_BOOTSTRAP.backgroundPanelY, ASSET_KEYS.chamber02BackgroundPlate)
-            .setDisplaySize(CONCEPT_PRESENTATION.chamberBackdrop.panelWidth, CHAMBER03_BOOTSTRAP.backgroundPanelHeight)
-            .setTint(0xc2b09b)
-            .setAlpha(0.26)
-            .setDepth(-14);
-        } else if (this.textures.exists(ASSET_KEYS.chamberBackground)) {
-          this.add
-            .image(anchorX, CHAMBER03_BOOTSTRAP.backgroundPanelY, ASSET_KEYS.chamberBackground)
-            .setDisplaySize(CONCEPT_PRESENTATION.chamberBackdrop.panelWidth, CONCEPT_PRESENTATION.chamberBackdrop.panelHeight)
-            .setTint(0xb39c88)
-            .setAlpha(0.12)
-            .setDepth(-14);
-        } else {
-          this.add
-            .rectangle(
-              anchorX,
-              CHAMBER03_BOOTSTRAP.backgroundPanelY,
-              CONCEPT_PRESENTATION.chamberBackdrop.panelWidth,
-              CHAMBER03_BOOTSTRAP.backgroundPanelHeight,
-              COLORS.architecture,
-              0.72
-            )
-            .setDepth(-14);
-        }
+    CHAMBER03_PROCESSION.forEach((segment, index) => {
+      const x = startX + index * (CHAMBER03_BOOTSTRAP.segmentWidth + CHAMBER03_BOOTSTRAP.segmentSpacing);
+      const hasSegmentArt = this.textures.exists(segment.key);
+
+      if (hasSegmentArt) {
+        this.add
+          .image(x, segment.y, segment.key)
+          .setDisplaySize(segment.width, segment.height)
+          .setTint(segment.tint)
+          .setAlpha(segment.alpha)
+          .setDepth(segment.depth);
+      } else {
+        this.renderFallbackProcessionSegment(x, segment, index);
       }
-    }
 
-    if (hasChamber03WallModuleArt) {
-      [256, 640, 1280, 1664].forEach((anchorX, index) => {
-        this.add
-          .image(anchorX, 242 + (index % 2) * 8, ASSET_KEYS.chamber03BackgroundWallModule)
-          .setDisplaySize(420, 312)
-          .setTint(0xc7b59f)
-          .setAlpha(hasChamber03EntryArt ? 0.22 : 0.34)
-          .setDepth(-13.6);
-      });
-    } else if (this.textures.exists(ASSET_KEYS.chamber02ForegroundHornArch)) {
-      [360, 960, 1560].forEach((archX, index) => {
-        this.add
-          .image(archX, CHAMBER03_BOOTSTRAP.foregroundArchY + index * 6, ASSET_KEYS.chamber02ForegroundHornArch)
-          .setDisplaySize(288, CHAMBER03_BOOTSTRAP.foregroundArchHeight)
-          .setTint(0xb89f86)
-          .setAlpha(0.16)
-          .setDepth(-12.5);
-      });
-    }
+      this.add
+        .ellipse(x, WORLD.floorY - 34, segment.width * 0.86, 68, 0x0a0808, 0.12 + index * 0.01)
+        .setDepth(-14.1);
+    });
+  }
 
+  renderFallbackProcessionSegment(x, segment, index) {
+    const frameColor = index >= CHAMBER03_PROCESSION.length - 2 ? 0x53463d : 0x43372f;
+    const panelColor = index === 3 ? 0x635144 : 0x58483d;
+
+    this.add
+      .rectangle(x, segment.y + 12, segment.width, segment.height, panelColor, 0.72)
+      .setDepth(segment.depth);
+
+    this.add
+      .rectangle(x, segment.y + 16, segment.width - 34, segment.height - 46, frameColor, 0.48)
+      .setDepth(segment.depth + 0.02);
+
+    this.add
+      .text(x, segment.y + 12, `CHAMBER 03\\nSEGMENT ${index + 1}`, {
+        fontFamily: 'monospace',
+        fontSize: '16px',
+        color: '#d6c7b2',
+        align: 'center'
+      })
+      .setOrigin(0.5)
+      .setAlpha(0.74)
+      .setDepth(segment.depth + 0.04);
+  }
+
+  renderArchitecturalMarkers() {
+    CHAMBER03_MARKERS.forEach((marker) => {
+      const ribY = WORLD.floorY - marker.ribHeight / 2 - 6;
+      const leftRibX = marker.x - marker.archWidth / 2;
+      const rightRibX = marker.x + marker.archWidth / 2;
+
+      this.add
+        .rectangle(leftRibX, ribY, marker.ribWidth, marker.ribHeight, 0x231a17, marker.alpha)
+        .setDepth(marker.depth);
+      this.add
+        .rectangle(rightRibX, ribY, marker.ribWidth, marker.ribHeight, 0x231a17, marker.alpha)
+        .setDepth(marker.depth);
+      this.add
+        .ellipse(marker.x, ribY - marker.ribHeight / 2 + 18, marker.archWidth, marker.archHeight, 0x3f342d, marker.alpha * 0.92)
+        .setDepth(marker.depth - 0.04);
+      this.add
+        .ellipse(marker.x, WORLD.floorY + 8, marker.archWidth * 1.18, 28, 0x050404, marker.alpha * 0.85)
+        .setDepth(-5.2);
+    });
+  }
+
+  renderFloor() {
     this.add
       .rectangle(
         CHAMBER03_BOOTSTRAP.worldWidth / 2,
         CHAMBER03_BOOTSTRAP.floorDepthY,
         CHAMBER03_BOOTSTRAP.worldWidth,
-        224,
+        228,
         COLORS.architecture,
-        hasChamber03EntryArt ? 0.58 : 0.7
+        0.6
       )
       .setDepth(-13);
 
-    if (this.textures.exists(ASSET_KEYS.chamber02FloorStrip)) {
+    const hasFloorStrip = this.textures.exists(ASSET_KEYS.chamber02FloorStrip);
+
+    if (hasFloorStrip) {
       this.add
         .tileSprite(
           CHAMBER03_BOOTSTRAP.worldWidth / 2,
@@ -155,8 +275,8 @@ export class Chamber03Scene extends Phaser.Scene {
           CHAMBER03_BOOTSTRAP.floorDisplayHeight,
           ASSET_KEYS.chamber02FloorStrip
         )
-        .setTint(hasChamber03EntryArt ? 0xc9b9a3 : 0xd1c0aa)
-        .setAlpha(hasChamber03EntryArt ? 0.66 : 0.72)
+        .setTint(0xcab9a1)
+        .setAlpha(0.72)
         .setDepth(-6);
     } else if (this.textures.exists(ASSET_KEYS.chamber01FloorStrip)) {
       this.add
@@ -184,15 +304,15 @@ export class Chamber03Scene extends Phaser.Scene {
     }
 
     this.add
-      .ellipse(CHAMBER03_BOOTSTRAP.worldWidth / 2, WORLD.floorY + 10, CHAMBER03_BOOTSTRAP.worldWidth, 58, 0x050404, 0.34)
+      .ellipse(
+        CHAMBER03_BOOTSTRAP.worldWidth / 2,
+        WORLD.floorY + 10,
+        CHAMBER03_BOOTSTRAP.worldWidth,
+        58,
+        0x050404,
+        CHAMBER03_BOOTSTRAP.floorShadowAlpha
+      )
       .setDepth(-5);
-
-    this.createInvisiblePlatform(
-      CHAMBER03_BOOTSTRAP.worldWidth / 2,
-      WORLD.floorY + 28,
-      CHAMBER03_BOOTSTRAP.worldWidth,
-      CHAMBER03_BOOTSTRAP.floorColliderHeight
-    );
   }
 
   createPlayerAndColliders() {

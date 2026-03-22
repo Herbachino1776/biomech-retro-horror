@@ -13,6 +13,9 @@ import chamber02ForegroundHornArchUrl from '../../art/raw/chamber02/foreground_v
 import chamber02TollKeeperSkitterUrl from '../../art/raw/chamber02/chamber02_tollkeeper_skitter_01_left_alpha.png';
 import chamber03BackgroundEntryNaveUrl from '../../art/raw/chamber03/chamber03_bg_entry_nave_01_source.png';
 import chamber03BackgroundWallModuleUrl from '../../art/raw/chamber03/chamber03_bg_wall_module_01_source.png';
+import chamber03BackgroundChoirOpeningUrl from '../../art/raw/chamber03/chamber03_bg_choir_opening_01_source.png';
+import chamber03BackgroundThresholdUrl from '../../art/raw/chamber03/chamber03_bg_threshold_01_source.png';
+import chamber03BackgroundBossDaisUrl from '../../art/raw/chamber03/chamber03_bg_boss_dais_01_source.png';
 import playerConceptUrl from '../../assets/concepts/player-concept-03-right-alpha.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
@@ -62,6 +65,9 @@ export const ASSET_URLS = {
   [ASSET_KEYS.chamber02TollKeeperSkitter]: chamber02TollKeeperSkitterUrl,
   [ASSET_KEYS.chamber03BackgroundEntryNave]: chamber03BackgroundEntryNaveUrl,
   [ASSET_KEYS.chamber03BackgroundWallModule]: chamber03BackgroundWallModuleUrl,
+  [ASSET_KEYS.chamber03BackgroundChoirOpening]: chamber03BackgroundChoirOpeningUrl,
+  [ASSET_KEYS.chamber03BackgroundThreshold]: chamber03BackgroundThresholdUrl,
+  [ASSET_KEYS.chamber03BackgroundBossDais]: chamber03BackgroundBossDaisUrl,
   [ASSET_KEYS.player]: playerConceptUrl,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,
