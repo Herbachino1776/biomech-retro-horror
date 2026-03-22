@@ -202,3 +202,8 @@ export const CHAMBER01_MINIBOSS = {
     scaleY: 1
   }
 };
+
+
+export const DEBUG_BOOT_OVERRIDES = {
+  startScene: null
+};

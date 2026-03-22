@@ -22,7 +22,7 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Chamber 02 central shrine/ossuary lore trigger runs through `LoreCutsceneScene` and preserves diegetic presentation.
 - Chamber 02 post-lore reaction state is implemented: environmental ritual shift plus enemy wake/activation.
 - Chamber 02 TOLL-KEEPER encounter pair gates the exit and unlocks the end gate on defeat.
-- Chamber 02 exit gate unlock state remains active after the TOLL-KEEPER fight, but the old placeholder lore payoff has been intentionally removed.
+- Chamber 02 exit gate unlock state remains active after the TOLL-KEEPER fight and now hands off through a real in-world gate interaction into Chamber 03.
 - Chamber 01 + Chamber 02 ambience is integrated in the shipped slice.
 - Player footsteps/combat/death audio is present.
 - Skitter, TOLL-KEEPER, miniboss, lore/gate, and banishment cues are present.
@@ -31,8 +31,8 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Texture-first asset loading with fallback resilience remains stable.
 
 ## What Still Needs Work Now
-- Chamber 02 now ends at a stable unlocked gate state rather than a placeholder lore-screen payoff.
-- The Chamber 02 -> Chamber 03 continuity contract still needs a real gate/progression-object handoff.
+- Chamber 03 now exists as a minimal visible bootstrap chamber using reused Chamber 01 / Chamber 02 art while dedicated Chamber 03 art/content remains pending.
+- This pass intentionally prioritized reliable Chamber 02 -> Chamber 03 transition plumbing and a visible empty Chamber 03 over spectacle, enemies, boss content, or new lore sequences.
 - Content expansion beyond the shipped Chamber 01 + Chamber 02 slice is the next milestone focus.
 - Combat presentation can still be polished further later, but current readability is sufficient for the shipped baseline.
 
@@ -59,7 +59,7 @@ Use the Chamber 03 chunked planning docs as the implementation contract:
 
 Immediate follow-through:
 - begin with the smallest milestone-disciplined Chamber 03 bootstrap slice rather than a full grand implementation,
-- implement the real Chamber 02 -> Chamber 03 gate/progression-object transition in that follow-up work instead of reviving placeholder lore-screen handoff behavior.
+- use the current Chamber 03 bootstrap as the stable starting point for later spatial buildout, encounter layering, threshold lore, and boss work without replacing the new real-gate handoff.
 
 ## Most Important Constraints
 1. Do not regress GitHub Pages/Vite base-path behavior.

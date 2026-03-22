@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
+import { CONCEPT_PRESENTATION, DEBUG_BOOT_OVERRIDES } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { ASSET_URLS } from '../data/assetUrls.js';
 
@@ -102,7 +102,7 @@ export class BootScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(centerX, centerY - (smallViewport ? 44 : 2), 'CHAMBERS 01-02 // ENCOUNTER SLICE', {
+      .text(centerX, centerY - (smallViewport ? 44 : 2), 'CHAMBERS 01-03 // BOOTSTRAP SLICE', {
         fontFamily: 'monospace',
         fontSize: '16px',
         color: '#8f7d72',
@@ -198,6 +198,7 @@ export class BootScene extends Phaser.Scene {
       });
     }
 
-    this.scene.start('Chamber01Scene');
+    const bootTargetScene = DEBUG_BOOT_OVERRIDES.startScene ?? 'Chamber01Scene';
+    this.scene.start(bootTargetScene);
   }
 }

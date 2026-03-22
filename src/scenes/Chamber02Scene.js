@@ -103,6 +103,7 @@ const CHAMBER02_EXIT_GATE = {
   zoneY: 402,
   zoneWidth: 164,
   zoneHeight: 172,
+  interactPromptOffsetY: -128,
   lockedTint: 0x927f66,
   lockedAlpha: 0.76,
   unlockedTint: 0xd7c5ac,
@@ -130,10 +131,13 @@ export class Chamber02Scene extends Phaser.Scene {
     this.loreZones = this.physics.add.staticGroup();
     this.triggeredLoreIds = new Set();
     this.currentLoreZone = null;
+    this.currentExitGateZone = null;
     this.isLoreTransitionActive = false;
+    this.isExitGateTransitionActive = false;
     this.isRestartingRun = false;
     this.hasAppliedPostLoreReaction = false;
     this.exitGateUnlockAudioTimer = null;
+    this.exitGatePromptText = null;
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
@@ -301,6 +305,19 @@ export class Chamber02Scene extends Phaser.Scene {
       .setDepth(-5.25)
       .setVisible(false);
 
+    this.exitGatePromptText = this.add
+      .text(CHAMBER02_EXIT_GATE.x + CHAMBER02_EXIT_GATE.zoneOffsetX, CHAMBER02_EXIT_GATE.zoneY + CHAMBER02_EXIT_GATE.interactPromptOffsetY, 'ENTER CHAMBER 03', {
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        color: '#d6c9b8',
+        align: 'center',
+        stroke: '#140f0e',
+        strokeThickness: 4
+      })
+      .setOrigin(0.5)
+      .setDepth(-5.1)
+      .setVisible(false);
+
     this.exitGateZone = this.add
       .zone(
         CHAMBER02_EXIT_GATE.x + CHAMBER02_EXIT_GATE.zoneOffsetX,
@@ -375,8 +392,10 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.restartText.setVisible(false);
 
-    if (this.isLoreTransitionActive) {
+    if (this.isLoreTransitionActive || this.isExitGateTransitionActive) {
       this.mobileControls.setMode('dialogue');
+      this.player.body.setVelocity(0, 0);
+      this.enemies.forEach((enemy) => enemy.body.setVelocity(0, 0));
       return;
     }
 
@@ -395,6 +414,8 @@ export class Chamber02Scene extends Phaser.Scene {
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
     this.refreshExitGateState();
+    this.refreshExitGateZonePresence();
+    this.tryBeginExitGateTransition(mobileInput);
     this.updateExitGateAura(time);
 
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
@@ -551,6 +572,66 @@ export class Chamber02Scene extends Phaser.Scene {
     this.beginLoreSequence(loreEntry);
   }
 
+  refreshExitGateZonePresence() {
+    this.currentExitGateZone = null;
+
+    if (!this.exitGateUnlocked || !this.exitGateZone) {
+      this.exitGatePromptText?.setVisible(false);
+      return;
+    }
+
+    this.physics.overlap(this.player.sprite, this.exitGateZone, () => {
+      this.currentExitGateZone = this.exitGateZone;
+    });
+
+    this.exitGatePromptText?.setVisible(Boolean(this.currentExitGateZone));
+  }
+
+  tryBeginExitGateTransition(mobileInput) {
+    if (!this.currentExitGateZone || this.isExitGateTransitionActive) {
+      return;
+    }
+
+    const interactPressed =
+      Phaser.Input.Keyboard.JustDown(this.keyInteract) ||
+      Phaser.Input.Keyboard.JustDown(this.keyEnter) ||
+      mobileInput.interactPressed;
+
+    if (!interactPressed) {
+      return;
+    }
+
+    console.log('[Chamber02Scene] Chamber 03 gate interaction accepted', {
+      playerX: this.player.sprite.x,
+      playerY: this.player.sprite.y,
+      transitionContext: this.transitionContext
+    });
+    this.audioDirector?.playGateInteract();
+    this.beginExitGateTransitionToChamber03();
+  }
+
+  beginExitGateTransitionToChamber03() {
+    if (this.isExitGateTransitionActive) {
+      return;
+    }
+
+    this.isExitGateTransitionActive = true;
+    this.mobileControls.setMode('dialogue');
+    this.player.body.setVelocity(0, 0);
+    this.enemies.forEach((enemy) => enemy.body.setVelocity(0, 0));
+    this.audioDirector?.stopAmbientLoop();
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      console.log("[Chamber02Scene] scene.start('Chamber03Scene') imminent");
+      this.scene.start('Chamber03Scene', {
+        enteredFrom: 'chamber02-exit-gate',
+        progressionSource: 'toll-keeper-end-gate'
+      });
+    });
+
+    this.cameras.main.fadeOut(700, 0, 0, 0);
+  }
+
   launchLoreCutscene(cutsceneId) {
     if (this.hasLaunchedLoreCutscene || !cutsceneId) {
       return;
@@ -668,6 +749,7 @@ export class Chamber02Scene extends Phaser.Scene {
 
   cleanupSceneUi() {
     this.restartText?.setVisible(false);
+    this.exitGatePromptText?.setVisible(false);
     this.mobileControls?.setMode('init');
     this.hud?.setVisible(false);
   }
