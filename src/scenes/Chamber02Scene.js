@@ -726,7 +726,11 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   tryBeginExitGateTransition() {
-    return;
+    if (!this.exitGateUnlocked || !this.currentExitThresholdZone || this.isExitGateTransitionActive) {
+      return;
+    }
+
+    this.beginExitGateTransitionToChamber03();
   }
 
   beginExitGateTransitionToChamber03() {
