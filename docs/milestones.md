@@ -38,6 +38,7 @@
 ## Milestone 5 — Content Expansion (Active)
 - extend beyond the shipped chamber 01 + chamber 02 baseline
 - restart Chamber 03 cleanly from the trusted rolled-back baseline
+- ship a minimal stable Chamber 03 bootstrap room before the larger Ossuary Choir Hall content pass
 - add the next playable area progression using established patterns
 - replace the old Chamber 02 placeholder lore handoff with a real gate/progression transition in a later scoped pass
 - preserve the shipped audio-integrated slice while expanding content

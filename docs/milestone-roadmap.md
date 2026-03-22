@@ -60,7 +60,7 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 **Dependencies:** Milestones 1–4 stable.
 **Do Not Expand Prematurely:** open-world structure, broad branching map, or new systems not required by the next playable area.
 **Status:** next planned / active.
-**Planning Notes:** Chamber 03 is the first major content-expansion target under Milestone 5. The trusted rolled-back Chamber 01 + Chamber 02 repo was the restart baseline, Chamber 02's unlocked end gate now hands off through a real progression-object interaction, and the current Chamber 03 state is an intentionally minimal bootstrap chamber using reused Chamber 01 / Chamber 02 art until dedicated Chamber 03 content is ready.
+**Planning Notes:** Chamber 03 is the first major content-expansion target under Milestone 5. The trusted rolled-back Chamber 01 + Chamber 02 repo was the restart baseline, Chamber 03 has now been rebuilt as an intentionally minimal bootstrap chamber using reused Chamber 01 / Chamber 02 art plus the shared HUD/mobile-controls path, and Chamber 02's unlocked end gate still stops safely short of the Chamber 03 handoff until that progression wiring is re-enabled in a later stability pass.
 
 ## Milestone 6 — Polish, Testing, and Release Slice
 **Purpose:** stabilize and package a coherent release-quality vertical slice.

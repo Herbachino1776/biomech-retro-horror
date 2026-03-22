@@ -15,7 +15,8 @@ The restored trusted baseline is now the title screen plus playable Chamber 01 a
 - Chamber 02 enemy encounters remain active with conservative wake timing and readable spacing.
 - Chamber 02 TOLL-KEEPER encounter pair gates the chamber exit and now has clearer end-gate readiness feedback.
 - Chamber 02 central lore trigger still uses a dedicated cinematic cutscene flow and now retains a clear diegetic shrine/ossuary affordance at the trigger site.
-- Chamber 02 exit gate unlock state remains intact after the TOLL-KEEPER fight, and the restored baseline now ends safely at the Chamber 02 threshold instead of entering Chamber 03.
+- Chamber 02 exit gate unlock state remains intact after the TOLL-KEEPER fight, and the trusted default flow still ends safely at the Chamber 02 threshold instead of entering Chamber 03 automatically.
+- Chamber 03 has been rebuilt as a clean minimal bootstrap room with working player/camera/HUD/mobile-control support for isolated testing.
 - Chamber 01 and Chamber 02 ambience are integrated in the shipped flow.
 - Player combat/death feedback, skitter, TOLL-KEEPER, miniboss, lore/gate, and banishment audio cues are present in the shipped slice.
 - Mobile controls remain screen-space anchored and usable in portrait + landscape.
@@ -43,8 +44,8 @@ Milestone 4 is now considered **complete / closed out** for the currently shippe
 7. Landscape usability remains intact.
 
 ## Known Remaining Rough Edges (Non-Blocking)
-- Chamber 03 content currently in the repo is not part of the trusted shipped flow and should not be treated as accepted gameplay content.
-- Chamber 03 will be rebuilt from scratch in a later pass rather than patched forward from the emergency debug implementation.
+- Chamber 03 is now a clean rebuilt bootstrap room rather than the old emergency debug scene, but it is still not full Ossuary Choir Hall gameplay content.
+- Chamber 03 currently focuses on stable movement/camera/input/bootstrap presentation only; encounter, lore, boss, and spectacle layers remain pending.
 - Combat presentation remains intentionally restrained and should only expand when content work needs it.
 - Future milestone work should add new playable content without destabilizing the shipped Chamber 01 + Chamber 02 baseline.
 
@@ -57,9 +58,9 @@ Extend the shipped Chamber 01 + Chamber 02 baseline into the next playable conte
 ### Immediate Milestone 5 Direction
 - Chamber 03 is the next major content target under Milestone 5.
 - Chamber 03 planning remains anchored to the **Ossuary Choir Hall** sector-finale vision.
-- Chamber 03 will be rebuilt from scratch from the restored Chamber 01/02 baseline.
-- Emergency debug boot overrides are removed from the active flow.
-- Chamber 02 currently ends safely at its restored threshold until a later Chamber 03 rebuild pass lands.
+- Chamber 03 has now been rebuilt from scratch from the restored Chamber 01/02 baseline as a minimal bootstrap chamber.
+- Emergency debug boot overrides remain removed from the active flow; direct boot remains an optional inactive debug switch only.
+- Chamber 02 currently still ends safely at its restored threshold while Chamber 03 progression wiring remains pending-by-choice for stability.
 
 ## Do Not Change Casually
 - Base-path deployment contract (`/biomech-retro-horror/` prod, `/` dev).

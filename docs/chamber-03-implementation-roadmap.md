@@ -1,6 +1,6 @@
 # Chamber 03 Implementation Roadmap
 
-Status: active bootstrap track. **This roadmap exists to prevent another oversized implementation attempt.** The trusted rolled-back Chamber 01 + Chamber 02 repo was the clean restart baseline, the old Chamber 02 exit-gate placeholder lore payoff remains removed, and Milestone 5B now exists in code as a minimal real-gate handoff plus Chamber 03 bootstrap scene.
+Status: active bootstrap track. **This roadmap exists to prevent another oversized implementation attempt.** The trusted rolled-back Chamber 01 + Chamber 02 repo was the clean restart baseline, the old Chamber 02 exit-gate placeholder lore payoff remains removed, and Milestone 5B now exists in code as a rebuilt minimal Chamber 03 bootstrap scene while the Chamber 02 -> Chamber 03 handoff stays disabled for stability.
 
 ## Warning from the Future
 The prior Chamber 03 mistake was trying to build the full chamber in one pass.
@@ -64,8 +64,8 @@ Build Chamber 03 in milestone-safe slices. Each slice should preserve the shippe
 - player can cross a stable in-world threshold from Chamber 02's stable unlocked-gate endpoint into an intentionally minimal Chamber 03 bootstrap state without breaking the shipped slice.
 
 **Current Implementation Note**
-- Chamber 02's unlocked end gate now accepts direct interaction and starts `Chamber03Scene`.
-- `Chamber03Scene` is intentionally empty, visible on first frame, controllable, and built from reused Chamber 01 / Chamber 02 backdrop/floor/gate art only.
+- `Chamber03Scene` has been rebuilt from scratch as an intentionally minimal bootstrap room with shared HUD/mobile-controls support and clean ordered scene setup.
+- Chamber 02's unlocked end gate still stops at the safe threshold in the default flow; direct boot remains the intended way to test Chamber 03 during this pass.
 - Dedicated Chamber 03 art, encounters, lore, boss work, and spectacle remain pending by design.
 
 ## Milestone 5C — Chamber 03 Spatial Buildout
