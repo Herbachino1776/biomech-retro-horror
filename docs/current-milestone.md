@@ -2,7 +2,7 @@
 
 ## Current Project State
 The project has completed **Milestone 4: Audio Identity Pass**.
-The shipped playable slice remains Chamber 01 and Chamber 02, now with stabilized encounter flow, refined Chamber 01 miniboss payoff, Chamber 02 toll-keeper gate progression, the central Chamber 02 cinematic lore beat, integrated ambient/audio cue coverage, and maintained mobile/desktop usability.
+The shipped playable slice now extends from Chamber 01 through a minimal Chamber 03 bootstrap, with stabilized Chamber 01/02 flow, a real Chamber 02 end-gate handoff, the central Chamber 02 cinematic lore beat intact, integrated ambient/audio cue coverage for the shipped chambers, and maintained mobile/desktop usability.
 
 ## What Is Currently Working
 - Boot/title flow reliably enters the current Chamber 01 -> Chamber 02 vertical slice.
@@ -15,7 +15,7 @@ The shipped playable slice remains Chamber 01 and Chamber 02, now with stabilize
 - Chamber 02 enemy encounters remain active with conservative wake timing and readable spacing.
 - Chamber 02 TOLL-KEEPER encounter pair gates the chamber exit and now has clearer end-gate readiness feedback.
 - Chamber 02 central lore trigger still uses a dedicated cinematic cutscene flow and now retains a clear diegetic shrine/ossuary affordance at the trigger site.
-- Chamber 02 exit gate unlock state remains intact after the TOLL-KEEPER fight, with the chamber now ending on a stable unlocked gate rather than a placeholder lore takeover.
+- Chamber 02 exit gate unlock state remains intact after the TOLL-KEEPER fight and now supports a real interaction-based transition into Chamber 03.
 - Chamber 01 and Chamber 02 ambience are integrated in the shipped flow.
 - Player combat/death feedback, skitter, TOLL-KEEPER, miniboss, lore/gate, and banishment audio cues are present in the shipped slice.
 - Mobile controls remain screen-space anchored and usable in portrait + landscape.
@@ -43,7 +43,7 @@ Milestone 4 is now considered **complete / closed out** for the currently shippe
 7. Landscape usability remains intact.
 
 ## Known Remaining Rough Edges (Non-Blocking)
-- The old Chamber 02 exit-gate placeholder lore payoff has been intentionally removed so the trusted rollback baseline ends at a stable unlocked gate state.
+- Chamber 03 currently exists as a minimal bootstrap chamber that intentionally reuses Chamber 01 / Chamber 02 art for fallback readability while dedicated Chamber 03 art/content remains pending.
 - Combat presentation remains intentionally restrained and should only expand when content work needs it.
 - Future milestone work should add new playable content without destabilizing the shipped Chamber 01 + Chamber 02 baseline.
 
@@ -57,8 +57,8 @@ Extend the shipped Chamber 01 + Chamber 02 baseline into the next playable conte
 - Chamber 03 is the next major content target under Milestone 5.
 - Chamber 03 planning remains anchored to the **Ossuary Choir Hall** sector-finale vision.
 - Chamber 03 is being restarted cleanly from the trusted rolled-back baseline.
-- Chamber 02 -> Chamber 03 should eventually become a real gate/progression-object transition.
-- Chamber 03 should be delivered in chunked implementation slices, not one giant pass.
+- Chamber 02 -> Chamber 03 now uses a real gate/progression-object interaction instead of a placeholder lore-screen handoff.
+- Chamber 03 remains a chunked implementation effort; this pass intentionally prioritized reliable transition + visible empty chamber bootstrap over spectacle.
 
 ## Do Not Change Casually
 - Base-path deployment contract (`/biomech-retro-horror/` prod, `/` dev).
