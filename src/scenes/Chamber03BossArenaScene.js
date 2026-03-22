@@ -32,6 +32,8 @@ const CHAMBER03_BOSS_ARENA = {
   bossAnchorY: WORLD.floorY - 152,
   bossWidth: 364,
   bossHeight: 418,
+  bossOriginX: 0.5,
+  bossOriginY: 0.98,
   bossPromptOffsetY: -236,
   bossRevealPromptDuration: 1800,
   omenDelayMs: 260,
@@ -347,7 +349,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       this.bossSprite = this.add
         .image(bossX, bossY, ASSET_KEYS.chamber03BossPrecentor)
         .setDisplaySize(CHAMBER03_BOSS_ARENA.bossWidth, CHAMBER03_BOSS_ARENA.bossHeight)
-        .setOrigin(0.56, 0.99)
+        .setOrigin(CHAMBER03_BOSS_ARENA.bossOriginX, CHAMBER03_BOSS_ARENA.bossOriginY)
         .setTint(0xd2c1aa)
         .setAlpha(0)
         .setDepth(6.2)
@@ -371,6 +373,9 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         .setVisible(false);
     }
 
+    this.bossBaseScaleX = this.bossSprite.scaleX;
+    this.bossBaseScaleY = this.bossSprite.scaleY;
+
     this.physics.add.existing(this.bossSprite);
     this.bossBody = this.bossSprite.body;
     this.bossBody.setCollideWorldBounds(true);
@@ -384,6 +389,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.physics.add.collider(this.bossSprite, this.platforms);
     this.physics.add.overlap(this.player.attackHitbox, this.bossSprite, this.handlePlayerHitBoss, null, this);
     this.physics.add.overlap(this.player.sprite, this.bossSprite, this.handleBossContactPlayer, null, this);
+    this.resetBossPresentationState();
 
     this.bossStatusPrompt = this.add
       .text(bossX, bossY + CHAMBER03_BOSS_ARENA.bossPromptOffsetY, '', {
@@ -500,6 +506,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.hasActivatedBoss = true;
     this.bossCombat.state = 'idle';
     this.bossCombat.attackLabel = '';
+    this.resetBossPresentationState();
     this.bossBody.enable = true;
     this.bossBody.setVelocity(0, 0);
     this.bossSprite.setVisible(true).setAlpha(1);
@@ -687,6 +694,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossCombat.state = 'defeated';
     this.cancelBossProjectileTimer();
     this.clearBossProjectiles();
+    this.tweens.killTweensOf([this.bossSprite, this.bossFallbackLabel, this.bossArrivalAura, this.bossArrivalHalo].filter(Boolean));
+    this.resetBossPresentationState();
     this.bossBody.enable = false;
     this.bossBody.setVelocity(0, 0);
     this.audioDirector?.playEnemyDeath('miniboss');
@@ -944,8 +953,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     const phaseTwo = this.bossCombat.phase === 2;
     const floatOffset = this.bossCombat.defeated ? 0 : Math.sin(time / (phaseTwo ? 240 : 420)) * (phaseTwo ? 8 : 5);
 
-    let scaleX = phaseTwo ? 1.02 : 1;
-    let scaleY = phaseTwo ? 1.01 : 1;
+    let scaleX = this.bossBaseScaleX * (phaseTwo ? 1.02 : 1);
+    let scaleY = this.bossBaseScaleY * (phaseTwo ? 1.01 : 1);
     let angle = 0;
     let tint = phaseTwo ? 0xcab192 : 0xd2c1aa;
 
@@ -968,7 +977,9 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       angle = Math.sin(time / 130) * 1.8;
     }
 
-    this.bossSprite.setY(CHAMBER03_BOSS_ARENA.bossAnchorY + floatOffset + (this.bossBody.enable ? this.bossBody.velocity.y * 0.01 : 0));
+    const bossX = this.bossBody?.enable ? this.bossBody.gameObject.x : this.bossSprite.x;
+    const verticalVelocityOffset = this.bossBody?.enable ? this.bossBody.velocity.y * 0.01 : 0;
+    this.bossSprite.setPosition(bossX, CHAMBER03_BOSS_ARENA.bossAnchorY + floatOffset + verticalVelocityOffset);
     this.bossSprite.setScale(scaleX, scaleY);
     this.bossSprite.setAngle(angle);
     if (typeof this.bossSprite.setFlipX === 'function') {
@@ -991,6 +1002,37 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossArrivalShadow
       ?.setPosition(this.bossSprite.x, WORLD.floorY + 8)
       .setAlpha(this.bossCombat.defeated ? 0.08 : 0.2 + (Math.sin(time / (phaseTwo ? 160 : 320)) + 1) * 0.04);
+  }
+
+  resetBossPresentationState() {
+    if (!this.bossSprite) {
+      return;
+    }
+
+    this.bossSprite
+      .setPosition(CHAMBER03_BOSS_ARENA.bossAnchorX, CHAMBER03_BOSS_ARENA.bossAnchorY)
+      .setScale(this.bossBaseScaleX ?? this.bossSprite.scaleX, this.bossBaseScaleY ?? this.bossSprite.scaleY)
+      .setAngle(0)
+      .setAlpha(0)
+      .setVisible(false)
+      .setDepth(6.2);
+
+    if (typeof this.bossSprite.setFlipX === 'function') {
+      this.bossSprite.setFlipX(false);
+    }
+    if (typeof this.bossSprite.setTint === 'function') {
+      this.bossSprite.setTint(0xd2c1aa);
+    }
+
+    this.bossFallbackLabel
+      ?.setPosition(CHAMBER03_BOSS_ARENA.bossAnchorX, CHAMBER03_BOSS_ARENA.bossAnchorY - 12)
+      .setAlpha(0)
+      .setVisible(false)
+      .setDepth(6.24);
+
+    this.bossArrivalShadow?.setPosition(CHAMBER03_BOSS_ARENA.bossAnchorX, WORLD.floorY + 8).setAlpha(0).setDepth(-4.2);
+    this.bossArrivalAura?.setPosition(CHAMBER03_BOSS_ARENA.bossAnchorX, CHAMBER03_BOSS_ARENA.bossAnchorY + 18).setAlpha(0).setDepth(-4.1);
+    this.bossArrivalHalo?.setPosition(CHAMBER03_BOSS_ARENA.bossAnchorX, CHAMBER03_BOSS_ARENA.bossAnchorY - 16).setAlpha(0).setDepth(-4.05);
   }
 
   getBossPromptY() {
