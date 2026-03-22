@@ -21,6 +21,8 @@ export const gameConfig = {
     autoCenter: Phaser.Scale.CENTER_BOTH
   }
 };
-
-
-export const BOOT_SCENE_OVERRIDE = Chamber03Scene;
+// Keep direct-scene boot opt-in and string-based so config evaluation never
+// depends on importing scene classes inside this shared data module.
+// Set to 'Chamber03Scene' temporarily when you want BootScene to jump straight
+// into the Chamber 03 bootstrap for local testing.
+export const BOOT_SCENE_OVERRIDE = null;
