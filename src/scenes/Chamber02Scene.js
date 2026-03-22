@@ -91,6 +91,7 @@ const CHAMBER02_POST_LORE_REACTION = {
 };
 
 const EXIT_GATE_UNLOCK_AUDIO_DELAY_MS = 2000;
+const CHAMBER02_EXIT_GATE_DISABLE_FADE_FOR_DIAGNOSTICS = false;
 
 const CHAMBER02_EXIT_GATE = {
   x: 3480,
@@ -591,6 +592,10 @@ export class Chamber02Scene extends Phaser.Scene {
       return;
     }
 
+    console.log(
+      `[Chamber02Scene] Exit gate transition requested. disableFade=${CHAMBER02_EXIT_GATE_DISABLE_FADE_FOR_DIAGNOSTICS}`
+    );
+
     this.hasTriggeredExitGateLore = true;
     this.isExitGateTransitionActive = true;
     this.exitGateReadyAura?.setVisible(false);
@@ -601,10 +606,23 @@ export class Chamber02Scene extends Phaser.Scene {
     this.audioDirector?.playGateInteract();
     this.audioDirector?.stopAmbientLoop();
 
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+    const startChamber03 = () => {
+      console.log('[Chamber02Scene] scene.start(\'Chamber03Scene\') about to run');
       this.scene.start('Chamber03Scene', {
         enteredFrom: 'chamber02-ossuary-threshold'
       });
+    };
+
+    if (CHAMBER02_EXIT_GATE_DISABLE_FADE_FOR_DIAGNOSTICS) {
+      console.log('[Chamber02Scene] Diagnostic no-fade path enabled; starting Chamber03Scene immediately');
+      startChamber03();
+      return;
+    }
+
+    console.log('[Chamber02Scene] Exit gate fade started');
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      console.log('[Chamber02Scene] Exit gate fade completed');
+      startChamber03();
     });
 
     this.cameras.main.fadeOut(420, 0, 0, 0);
