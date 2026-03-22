@@ -29,12 +29,12 @@ const CHAMBER03_BOSS_ARENA = {
   lowerDepthBandAlpha: 0.18,
   floorShadowAlpha: 0.34,
   bossAnchorX: 1464,
-  bossAnchorY: WORLD.floorY - 152,
+  bossAnchorY: WORLD.floorY - 10,
   bossWidth: 364,
   bossHeight: 418,
   bossOriginX: 0.5,
   bossOriginY: 0.98,
-  bossPromptOffsetY: -236,
+  bossPromptOffsetY: -228,
   bossRevealPromptDuration: 1800,
   omenDelayMs: 260,
   playerHalo: {
@@ -177,6 +177,20 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     const hasSideWallArt = this.textures.exists(sideWallKey);
     const sideWallOffset = CHAMBER03_BOSS_ARENA.backdropWidth / 2 + CHAMBER03_BOSS_ARENA.sideWallInset;
 
+    if (hasSideWallArt) {
+      this.add
+        .tileSprite(
+          centerX,
+          CHAMBER03_BOSS_ARENA.backdropY + 18,
+          CHAMBER03_BOSS_ARENA.backdropWidth + 220,
+          CHAMBER03_BOSS_ARENA.backdropHeight,
+          sideWallKey
+        )
+        .setTint(0xb8a48f)
+        .setAlpha(0.42)
+        .setDepth(-14.76);
+    }
+
     [-1, 1].forEach((direction, index) => {
       const wallX = centerX + sideWallOffset * direction;
       const wallDepth = -14.82 + index * 0.01;
@@ -213,6 +227,18 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         .setDisplaySize(CHAMBER03_BOSS_ARENA.backdropWidth, CHAMBER03_BOSS_ARENA.backdropHeight)
         .setTint(0xcfbea5)
         .setAlpha(0.8)
+        .setDepth(-14.7);
+    } else if (hasSideWallArt) {
+      this.add
+        .tileSprite(
+          centerX,
+          CHAMBER03_BOSS_ARENA.backdropY + 14,
+          CHAMBER03_BOSS_ARENA.backdropWidth,
+          CHAMBER03_BOSS_ARENA.backdropHeight,
+          sideWallKey
+        )
+        .setTint(0xc3af98)
+        .setAlpha(0.68)
         .setDepth(-14.7);
     } else {
       this.add
@@ -356,7 +382,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         .setVisible(false);
     } else {
       this.bossSprite = this.add
-        .ellipse(bossX, bossY + 6, 212, 312, 0x4d3c34, 0)
+        .ellipse(bossX, bossY, 212, 312, 0x4d3c34, 0)
+        .setOrigin(CHAMBER03_BOSS_ARENA.bossOriginX, CHAMBER03_BOSS_ARENA.bossOriginY)
         .setStrokeStyle(3, 0xd7c8b2, 0)
         .setDepth(6.2)
         .setVisible(false);
@@ -375,6 +402,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
     this.bossBaseScaleX = this.bossSprite.scaleX;
     this.bossBaseScaleY = this.bossSprite.scaleY;
+    this.bossGroundedVisualOffsetY = CHAMBER03_BOSS_ARENA.bossHeight * (1 - CHAMBER03_BOSS_ARENA.bossOriginY);
 
     this.physics.add.existing(this.bossSprite);
     this.bossBody = this.bossSprite.body;
@@ -978,8 +1006,10 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     }
 
     const bossX = this.bossBody?.enable ? this.bossBody.gameObject.x : this.bossSprite.x;
-    const verticalVelocityOffset = this.bossBody?.enable ? this.bossBody.velocity.y * 0.01 : 0;
-    this.bossSprite.setPosition(bossX, CHAMBER03_BOSS_ARENA.bossAnchorY + floatOffset + verticalVelocityOffset);
+    const bossY = this.bossBody?.enable
+      ? this.bossBody.bottom - this.bossGroundedVisualOffsetY + floatOffset
+      : CHAMBER03_BOSS_ARENA.bossAnchorY + floatOffset;
+    this.bossSprite.setPosition(bossX, bossY);
     this.bossSprite.setScale(scaleX, scaleY);
     this.bossSprite.setAngle(angle);
     if (typeof this.bossSprite.setFlipX === 'function') {
