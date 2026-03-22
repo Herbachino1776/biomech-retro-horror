@@ -11,7 +11,6 @@ import chamber02BackgroundPlateUrl from '../../art/raw/chamber02/chamber02_backg
 import chamber02FloorStripUrl from '../../art/raw/chamber02/chamber02_floor_strip_01_source.png';
 import chamber02ForegroundHornArchUrl from '../../art/raw/chamber02/foreground_vertebral_horn_arch_01_source.png';
 import chamber02TollKeeperSkitterUrl from '../../art/raw/chamber02/chamber02_tollkeeper_skitter_01_left_alpha.png';
-import chamber02ExitGateLoreUrl from '../../art/raw/chamber02/chamber02_exit_gate_lore_01_source.png';
 import playerConceptUrl from '../../assets/concepts/player-concept-03-right-alpha.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
@@ -59,7 +58,6 @@ export const ASSET_URLS = {
   [ASSET_KEYS.chamber02FloorStrip]: chamber02FloorStripUrl,
   [ASSET_KEYS.chamber02ForegroundHornArch]: chamber02ForegroundHornArchUrl,
   [ASSET_KEYS.chamber02TollKeeperSkitter]: chamber02TollKeeperSkitterUrl,
-  [ASSET_KEYS.chamber02ExitGateLore]: chamber02ExitGateLoreUrl,
   [ASSET_KEYS.player]: playerConceptUrl,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,

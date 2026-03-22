@@ -91,7 +91,7 @@ const CHAMBER02_POST_LORE_REACTION = {
 };
 
 const EXIT_GATE_UNLOCK_AUDIO_DELAY_MS = 2000;
-const CHAMBER03_NO_FADE_DIAGNOSTIC = false;
+const CHAMBER03_SCENE_KEY = 'Chamber03Scene';
 
 const CHAMBER02_EXIT_GATE = {
   x: 3480,
@@ -140,6 +140,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.hasAppliedPostLoreReaction = false;
     this.hasUsedExitGate = false;
     this.exitGateUnlockAudioTimer = null;
+    this.exitGateFallbackMessageTimer = null;
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
@@ -187,6 +188,8 @@ export class Chamber02Scene extends Phaser.Scene {
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.exitGateUnlockAudioTimer?.remove(false);
       this.exitGateUnlockAudioTimer = null;
+      this.exitGateFallbackMessageTimer?.remove(false);
+      this.exitGateFallbackMessageTimer = null;
       this.audioDirector?.shutdown();
       this.cleanupSceneUi();
     });
@@ -502,6 +505,8 @@ export class Chamber02Scene extends Phaser.Scene {
     } else {
       this.exitGateUnlockAudioTimer?.remove(false);
       this.exitGateUnlockAudioTimer = null;
+      this.exitGateFallbackMessageTimer?.remove(false);
+      this.exitGateFallbackMessageTimer = null;
     }
     this.exitGateSigil?.setAlpha(unlocked ? 0.3 : 0.14);
     this.applyExitGateVisualState(unlocked);
@@ -608,10 +613,6 @@ export class Chamber02Scene extends Phaser.Scene {
       return;
     }
 
-    console.log(
-      `[Chamber02Scene] Exit gate transition requested. disableFade=${CHAMBER03_NO_FADE_DIAGNOSTIC}`
-    );
-
     this.hasUsedExitGate = true;
     this.isExitGateTransitionActive = true;
     this.exitGateReadyAura?.setVisible(false);
@@ -623,33 +624,40 @@ export class Chamber02Scene extends Phaser.Scene {
     this.audioDirector?.playGateInteract();
     this.audioDirector?.stopAmbientLoop();
 
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.transitionThroughExitGate();
+    });
+
+    this.cameras.main.fadeOut(420, 0, 0, 0);
+  }
+
+  transitionThroughExitGate() {
     const transitionPayload = {
       enteredFrom: 'chamber02-ossuary-threshold'
     };
-    const startChamber03 = () => {
-      console.log('[Chamber02Scene] exit gate: scene.start(Chamber03Scene)');
-      this.scene.start('Chamber03Scene', transitionPayload);
-    };
 
-    console.log('[Chamber02Scene] exit gate: transition requested', {
-      noFadeDiagnostic: CHAMBER03_NO_FADE_DIAGNOSTIC,
-      playerX: this.player?.sprite?.x,
-      playerY: this.player?.sprite?.y
-    });
-
-    if (CHAMBER03_NO_FADE_DIAGNOSTIC) {
-      console.log('[Chamber02Scene] exit gate: no-fade diagnostic enabled; starting Chamber03Scene immediately');
-      startChamber03();
+    if (this.scene.manager.keys[CHAMBER03_SCENE_KEY]) {
+      this.scene.start(CHAMBER03_SCENE_KEY, transitionPayload);
       return;
     }
 
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      console.log('[Chamber02Scene] exit gate: fade completed');
-      startChamber03();
-    });
+    this.resolveMissingChamber03Transition();
+  }
 
-    console.log('[Chamber02Scene] exit gate: fade started');
-    this.cameras.main.fadeOut(420, 0, 0, 0);
+  resolveMissingChamber03Transition() {
+    this.isExitGateTransitionActive = false;
+    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01);
+    this.cameras.main.fadeIn(320, 0, 0, 0);
+    this.restartText
+      .setText('THRESHOLD STABILIZED\nCHAMBER 03 NOT YET SEEDED')
+      .setVisible(true);
+
+    this.exitGateFallbackMessageTimer?.remove(false);
+    this.exitGateFallbackMessageTimer = this.time.delayedCall(1800, () => {
+      this.restartText?.setVisible(false);
+      this.mobileControls?.setMode('gameplay');
+      this.exitGateFallbackMessageTimer = null;
+    });
   }
 
   launchLoreCutscene(cutsceneId) {

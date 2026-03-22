@@ -15,7 +15,7 @@ The shipped playable slice remains Chamber 01 and Chamber 02, now with stabilize
 - Chamber 02 enemy encounters remain active with conservative wake timing and readable spacing.
 - Chamber 02 TOLL-KEEPER encounter pair gates the chamber exit and now has clearer end-gate readiness feedback.
 - Chamber 02 central lore trigger still uses a dedicated cinematic cutscene flow and now retains a clear diegetic shrine/ossuary affordance at the trigger site.
-- Chamber 02 exit gate unlock + lore trigger flow remains intact after the TOLL-KEEPER fight.
+- Chamber 02 exit gate unlock now resolves through a real in-world threshold contract after the TOLL-KEEPER fight.
 - Chamber 01 and Chamber 02 ambience are integrated in the shipped flow.
 - Player combat/death feedback, skitter, TOLL-KEEPER, miniboss, lore/gate, and banishment audio cues are present in the shipped slice.
 - Mobile controls remain screen-space anchored and usable in portrait + landscape.

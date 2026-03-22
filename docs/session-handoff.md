@@ -22,7 +22,7 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Chamber 02 central shrine/ossuary lore trigger runs through `LoreCutsceneScene` and preserves diegetic presentation.
 - Chamber 02 post-lore reaction state is implemented: environmental ritual shift plus enemy wake/activation.
 - Chamber 02 TOLL-KEEPER encounter pair gates the exit and unlocks the end gate on defeat.
-- Chamber 02 exit gate lore trigger/payoff is active after unlock.
+- Chamber 02 exit gate now serves as the stable physical threshold into Chamber 03 after unlock.
 - Chamber 01 + Chamber 02 ambience is integrated in the shipped slice.
 - Player footsteps/combat/death audio is present.
 - Skitter, TOLL-KEEPER, miniboss, lore/gate, and banishment cues are present.
