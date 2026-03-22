@@ -37,6 +37,7 @@ const CHAMBER03_BOSS_ARENA = {
   bossPromptOffsetY: -228,
   bossRevealPromptDuration: 1800,
   omenDelayMs: 260,
+  groundedBodyRestingYOffset: 0,
   playerHalo: {
     fill: 0xd8cfbb,
     alpha: 0.18,
@@ -402,7 +403,6 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
     this.bossBaseScaleX = this.bossSprite.scaleX;
     this.bossBaseScaleY = this.bossSprite.scaleY;
-    this.bossGroundedVisualOffsetY = CHAMBER03_BOSS_ARENA.bossHeight * (1 - CHAMBER03_BOSS_ARENA.bossOriginY);
 
     this.physics.add.existing(this.bossSprite);
     this.bossBody = this.bossSprite.body;
@@ -413,6 +413,10 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossBody.setSize(CHAMBER03_BOSS_COMBAT.body.width / scaleX, CHAMBER03_BOSS_COMBAT.body.height / scaleY);
     this.bossBody.setOffset(CHAMBER03_BOSS_COMBAT.body.offsetX / scaleX, CHAMBER03_BOSS_COMBAT.body.offsetY / scaleY);
     this.bossBody.enable = false;
+    this.bossGroundedBodyOffsetY =
+      CHAMBER03_BOSS_ARENA.bossHeight * CHAMBER03_BOSS_ARENA.bossOriginY -
+      (CHAMBER03_BOSS_COMBAT.body.offsetY + CHAMBER03_BOSS_COMBAT.body.height) +
+      CHAMBER03_BOSS_ARENA.groundedBodyRestingYOffset;
 
     this.physics.add.collider(this.bossSprite, this.platforms);
     this.physics.add.overlap(this.player.attackHitbox, this.bossSprite, this.handlePlayerHitBoss, null, this);
@@ -543,7 +547,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossArrivalAura?.setAlpha(usedFallback ? 0.16 : 0.12);
     this.bossArrivalHalo?.setAlpha(usedFallback ? 0.1 : 0.08);
     this.bossStatusPrompt
-      ?.setText(usedFallback ? 'THE PRECENTOR ARRIVES WITHOUT OMEN' : 'THE PRECENTOR DESCENDS')
+      ?.setText(usedFallback ? 'THE PRECENTOR ARRIVES WITHOUT OMEN' : 'THE PRECENTOR STANDS IN JUDGMENT')
       .setPosition(this.scale.width / 2, this.getBossPromptY())
       .setVisible(true);
 
@@ -979,7 +983,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     const takingHit = time < this.bossCombat.lastDamageFlashTime + CHAMBER03_BOSS_COMBAT.hurtFlashMs;
     const hitPulsing = time < this.bossCombat.hitPulseUntil;
     const phaseTwo = this.bossCombat.phase === 2;
-    const floatOffset = this.bossCombat.defeated ? 0 : Math.sin(time / (phaseTwo ? 240 : 420)) * (phaseTwo ? 8 : 5);
+    const floatOffset = 0;
 
     let scaleX = this.bossBaseScaleX * (phaseTwo ? 1.02 : 1);
     let scaleY = this.bossBaseScaleY * (phaseTwo ? 1.01 : 1);
@@ -1007,7 +1011,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
     const bossX = this.bossBody?.enable ? this.bossBody.gameObject.x : this.bossSprite.x;
     const bossY = this.bossBody?.enable
-      ? this.bossBody.bottom - this.bossGroundedVisualOffsetY + floatOffset
+      ? this.bossBody.bottom + this.bossGroundedBodyOffsetY + floatOffset
       : CHAMBER03_BOSS_ARENA.bossAnchorY + floatOffset;
     this.bossSprite.setPosition(bossX, bossY);
     this.bossSprite.setScale(scaleX, scaleY);
