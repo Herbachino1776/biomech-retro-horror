@@ -27,90 +27,77 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   create() {
-    console.log('[Chamber03Scene] BOOT OK create()', this.transitionContext);
+    console.log('[Chamber03Scene] create() boot start', this.transitionContext);
 
-    this.physics.world.gravity.y = WORLD.gravityY;
-    this.cameras.main.setBounds(0, 0, CHAMBER03_WORLD.width, WORLD.height);
-    this.physics.world.setBounds(0, 0, CHAMBER03_WORLD.width, WORLD.height);
-    this.cameras.main.setBackgroundColor('#2d201c');
+    try {
+      this.physics.world.gravity.y = WORLD.gravityY;
+      this.cameras.main.setBounds(0, 0, CHAMBER03_WORLD.width, WORLD.height);
+      this.physics.world.setBounds(0, 0, CHAMBER03_WORLD.width, WORLD.height);
+      this.cameras.main.setBackgroundColor('#4d3328');
 
-    this.add
-      .rectangle(CHAMBER03_WORLD.width / 2, WORLD.height / 2, CHAMBER03_WORLD.width, WORLD.height, 0x2d201c, 1)
-      .setDepth(-20);
-    this.add
-      .rectangle(CHAMBER03_WORLD.width / 2, WORLD.height / 2 - 22, CHAMBER03_WORLD.width - 160, WORLD.height - 120, 0x4c372f, 1)
-      .setStrokeStyle(6, 0x8c745f, 0.82)
-      .setDepth(-19);
-    this.add
-      .rectangle(CHAMBER03_WORLD.width / 2, CHAMBER03_WORLD.floorY, CHAMBER03_WORLD.width, CHAMBER03_WORLD.floorHeight, 0xa58b73, 1)
-      .setDepth(-11);
-    this.add
-      .rectangle(CHAMBER03_WORLD.width / 2, WORLD.floorY - 10, CHAMBER03_WORLD.width, 12, 0x8ea26d, 0.26)
-      .setDepth(-10.8);
+      this.add
+        .rectangle(CHAMBER03_WORLD.width / 2, WORLD.height / 2, CHAMBER03_WORLD.width, WORLD.height, 0x4d3328, 1)
+        .setDepth(-20);
+      this.add
+        .rectangle(CHAMBER03_WORLD.width / 2, CHAMBER03_WORLD.floorY, CHAMBER03_WORLD.width, CHAMBER03_WORLD.floorHeight, 0xb29778, 1)
+        .setDepth(-11);
 
-    this.add.text(CHAMBER03_WORLD.headerX, CHAMBER03_WORLD.headerY, 'CHAMBER 03 BOOT OK', {
-      fontFamily: 'monospace',
-      fontSize: '28px',
-      color: '#f4e6d2',
-      stroke: '#120c0b',
-      strokeThickness: 6
-    }).setScrollFactor(0).setDepth(40);
+      this.add
+        .text(CHAMBER03_WORLD.headerX, CHAMBER03_WORLD.headerY, 'CHAMBER 03 BOOT OK', {
+          fontFamily: 'monospace',
+          fontSize: '28px',
+          color: '#f4e6d2',
+          stroke: '#120c0b',
+          strokeThickness: 6
+        })
+        .setScrollFactor(0)
+        .setDepth(40);
 
-    this.add.text(120, 128, 'CHAMBER 03', {
-      fontFamily: 'monospace',
-      fontSize: '36px',
-      color: '#eadac4',
-      stroke: '#120c0b',
-      strokeThickness: 6
-    }).setDepth(12);
+      this.platforms = this.physics.add.staticGroup();
+      this.createInvisiblePlatform(
+        CHAMBER03_WORLD.width / 2,
+        WORLD.floorY + 28,
+        CHAMBER03_WORLD.width,
+        CHAMBER03_WORLD.floorColliderHeight
+      );
 
-    this.add.text(120, 170, 'EMPTY BOOTSTRAP CHAMBER // RELIABILITY PASS', {
-      fontFamily: 'monospace',
-      fontSize: '14px',
-      color: '#9fb17f'
-    }).setDepth(12);
+      this.player = new Player(this, CHAMBER03_WORLD.spawnX, CHAMBER03_WORLD.spawnY, PLAYER);
+      this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
+      this.physics.add.collider(this.player.sprite, this.platforms);
+      this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
 
-    this.platforms = this.physics.add.staticGroup();
-    this.createInvisiblePlatform(
-      CHAMBER03_WORLD.width / 2,
-      WORLD.floorY + 28,
-      CHAMBER03_WORLD.width,
-      CHAMBER03_WORLD.floorColliderHeight
-    );
+      this.hud = new HudOverlay(this);
+      this.mobileControls = new MobileControls(this);
 
-    this.player = new Player(this, CHAMBER03_WORLD.spawnX, CHAMBER03_WORLD.spawnY, PLAYER);
-    this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
-    this.physics.add.collider(this.player.sprite, this.platforms);
+      this.restartText = this.add
+        .text(this.scale.width / 2, 90, '', {
+          fontFamily: 'monospace',
+          fontSize: '22px',
+          color: '#d2c2ac',
+          align: 'center'
+        })
+        .setScrollFactor(0)
+        .setDepth(35)
+        .setOrigin(0.5)
+        .setVisible(false);
 
-    this.hud = new HudOverlay(this);
-    this.mobileControls = new MobileControls(this);
-    this.setupMobileUiCamera();
+      this.cursors = this.input.keyboard.createCursorKeys();
+      this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+      this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
-    this.restartText = this.add
-      .text(this.scale.width / 2, 90, '', {
-        fontFamily: 'monospace',
-        fontSize: '22px',
-        color: '#d2c2ac',
-        align: 'center'
-      })
-      .setScrollFactor(0)
-      .setDepth(35)
-      .setOrigin(0.5)
-      .setVisible(false);
+      this.scale.on('resize', this.applyResponsiveLayout, this);
+      this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
+        this.scale.off('resize', this.applyResponsiveLayout, this);
+        this.cleanupSceneUi();
+      });
 
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
-    this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-
-    this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
-    this.scale.on('resize', this.applyResponsiveLayout, this);
-    this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.scale.off('resize', this.applyResponsiveLayout, this);
-      this.cleanupSceneUi();
-    });
-
-    this.applyResponsiveLayout();
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+      this.applyResponsiveLayout();
+      this.hud.update(this.player.health, PLAYER.maxHealth);
+      console.log('[Chamber03Scene] create completed');
+    } catch (error) {
+      console.error('[Chamber03Scene] create failed', error);
+      this.renderCreateErrorFallback(error);
+    }
   }
 
   update(time) {
@@ -175,19 +162,32 @@ export class Chamber03Scene extends Phaser.Scene {
     return { halo, shadow };
   }
 
-  setupMobileUiCamera() {
-    if (!this.mobileControls.enabled) {
-      return;
-    }
+  renderCreateErrorFallback(error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
 
-    this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height, false, 'Chamber03MobileUiCamera');
-
-    const mobileUiElements = this.mobileControls.getUiElements();
-    const mobileUiSet = new Set(mobileUiElements);
-    const nonMobileObjects = this.children.list.filter((element) => !mobileUiSet.has(element));
-
-    this.cameras.main.ignore(mobileUiElements);
-    this.uiCamera.ignore(nonMobileObjects);
+    this.cameras.main.setBackgroundColor('#3b0f12');
+    this.add.rectangle(CHAMBER03_WORLD.width / 2, WORLD.height / 2, CHAMBER03_WORLD.width, WORLD.height, 0x3b0f12, 1).setDepth(-20);
+    this.add.rectangle(CHAMBER03_WORLD.width / 2, CHAMBER03_WORLD.floorY, CHAMBER03_WORLD.width, CHAMBER03_WORLD.floorHeight, 0x6f3b31, 1).setDepth(-11);
+    this.add
+      .text(CHAMBER03_WORLD.headerX, CHAMBER03_WORLD.headerY, 'CHAMBER 03 CREATE ERROR', {
+        fontFamily: 'monospace',
+        fontSize: '28px',
+        color: '#ffe3df',
+        stroke: '#160708',
+        strokeThickness: 6,
+        wordWrap: { width: this.scale.width - 64 }
+      })
+      .setScrollFactor(0)
+      .setDepth(40);
+    this.add
+      .text(CHAMBER03_WORLD.headerX, CHAMBER03_WORLD.headerY + 50, errorMessage, {
+        fontFamily: 'monospace',
+        fontSize: '16px',
+        color: '#ffd4cc',
+        wordWrap: { width: this.scale.width - 64 }
+      })
+      .setScrollFactor(0)
+      .setDepth(40);
   }
 
   cleanupSceneUi() {
