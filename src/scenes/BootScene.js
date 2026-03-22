@@ -80,6 +80,11 @@ export class BootScene extends Phaser.Scene {
     this.hasStarted = false;
     this.cameras.main.setBackgroundColor('#110d0c');
 
+    if (DEBUG_BOOT_OVERRIDES.skipTitleAndBootSceneDirect) {
+      this.beginChamber();
+      return;
+    }
+
     const centerX = this.scale.width / 2;
     const centerY = this.scale.height / 2;
     const smallViewport = this.scale.width < 760;
