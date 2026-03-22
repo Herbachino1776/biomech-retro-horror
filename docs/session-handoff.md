@@ -21,8 +21,8 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Chamber 02 is playable with established platform/combat pacing.
 - Chamber 02 central shrine/ossuary lore trigger runs through `LoreCutsceneScene` and preserves diegetic presentation.
 - Chamber 02 post-lore reaction state is implemented: environmental ritual shift plus enemy wake/activation.
-- Chamber 02 TOLL-KEEPER encounter pair gates the exit and unlocks the end gate on defeat.
-- Chamber 02 exit gate lore trigger/payoff is active after unlock.
+- Chamber 02 TOLL-KEEPER encounter pair gates the exit and unlocks the physical end gate on defeat.
+- Chamber 02 now hands off directly into a minimal playable Chamber 03 through that physical gate, without an end-lore-screen dependency.
 - Chamber 01 + Chamber 02 ambience is integrated in the shipped slice.
 - Player footsteps/combat/death audio is present.
 - Skitter, TOLL-KEEPER, miniboss, lore/gate, and banishment cues are present.
@@ -31,7 +31,7 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Texture-first asset loading with fallback resilience remains stable.
 
 ## What Still Needs Work Now
-- Chamber 02 now hands off through a real physical exit gate into a minimal playable Chamber 03 bootstrap.
+- Chamber 02 now hands off through a real physical exit gate into a fresh minimal playable Chamber 03 entry nave.
 - Chamber 03 still needs its future threshold lore, encounter buildout, boss arena, and finale payoff layers.
 - Content expansion beyond the shipped Chamber 01 + Chamber 02 slice is the next milestone focus.
 - Combat presentation can still be polished further later, but current readability is sufficient for the shipped baseline.

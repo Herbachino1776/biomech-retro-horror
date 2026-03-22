@@ -11,6 +11,8 @@ import chamber02BackgroundPlateUrl from '../../art/raw/chamber02/chamber02_backg
 import chamber02FloorStripUrl from '../../art/raw/chamber02/chamber02_floor_strip_01_source.png';
 import chamber02ForegroundHornArchUrl from '../../art/raw/chamber02/foreground_vertebral_horn_arch_01_source.png';
 import chamber02TollKeeperSkitterUrl from '../../art/raw/chamber02/chamber02_tollkeeper_skitter_01_left_alpha.png';
+import chamber03BgEntryNaveUrl from '../../art/raw/chamber03/chamber03_bg_entry_nave_01_source.png';
+import chamber03BgWallModuleUrl from '../../art/raw/chamber03/chamber03_bg_wall_module_01_source.png';
 import playerConceptUrl from '../../assets/concepts/player-concept-03-right-alpha.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
@@ -40,9 +42,6 @@ import loreExit01Url from '../../assets/audio/ui/lore_exit_01.ogg';
 import banishmentSting01Url from '../../assets/audio/ui/banishment_sting_01.ogg';
 import ambientChamber01Loop01Url from '../../assets/audio/ambient/ambient_chamber01_loop_01.ogg';
 import ambientChamber02Loop01Url from '../../assets/audio/ambient/ambient_chamber02_loop_01.ogg';
-
-const chamber03BgEntryNaveUrl = null;
-const chamber03BgWallModuleUrl = null;
 import { PROCEDURAL_AUDIO_URLS } from '../audio/proceduralAudio.js';
 import { ASSET_KEYS } from './assetKeys.js';
 
