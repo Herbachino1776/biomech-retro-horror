@@ -53,6 +53,11 @@ Milestone 4 is now considered **complete / closed out** for the currently shippe
 ### Core Goal
 Extend the shipped Chamber 01 + Chamber 02 baseline into the next playable content step while preserving the now-complete audio-integrated slice.
 
+### Immediate Milestone 5 Direction
+- Chamber 03 is the next major content target under Milestone 5.
+- Chamber 03 planning remains anchored to the **Ossuary Choir Hall** sector-finale vision.
+- Chamber 03 should be delivered in chunked implementation slices, not one giant pass.
+
 ## Do Not Change Casually
 - Base-path deployment contract (`/biomech-retro-horror/` prod, `/` dev).
 - Mobile/desktop input parity and screen-space anchoring rules.

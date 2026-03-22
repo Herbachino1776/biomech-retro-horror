@@ -32,6 +32,7 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 
 ## What Still Needs Work Now
 - Chamber 02 still ends with lore payoff rather than a playable Chamber 03 transition.
+- The Chamber 02 -> Chamber 03 continuity contract needs a real gate/progression-object handoff.
 - Content expansion beyond the shipped Chamber 01 + Chamber 02 slice is the next milestone focus.
 - Combat presentation can still be polished further later, but current readability is sufficient for the shipped baseline.
 
@@ -44,13 +45,20 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Constraints: preserve mobile playability, preserve keyboard parity, and do not destabilize the current shipped baseline while expanding content.
 
 ## Latest Completed Task
+- The repo has been intentionally rolled back to the state just before the failed oversized Chamber 03 implementation attempt.
 - Milestone 4 audio identity pass is shipped and closed out.
 - Chamber 01 + Chamber 02 ambience, player footsteps/combat/death audio, skitter/TOLL-KEEPER/miniboss cues, and lore/gate/banishment cues are integrated in the current playable slice.
 - Recent audio QA/polish has already been folded into the shipped baseline without changing the slice scope.
 - Docs/status files now reflect Milestone 4 completion and Milestone 5 activation.
 
 ## Exact Next Best Step After This Task
-Begin **Milestone 5 content expansion planning** for the next playable area progression, using the shipped Chamber 01 + Chamber 02 audio-integrated slice as the stability baseline.
+Use the Chamber 03 chunked planning docs as the implementation contract:
+- `docs/chamber-03-master-plan.md`
+- `docs/chamber-03-implementation-roadmap.md`
+
+Immediate follow-through:
+- correct Chamber 02 -> Chamber 03 continuity to use a real gate/progression object,
+- begin with the smallest Chamber 03 bootstrap slice rather than a full grand implementation.
 
 ## Most Important Constraints
 1. Do not regress GitHub Pages/Vite base-path behavior.
