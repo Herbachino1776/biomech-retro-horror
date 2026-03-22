@@ -205,7 +205,7 @@ export const CHAMBER01_MINIBOSS = {
 
 
 export const DEBUG_BOOT_OVERRIDES = {
-  startScene: null
+  startScene: 'Chamber03Scene'
 };
 
 export const CHAMBER02_EXIT_GATE_TRANSITION = {
