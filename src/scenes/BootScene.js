@@ -86,6 +86,12 @@ export class BootScene extends Phaser.Scene {
   create() {
     this.hasStarted = false;
     this.cameras.main.setBackgroundColor('#110d0c');
+    this.sound?.getAll?.().forEach((sound) => {
+      if (sound?.key === ASSET_KEYS.ambientChamber01Loop01 || sound?.key === ASSET_KEYS.ambientChamber02Loop01) {
+        sound.stop();
+        sound.destroy();
+      }
+    });
 
     if (DEBUG_BOOT_OVERRIDES.skipTitleAndBootSceneDirect) {
       this.beginChamber();

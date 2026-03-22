@@ -767,7 +767,7 @@ export class Chamber02Scene extends Phaser.Scene {
       enemy.attackHitbox?.body?.setEnable(false);
     });
 
-    this.audioDirector?.stopAmbientLoop();
+    this.audioDirector?.stopAmbientLoop({ fadeOut: false });
 
     this.time.delayedCall(20, () => {
       console.log("[Chamber02Scene] calling scene.start('Chamber03Scene')");

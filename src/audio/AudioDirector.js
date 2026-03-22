@@ -184,6 +184,7 @@ export class AudioDirector {
     this.lastPlayedAt = new Map();
     this.activeSounds = new Map();
     this.activeAmbient = null;
+    this.fadingAmbient = null;
     this.ambientFadeTween = null;
   }
 
@@ -225,27 +226,26 @@ export class AudioDirector {
   }
 
   stopAmbientLoop({ fadeOut = true } = {}) {
-    if (!this.activeAmbient) {
+    const ambient = this.activeAmbient;
+    if (!ambient) {
       return;
     }
 
-    const ambient = this.activeAmbient;
     this.activeAmbient = null;
     this.stopAmbientFadeTween();
 
     if (!fadeOut || !ambient.isPlaying) {
-      ambient.stop();
-      ambient.destroy();
+      this.destroyAmbient(ambient);
       return;
     }
 
+    this.fadingAmbient = ambient;
     this.ambientFadeTween = this.scene.tweens.add({
       targets: ambient,
       volume: 0,
       duration: AMBIENT_SOUND_CONFIG.fadeDurationMs,
       onComplete: () => {
-        ambient.stop();
-        ambient.destroy();
+        this.destroyAmbient(ambient);
         if (this.ambientFadeTween?.targets?.includes?.(ambient)) {
           this.ambientFadeTween = null;
         }
@@ -260,6 +260,25 @@ export class AudioDirector {
 
     this.ambientFadeTween.stop();
     this.ambientFadeTween = null;
+  }
+
+  destroyAmbient(ambient = this.fadingAmbient ?? this.activeAmbient) {
+    if (!ambient) {
+      return;
+    }
+
+    if (this.activeAmbient === ambient) {
+      this.activeAmbient = null;
+    }
+
+    if (this.fadingAmbient === ambient) {
+      this.fadingAmbient = null;
+    }
+
+    if (ambient.isPlaying) {
+      ambient.stop();
+    }
+    ambient.destroy();
   }
 
   playProfileGroup(profile, event) {
@@ -333,9 +352,11 @@ export class AudioDirector {
   }
 
   shutdown() {
+    this.stopAmbientFadeTween();
+    this.destroyAmbient(this.activeAmbient);
+    this.destroyAmbient(this.fadingAmbient);
     this.stopAmbientLoop({ fadeOut: false });
     this.activeSounds.forEach((sound) => sound.stop());
     this.activeSounds.clear();
   }
 }
-

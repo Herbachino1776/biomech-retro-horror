@@ -6,6 +6,7 @@ const CHAMBER03_SCENE_KEY = 'Chamber03Scene';
 const CHAMBER03_BOSS_ARENA_SCENE_KEY = 'Chamber03BossArenaScene';
 const SECTOR_COMPLETE_SCENE_KEY = 'SectorCompleteScene';
 const LORE_SCENE_KEYS = ['LoreScreenScene', 'LoreCutsceneScene'];
+const GAMEPLAY_AMBIENT_KEYS = [ASSET_KEYS.ambientChamber01Loop01, ASSET_KEYS.ambientChamber02Loop01];
 
 export function restartRunFromDeath(scene) {
   if (!scene?.scene) {
@@ -14,6 +15,10 @@ export function restartRunFromDeath(scene) {
 
   scene.game?.sound?.get(ASSET_KEYS.loreEnter)?.stop();
   scene.game?.sound?.get(ASSET_KEYS.loreExit)?.stop();
+  GAMEPLAY_AMBIENT_KEYS.forEach((ambientKey) => {
+    scene.game?.sound?.get(ambientKey)?.stop();
+    scene.game?.sound?.removeByKey?.(ambientKey);
+  });
 
   LORE_SCENE_KEYS.forEach((loreSceneKey) => {
     scene.scene.stop(loreSceneKey);
