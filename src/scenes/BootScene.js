@@ -25,7 +25,8 @@ export class BootScene extends Phaser.Scene {
     this.load.image(ASSET_KEYS.chamber02FloorStrip, ASSET_URLS[ASSET_KEYS.chamber02FloorStrip]);
     this.load.image(ASSET_KEYS.chamber02ForegroundHornArch, ASSET_URLS[ASSET_KEYS.chamber02ForegroundHornArch]);
     this.load.image(ASSET_KEYS.chamber02TollKeeperSkitter, ASSET_URLS[ASSET_KEYS.chamber02TollKeeperSkitter]);
-    this.load.image(ASSET_KEYS.chamber02ExitGateLore, ASSET_URLS[ASSET_KEYS.chamber02ExitGateLore]);
+    this.preloadOptionalImage(ASSET_KEYS.chamber03BackdropEntryNave);
+    this.preloadOptionalImage(ASSET_KEYS.chamber03BackdropWallModule);
     this.load.image(ASSET_KEYS.player, ASSET_URLS[ASSET_KEYS.player]);
     this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
@@ -68,6 +69,15 @@ export class BootScene extends Phaser.Scene {
   }
 
 
+  preloadOptionalImage(assetKey) {
+    const assetUrl = ASSET_URLS[assetKey];
+    if (!assetUrl) {
+      return;
+    }
+
+    this.load.image(assetKey, assetUrl);
+  }
+
   preloadAudioAsset(assetKey) {
     const assetUrl = ASSET_URLS[assetKey];
     if (!assetUrl) {
@@ -103,7 +113,7 @@ export class BootScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(centerX, centerY - (smallViewport ? 44 : 2), 'CHAMBERS 01-02 // ENCOUNTER SLICE', {
+      .text(centerX, centerY - (smallViewport ? 44 : 2), 'CHAMBERS 01-03 // VERTICAL SLICE', {
         fontFamily: 'monospace',
         fontSize: '16px',
         color: '#8f7d72',

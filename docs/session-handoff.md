@@ -31,8 +31,8 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Texture-first asset loading with fallback resilience remains stable.
 
 ## What Still Needs Work Now
-- Chamber 02 still ends with lore payoff rather than a playable Chamber 03 transition.
-- The Chamber 02 -> Chamber 03 continuity contract needs a real gate/progression-object handoff.
+- Chamber 02 now hands off through a real physical exit gate into a minimal playable Chamber 03 bootstrap.
+- Chamber 03 still needs its future threshold lore, encounter buildout, boss arena, and finale payoff layers.
 - Content expansion beyond the shipped Chamber 01 + Chamber 02 slice is the next milestone focus.
 - Combat presentation can still be polished further later, but current readability is sufficient for the shipped baseline.
 

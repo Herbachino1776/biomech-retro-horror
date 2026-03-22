@@ -106,8 +106,7 @@ const CHAMBER02_EXIT_GATE = {
   lockedTint: 0x927f66,
   lockedAlpha: 0.76,
   unlockedTint: 0xd7c5ac,
-  unlockedAlpha: 0.96,
-  loreCutsceneId: 'chamber02-exit-gate'
+  unlockedAlpha: 0.96
 };
 
 export class Chamber02Scene extends Phaser.Scene {
@@ -135,7 +134,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.isLoreTransitionActive = false;
     this.isRestartingRun = false;
     this.hasAppliedPostLoreReaction = false;
-    this.hasTriggeredExitGateLore = false;
+    this.isTransitioningToChamber03 = false;
     this.exitGateUnlockAudioTimer = null;
 
     this.renderProcessionalBackdrop();
@@ -490,7 +489,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.exitGateSigil?.setAlpha(unlocked ? 0.3 : 0.14);
     this.applyExitGateVisualState(unlocked);
     this.exitGateBarrier?.setVisible(!unlocked);
-    this.exitGateReadyAura?.setVisible(unlocked && !this.hasTriggeredExitGateLore);
+    this.exitGateReadyAura?.setVisible(unlocked && !this.isTransitioningToChamber03);
 
     if (this.exitGateBarrier?.body) {
       this.exitGateBarrier.body.enable = !unlocked;
@@ -536,7 +535,7 @@ export class Chamber02Scene extends Phaser.Scene {
   refreshExitGatePresence() {
     this.currentGateZone = null;
 
-    if (!this.exitGateZone || this.hasTriggeredExitGateLore || !this.areAllTollKeepersDefeated()) {
+    if (!this.exitGateZone || this.isTransitioningToChamber03 || !this.areAllTollKeepersDefeated()) {
       return;
     }
 
@@ -569,7 +568,7 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   tryUseExitGate(mobileInput) {
-    if (!this.currentGateZone || this.isLoreTransitionActive || this.hasTriggeredExitGateLore) {
+    if (!this.currentGateZone || this.isLoreTransitionActive || this.isTransitioningToChamber03) {
       return;
     }
 
@@ -582,9 +581,9 @@ export class Chamber02Scene extends Phaser.Scene {
       return;
     }
 
-    this.hasTriggeredExitGateLore = true;
+    this.isTransitioningToChamber03 = true;
     this.audioDirector?.playGateInteract();
-    this.beginLoreSequence({ cutsceneId: CHAMBER02_EXIT_GATE.loreCutsceneId });
+    this.transitionToChamber03();
   }
 
   launchLoreCutscene(cutsceneId) {
@@ -627,23 +626,30 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   handleLoreCutsceneComplete({ cutsceneId } = {}) {
-    if (cutsceneId === CHAMBER02_LORE_ENTRY.cutsceneId) {
-      this.applyPostLoreReactionState();
-    }
-
-    if (cutsceneId === CHAMBER02_EXIT_GATE.loreCutsceneId) {
-      this.exitGateReadyAura?.setVisible(false);
-      this.exitGateSigil?.setAlpha(0.38);
-    }
-
-    if (cutsceneId !== CHAMBER02_LORE_ENTRY.cutsceneId && cutsceneId !== CHAMBER02_EXIT_GATE.loreCutsceneId) {
+    if (cutsceneId !== CHAMBER02_LORE_ENTRY.cutsceneId) {
       return;
     }
 
+    this.applyPostLoreReactionState();
     this.isLoreTransitionActive = false;
     this.mobileControls.setMode('gameplay');
     this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01);
     this.cameras.main.fadeIn(500, 0, 0, 0);
+  }
+
+  transitionToChamber03() {
+    this.exitGateReadyAura?.setVisible(false);
+    this.exitGateSigil?.setAlpha(0.38);
+    this.mobileControls.setMode('dialogue');
+    this.player.body.setVelocity(0, 0);
+    this.enemies.forEach((enemy) => enemy.body.setVelocity(0, 0));
+    this.audioDirector?.stopAmbientLoop();
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.start('Chamber03Scene', { fromScene: this.scene.key });
+    });
+
+    this.cameras.main.fadeOut(380, 0, 0, 0);
   }
 
   applyPostLoreReactionState() {
