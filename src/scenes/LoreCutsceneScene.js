@@ -53,7 +53,7 @@ export class LoreCutsceneScene extends Phaser.Scene {
   }
 
   create(data) {
-    this.returnSceneKey = data?.returnSceneKey ?? 'Chamber02Scene';
+    this.returnSceneKey = data?.returnSceneKey ?? null;
     playLoreEnter(this.sound);
     this.cutsceneId = data?.cutsceneId ?? null;
     this.cutscene = this.cutsceneId ? LORE_CUTSCENES[this.cutsceneId] : null;
@@ -275,7 +275,9 @@ export class LoreCutsceneScene extends Phaser.Scene {
     this.isClosing = true;
     playLoreExit(this.sound);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.resume(this.returnSceneKey);
+      if (this.returnSceneKey) {
+        this.scene.resume(this.returnSceneKey);
+      }
       this.game.events.emit('lore-cutscene-complete', { cutsceneId: this.cutsceneId });
       this.scene.stop();
     });
