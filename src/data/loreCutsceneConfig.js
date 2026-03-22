@@ -31,35 +31,6 @@ export const LORE_CUTSCENES = {
     }
   },
 
-  'chamber02-exit-gate': {
-    id: 'chamber02-exit-gate',
-    imageKey: ASSET_KEYS.chamber02ExitGateLore,
-    title: 'CHAMBER 02 // EXIT TOLL GATE',
-    body: [
-      'When the toll-keepers split open, the gate remembers a softer cruelty.',
-      'Its hinge-flesh parts one vertebra at a time and counts the marrow debt you still carry.',
-      'Beyond this sealed mouth, the third chamber waits for a witness willing to be entered first.'
-    ],
-    prompt: 'Press [E] / [Enter] or tap to continue',
-    style: {
-      frameColor: 0xb7a383,
-      titleColor: '#9bb085',
-      bodyColor: '#d4c5af',
-      promptColor: '#8a9f79',
-      imageTint: 0xd6c0a8,
-      imageAlpha: 0.97,
-      backgroundColor: '#000000',
-      motion: {
-        panX: 12,
-        panY: -10,
-        zoom: 1.035,
-        duration: 8800,
-        shakeX: 2,
-        shakeY: 1,
-        shakeDuration: 3400
-      }
-    }
-  },
   'chamber02-horn-arch': {
     id: 'chamber02-horn-arch',
     imageKey: ASSET_KEYS.chamber02VertebralHornGate,

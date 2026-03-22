@@ -15,7 +15,7 @@ The shipped playable slice remains Chamber 01 and Chamber 02, now with stabilize
 - Chamber 02 enemy encounters remain active with conservative wake timing and readable spacing.
 - Chamber 02 TOLL-KEEPER encounter pair gates the chamber exit and now has clearer end-gate readiness feedback.
 - Chamber 02 central lore trigger still uses a dedicated cinematic cutscene flow and now retains a clear diegetic shrine/ossuary affordance at the trigger site.
-- Chamber 02 exit gate unlock + lore trigger flow remains intact after the TOLL-KEEPER fight.
+- Chamber 02 exit gate now unlocks after the TOLL-KEEPER pair and transitions directly into a minimal playable Chamber 03 bootstrap.
 - Chamber 01 and Chamber 02 ambience are integrated in the shipped flow.
 - Player combat/death feedback, skitter, TOLL-KEEPER, miniboss, lore/gate, and banishment audio cues are present in the shipped slice.
 - Mobile controls remain screen-space anchored and usable in portrait + landscape.
@@ -43,7 +43,7 @@ Milestone 4 is now considered **complete / closed out** for the currently shippe
 7. Landscape usability remains intact.
 
 ## Known Remaining Rough Edges (Non-Blocking)
-- Chamber 02 still ends on an exit-gate lore payoff rather than entering a playable Chamber 03, which is acceptable because new chambers remain out of scope for the shipped slice.
+- Chamber 03 currently exists as a deliberately minimal bootstrap chamber: visible, playable, and stable, but not yet built out into its boss/threshold/finale layers.
 - Combat presentation remains intentionally restrained and should only expand when content work needs it.
 - Future milestone work should add new playable content without destabilizing the shipped Chamber 01 + Chamber 02 baseline.
 

@@ -4,11 +4,12 @@ import { BootScene } from './scenes/BootScene.js';
 import { Chamber01Scene } from './scenes/Chamber01Scene.js';
 import { LoreScreenScene } from './scenes/LoreScreenScene.js';
 import { Chamber02Scene } from './scenes/Chamber02Scene.js';
+import { Chamber03Scene } from './scenes/Chamber03Scene.js';
 import { LoreCutsceneScene } from './scenes/LoreCutsceneScene.js';
 
 const config = {
   ...gameConfig,
-  scene: [BootScene, Chamber01Scene, LoreScreenScene, Chamber02Scene, LoreCutsceneScene],
+  scene: [BootScene, Chamber01Scene, LoreScreenScene, Chamber02Scene, Chamber03Scene, LoreCutsceneScene],
   physics: {
     default: 'arcade',
     arcade: {
