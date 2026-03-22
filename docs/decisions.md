@@ -47,6 +47,15 @@ Concise record of technical/design decisions currently in force.
 - Milestone 3 implementation landed in the intended order: regular enemy encounter depth pass first, miniboss refinement second, limited combat presentation support third.
 - Milestone 4 (**Audio Identity**) is complete for the shipped Chamber 01 + Chamber 02 slice.
 - Milestone 5 (**Content Expansion**) is now the active milestone.
+- Major chamber expansion should be implemented in milestone slices rather than one oversized pass.
+
+## Chamber Progression Doctrine
+- Chamber 03 is the planned **Ossuary Choir Hall** and Bucket 01 sector finale.
+- Chamber 03 contains the first true boss and closes the opening dead-god palace / laughing-engine / subterranean biomech necropolis thread.
+- All future chambers should aim for **Chamber-03-level consequence, length, and complexity** even when their implementation is chunked.
+- Every future chamber should include substantial encounter design plus a climax entity: miniboss, elite/high-level enemy, or true boss.
+- Chambers should differentiate through art/theme, trigger placement, pacing, enemy placement, and climax tier rather than by lowering stakes.
+- Chamber 02 -> Chamber 03 continuity should use a real gate/progression-object transition, not a fragile lore-screen-only handoff.
 
 ## Lore Presentation Direction
 - Lore is a core identity system, not optional garnish.
