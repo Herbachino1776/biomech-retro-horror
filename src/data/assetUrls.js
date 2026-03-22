@@ -16,6 +16,8 @@ import chamber03BackgroundWallModuleUrl from '../../art/raw/chamber03/chamber03_
 import chamber03BackgroundChoirOpeningUrl from '../../art/raw/chamber03/chamber03_bg_choir_opening_01_source.png';
 import chamber03BackgroundThresholdUrl from '../../art/raw/chamber03/chamber03_bg_threshold_01_source.png';
 import chamber03BackgroundBossDaisUrl from '../../art/raw/chamber03/chamber03_bg_boss_dais_01_source.png';
+import chamber03Lore01Url from '../../art/raw/chamber03/chamber03_lore_01_source.png';
+import chamber03BossPrecentorUrl from '../../art/raw/chamber03/boss_chamber03_precentor_main_01_alpha.png';
 import playerConceptUrl from '../../assets/concepts/player-concept-03-right-alpha.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
@@ -68,6 +70,8 @@ export const ASSET_URLS = {
   [ASSET_KEYS.chamber03BackgroundChoirOpening]: chamber03BackgroundChoirOpeningUrl,
   [ASSET_KEYS.chamber03BackgroundThreshold]: chamber03BackgroundThresholdUrl,
   [ASSET_KEYS.chamber03BackgroundBossDais]: chamber03BackgroundBossDaisUrl,
+  [ASSET_KEYS.chamber03Lore01]: chamber03Lore01Url,
+  [ASSET_KEYS.chamber03BossPrecentor]: chamber03BossPrecentorUrl,
   [ASSET_KEYS.player]: playerConceptUrl,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,
