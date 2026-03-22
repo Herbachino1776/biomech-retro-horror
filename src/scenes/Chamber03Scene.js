@@ -24,10 +24,10 @@ const CHAMBER03_BOOTSTRAP = {
   floorAlpha: 0.82,
   landmarkX: 1680,
   landmarkY: 286,
-  diagnosticBackground: 0x2d0f12,
-  diagnosticFloor: 0xd3c2a4,
-  errorBackground: 0x1a0708,
-  errorFloor: 0x8b5447
+  proofBackgroundTint: 0x2d0f12,
+  proofBackgroundAlpha: 1,
+  proofFloorTint: 0xc89b62,
+  proofFloorAlpha: 0.94
 };
 
 export class Chamber03Scene extends Phaser.Scene {
@@ -40,10 +40,15 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   create() {
-    this.bootDiagnostics = { phases: [] };
+    this.bootError = null;
+    this.player = null;
+    this.hud = null;
+    this.mobileControls = null;
+    this.uiCamera = null;
     this.platforms = this.physics.add.staticGroup();
 
-    this.renderImmediateBootProof();
+    this.renderBootProof();
+    this.logBootPhase('create:start', this.transitionContext);
 
     try {
       this.runBootPhase('phase 1: world/camera bounds', () => {
@@ -69,7 +74,9 @@ export class Chamber03Scene extends Phaser.Scene {
         this.hud = new HudOverlay(this);
         this.mobileControls = new MobileControls(this);
         this.setupMobileUiCamera();
+      });
 
+      this.runBootPhase('phase 5: camera follow/layout', () => {
         this.restartText = this.add
           .text(this.scale.width / 2, 90, '', {
             fontFamily: 'monospace',
@@ -92,9 +99,7 @@ export class Chamber03Scene extends Phaser.Scene {
           .setScrollFactor(0)
           .setDepth(30)
           .setOrigin(0.5);
-      });
 
-      this.runBootPhase('phase 5: camera follow/layout', () => {
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
         this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
@@ -111,109 +116,100 @@ export class Chamber03Scene extends Phaser.Scene {
 
         this.hud.update(this.player.health, PLAYER.maxHealth);
       });
+
+      this.hideBootFailureText();
+      this.logBootPhase('create:complete');
     } catch (error) {
-      this.handleCreateFailure(error);
+      this.handleBootFailure(error);
     }
   }
 
-  runBootPhase(label, fn) {
-    console.log(`[Chamber03Scene] ${label} start`);
-    this.bootDiagnostics?.phases.push({ label, status: 'start' });
-    fn();
-    console.log(`[Chamber03Scene] ${label} ok`);
-    this.bootDiagnostics?.phases.push({ label, status: 'ok' });
-  }
-
-  renderImmediateBootProof() {
+  renderBootProof() {
     this.bootProofBackground = this.add
       .rectangle(
         CHAMBER03_WORLD.width / 2,
         CHAMBER03_WORLD.height / 2,
         CHAMBER03_WORLD.width,
         CHAMBER03_WORLD.height,
-        CHAMBER03_BOOTSTRAP.diagnosticBackground,
-        1
+        CHAMBER03_BOOTSTRAP.proofBackgroundTint,
+        CHAMBER03_BOOTSTRAP.proofBackgroundAlpha
       )
       .setOrigin(0.5)
-      .setDepth(-40);
+      .setDepth(-100);
 
     this.bootProofFloor = this.add
       .rectangle(
         CHAMBER03_WORLD.width / 2,
-        WORLD.floorY + 8,
+        WORLD.floorY + 14,
         CHAMBER03_WORLD.width,
-        92,
-        CHAMBER03_BOOTSTRAP.diagnosticFloor,
-        0.94
+        112,
+        CHAMBER03_BOOTSTRAP.proofFloorTint,
+        CHAMBER03_BOOTSTRAP.proofFloorAlpha
       )
-      .setDepth(-39);
+      .setDepth(-99);
 
-    this.bootProofLabel = this.add
-      .text(26, 22, 'CHAMBER 03 BOOT OK', {
+    this.bootProofText = this.add
+      .text(20, 20, 'CHAMBER 03 BOOT OK', {
         fontFamily: 'monospace',
         fontSize: '28px',
-        color: '#f5e6c8',
-        backgroundColor: '#3d1619',
-        padding: { x: 10, y: 6 }
+        color: '#fff1bf',
+        backgroundColor: '#3a1416',
+        padding: { x: 14, y: 8 }
       })
       .setScrollFactor(0)
-      .setDepth(120)
+      .setDepth(100)
       .setOrigin(0, 0);
   }
 
-  handleCreateFailure(error) {
-    console.error('[Chamber03Scene] create() boot failure', error);
-    this.cameras.main?.setBackgroundColor?.(`#${CHAMBER03_BOOTSTRAP.errorBackground.toString(16).padStart(6, '0')}`);
+  runBootPhase(label, callback) {
+    this.logBootPhase(label + ':start');
+    callback();
+    this.logBootPhase(label + ':ok');
+  }
 
-    if (!this.bootProofBackground?.active) {
-      this.bootProofBackground = this.add
-        .rectangle(
-          CHAMBER03_WORLD.width / 2,
-          CHAMBER03_WORLD.height / 2,
-          CHAMBER03_WORLD.width,
-          CHAMBER03_WORLD.height,
-          CHAMBER03_BOOTSTRAP.errorBackground,
-          1
-        )
-        .setOrigin(0.5)
-        .setDepth(-40);
-    }
-
-    if (!this.bootProofFloor?.active) {
-      this.bootProofFloor = this.add
-        .rectangle(
-          CHAMBER03_WORLD.width / 2,
-          WORLD.floorY + 8,
-          CHAMBER03_WORLD.width,
-          92,
-          CHAMBER03_BOOTSTRAP.errorFloor,
-          0.94
-        )
-        .setDepth(-39);
-    } else {
-      this.bootProofFloor.setFillStyle(CHAMBER03_BOOTSTRAP.errorFloor, 0.94);
-    }
-
-    this.bootProofLabel?.setText('CHAMBER 03 BOOT FAILURE').setBackgroundColor('#4a1418');
-
-    const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
-    if (this.bootFailureText?.active) {
-      this.bootFailureText.setText(`CHAMBER 03 BOOT FAILURE\n${message}`);
+  logBootPhase(label, payload) {
+    if (payload !== undefined) {
+      console.log(`[Chamber03Scene] ${label}`, payload);
       return;
     }
 
-    this.bootFailureText = this.add
-      .text(26, 74, `CHAMBER 03 BOOT FAILURE\n${message}`, {
-        fontFamily: 'monospace',
-        fontSize: '18px',
-        color: '#ffd7cf',
-        backgroundColor: '#22090b',
-        wordWrap: { width: Math.max(260, this.scale.width - 52) },
-        padding: { x: 10, y: 8 }
-      })
-      .setScrollFactor(0)
-      .setDepth(121)
-      .setOrigin(0, 0);
+    console.log(`[Chamber03Scene] ${label}`);
+  }
+
+  handleBootFailure(error) {
+    this.bootError = error;
+    console.error('[Chamber03Scene] boot failure', error);
+    this.showBootFailureText(error);
+    this.mobileControls?.setMode('dialogue');
+    this.hud?.setVisible(false);
+  }
+
+  showBootFailureText(error) {
+    const errorMessage = error instanceof Error ? error.message : String(error ?? 'Unknown Chamber 03 boot error');
+    const failureCopy = `CHAMBER 03 BOOT FAILURE\n${errorMessage}`;
+
+    if (!this.bootFailureText) {
+      this.bootFailureText = this.add
+        .text(this.scale.width / 2, this.scale.height / 2, failureCopy, {
+          fontFamily: 'monospace',
+          fontSize: '20px',
+          color: '#ffe4d2',
+          backgroundColor: '#2a0608',
+          align: 'center',
+          wordWrap: { width: Math.max(320, this.scale.width - 60) },
+          padding: { x: 18, y: 12 }
+        })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(120);
+      return;
+    }
+
+    this.bootFailureText.setText(failureCopy).setVisible(true);
+  }
+
+  hideBootFailureText() {
+    this.bootFailureText?.setVisible(false);
   }
 
   renderBackdrop() {
@@ -305,14 +301,24 @@ export class Chamber03Scene extends Phaser.Scene {
   }
 
   update(time) {
-    if (!this.player || !this.mobileControls || !this.hud || !this.restartText) {
+    if (this.bootError) {
       return;
     }
 
-    const mobileInput = this.mobileControls.getInputState();
+    const mobileInput = this.mobileControls?.getInputState?.() ?? {
+      left: false,
+      right: false,
+      jumpPressed: false,
+      attackPressed: false,
+      interactPressed: false
+    };
+
+    if (!this.player || !this.cursors || !this.keyAttack || !this.keyRestart || !this.restartText) {
+      return;
+    }
 
     if (this.player.isDead) {
-      this.mobileControls.setMode('dead');
+      this.mobileControls?.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
       if (Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) {
         this.cleanupSceneUi();
@@ -322,7 +328,7 @@ export class Chamber03Scene extends Phaser.Scene {
     }
 
     this.restartText.setVisible(false);
-    this.mobileControls.setMode('gameplay');
+    this.mobileControls?.setMode('gameplay');
 
     this.player.update(time, {
       left: this.cursors.left.isDown || mobileInput.left,
@@ -334,11 +340,11 @@ export class Chamber03Scene extends Phaser.Scene {
       attackPressed: Phaser.Input.Keyboard.JustDown(this.keyAttack) || mobileInput.attackPressed
     });
 
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud?.update(this.player.health, PLAYER.maxHealth);
   }
 
   setupMobileUiCamera() {
-    if (!this.mobileControls.enabled) {
+    if (!this.mobileControls?.enabled) {
       return;
     }
 
@@ -381,6 +387,7 @@ export class Chamber03Scene extends Phaser.Scene {
   cleanupSceneUi() {
     this.restartText?.setVisible(false);
     this.chamberLabel?.setVisible(false);
+    this.bootFailureText?.setVisible(false);
     this.mobileControls?.setMode('init');
     this.hud?.setVisible(false);
   }
@@ -389,13 +396,15 @@ export class Chamber03Scene extends Phaser.Scene {
     const camera = this.cameras.main;
     const width = this.scale.width;
     const height = this.scale.height;
-    const isPortraitMobile = this.mobileControls.enabled && height >= width;
+    const isPortraitMobile = this.mobileControls?.enabled && height >= width;
 
     if (this.uiCamera) {
       this.uiCamera.setViewport(0, 0, width, height);
     }
 
     this.chamberLabel?.setPosition(width / 2, 44);
+    this.bootProofText?.setPosition(20, 20);
+    this.bootFailureText?.setPosition(width / 2, height / 2).setWordWrapWidth(Math.max(320, width - 60));
 
     if (isPortraitMobile) {
       const safeAreaBottom = this.mobileControls.getSafeAreaInsetPx('bottom');
@@ -423,7 +432,7 @@ export class Chamber03Scene extends Phaser.Scene {
     camera.setViewport(0, 0, width, height);
     camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
     camera.setFollowOffset(-140, PORTRAIT_LAYOUT.desktopFollowOffsetY);
-    this.mobileControls.setReservedBottomPx(0);
+    this.mobileControls?.setReservedBottomPx(0);
     this.restartText?.setPosition(width / 2, 90);
   }
 }
