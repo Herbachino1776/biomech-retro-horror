@@ -22,7 +22,9 @@ const CHAMBER03_DEBUG = {
   fallbackMoveSpeed: 200,
   fallbackJumpVelocity: -450,
   pointerFlashMs: 650,
-  portraitWorldBandHeight: 308
+  portraitWorldBandHeight: 308,
+  mobileControlsDebugOverlay: true,
+  emergencyTouchBypass: true
 };
 
 class Chamber03FallbackPlayer {
@@ -83,6 +85,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.lastControlMode = 'init';
     this.lastInputSnapshot = null;
     this.playerUsesFallback = CHAMBER03_DEBUG.useFallbackPlayer;
+    this.debugBypassInput = { left: false, right: false, jumpQueued: false, jumpHeld: false, attackQueued: false, attackHeld: false };
   }
 
   create() {
@@ -138,7 +141,12 @@ export class Chamber03Scene extends Phaser.Scene {
 
       this.hud = new HudOverlay(this);
       this.mobileControls = new MobileControls(this);
+      this.mobileControls.setDebugOverlayEnabled(CHAMBER03_DEBUG.mobileControlsDebugOverlay, { sceneKey: 'Chamber03Scene' });
       this.mobileControls.setMode('gameplay');
+
+      if (CHAMBER03_DEBUG.emergencyTouchBypass) {
+        this.createEmergencyTouchBypass();
+      }
 
       this.restartText = this.add
         .text(this.scale.width / 2, 90, '', {
@@ -259,14 +267,16 @@ export class Chamber03Scene extends Phaser.Scene {
     }
 
     const mobileInput = this.mobileControls.getInputState();
+    const bypassInput = this.getEmergencyBypassInput();
     const inputSnapshot = {
-      left: this.cursors.left.isDown || mobileInput.left,
-      right: this.cursors.right.isDown || mobileInput.right,
+      left: this.cursors.left.isDown || mobileInput.left || bypassInput.left,
+      right: this.cursors.right.isDown || mobileInput.right || bypassInput.right,
       jumpPressed:
         Phaser.Input.Keyboard.JustDown(this.cursors.up) ||
         Phaser.Input.Keyboard.JustDown(this.cursors.space) ||
-        mobileInput.jumpPressed,
-      attackPressed: Phaser.Input.Keyboard.JustDown(this.keyAttack) || mobileInput.attackPressed
+        mobileInput.jumpPressed ||
+        bypassInput.jumpPressed,
+      attackPressed: Phaser.Input.Keyboard.JustDown(this.keyAttack) || mobileInput.attackPressed || bypassInput.attackPressed
     };
 
     if (this.player.isDead) {
@@ -284,10 +294,10 @@ export class Chamber03Scene extends Phaser.Scene {
     this.restartText.setVisible(false);
     this.player.update(time, inputSnapshot);
     this.hud.update(this.player.health, PLAYER.maxHealth);
-    this.updateDebugTelemetry(time, mobileInput, inputSnapshot);
+    this.updateDebugTelemetry(time, mobileInput, inputSnapshot, bypassInput);
   }
 
-  updateDebugTelemetry(time, mobileInput, inputSnapshot = this.lastInputSnapshot) {
+  updateDebugTelemetry(time, mobileInput, inputSnapshot = this.lastInputSnapshot, bypassInput = this.debugBypassInput) {
     this.lastInputSnapshot = inputSnapshot;
 
     const keyboardState = {
@@ -319,11 +329,19 @@ export class Chamber03Scene extends Phaser.Scene {
       `body.enable: ${body?.enable === true}`,
       `blocked.down: ${body?.blocked?.down === true}`,
       `ptr: ${this.lastPointerMessage}`,
-      `applied L:${Number(Boolean(inputSnapshot?.left))} R:${Number(Boolean(inputSnapshot?.right))} J:${Number(Boolean(inputSnapshot?.jumpPressed))} A:${Number(Boolean(inputSnapshot?.attackPressed))}`
+      `bypass L:${Number(Boolean(bypassInput?.left))} R:${Number(Boolean(bypassInput?.right))} J:${Number(Boolean(bypassInput?.jumpHeld))} A:${Number(Boolean(bypassInput?.attackHeld))}`,
+      `applied L:${Number(Boolean(inputSnapshot?.left))} R:${Number(Boolean(inputSnapshot?.right))} J:${Number(Boolean(inputSnapshot?.jumpPressed))} A:${Number(Boolean(inputSnapshot?.attackPressed))}`,
+      `vel x:${Math.round(body?.velocity?.x ?? 0)} y:${Math.round(body?.velocity?.y ?? 0)}`
     ];
 
     this.debugHeartbeatText?.setText(heartbeatLines.join('\n'));
     this.debugInputText?.setText(inputLines.join('\n'));
+    this.mobileControls?.updateDebugTelemetry({
+      chamberAppliedLeft: Number(Boolean(inputSnapshot?.left)),
+      chamberAppliedRight: Number(Boolean(inputSnapshot?.right)),
+      chamberAppliedJump: Number(Boolean(inputSnapshot?.jumpPressed)),
+      chamberAppliedAttack: Number(Boolean(inputSnapshot?.attackPressed))
+    });
     this.pointerFlash?.setVisible(pointerActive);
     if (!pointerActive) {
       this.pointerFlash?.setFillStyle(0x5b2b2f, 0.55);
@@ -358,6 +376,141 @@ export class Chamber03Scene extends Phaser.Scene {
       this.lastControlMode = this.mobileControls?.mode ?? 'none';
       console.log('[Chamber03Scene] mobile controls mode changed', this.lastControlMode);
     }
+  }
+
+
+  createEmergencyTouchBypass() {
+    this.emergencyTouchZones = [];
+    this.emergencyTouchLayer = this.add.layer().setDepth(67).setScrollFactor(0);
+
+    const zoneSpecs = [
+      { action: 'left', label: 'DBG LEFT', color: 0x4aa3c7 },
+      { action: 'right', label: 'DBG RIGHT', color: 0x7cc96b },
+      { action: 'jump', label: 'DBG JUMP', color: 0xd5a15c },
+      { action: 'attack', label: 'DBG ATK', color: 0xc96a88 }
+    ];
+
+    zoneSpecs.forEach((spec) => {
+      const rect = this.add.rectangle(0, 0, 10, 10, spec.color, 0.22).setScrollFactor(0).setStrokeStyle(2, spec.color, 0.88);
+      const label = this.add.text(0, 0, spec.label, {
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        color: '#f4e6d2',
+        stroke: '#120c0b',
+        strokeThickness: 4
+      }).setOrigin(0.5).setScrollFactor(0);
+      const zone = this.add.zone(0, 0, 10, 10).setScrollFactor(0).setInteractive({ useHandCursor: false });
+      const entry = { ...spec, rect, label, zone, activePointers: new Set() };
+      zone
+        .on('pointerdown', (pointer) => this.onEmergencyZonePress(entry, pointer))
+        .on('pointerup', (pointer) => this.onEmergencyZoneRelease(entry, pointer))
+        .on('pointerout', (pointer) => this.onEmergencyZoneRelease(entry, pointer));
+      this.emergencyTouchZones.push(entry);
+      this.emergencyTouchLayer.add([rect, label, zone]);
+    });
+
+    this.input.on('pointerup', this.handleEmergencyPointerUp, this);
+    this.layoutEmergencyTouchBypass();
+  }
+
+  layoutEmergencyTouchBypass() {
+    if (!this.emergencyTouchZones?.length) {
+      return;
+    }
+
+    const width = this.scale.width;
+    const height = this.scale.height;
+    const isPortrait = height >= width;
+    const bandHeight = isPortrait ? Math.max(184, Math.round(height * 0.3)) : Math.max(132, Math.round(height * 0.22));
+    const bandTop = height - bandHeight;
+    const specs = {
+      left: { x: width * 0.18, y: bandTop + bandHeight * 0.56, w: width * 0.28, h: bandHeight * 0.72 },
+      right: { x: width * 0.44, y: bandTop + bandHeight * 0.56, w: width * 0.28, h: bandHeight * 0.72 },
+      jump: { x: width * 0.76, y: bandTop + bandHeight * 0.52, w: width * 0.3, h: bandHeight * 0.78 },
+      attack: { x: width * 0.76, y: bandTop + bandHeight * 0.2, w: width * 0.24, h: bandHeight * 0.28 }
+    };
+
+    this.emergencyTouchZones.forEach((entry) => {
+      const spec = specs[entry.action];
+      if (!spec) return;
+      entry.rect.setPosition(spec.x, spec.y).setSize(spec.w, spec.h);
+      entry.zone.setPosition(spec.x, spec.y).setSize(spec.w, spec.h);
+      entry.label.setPosition(spec.x, spec.y);
+    });
+  }
+
+  onEmergencyZonePress(entry, pointer) {
+    entry.activePointers.add(pointer.id);
+    entry.rect.setAlpha(0.42);
+    entry.label.setText(`DBG ${entry.action.toUpperCase()} ON`);
+    if (entry.action === 'left' || entry.action === 'right') {
+      this.debugBypassInput[entry.action] = true;
+      if (entry.action === 'left') {
+        this.debugBypassInput.right = false;
+      } else {
+        this.debugBypassInput.left = false;
+      }
+    }
+    if (entry.action === 'jump') {
+      this.debugBypassInput.jumpHeld = true;
+      this.debugBypassInput.jumpQueued = true;
+    }
+    if (entry.action === 'attack') {
+      this.debugBypassInput.attackHeld = true;
+      this.debugBypassInput.attackQueued = true;
+    }
+    console.log('[Chamber03Scene] emergency touch zone pointerdown', { action: entry.action, id: pointer.id });
+  }
+
+  onEmergencyZoneRelease(entry, pointer) {
+    entry.activePointers.delete(pointer.id);
+    const active = entry.activePointers.size > 0;
+    entry.rect.setAlpha(active ? 0.42 : 0.22);
+    entry.label.setText(active ? `DBG ${entry.action.toUpperCase()} ON` : `DBG ${entry.action.toUpperCase()}`);
+    if (!active) {
+      if (entry.action === 'left' || entry.action === 'right') {
+        this.debugBypassInput[entry.action] = false;
+      }
+      if (entry.action === 'jump') {
+        this.debugBypassInput.jumpHeld = false;
+      }
+      if (entry.action === 'attack') {
+        this.debugBypassInput.attackHeld = false;
+      }
+    }
+    console.log('[Chamber03Scene] emergency touch zone pointerup', { action: entry.action, id: pointer.id, active });
+  }
+
+  handleEmergencyPointerUp(pointer) {
+    this.emergencyTouchZones?.forEach((entry) => {
+      if (entry.activePointers.has(pointer.id)) {
+        this.onEmergencyZoneRelease(entry, pointer);
+      }
+    });
+  }
+
+  getEmergencyBypassInput() {
+    const snapshot = {
+      left: Boolean(this.debugBypassInput.left),
+      right: Boolean(this.debugBypassInput.right),
+      jumpHeld: Boolean(this.debugBypassInput.jumpHeld),
+      attackHeld: Boolean(this.debugBypassInput.attackHeld),
+      jumpPressed: Boolean(this.debugBypassInput.jumpQueued),
+      attackPressed: Boolean(this.debugBypassInput.attackQueued)
+    };
+
+    this.debugBypassInput.jumpQueued = false;
+    this.debugBypassInput.attackQueued = false;
+    return snapshot;
+  }
+
+  destroyEmergencyTouchBypass() {
+    if (this.input && this.handleEmergencyPointerUp) {
+      this.input.off('pointerup', this.handleEmergencyPointerUp, this);
+    }
+    this.emergencyTouchLayer?.destroy(true);
+    this.emergencyTouchZones = null;
+    this.emergencyTouchLayer = null;
   }
 
   createInvisiblePlatform(x, y, width, height) {
@@ -429,6 +582,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.restartText?.setVisible(false);
     this.mobileControls?.setMode('init');
     this.hud?.setVisible(false);
+    this.destroyEmergencyTouchBypass();
   }
 
   applyResponsiveLayout() {
@@ -442,6 +596,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.debugInputText?.setPosition(18, 88);
     this.pointerProofText?.setPosition(width - 18, 132);
     this.pointerFlash?.setPosition(width - 18, 166);
+    this.layoutEmergencyTouchBypass();
 
     if (isPortraitMobile) {
       const safeAreaBottom = this.mobileControls.getSafeAreaInsetPx('bottom');
