@@ -33,8 +33,8 @@ const CHAMBER03_BOOTSTRAP = {
 const CHAMBER03_BOSS_THRESHOLD = {
   portalX: 4540,
   portalY: WORLD.floorY - 112,
-  portalWidth: 178,
-  portalHeight: 248,
+  portalWidth: 236,
+  portalHeight: 292,
   zoneWidth: 180,
   zoneHeight: 212,
   promptOffsetY: -162,
@@ -44,6 +44,35 @@ const CHAMBER03_BOSS_THRESHOLD = {
   auraAlpha: 0.18,
   fallbackVeinTint: 0xa88e71,
   fallbackVeinAlpha: 0.76
+};
+
+const CHAMBER03_THRESHOLD_STAGING = {
+  endcapCenterX: 4488,
+  endcapWidth: 852,
+  endcapHeight: 468,
+  endcapY: 218,
+  wallModuleWidth: 356,
+  wallModuleHeight: 442,
+  wallModuleOffsetX: 332,
+  wallModuleY: 222,
+  wallModuleAlpha: 0.78,
+  wallModuleTintLeft: 0xb8a48f,
+  wallModuleTintRight: 0xc2ae96,
+  bossDaisWidth: 884,
+  bossDaisHeight: 486,
+  bossDaisY: 214,
+  bossDaisTint: 0xcab59c,
+  bossDaisAlpha: 0.56,
+  floorShadowWidth: 808,
+  floorShadowHeight: 118,
+  floorShadowY: WORLD.floorY - 36,
+  floorShadowAlpha: 0.18,
+  foreArchWidth: 568,
+  foreArchHeight: 448,
+  foreArchX: 4528,
+  foreArchY: WORLD.floorY - 114,
+  foreArchAlpha: 0.26,
+  foreArchTint: 0xb6c19e
 };
 
 const CHAMBER03_PROCESSION = [
@@ -184,6 +213,7 @@ export class Chamber03Scene extends Phaser.Scene {
 
     this.renderProcessionBackdrop();
     this.renderArchitecturalMarkers();
+    this.renderBossThresholdStaging();
     this.renderFloor();
     this.createInvisiblePlatform(
       CHAMBER03_BOOTSTRAP.worldWidth / 2,
@@ -325,6 +355,83 @@ export class Chamber03Scene extends Phaser.Scene {
       .setDepth(-5);
   }
 
+  renderBossThresholdStaging() {
+    const { endcapCenterX } = CHAMBER03_THRESHOLD_STAGING;
+    const hasWallModuleArt = this.textures.exists(ASSET_KEYS.chamber03BackgroundWallModule);
+    const hasBossDaisArt = this.textures.exists(ASSET_KEYS.chamber03BackgroundBossDais);
+    const hasThresholdArt = this.textures.exists(ASSET_KEYS.chamber03BackgroundThreshold);
+    const hasHornArchArt = this.textures.exists(ASSET_KEYS.chamber02ForegroundHornArch);
+
+    this.add
+      .ellipse(
+        endcapCenterX,
+        CHAMBER03_THRESHOLD_STAGING.floorShadowY,
+        CHAMBER03_THRESHOLD_STAGING.floorShadowWidth,
+        CHAMBER03_THRESHOLD_STAGING.floorShadowHeight,
+        0x0a0808,
+        CHAMBER03_THRESHOLD_STAGING.floorShadowAlpha
+      )
+      .setDepth(-14.18);
+
+    if (hasBossDaisArt) {
+      this.add
+        .image(endcapCenterX, CHAMBER03_THRESHOLD_STAGING.bossDaisY, ASSET_KEYS.chamber03BackgroundBossDais)
+        .setDisplaySize(CHAMBER03_THRESHOLD_STAGING.bossDaisWidth, CHAMBER03_THRESHOLD_STAGING.bossDaisHeight)
+        .setTint(CHAMBER03_THRESHOLD_STAGING.bossDaisTint)
+        .setAlpha(CHAMBER03_THRESHOLD_STAGING.bossDaisAlpha)
+        .setDepth(-14.54);
+    }
+
+    [-1, 1].forEach((direction, index) => {
+      const wallX = endcapCenterX + CHAMBER03_THRESHOLD_STAGING.wallModuleOffsetX * direction;
+      const wallTint = index === 0 ? CHAMBER03_THRESHOLD_STAGING.wallModuleTintLeft : CHAMBER03_THRESHOLD_STAGING.wallModuleTintRight;
+
+      if (hasWallModuleArt) {
+        this.add
+          .image(wallX, CHAMBER03_THRESHOLD_STAGING.wallModuleY, ASSET_KEYS.chamber03BackgroundWallModule)
+          .setDisplaySize(CHAMBER03_THRESHOLD_STAGING.wallModuleWidth, CHAMBER03_THRESHOLD_STAGING.wallModuleHeight)
+          .setTint(wallTint)
+          .setAlpha(CHAMBER03_THRESHOLD_STAGING.wallModuleAlpha)
+          .setFlipX(direction > 0)
+          .setDepth(-14.5 + index * 0.01);
+        return;
+      }
+
+      this.add
+        .rectangle(
+          wallX,
+          CHAMBER03_THRESHOLD_STAGING.wallModuleY,
+          CHAMBER03_THRESHOLD_STAGING.wallModuleWidth,
+          CHAMBER03_THRESHOLD_STAGING.wallModuleHeight,
+          0x43362f,
+          0.74
+        )
+        .setDepth(-14.5 + index * 0.01);
+    });
+
+    if (hasThresholdArt) {
+      this.add
+        .image(endcapCenterX + 28, CHAMBER03_THRESHOLD_STAGING.endcapY, ASSET_KEYS.chamber03BackgroundThreshold)
+        .setDisplaySize(CHAMBER03_THRESHOLD_STAGING.endcapWidth, CHAMBER03_THRESHOLD_STAGING.endcapHeight)
+        .setTint(0xc4b198)
+        .setAlpha(0.42)
+        .setDepth(-14.44);
+    }
+
+    if (hasHornArchArt) {
+      this.add
+        .image(
+          CHAMBER03_THRESHOLD_STAGING.foreArchX,
+          CHAMBER03_THRESHOLD_STAGING.foreArchY,
+          ASSET_KEYS.chamber02ForegroundHornArch
+        )
+        .setDisplaySize(CHAMBER03_THRESHOLD_STAGING.foreArchWidth, CHAMBER03_THRESHOLD_STAGING.foreArchHeight)
+        .setTint(CHAMBER03_THRESHOLD_STAGING.foreArchTint)
+        .setAlpha(CHAMBER03_THRESHOLD_STAGING.foreArchAlpha)
+        .setDepth(-4.72);
+    }
+  }
+
   createPlayerAndColliders() {
     this.player = new Player(this, CHAMBER03_BOOTSTRAP.spawnX, CHAMBER03_BOOTSTRAP.spawnY, PLAYER);
     this.applyGameplayReadabilitySupport(this.player.sprite, CHAMBER03_BOOTSTRAP.playerHalo);
@@ -335,16 +442,33 @@ export class Chamber03Scene extends Phaser.Scene {
     const baseX = CHAMBER03_BOSS_THRESHOLD.portalX;
     const baseY = CHAMBER03_BOSS_THRESHOLD.portalY;
     const hasThresholdArt = this.textures.exists(ASSET_KEYS.chamber03BackgroundThreshold);
+    const hasBossDaisArt = this.textures.exists(ASSET_KEYS.chamber03BackgroundBossDais);
 
-    this.add.ellipse(baseX, WORLD.floorY + 10, 248, 40, 0x050404, 0.32).setDepth(-4.6);
+    if (hasBossDaisArt) {
+      this.add
+        .image(baseX - 10, baseY + 32, ASSET_KEYS.chamber03BackgroundBossDais)
+        .setDisplaySize(412, 264)
+        .setTint(0xbdab95)
+        .setAlpha(0.32)
+        .setDepth(-4.48);
+    }
+
+    this.add.ellipse(baseX, WORLD.floorY + 10, 316, 48, 0x050404, 0.34).setDepth(-4.6);
     this.bossThresholdAura = this.add
-      .ellipse(baseX, baseY + 22, 124, 196, CHAMBER03_BOSS_THRESHOLD.auraTint, CHAMBER03_BOSS_THRESHOLD.auraAlpha)
+      .ellipse(baseX, baseY + 10, 152, 228, CHAMBER03_BOSS_THRESHOLD.auraTint, CHAMBER03_BOSS_THRESHOLD.auraAlpha)
       .setDepth(-4.5);
     this.bossThresholdInnerAura = this.add
-      .ellipse(baseX, baseY + 10, 74, 156, 0xe0d0a2, 0.14)
+      .ellipse(baseX, baseY + 2, 104, 180, 0xe0d0a2, 0.14)
       .setDepth(-4.45);
 
     if (hasThresholdArt) {
+      this.add
+        .image(baseX - 6, baseY - 4, ASSET_KEYS.chamber03BackgroundThreshold)
+        .setDisplaySize(438, 332)
+        .setTint(0x9cab90)
+        .setAlpha(0.18)
+        .setDepth(-4.42);
+
       this.bossThresholdShell = this.add
         .image(baseX, baseY, ASSET_KEYS.chamber03BackgroundThreshold)
         .setDisplaySize(CHAMBER03_BOSS_THRESHOLD.portalWidth, CHAMBER03_BOSS_THRESHOLD.portalHeight)
