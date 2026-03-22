@@ -135,7 +135,9 @@ export class Chamber02Scene extends Phaser.Scene {
     this.isRestartingRun = false;
     this.hasAppliedPostLoreReaction = false;
     this.isTransitioningToChamber03 = false;
+    this.hasStartedChamber03Transition = false;
     this.exitGateUnlockAudioTimer = null;
+    this.chamber03TransitionFallbackTimer = null;
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
@@ -183,6 +185,10 @@ export class Chamber02Scene extends Phaser.Scene {
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.exitGateUnlockAudioTimer?.remove(false);
       this.exitGateUnlockAudioTimer = null;
+      if (typeof window !== 'undefined' && this.chamber03TransitionFallbackTimer !== null) {
+        window.clearTimeout(this.chamber03TransitionFallbackTimer);
+      }
+      this.chamber03TransitionFallbackTimer = null;
       this.audioDirector?.shutdown();
       this.cleanupSceneUi();
     });
@@ -646,10 +652,31 @@ export class Chamber02Scene extends Phaser.Scene {
     this.audioDirector?.stopAmbientLoop();
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.start('Chamber03Scene', { fromScene: this.scene.key });
+      this.startChamber03Scene();
     });
 
+    if (typeof window !== 'undefined') {
+      this.chamber03TransitionFallbackTimer = window.setTimeout(() => {
+        this.startChamber03Scene();
+      }, 520);
+    }
+
     this.cameras.main.fadeOut(380, 0, 0, 0);
+  }
+
+  startChamber03Scene() {
+    if (this.hasStartedChamber03Transition) {
+      return;
+    }
+
+    this.hasStartedChamber03Transition = true;
+
+    if (typeof window !== 'undefined' && this.chamber03TransitionFallbackTimer !== null) {
+      window.clearTimeout(this.chamber03TransitionFallbackTimer);
+    }
+    this.chamber03TransitionFallbackTimer = null;
+
+    this.scene.start('Chamber03Scene', { fromScene: this.scene.key });
   }
 
   applyPostLoreReactionState() {

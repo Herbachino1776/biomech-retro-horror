@@ -72,6 +72,8 @@ export class Chamber01Scene extends Phaser.Scene {
     this.completedLoreBeats = new Set();
     this.isChamber02GateActive = false;
     this.isGateTransitionActive = false;
+    this.hasStartedChamber02Transition = false;
+    this.chamber02TransitionFallbackTimer = null;
     this.isLoreTransitionActive = false;
     this.isMinibossRewardActive = false;
     this.minibossEncounterStarted = false;
@@ -135,6 +137,10 @@ export class Chamber01Scene extends Phaser.Scene {
       this.scale.off('resize', this.applyResponsiveLayout, this);
       this.game.events.off('lore-screen-complete', this.handleLoreScreenComplete, this);
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+      if (typeof window !== 'undefined' && this.chamber02TransitionFallbackTimer !== null) {
+        window.clearTimeout(this.chamber02TransitionFallbackTimer);
+      }
+      this.chamber02TransitionFallbackTimer = null;
       this.audioDirector?.shutdown();
     });
 
@@ -851,13 +857,34 @@ export class Chamber01Scene extends Phaser.Scene {
     this.audioDirector?.stopAmbientLoop();
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.start('Chamber02Scene', {
-        enteredFrom: 'chamber01-vertebral-horn-gate',
-        progressionSource: 'entry-altar'
-      });
+      this.startChamber02Scene();
     });
 
+    if (typeof window !== 'undefined') {
+      this.chamber02TransitionFallbackTimer = window.setTimeout(() => {
+        this.startChamber02Scene();
+      }, 820);
+    }
+
     this.cameras.main.fadeOut(700, 0, 0, 0);
+  }
+
+  startChamber02Scene() {
+    if (this.hasStartedChamber02Transition) {
+      return;
+    }
+
+    this.hasStartedChamber02Transition = true;
+
+    if (typeof window !== 'undefined' && this.chamber02TransitionFallbackTimer !== null) {
+      window.clearTimeout(this.chamber02TransitionFallbackTimer);
+    }
+    this.chamber02TransitionFallbackTimer = null;
+
+    this.scene.start('Chamber02Scene', {
+      enteredFrom: 'chamber01-vertebral-horn-gate',
+      progressionSource: 'entry-altar'
+    });
   }
 
   isEnemyOverlapTarget(target, sprite) {
