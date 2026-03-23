@@ -213,17 +213,54 @@ const BLACK_AQUEDUCT_ENCOUNTER_POCKETS = [
 
 const BLACK_AQUEDUCT_LORE = {
   cutsceneId: 'sector02-chamber01-basin-reliquary',
-  zoneX: 3660,
-  zoneY: WORLD.floorY - 74,
-  zoneWidth: 180,
-  zoneHeight: 208,
-  promptOffsetY: -176,
-  muralX: 3660,
-  muralY: 220,
-  muralWidth: 472,
-  muralHeight: 290,
-  backingWidth: 548,
-  backingHeight: 346
+  anchors: [
+    {
+      id: 'entry-basin-altar',
+      label: 'READ THE ENTRY RELIQUARY',
+      zoneX: 860,
+      zoneY: WORLD.floorY - 74,
+      zoneWidth: 172,
+      zoneHeight: 190,
+      promptOffsetY: -156,
+      altarX: 860,
+      altarY: WORLD.floorY - 92,
+      altarDisplayWidth: 164,
+      altarDisplayHeight: 164,
+      supportWidth: 228,
+      supportHeight: 122,
+      supportTopY: WORLD.floorY - 76,
+      shadowWidth: 262,
+      wallPlateWidth: 286,
+      wallPlateHeight: 202,
+      wallPlateY: WORLD.floorY - 150
+    },
+    {
+      id: 'basin-reliquary',
+      label: 'READ THE BASIN RELIQUARY',
+      zoneX: 3660,
+      zoneY: WORLD.floorY - 74,
+      zoneWidth: 180,
+      zoneHeight: 208,
+      promptOffsetY: -176,
+      altarX: 3660,
+      altarY: WORLD.floorY - 88,
+      altarDisplayWidth: 188,
+      altarDisplayHeight: 188,
+      supportWidth: 228,
+      supportHeight: 116,
+      supportTopY: WORLD.floorY - 72,
+      shadowWidth: 278,
+      wallPlateWidth: 548,
+      wallPlateHeight: 346,
+      wallPlateY: WORLD.floorY - 132,
+      muralX: 3660,
+      muralY: 220,
+      muralWidth: 472,
+      muralHeight: 290,
+      muralBackingWidth: 548,
+      muralBackingHeight: 346
+    }
+  ]
 };
 
 export class Sector02Chamber01Scene extends Phaser.Scene {
@@ -241,6 +278,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.hasTriggeredForwardContract = false;
     this.enemies = [];
     this.encounterPockets = [];
+    this.loreAnchors = [];
   }
 
   create() {
@@ -250,7 +288,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.createPlayerAndColliders();
     this.createEncounterPockets();
     this.createClimaxEncounter();
-    this.createLoreAnchor();
+    this.createLoreAnchors();
     this.createUiAndInput();
     this.createForwardThreshold();
     this.configureCameraAndLayout();
@@ -427,44 +465,66 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.applyGameplayReadabilitySupport(this.archon.sprite, { fill: 0xd8ddcf, alpha: 0.18, scale: 1.28 });
   }
 
-  createLoreAnchor() {
-    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 146, BLACK_AQUEDUCT_LORE.backingWidth + 28, 286, 0x091011, 0.88).setDepth(-13.94);
-    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 94, BLACK_AQUEDUCT_LORE.backingWidth - 30, 188, 0x1b2425, 0.96).setDepth(-13.88);
-    this.add.ellipse(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY + 10, 446, 38, 0x020404, 0.34).setDepth(-6.04);
-
-    if (this.textures.exists(ASSET_KEYS.sector02Chamber01BackgroundWallModule)) {
-      this.add.image(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 132, ASSET_KEYS.sector02Chamber01BackgroundWallModule).setDisplaySize(BLACK_AQUEDUCT_LORE.backingWidth + 34, BLACK_AQUEDUCT_LORE.backingHeight + 20).setTint(0x7f8b87).setAlpha(0.22).setDepth(-13.84);
-    }
-
-    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 72, 228, 116, 0x111718, 0.94).setDepth(-6.22);
-    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 12, 312, 18, 0x090b0c, 0.82).setDepth(-6.14);
-    this.add.ellipse(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 18, 278, 28, 0x263130, 0.18).setDepth(-6.12);
-
-    if (this.textures.exists(ASSET_KEYS.sector02Chamber01LoreAltar)) {
-      this.add.image(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 88, ASSET_KEYS.sector02Chamber01LoreAltar).setDisplaySize(188, 188).setTint(0xc1ccbd).setAlpha(0.84).setDepth(-6.08);
-    } else {
-      this.add.ellipse(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 82, 128, 132, 0x66706b, 0.76).setDepth(-6.08);
-    }
-
-    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, BLACK_AQUEDUCT_LORE.muralY, BLACK_AQUEDUCT_LORE.muralWidth + 22, BLACK_AQUEDUCT_LORE.muralHeight + 18, 0x182120, 0.94).setDepth(-13.7);
-    if (this.textures.exists(ASSET_KEYS.sector02Chamber01LoreImage)) {
-      this.add.image(BLACK_AQUEDUCT_LORE.muralX, BLACK_AQUEDUCT_LORE.muralY, ASSET_KEYS.sector02Chamber01LoreImage).setDisplaySize(BLACK_AQUEDUCT_LORE.muralWidth, BLACK_AQUEDUCT_LORE.muralHeight).setTint(0xd8e0d0).setAlpha(0.98).setDepth(-13.65);
-    } else {
-      this.add.text(BLACK_AQUEDUCT_LORE.muralX, BLACK_AQUEDUCT_LORE.muralY, 'BLACK AQUEDUCT\nLORE IMAGE FALLBACK', {
-        fontFamily: 'monospace', fontSize: '22px', color: '#d5dacd', align: 'center'
-      }).setOrigin(0.5).setDepth(-13.64);
-    }
-
-    this.loreZone = this.add.zone(BLACK_AQUEDUCT_LORE.zoneX, BLACK_AQUEDUCT_LORE.zoneY, BLACK_AQUEDUCT_LORE.zoneWidth, BLACK_AQUEDUCT_LORE.zoneHeight).setOrigin(0.5);
-    this.physics.add.existing(this.loreZone, true);
-
-    this.lorePrompt = this.add.text(BLACK_AQUEDUCT_LORE.zoneX, BLACK_AQUEDUCT_LORE.zoneY + BLACK_AQUEDUCT_LORE.promptOffsetY, 'READ THE BASIN RELIQUARY', {
-      fontFamily: 'monospace', fontSize: '14px', color: '#cfdbc9', align: 'center', stroke: '#0d1010', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.6).setAlpha(0.9).setVisible(false);
-
+  createLoreAnchors() {
+    BLACK_AQUEDUCT_LORE.anchors.forEach((anchorConfig) => {
+      this.loreAnchors.push(this.createLoreAnchor(anchorConfig));
+    });
     this.footholdLabel = this.add.text(4380, WORLD.floorY - 224, 'BLACK AQUEDUCT\nCHAMBER 01', {
       fontFamily: 'monospace', fontSize: '18px', color: '#cfd7cc', align: 'center', stroke: '#0c0f10', strokeThickness: 4
     }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.82);
+  }
+
+  createLoreAnchor(anchorConfig) {
+    if (anchorConfig.wallPlateWidth && anchorConfig.wallPlateHeight) {
+      this.add.rectangle(anchorConfig.altarX, anchorConfig.wallPlateY, anchorConfig.wallPlateWidth, anchorConfig.wallPlateHeight, 0x091011, 0.88).setDepth(-13.94);
+      if (this.textures.exists(ASSET_KEYS.sector02Chamber01BackgroundWallModule)) {
+        this.add.image(anchorConfig.altarX, anchorConfig.wallPlateY, ASSET_KEYS.sector02Chamber01BackgroundWallModule)
+          .setDisplaySize(anchorConfig.wallPlateWidth + 24, anchorConfig.wallPlateHeight + 18)
+          .setTint(0x7f8b87)
+          .setAlpha(0.2)
+          .setDepth(-13.84);
+      }
+    }
+
+    if (anchorConfig.muralX && anchorConfig.muralY) {
+      this.add.rectangle(anchorConfig.muralX, WORLD.floorY - 94, anchorConfig.muralBackingWidth - 30, 188, 0x1b2425, 0.96).setDepth(-13.88);
+      this.add.rectangle(anchorConfig.muralX, anchorConfig.muralY, anchorConfig.muralWidth + 22, anchorConfig.muralHeight + 18, 0x182120, 0.94).setDepth(-13.7);
+      if (this.textures.exists(ASSET_KEYS.sector02Chamber01LoreImage)) {
+        this.add.image(anchorConfig.muralX, anchorConfig.muralY, ASSET_KEYS.sector02Chamber01LoreImage)
+          .setDisplaySize(anchorConfig.muralWidth, anchorConfig.muralHeight)
+          .setTint(0xd8e0d0)
+          .setAlpha(0.98)
+          .setDepth(-13.65);
+      } else {
+        this.add.text(anchorConfig.muralX, anchorConfig.muralY, 'BLACK AQUEDUCT\nLORE IMAGE FALLBACK', {
+          fontFamily: 'monospace', fontSize: '22px', color: '#d5dacd', align: 'center'
+        }).setOrigin(0.5).setDepth(-13.64);
+      }
+    }
+
+    this.add.rectangle(anchorConfig.altarX, anchorConfig.supportTopY, anchorConfig.supportWidth, anchorConfig.supportHeight, 0x111718, 0.94).setDepth(-6.22);
+    this.add.rectangle(anchorConfig.altarX, WORLD.floorY - 12, anchorConfig.supportWidth + 84, 18, 0x090b0c, 0.82).setDepth(-6.14);
+    this.add.ellipse(anchorConfig.altarX, WORLD.floorY - 18, anchorConfig.shadowWidth, 28, 0x263130, 0.18).setDepth(-6.12);
+    this.add.ellipse(anchorConfig.altarX, WORLD.floorY + 10, anchorConfig.shadowWidth + 168, 38, 0x020404, 0.34).setDepth(-6.04);
+
+    if (this.textures.exists(ASSET_KEYS.sector02Chamber01LoreAltar)) {
+      this.add.image(anchorConfig.altarX, anchorConfig.altarY, ASSET_KEYS.sector02Chamber01LoreAltar)
+        .setDisplaySize(anchorConfig.altarDisplayWidth, anchorConfig.altarDisplayHeight)
+        .setTint(0xc1ccbd)
+        .setAlpha(0.84)
+        .setDepth(-6.08);
+    } else {
+      this.add.ellipse(anchorConfig.altarX, anchorConfig.altarY + 6, 128, 132, 0x66706b, 0.76).setDepth(-6.08);
+    }
+
+    const zone = this.add.zone(anchorConfig.zoneX, anchorConfig.zoneY, anchorConfig.zoneWidth, anchorConfig.zoneHeight).setOrigin(0.5);
+    this.physics.add.existing(zone, true);
+
+    const prompt = this.add.text(anchorConfig.zoneX, anchorConfig.zoneY + anchorConfig.promptOffsetY, anchorConfig.label, {
+      fontFamily: 'monospace', fontSize: '14px', color: '#cfdbc9', align: 'center', stroke: '#0d1010', strokeThickness: 4
+    }).setOrigin(0.5).setDepth(-4.6).setAlpha(0.9).setVisible(false);
+
+    return { ...anchorConfig, zone, prompt };
   }
 
   createForwardThreshold() {
@@ -633,16 +693,19 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
   refreshLoreZonePresence() {
     this.currentLoreZone = null;
 
-    if (!this.loreZone || this.isLoreTransitionActive) {
-      this.lorePrompt?.setVisible(false);
+    if (!this.loreAnchors.length || this.isLoreTransitionActive || this.hasCompletedLoreBeat) {
+      this.loreAnchors.forEach((anchor) => anchor.prompt?.setVisible(false));
       return;
     }
 
-    this.physics.overlap(this.player.sprite, this.loreZone, () => {
-      this.currentLoreZone = this.loreZone;
+    this.loreAnchors.forEach((anchor) => {
+      let isInside = false;
+      this.physics.overlap(this.player.sprite, anchor.zone, () => {
+        isInside = true;
+        this.currentLoreZone = anchor;
+      });
+      anchor.prompt?.setVisible(isInside);
     });
-
-    this.lorePrompt?.setVisible(Boolean(this.currentLoreZone));
   }
 
   tryBeginLoreSequence(mobileInput) {
@@ -665,7 +728,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
 
     this.isLoreTransitionActive = true;
     this.currentLoreZone = null;
-    this.lorePrompt?.setVisible(false);
+    this.loreAnchors.forEach((anchor) => anchor.prompt?.setVisible(false));
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
     this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
