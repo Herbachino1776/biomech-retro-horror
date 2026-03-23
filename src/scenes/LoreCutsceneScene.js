@@ -149,6 +149,14 @@ export class LoreCutsceneScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const isPortrait = height >= width;
     const layout = this.resolveLayout(isPortrait);
+    const compositionKey = this.cutscene?.style?.composition;
+
+    this.trackLayoutElement(this.add.rectangle(0, 0, width, height, 0x000000, 1).setOrigin(0).setDepth(DEPTH.backdrop));
+
+    if (compositionKey === 'black-aqueduct-closeup') {
+      this.drawBlackAqueductCloseupLayout(width, height, layout);
+      return;
+    }
 
     const containerWidth = width - layout.outerMarginX * 2;
     const containerHeight = height - layout.outerMarginY * 2;
@@ -164,11 +172,32 @@ export class LoreCutsceneScene extends Phaser.Scene {
     const containerLeft = layout.outerMarginX;
     const containerTop = layout.outerMarginY;
 
-    this.trackLayoutElement(this.add.rectangle(0, 0, width, height, 0x000000, 1).setOrigin(0).setDepth(DEPTH.backdrop));
-
     const imageRegion = new Phaser.Geom.Rectangle(containerLeft, containerTop, containerWidth, imageHeight);
     const textRegion = new Phaser.Geom.Rectangle(containerLeft, imageRegion.bottom + sectionGap, containerWidth, textHeight);
     const promptRegion = new Phaser.Geom.Rectangle(containerLeft, textRegion.bottom + sectionGap, containerWidth, promptHeight);
+
+    this.drawImageRegion(imageRegion);
+    this.drawTextRegion(textRegion, layout);
+    this.drawPromptRegion(promptRegion, layout);
+  }
+
+  drawBlackAqueductCloseupLayout(width, height, layout) {
+    const containerWidth = width - layout.outerMarginX * 2;
+    const containerHeight = height - layout.outerMarginY * 2;
+    const promptHeight = Math.max(layout.promptMinHeight ?? 36, Math.floor(containerHeight * layout.promptHeightRatio));
+    const textHeight = Math.max(layout.textMinHeight ?? 128, Math.floor(containerHeight * layout.textHeightRatio));
+    const bottomInset = layout.bottomInset ?? 12;
+    const sectionGap = layout.sectionGap;
+
+    const imageRegion = new Phaser.Geom.Rectangle(layout.outerMarginX, layout.outerMarginY, containerWidth, containerHeight);
+    const textWidth = Math.floor(containerWidth * (layout.textWidthRatio ?? 0.86));
+    const promptWidth = Math.floor(containerWidth * (layout.promptWidthRatio ?? 0.7));
+    const promptX = width / 2 - (layout.promptOffsetX ?? 0);
+    const promptY = height - layout.outerMarginY - bottomInset - promptHeight / 2;
+    const textY = promptY - promptHeight / 2 - sectionGap - textHeight / 2;
+    const textX = width / 2 + (layout.textOffsetX ?? 0);
+    const textRegion = new Phaser.Geom.Rectangle(textX - textWidth / 2, textY - textHeight / 2, textWidth, textHeight);
+    const promptRegion = new Phaser.Geom.Rectangle(promptX - promptWidth / 2, promptY - promptHeight / 2, promptWidth, promptHeight);
 
     this.drawImageRegion(imageRegion);
     this.drawTextRegion(textRegion, layout);
