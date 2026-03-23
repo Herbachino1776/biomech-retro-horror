@@ -200,28 +200,36 @@ export class LoreCutsceneScene extends Phaser.Scene {
     const imageScaleMultiplier = imageStyle.imageScaleMultiplier ?? 1;
     const imageFrameAlpha = imageStyle.imageFrameAlpha ?? 0.96;
     const imageStrokeAlpha = imageStyle.imageStrokeAlpha ?? 0.85;
+    const imageFrameColor = imageStyle.imageFrameColor ?? imageStyle.frameColor ?? COLORS.bone;
+    const imageFrameThickness = imageStyle.imageFrameThickness ?? 2;
+    const imageBackgroundColor = imageStyle.imageBackgroundColor ?? 0x17201f;
+    const imageBackgroundAlpha = imageStyle.imageBackgroundAlpha ?? 0.86;
 
-    this.trackLayoutElement(
-      this.add
-        .rectangle(region.centerX, region.centerY, region.width, region.height, 0x111515, imageFrameAlpha)
-        .setStrokeStyle(2, imageStyle.frameColor ?? COLORS.bone, imageStrokeAlpha)
-        .setDepth(DEPTH.frame)
-    );
+    if (imageFrameAlpha > 0 || imageStrokeAlpha > 0) {
+      this.trackLayoutElement(
+        this.add
+          .rectangle(region.centerX, region.centerY, region.width, region.height, imageBackgroundColor, imageFrameAlpha)
+          .setStrokeStyle(imageFrameThickness, imageFrameColor, imageStrokeAlpha)
+          .setDepth(DEPTH.frame)
+      );
+    }
 
     const hasImage = this.cutscene?.imageKey && this.textures.exists(this.cutscene.imageKey);
 
-    this.trackLayoutElement(
-      this.add
-        .rectangle(
-          region.centerX,
-          region.centerY,
-          region.width - 8,
-          region.height - 8,
-          imageStyle.imageBackgroundColor ?? 0x17201f,
-          imageStyle.imageBackgroundAlpha ?? 0.86
-        )
-        .setDepth(DEPTH.image - 0.2)
-    );
+    if (imageBackgroundAlpha > 0) {
+      this.trackLayoutElement(
+        this.add
+          .rectangle(
+            region.centerX,
+            region.centerY,
+            region.width - 8,
+            region.height - 8,
+            imageBackgroundColor,
+            imageBackgroundAlpha
+          )
+          .setDepth(DEPTH.image - 0.2)
+      );
+    }
     if (!hasImage) {
       this.trackLayoutElement(this.add
         .text(region.centerX, region.centerY, 'LORE IMAGE MISSING\nVISIBLE FALLBACK ACTIVE', {
@@ -370,9 +378,15 @@ export class LoreCutsceneScene extends Phaser.Scene {
   }
 
   drawPromptRegion(region, layout) {
+    const promptRegionColor = this.cutscene?.style?.promptRegionColor ?? 0x050505;
+    const promptRegionAlpha = this.cutscene?.style?.promptRegionAlpha ?? 0.7;
+    const promptRegionStrokeColor = this.cutscene?.style?.promptRegionStrokeColor ?? this.cutscene?.style?.frameColor ?? COLORS.bone;
+    const promptRegionStrokeAlpha = this.cutscene?.style?.promptRegionStrokeAlpha ?? 0.35;
+    const promptRegionStrokeThickness = this.cutscene?.style?.promptRegionStrokeThickness ?? 1;
+
     this.trackLayoutElement(this.add
-      .rectangle(region.centerX, region.centerY, region.width, region.height, 0x050505, 0.7)
-      .setStrokeStyle(1, this.cutscene?.style?.frameColor ?? COLORS.bone, 0.35)
+      .rectangle(region.centerX, region.centerY, region.width, region.height, promptRegionColor, promptRegionAlpha)
+      .setStrokeStyle(promptRegionStrokeThickness, promptRegionStrokeColor, promptRegionStrokeAlpha)
       .setDepth(DEPTH.promptRegion));
 
     const prompt = this.cutscene?.prompt ?? 'Tap or press Enter to continue';

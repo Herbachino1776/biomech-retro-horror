@@ -463,6 +463,7 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
+    // Temporary Sector 2 Chamber 1 shortcut so the Chamber 01 mobile DEV button can jump straight to the Black Aqueduct.
     this.cleanupSceneUi?.();
     this.audioDirector?.shutdown();
     this.scene.start('Sector02Chamber01Scene', {
