@@ -21,7 +21,7 @@ Create a playable vertical slice first:
 - Chamber 03 is now playable as the Ossuary Choir Hall sector-finale chamber rather than only a bootstrap stub.
 - Chamber 03's boss flow now hands off into a separate boss arena, giving Sector 1 a real finale/payoff path.
 - The Sector 1 arc is functionally in place across Chamber 01, Chamber 02, Chamber 03, and the separate boss arena, even though the project still has iterative polish debt.
-- Next forward progress is Bucket 2 / Cosmic Garden foothold work rather than more Chamber 3 rescue.
+- Next forward progress is Bucket 2 / The Black Aqueduct foothold work rather than more Chamber 3 rescue.
 - Restart/reset flow safely handles both lore-scene types because both are live in the shipped game.
 
 ## Tech Stack (Current Scaffold)
@@ -132,4 +132,4 @@ This still serves the game locally from `/`.
 5. Open PR-sized changes, not giant rewrites.
 
 ## Current Milestone Status
-Milestone 5 is closed in a first-pass sense. See `docs/current-milestone.md`, `docs/milestone-roadmap.md`, and `docs/milestones.md` for the Sector 1 closeout and the new Milestone 6 Bucket 2 / Cosmic Garden foothold direction.
+Milestone 5 is closed in a first-pass sense. See `docs/current-milestone.md`, `docs/milestone-roadmap.md`, and `docs/milestones.md` for the Sector 1 closeout and the new Milestone 6 Bucket 2 / The Black Aqueduct foothold direction.

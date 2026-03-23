@@ -47,9 +47,16 @@ Concise record of technical/design decisions currently in force.
 - Milestone 3 implementation landed in the intended order: regular enemy encounter depth pass first, miniboss refinement second, limited combat presentation support third.
 - Milestone 4 (**Audio Identity**) is complete for the shipped Chamber 01 + Chamber 02 slice.
 - Milestone 5 (**Content Expansion**) is complete enough to close once forward progress is unlocked, even if some polish debt remains.
-- Milestone 6 (**Bucket 2 Foothold / Cosmic Garden Start**) is now the active milestone.
+- Milestone 6 (**Bucket 2 Foothold / The Black Aqueduct Start**) is now the active milestone.
 - Major chamber expansion should be implemented in milestone slices rather than one oversized pass.
 - Bootstrap before spectacle: get scene registration, handoff wiring, and stable boot flow working before layering chamber spectacle.
+
+## Bucket 2 Direction Doctrine
+- Bucket 2 is **The Black Aqueduct**, not Cosmic Garden.
+- The Black Aqueduct is the **transit infrastructure of recurrence**: channels, sluices, gates, basins, conveyance, and soul-transit rather than a nature/garden biome.
+- The project is moving from palace/judgment interior into canal/transit/system infrastructure for the next major area.
+- Chamber 03's asset package is the blueprint for future chamber production, with each new chamber getting its own themed asset set per chamber/sector.
+- Sector 2 Chamber 1 requires chamber-specific backgrounds, enemies, lore altar/trigger art, lore image, lore text, and gate/progression art.
 
 ## Chamber Progression Doctrine
 - Chamber 03 is the planned **Ossuary Choir Hall** and Bucket 01 sector finale.

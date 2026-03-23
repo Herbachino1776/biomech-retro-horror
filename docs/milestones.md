@@ -42,8 +42,10 @@
 - establish Sector 1 payoff and onward progression contract
 - record remaining Chamber 3/boss-finale work as polish debt rather than a blocker
 
-## Milestone 6 — Bucket 2 Foothold / Cosmic Garden Start (Active)
+## Milestone 6 — Bucket 2 Foothold / The Black Aqueduct Start (Active)
 - establish the first safe foothold beyond Sector 1
-- introduce Cosmic Garden as the next area bucket
+- introduce The Black Aqueduct as the next area bucket
+- define Bucket 2 as necro-industrial canal/transit infrastructure rather than a garden biome
+- build Sector 2 Chamber 1 from the Chamber 3 blueprint with new chamber-specific backgrounds, enemies, lore altar/trigger art, lore image, lore text, and gate/progression art
 - prove progression continues after the Sector 1 finale
 - preserve the shipped Sector 1 arc while opening the next path
