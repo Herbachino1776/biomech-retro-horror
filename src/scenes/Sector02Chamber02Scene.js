@@ -662,22 +662,36 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.uiCamera.setViewport(0, 0, width, height);
     }
 
-    const controlBandHeight = this.mobileControls.getReservedBottomPx();
-    const worldBandHeight = isPortraitMobile
-      ? Phaser.Math.Clamp(height - controlBandHeight, PORTRAIT_LAYOUT.worldBandMin, PORTRAIT_LAYOUT.worldBandMax)
-      : height;
-    const viewportHeight = isPortraitMobile ? worldBandHeight : height;
-    const viewportY = 0;
+    if (isPortraitMobile) {
+      const safeAreaBottom = this.mobileControls.getSafeAreaInsetPx('bottom');
+      const maxWorldBandFromControlNeeds = height - PORTRAIT_LAYOUT.minControlBand - safeAreaBottom;
+      const worldBandMax = Math.max(
+        PORTRAIT_LAYOUT.worldBandMin,
+        Math.min(PORTRAIT_LAYOUT.worldBandMax, maxWorldBandFromControlNeeds)
+      );
+      const worldBandHeight = Phaser.Math.Clamp(
+        Math.floor(height * PORTRAIT_LAYOUT.worldBandRatio),
+        PORTRAIT_LAYOUT.worldBandMin,
+        worldBandMax
+      );
 
-    camera.setViewport(0, viewportY, width, viewportHeight);
-    camera.setZoom(isPortraitMobile ? PORTRAIT_LAYOUT.portraitZoom : PORTRAIT_LAYOUT.desktopZoom);
-    camera.setFollowOffset(
-      isPortraitMobile ? COMPRESSION_VAULTS_BOOTSTRAP.portraitFollowOffsetX : COMPRESSION_VAULTS_BOOTSTRAP.desktopFollowOffsetX,
-      isPortraitMobile ? PORTRAIT_LAYOUT.portraitFollowOffsetY : PORTRAIT_LAYOUT.desktopFollowOffsetY
-    );
+      camera.setViewport(0, 0, width, worldBandHeight);
+      camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
+      camera.setFollowOffset(COMPRESSION_VAULTS_BOOTSTRAP.portraitFollowOffsetX, PORTRAIT_LAYOUT.portraitFollowOffsetY);
+      this.mobileControls.setReservedBottomPx(height - worldBandHeight);
+      this.restartText?.setPosition(
+        width / 2,
+        Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY)
+      );
+      this.hud?.layout();
+      return;
+    }
 
-    this.restartText?.setPosition(width / 2, Math.max(PORTRAIT_LAYOUT.restartTextMinY, height * PORTRAIT_LAYOUT.restartTextRatioY));
-    this.mobileControls.layout();
+    camera.setViewport(0, 0, width, height);
+    camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
+    camera.setFollowOffset(COMPRESSION_VAULTS_BOOTSTRAP.desktopFollowOffsetX, PORTRAIT_LAYOUT.desktopFollowOffsetY);
+    this.mobileControls.setReservedBottomPx(0);
+    this.restartText?.setPosition(width / 2, 90);
     this.hud?.layout();
   }
 
