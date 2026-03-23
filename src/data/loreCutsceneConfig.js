@@ -78,5 +78,34 @@ export const LORE_CUTSCENES = {
       imageAlpha: 0.94,
       backgroundColor: '#000000'
     }
+  },
+  'sector02-chamber01-basin-reliquary': {
+    id: 'sector02-chamber01-basin-reliquary',
+    imageKey: ASSET_KEYS.sector02Chamber01LoreImage,
+    title: 'SECTOR 02 // BLACK AQUEDUCT RELIQUARY',
+    body: [
+      'The aqueduct does not carry water. It escorts the black remainder between verdicts.',
+      'Every sluice remembers a body, and every basin waits for the next emptied name.',
+      'Below the gate-lung, recurrence moves like oil learning how to pray.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xaab1a1,
+      titleColor: '#9ab18a',
+      bodyColor: '#d2c5b4',
+      promptColor: '#86a06d',
+      imageTint: 0xc7ceb8,
+      imageAlpha: 0.96,
+      backgroundColor: '#000000',
+      motion: {
+        panX: 20,
+        panY: -12,
+        zoom: 1.045,
+        duration: 9000,
+        shakeX: 3,
+        shakeY: 2,
+        shakeDuration: 3200
+      }
+    }
   }
 };

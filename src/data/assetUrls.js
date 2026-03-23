@@ -18,6 +18,17 @@ import chamber03BackgroundThresholdUrl from '../../art/raw/chamber03/chamber03_b
 import chamber03BackgroundBossDaisUrl from '../../art/raw/chamber03/chamber03_bg_boss_dais_01_source.png';
 import chamber03Lore01Url from '../../art/raw/chamber03/chamber03_lore_01_source.png';
 import chamber03BossPrecentorUrl from '../../art/raw/chamber03/boss_chamber03_precentor_main_01_alpha.png';
+import sector02Chamber01BackgroundEntryCanalUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_bg_entry_canal_01.png';
+import sector02Chamber01BackgroundWallModuleUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_bg_wall_module_01.png';
+import sector02Chamber01BackgroundSluiceOpeningUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_bg_sluice_opening_01.png';
+import sector02Chamber01BackgroundThresholdUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_bg_threshold_01.png';
+import sector02Chamber01BackgroundClimaxUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_bg_climax_01.png';
+import sector02Chamber01EnemyBasicUrl from '../../art/raw/sector02/chamber01/enemy_sector02_chamber01_basic_01.png';
+import sector02Chamber01EnemyEliteUrl from '../../art/raw/sector02/chamber01/enemy_sector02_chamber01_elite_01.png';
+import sector02Chamber01LoreAltarUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_lore_altar_01.png';
+import sector02Chamber01LoreImageUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_lore_image_01.png';
+import sector02Chamber01GateUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_gate_01.png';
+import sector02Chamber01FloorUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_floor_01.png';
 import playerConceptUrl from '../../assets/concepts/player-concept-03-right-alpha.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
@@ -72,6 +83,17 @@ export const ASSET_URLS = {
   [ASSET_KEYS.chamber03BackgroundBossDais]: chamber03BackgroundBossDaisUrl,
   [ASSET_KEYS.chamber03Lore01]: chamber03Lore01Url,
   [ASSET_KEYS.chamber03BossPrecentor]: chamber03BossPrecentorUrl,
+  [ASSET_KEYS.sector02Chamber01BackgroundEntryCanal]: sector02Chamber01BackgroundEntryCanalUrl,
+  [ASSET_KEYS.sector02Chamber01BackgroundWallModule]: sector02Chamber01BackgroundWallModuleUrl,
+  [ASSET_KEYS.sector02Chamber01BackgroundSluiceOpening]: sector02Chamber01BackgroundSluiceOpeningUrl,
+  [ASSET_KEYS.sector02Chamber01BackgroundThreshold]: sector02Chamber01BackgroundThresholdUrl,
+  [ASSET_KEYS.sector02Chamber01BackgroundClimax]: sector02Chamber01BackgroundClimaxUrl,
+  [ASSET_KEYS.sector02Chamber01EnemyBasic]: sector02Chamber01EnemyBasicUrl,
+  [ASSET_KEYS.sector02Chamber01EnemyElite]: sector02Chamber01EnemyEliteUrl,
+  [ASSET_KEYS.sector02Chamber01LoreAltar]: sector02Chamber01LoreAltarUrl,
+  [ASSET_KEYS.sector02Chamber01LoreImage]: sector02Chamber01LoreImageUrl,
+  [ASSET_KEYS.sector02Chamber01Gate]: sector02Chamber01GateUrl,
+  [ASSET_KEYS.sector02Chamber01Floor]: sector02Chamber01FloorUrl,
   [ASSET_KEYS.player]: playerConceptUrl,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,
