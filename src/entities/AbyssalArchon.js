@@ -132,7 +132,10 @@ export class AbyssalArchon extends HalfSkullMiniboss {
   fireProjectileAt(player, time) {
     const spawnX = this.sprite.x + this.direction * this.projectileConfig.spawnOffsetX;
     const spawnY = this.sprite.y + this.projectileConfig.spawnOffsetY;
-    const target = new Phaser.Math.Vector2(player.x, player.y - 36);
+    const bodyCenterX = player.body?.center?.x ?? player.x;
+    const bodyCenterY = player.body?.center?.y ?? player.y;
+    const torsoTargetY = bodyCenterY - ((player.body?.height ?? 0) * 0.18);
+    const target = new Phaser.Math.Vector2(bodyCenterX, torsoTargetY);
     const velocity = target.subtract(new Phaser.Math.Vector2(spawnX, spawnY)).normalize().scale(this.projectileConfig.speed);
 
     if (Number.isNaN(velocity.x) || Number.isNaN(velocity.y)) {

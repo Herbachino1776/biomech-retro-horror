@@ -433,7 +433,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
         damage: config.damage ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.damage,
         lifetimeMs: config.lifetimeMs ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.lifetimeMs,
         rotationSpeed: config.rotationSpeed ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.rotationSpeed,
-        bodySize: { width: 20, height: 20 },
+        bodySize: { width: 28, height: 28 },
         depth: config.depth ?? 6.32,
         presentation: {
           displayWidth: 44,
@@ -441,6 +441,12 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
           alpha: 0.98,
           fallbackFill: 0xc7d4c0,
           fallbackStroke: 0x67807a
+        },
+        impact: {
+          durationMs: 130,
+          alpha: 0.88,
+          scaleMultiplier: 1.2,
+          tint: 0xe0ead2
         }
       });
 
@@ -868,7 +874,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
   }
 
   handleEnemyProjectileHit(projectileSprite, projectile) {
-    if (!projectile?.active || !this.player?.sprite?.body?.enable) {
+    if (!projectile?.active || projectile.inImpact || !this.player?.sprite?.body?.enable) {
       return;
     }
 
@@ -876,9 +882,11 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       return;
     }
 
+    const impactX = Phaser.Math.Clamp(this.player.body.center.x, this.player.body.left + 8, this.player.body.right - 8);
+    const impactY = this.player.body.center.y - this.player.body.height * 0.1;
     const damage = projectile.damage ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.damage;
     const tookDamage = this.player.receiveDamage(damage, this.time.now);
-    projectile.destroyProjectile();
+    projectile.playImpact(impactX, impactY);
     if (!tookDamage) {
       return;
     }
