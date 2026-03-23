@@ -86,7 +86,8 @@ export const LORE_CUTSCENES = {
     body: [
       'The aqueduct does not carry water. It escorts the black remainder between verdicts.',
       'Every sluice remembers a body, and every basin waits for the next emptied name.',
-      'Below the gate-lung, recurrence moves like oil learning how to pray.'
+      'Below the gate-lung, recurrence moves like oil learning how to pray.',
+      'Temporary rite text: the basin reliquary names this chamber as a holding throat for the dead between seals.'
     ],
     prompt: 'Press [E] / [Enter] or tap to continue',
     style: {

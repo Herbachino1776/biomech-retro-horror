@@ -57,6 +57,18 @@ export class LoreCutsceneScene extends Phaser.Scene {
     playLoreEnter(this.sound);
     this.cutsceneId = data?.cutsceneId ?? null;
     this.cutscene = this.cutsceneId ? LORE_CUTSCENES[this.cutsceneId] : null;
+    this.cutscene = this.cutscene ?? {
+      title: 'RITUAL RECORD',
+      body: ['Fallback lore record active.', 'The chamber keeps its own scripture until the proper rite is restored.'],
+      prompt: 'Tap or press Enter to continue',
+      style: {
+        frameColor: COLORS.bone,
+        titleColor: '#9bb085',
+        bodyColor: '#d2c2ac',
+        promptColor: '#8a9f79',
+        backgroundColor: '#000000'
+      }
+    };
     this.isClosing = false;
 
     const backgroundColor = this.cutscene?.style?.backgroundColor ?? '#000000';
@@ -107,14 +119,18 @@ export class LoreCutsceneScene extends Phaser.Scene {
 
   drawImageRegion(region) {
     this.add
-      .rectangle(region.centerX, region.centerY, region.width, region.height, 0x0a0a0a, 0.95)
+      .rectangle(region.centerX, region.centerY, region.width, region.height, 0x111515, 0.96)
       .setStrokeStyle(2, this.cutscene?.style?.frameColor ?? COLORS.bone, 0.85)
       .setDepth(DEPTH.frame);
 
     const hasImage = this.cutscene?.imageKey && this.textures.exists(this.cutscene.imageKey);
+
+    this.add
+      .rectangle(region.centerX, region.centerY, region.width - 8, region.height - 8, 0x17201f, 0.86)
+      .setDepth(DEPTH.image - 0.2);
     if (!hasImage) {
       this.add
-        .text(region.centerX, region.centerY, 'LORE IMAGE MISSING\nFALLBACK ACTIVE', {
+        .text(region.centerX, region.centerY, 'LORE IMAGE MISSING\nVISIBLE FALLBACK ACTIVE', {
           fontFamily: 'monospace',
           fontSize: '18px',
           color: '#d2c2ac',
@@ -122,6 +138,11 @@ export class LoreCutsceneScene extends Phaser.Scene {
         })
         .setOrigin(0.5)
         .setDepth(DEPTH.image);
+
+      this.add
+        .rectangle(region.centerX, region.centerY, region.width * 0.48, region.height * 0.28, 0x8ca08c, 0.14)
+        .setStrokeStyle(2, 0xcfd6c6, 0.48)
+        .setDepth(DEPTH.image - 0.1);
       return;
     }
 
@@ -185,7 +206,7 @@ export class LoreCutsceneScene extends Phaser.Scene {
     const textPadding = layout.textPadding;
 
     this.add
-      .rectangle(region.centerX, region.centerY, region.width, region.height, 0x080808, 0.8)
+      .rectangle(region.centerX, region.centerY, region.width, region.height, 0x0d1010, 0.94)
       .setStrokeStyle(1, this.cutscene?.style?.frameColor ?? COLORS.rust, 0.5)
       .setDepth(DEPTH.textRegion);
 
@@ -203,7 +224,9 @@ export class LoreCutsceneScene extends Phaser.Scene {
         .text(textX, nextY, title, {
           fontFamily: 'monospace',
           fontSize: `${layout.titleSize}px`,
-          color: this.cutscene?.style?.titleColor ?? '#9bb085'
+          color: this.cutscene?.style?.titleColor ?? '#9bb085',
+          stroke: '#050706',
+          strokeThickness: 3
         })
         .setDepth(DEPTH.text);
       nextY += layout.titleSize + 8;
@@ -216,6 +239,8 @@ export class LoreCutsceneScene extends Phaser.Scene {
         fontFamily: 'monospace',
         fontSize: `${bodyFontSize}px`,
         color: this.cutscene?.style?.bodyColor ?? '#d2c2ac',
+        stroke: '#050706',
+        strokeThickness: 2,
         wordWrap: { width: maxWidth, useAdvancedWrap: true },
         lineSpacing: layout.bodyLineSpacing
       })
