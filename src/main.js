@@ -9,6 +9,7 @@ import { Chamber03BossArenaScene } from './scenes/Chamber03BossArenaScene.js';
 import { LoreCutsceneScene } from './scenes/LoreCutsceneScene.js';
 import { SectorCompleteScene } from './scenes/SectorCompleteScene.js';
 import { Sector02Chamber01Scene } from './scenes/Sector02Chamber01Scene.js';
+import { Sector02Chamber02Scene } from './scenes/Sector02Chamber02Scene.js';
 
 const config = {
   ...gameConfig,
@@ -21,7 +22,8 @@ const config = {
     Chamber03BossArenaScene,
     LoreCutsceneScene,
     SectorCompleteScene,
-    Sector02Chamber01Scene
+    Sector02Chamber01Scene,
+    Sector02Chamber02Scene
   ],
   physics: {
     default: 'arcade',

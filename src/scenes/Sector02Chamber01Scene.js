@@ -904,8 +904,8 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     const promptVisible = Boolean(this.currentForwardThreshold) || (this.hasUnlockedForwardPath && !this.hasTriggeredForwardContract);
     const promptText = this.hasUnlockedForwardPath
       ? this.hasTriggeredForwardContract
-        ? 'FORWARD CONTRACT MARKED\nSECTOR 2 CHAMBER 2 NOT IN THIS PASS'
-        : 'PATH FORWARD STABILIZED\nPRESS RITE / [E] TO MARK DESCENT'
+        ? 'FORWARD PATH SEALED\nENTER THE COMPRESSION VAULTS'
+        : 'PATH FORWARD STABILIZED\nPRESS RITE / [E] TO DESCEND'
       : 'CLIMAX LOCKED';
     this.forwardPrompt?.setVisible(promptVisible).setText(promptText);
   }
@@ -921,8 +921,19 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     }
 
     this.hasTriggeredForwardContract = true;
-    this.forwardPrompt?.setVisible(true).setText('FORWARD CONTRACT MARKED\nSECTOR 2 CHAMBER 2 PENDING');
-    this.processionalLabel?.setText('DESCENT MARKED\nFURTHER CHAMBER PENDING');
+    this.forwardPrompt?.setVisible(true).setText('DESCENT MARKED\nENTERING THE COMPRESSION VAULTS');
+    this.processionalLabel?.setText('DESCENT MARKED\nCOMPRESSION VAULTS');
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.cleanupSceneUi?.();
+      this.audioDirector?.shutdown();
+      this.scene.start('Sector02Chamber02Scene', {
+        fromScene: this.scene.key,
+        fromGate: 'black-aqueduct-threshold'
+      });
+    });
+
+    this.cameras.main.fadeOut(320, 0, 0, 0);
   }
 
   updateFootholdLabel(time) {

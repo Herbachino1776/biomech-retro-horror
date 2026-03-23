@@ -30,6 +30,19 @@ import sector02Chamber01LoreAltarUrl from '../../art/raw/sector02/chamber01/sect
 import sector02Chamber01LoreImageUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_lore_image_01.png';
 import sector02Chamber01GateUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_gate_01.png';
 import sector02Chamber01FloorUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_floor_01.png';
+import sector02Chamber02BackgroundWallModuleUrl from '../../art/raw/sector02/chamber02/sector02_chamber02_bg_wall_module_01.png';
+import sector02Chamber02BackgroundEntryLockBasinUrl from '../../art/raw/sector02/chamber02/sector02_chamber02_bg_entry_lock_basin_01.png';
+import sector02Chamber02BackgroundCompressionVaultUrl from '../../art/raw/sector02/chamber02/sector02_chamber02_bg_compression_vault_01.png';
+import sector02Chamber02BackgroundThresholdUrl from '../../art/raw/sector02/chamber02/sector02_chamber02_bg_threshold_01.png';
+import sector02Chamber02BackgroundClimaxCrucibleGateUrl from '../../art/raw/sector02/chamber02/sector02_chamber02_bg_climax_crucible_gate_01.png';
+import sector02Chamber02EnemyBasic01Url from '../../art/raw/sector02/chamber02/enemy_sector02_chamber02_basic_01.png';
+import sector02Chamber02EnemyBasic02Url from '../../art/raw/sector02/chamber02/enemy_sector02_chamber02_basic_02.png';
+import sector02Chamber02EnemyEliteUrl from '../../art/raw/sector02/chamber02/enemy_sector02_chamber02_elite_01.png';
+import sector02Chamber02PressureDeaconUrl from '../../art/raw/sector02/chamber02/miniboss_sector02_chamber02_pressure_deacon_01_alpha.png';
+import sector02Chamber02LoreAltarUrl from '../../art/raw/sector02/chamber02/sector02_chamber02_lore_altar_01.png';
+import sector02Chamber02LoreImageUrl from '../../art/raw/sector02/chamber02/sector02_chamber02_lore_image_01.png';
+import sector02Chamber02GateUrl from '../../art/raw/sector02/chamber02/sector02_chamber02_gate_01.png';
+import sector02Chamber02FloorUrl from '../../art/raw/sector02/chamber02/sector02_chamber02_floor_01.png';
 import playerConceptUrl from '../../assets/concepts/player-concept-03-right-alpha.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
@@ -96,6 +109,19 @@ export const ASSET_URLS = {
   [ASSET_KEYS.sector02Chamber01LoreImage]: sector02Chamber01LoreImageUrl,
   [ASSET_KEYS.sector02Chamber01Gate]: sector02Chamber01GateUrl,
   [ASSET_KEYS.sector02Chamber01Floor]: sector02Chamber01FloorUrl,
+  [ASSET_KEYS.sector02Chamber02BackgroundWallModule]: sector02Chamber02BackgroundWallModuleUrl,
+  [ASSET_KEYS.sector02Chamber02BackgroundEntryLockBasin]: sector02Chamber02BackgroundEntryLockBasinUrl,
+  [ASSET_KEYS.sector02Chamber02BackgroundCompressionVault]: sector02Chamber02BackgroundCompressionVaultUrl,
+  [ASSET_KEYS.sector02Chamber02BackgroundThreshold]: sector02Chamber02BackgroundThresholdUrl,
+  [ASSET_KEYS.sector02Chamber02BackgroundClimaxCrucibleGate]: sector02Chamber02BackgroundClimaxCrucibleGateUrl,
+  [ASSET_KEYS.sector02Chamber02EnemyBasic01]: sector02Chamber02EnemyBasic01Url,
+  [ASSET_KEYS.sector02Chamber02EnemyBasic02]: sector02Chamber02EnemyBasic02Url,
+  [ASSET_KEYS.sector02Chamber02EnemyElite]: sector02Chamber02EnemyEliteUrl,
+  [ASSET_KEYS.sector02Chamber02PressureDeacon]: sector02Chamber02PressureDeaconUrl,
+  [ASSET_KEYS.sector02Chamber02LoreAltar]: sector02Chamber02LoreAltarUrl,
+  [ASSET_KEYS.sector02Chamber02LoreImage]: sector02Chamber02LoreImageUrl,
+  [ASSET_KEYS.sector02Chamber02Gate]: sector02Chamber02GateUrl,
+  [ASSET_KEYS.sector02Chamber02Floor]: sector02Chamber02FloorUrl,
   [ASSET_KEYS.player]: playerConceptUrl,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,
