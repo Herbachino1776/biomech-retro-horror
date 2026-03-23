@@ -10,7 +10,7 @@ import { restartRunFromDeath } from '../systems/RunReset.js';
 
 const BLACK_AQUEDUCT_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber01Scene',
-  worldWidth: 4480,
+  worldWidth: 5560,
   floorColliderHeight: 72,
   spawnX: 220,
   spawnY: PLAYER.startY,
@@ -24,86 +24,98 @@ const BLACK_AQUEDUCT_BOOTSTRAP = {
   canalY: WORLD.floorY + 54,
   canalHeight: 126,
   canalAlpha: 0.7,
-  reflectionY: WORLD.floorY + 28
+  reflectionY: WORLD.floorY + 28,
+  processionalShadowY: WORLD.floorY - 22
 };
 
 const BLACK_AQUEDUCT_SEGMENTS = [
   {
     key: ASSET_KEYS.sector02Chamber01BackgroundEntryCanal,
-    x: 360,
+    x: 420,
     y: 220,
-    width: 860,
-    height: 468,
+    width: 920,
+    height: 480,
     tint: 0xb7b9ad,
-    alpha: 0.7,
+    alpha: 0.72,
     depth: -14.72
   },
   {
     key: ASSET_KEYS.sector02Chamber01BackgroundWallModule,
-    x: 1120,
+    x: 1200,
     y: 214,
-    width: 792,
+    width: 812,
     height: 448,
-    tint: 0xa5a394,
+    tint: 0xa6a698,
     alpha: 0.58,
     depth: -14.6
   },
   {
-    key: ASSET_KEYS.sector02Chamber01BackgroundSluiceOpening,
-    x: 1920,
-    y: 218,
-    width: 920,
+    key: ASSET_KEYS.sector02Chamber01BackgroundWallModule,
+    x: 1960,
+    y: 214,
+    width: 812,
     height: 448,
+    tint: 0x96988f,
+    alpha: 0.54,
+    depth: -14.58
+  },
+  {
+    key: ASSET_KEYS.sector02Chamber01BackgroundSluiceOpening,
+    x: 2780,
+    y: 218,
+    width: 940,
+    height: 452,
     tint: 0xb8bdae,
-    alpha: 0.7,
+    alpha: 0.72,
     depth: -14.76
   },
   {
     key: ASSET_KEYS.sector02Chamber01BackgroundWallModule,
-    x: 2720,
+    x: 3600,
     y: 214,
-    width: 812,
-    height: 450,
-    tint: 0x969487,
+    width: 824,
+    height: 452,
+    tint: 0x8f9088,
     alpha: 0.56,
-    depth: -14.58
+    depth: -14.56
   },
   {
     key: ASSET_KEYS.sector02Chamber01BackgroundThreshold,
-    x: 3500,
+    x: 4420,
     y: 216,
-    width: 904,
-    height: 452,
+    width: 920,
+    height: 456,
     tint: 0xb4b8ab,
-    alpha: 0.68,
+    alpha: 0.7,
     depth: -14.74
   },
   {
     key: ASSET_KEYS.sector02Chamber01BackgroundClimax,
-    x: 4150,
+    x: 5180,
     y: 208,
-    width: 728,
-    height: 452,
+    width: 760,
+    height: 456,
     tint: 0xb9c0b0,
-    alpha: 0.74,
+    alpha: 0.76,
     depth: -14.78
   }
 ];
 
 const BLACK_AQUEDUCT_RIBS = [
-  { x: 820, ribWidth: 26, ribHeight: 300, archWidth: 220, archHeight: 138, alpha: 0.16, depth: -11.7 },
-  { x: 2050, ribWidth: 24, ribHeight: 332, archWidth: 244, archHeight: 152, alpha: 0.18, depth: -11.76 },
-  { x: 3360, ribWidth: 28, ribHeight: 348, archWidth: 268, archHeight: 164, alpha: 0.2, depth: -11.82 }
+  { x: 980, ribWidth: 26, ribHeight: 300, archWidth: 220, archHeight: 138, alpha: 0.16, depth: -11.7 },
+  { x: 2240, ribWidth: 24, ribHeight: 332, archWidth: 244, archHeight: 152, alpha: 0.18, depth: -11.76 },
+  { x: 3720, ribWidth: 28, ribHeight: 348, archWidth: 268, archHeight: 164, alpha: 0.2, depth: -11.82 },
+  { x: 4920, ribWidth: 30, ribHeight: 364, archWidth: 292, archHeight: 176, alpha: 0.22, depth: -11.88 }
 ];
 
 const BLACK_AQUEDUCT_LORE = {
   cutsceneId: 'sector02-chamber01-basin-reliquary',
-  zoneX: 3080,
+  zoneX: 3660,
   zoneY: WORLD.floorY - 74,
   zoneWidth: 180,
   zoneHeight: 208,
-  promptOffsetY: -172,
-  muralX: 3080,
+  promptOffsetY: -176,
+  muralX: 3660,
   muralY: 220,
   muralWidth: 472,
   muralHeight: 290,
@@ -175,6 +187,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.renderCanalTrough();
     this.renderArchitecture();
     this.renderWalkway();
+    this.renderGateThreshold();
     this.createInvisiblePlatform(
       BLACK_AQUEDUCT_BOOTSTRAP.worldWidth / 2,
       WORLD.floorY + 28,
@@ -251,8 +264,6 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
   }
 
   renderWalkway() {
-    // Defer the new floor texture for now: the foothold keeps a conservative opaque walkway
-    // so collision/readability stay stable on mobile and desktop.
     this.add
       .rectangle(BLACK_AQUEDUCT_BOOTSTRAP.worldWidth / 2, WORLD.floorY - 14, BLACK_AQUEDUCT_BOOTSTRAP.worldWidth, 96, 0x151716, 0.94)
       .setDepth(-6.3);
@@ -261,14 +272,63 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       .rectangle(BLACK_AQUEDUCT_BOOTSTRAP.worldWidth / 2, WORLD.floorY - 48, BLACK_AQUEDUCT_BOOTSTRAP.worldWidth, 24, 0x202727, 0.74)
       .setDepth(-6.26);
 
-    [520, 1240, 2040, 2860, 3640, 4260].forEach((x, index) => {
-      this.add.rectangle(x, WORLD.floorY - 24, 168, 8, 0x6f7f73, 0.18 + index * 0.01).setDepth(-6.18);
+    if (this.textures.exists(ASSET_KEYS.sector02Chamber01Floor)) {
+      this.add
+        .tileSprite(
+          BLACK_AQUEDUCT_BOOTSTRAP.worldWidth / 2,
+          WORLD.floorY + 6,
+          BLACK_AQUEDUCT_BOOTSTRAP.worldWidth,
+          64,
+          ASSET_KEYS.sector02Chamber01Floor
+        )
+        .setTint(0x9ea698)
+        .setAlpha(0.2)
+        .setDepth(-6.22);
+    }
+
+    [540, 1280, 2020, 2760, 3500, 4240, 4980].forEach((x, index) => {
+      this.add.rectangle(x, WORLD.floorY - 24, 180, 8, 0x6f7f73, 0.16 + index * 0.01).setDepth(-6.18);
       this.add.rectangle(x, WORLD.floorY - 4, 4, 40, 0x050606, 0.32).setDepth(-6.12);
     });
 
     this.add
       .ellipse(BLACK_AQUEDUCT_BOOTSTRAP.worldWidth / 2, WORLD.floorY + 12, BLACK_AQUEDUCT_BOOTSTRAP.worldWidth, 54, 0x020303, 0.36)
       .setDepth(-5.9);
+  }
+
+  renderGateThreshold() {
+    const gateX = 5180;
+    const gateY = WORLD.floorY - 164;
+
+    this.add.ellipse(gateX, WORLD.floorY + 4, 360, 44, 0x030404, 0.34).setDepth(-5.82);
+    this.add.rectangle(gateX, WORLD.floorY - 106, 420, 232, 0x101515, 0.22).setDepth(-13.72);
+
+    if (this.textures.exists(ASSET_KEYS.sector02Chamber01Gate)) {
+      this.add
+        .image(gateX, gateY, ASSET_KEYS.sector02Chamber01Gate)
+        .setDisplaySize(340, 340)
+        .setTint(0xc2c7b9)
+        .setAlpha(0.84)
+        .setDepth(-4.92);
+    } else {
+      this.add
+        .ellipse(gateX, gateY, 260, 312, 0x364240, 0.82)
+        .setStrokeStyle(3, 0xd7d5c8, 0.52)
+        .setDepth(-4.92);
+    }
+
+    this.processionalLabel = this.add
+      .text(gateX - 22, WORLD.floorY - 270, 'BLACK AQUEDUCT\nPROCESSION THRESHOLD', {
+        fontFamily: 'monospace',
+        fontSize: '17px',
+        color: '#cfd7cc',
+        align: 'center',
+        stroke: '#0c0f10',
+        strokeThickness: 4
+      })
+      .setOrigin(0.5)
+      .setDepth(-4.74)
+      .setAlpha(0.8);
   }
 
   createPlayerAndColliders() {
@@ -278,27 +338,44 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
   }
 
   createLoreAnchor() {
-    // The lore image is mounted into an opaque wall niche. The altar/gate assets stay deferred
-    // in this pass because their transparent silhouettes read too much like floating overlays here.
-    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 134, BLACK_AQUEDUCT_LORE.backingWidth, 252, 0x0d1213, 0.74).setDepth(-13.9);
-    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 92, BLACK_AQUEDUCT_LORE.backingWidth - 48, 176, 0x1c2324, 0.92).setDepth(-13.82);
+    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 134, BLACK_AQUEDUCT_LORE.backingWidth, 252, 0x0d1213, 0.82).setDepth(-13.9);
+    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 92, BLACK_AQUEDUCT_LORE.backingWidth - 48, 176, 0x1c2324, 0.94).setDepth(-13.82);
 
-    if (this.textures.exists(ASSET_KEYS.sector02Chamber01BackgroundThreshold)) {
+    if (this.textures.exists(ASSET_KEYS.sector02Chamber01BackgroundWallModule)) {
       this.add
-        .image(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 130, ASSET_KEYS.sector02Chamber01BackgroundThreshold)
-        .setDisplaySize(BLACK_AQUEDUCT_LORE.backingWidth, BLACK_AQUEDUCT_LORE.backingHeight)
-        .setTint(0x81908a)
-        .setAlpha(0.2)
-        .setDepth(-13.8);
+        .image(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 132, ASSET_KEYS.sector02Chamber01BackgroundWallModule)
+        .setDisplaySize(BLACK_AQUEDUCT_LORE.backingWidth + 34, BLACK_AQUEDUCT_LORE.backingHeight + 20)
+        .setTint(0x7f8b87)
+        .setAlpha(0.22)
+        .setDepth(-13.84);
+    }
+
+    if (this.textures.exists(ASSET_KEYS.sector02Chamber01LoreAltar)) {
+      this.add
+        .image(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 88, ASSET_KEYS.sector02Chamber01LoreAltar)
+        .setDisplaySize(178, 178)
+        .setTint(0xb6c2b5)
+        .setAlpha(0.78)
+        .setDepth(-6.18);
     }
 
     if (this.textures.exists(ASSET_KEYS.sector02Chamber01LoreImage)) {
       this.add
         .image(BLACK_AQUEDUCT_LORE.muralX, BLACK_AQUEDUCT_LORE.muralY, ASSET_KEYS.sector02Chamber01LoreImage)
         .setDisplaySize(BLACK_AQUEDUCT_LORE.muralWidth, BLACK_AQUEDUCT_LORE.muralHeight)
-        .setTint(0xc7d0bf)
-        .setAlpha(0.94)
+        .setTint(0xd8e0d0)
+        .setAlpha(0.96)
         .setDepth(-13.65);
+    } else {
+      this.add
+        .text(BLACK_AQUEDUCT_LORE.muralX, BLACK_AQUEDUCT_LORE.muralY, 'BLACK AQUEDUCT\nLORE IMAGE FALLBACK', {
+          fontFamily: 'monospace',
+          fontSize: '22px',
+          color: '#d5dacd',
+          align: 'center'
+        })
+        .setOrigin(0.5)
+        .setDepth(-13.64);
     }
 
     this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 6, 382, 18, 0x090b0c, 0.76).setDepth(-6.1);
@@ -329,7 +406,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       .setVisible(false);
 
     this.footholdLabel = this.add
-      .text(3980, WORLD.floorY - 224, 'BLACK AQUEDUCT\nFOOTHOLD', {
+      .text(4380, WORLD.floorY - 224, 'BLACK AQUEDUCT\nCHAMBER 01', {
         fontFamily: 'monospace',
         fontSize: '18px',
         color: '#cfd7cc',
@@ -505,6 +582,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
   updateFootholdLabel(time) {
     const completionBoost = this.hasCompletedLoreBeat ? 0.12 : 0;
     this.footholdLabel?.setAlpha(0.68 + (Math.sin(time / 500) + 1) * 0.04 + completionBoost);
+    this.processionalLabel?.setAlpha(0.72 + (Math.sin(time / 620) + 1) * 0.035 + completionBoost * 0.65);
   }
 
   createInvisiblePlatform(x, y, width, height) {
