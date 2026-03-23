@@ -1,4 +1,11 @@
+import sector02Chamber01LoreTextRaw from '../../art/raw/sector02/chamber01/sector02_chamber01_lore_text_01.txt?raw';
 import { ASSET_KEYS } from './assetKeys.js';
+
+
+const sector02Chamber01LoreBody = sector02Chamber01LoreTextRaw
+  .split(/\n\s*\n/g)
+  .map((paragraph) => paragraph.trim())
+  .filter(Boolean);
 
 export const LORE_CUTSCENES = {
   'chamber01-deadgod-witness': {
@@ -83,12 +90,13 @@ export const LORE_CUTSCENES = {
     id: 'sector02-chamber01-basin-reliquary',
     imageKey: ASSET_KEYS.sector02Chamber01LoreImage,
     title: 'SECTOR 02 // BLACK AQUEDUCT RELIQUARY',
-    body: [
-      'The aqueduct does not carry water. It escorts the black remainder between verdicts.',
-      'Every sluice remembers a body, and every basin waits for the next emptied name.',
-      'Below the gate-lung, recurrence moves like oil learning how to pray.',
-      'Temporary rite text: the basin reliquary names this chamber as a holding throat for the dead between seals.'
-    ],
+    body: sector02Chamber01LoreBody.length > 0
+      ? sector02Chamber01LoreBody
+      : [
+        'The aqueduct does not carry water. It escorts the black remainder between verdicts.',
+        'Every sluice remembers a body, and every basin waits for the next emptied name.',
+        'The basin reliquary names this chamber as a holding throat for the dead between seals.'
+      ],
     prompt: 'Press [E] / [Enter] or tap to continue',
     style: {
       frameColor: 0xaab1a1,
@@ -96,8 +104,11 @@ export const LORE_CUTSCENES = {
       bodyColor: '#d2c5b4',
       promptColor: '#86a06d',
       imageTint: 0xc7ceb8,
-      imageAlpha: 0.96,
+      imageAlpha: 0.98,
       backgroundColor: '#000000',
+      imageSizingMode: 'cover',
+      imageBackgroundColor: 0x24302d,
+      imageBackgroundAlpha: 0.42,
       motion: {
         panX: 20,
         panY: -12,

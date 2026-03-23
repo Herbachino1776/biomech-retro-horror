@@ -126,7 +126,14 @@ export class LoreCutsceneScene extends Phaser.Scene {
     const hasImage = this.cutscene?.imageKey && this.textures.exists(this.cutscene.imageKey);
 
     this.add
-      .rectangle(region.centerX, region.centerY, region.width - 8, region.height - 8, 0x17201f, 0.86)
+      .rectangle(
+        region.centerX,
+        region.centerY,
+        region.width - 8,
+        region.height - 8,
+        this.cutscene?.style?.imageBackgroundColor ?? 0x17201f,
+        this.cutscene?.style?.imageBackgroundAlpha ?? 0.86
+      )
       .setDepth(DEPTH.image - 0.2);
     if (!hasImage) {
       this.add
@@ -149,10 +156,17 @@ export class LoreCutsceneScene extends Phaser.Scene {
     const texture = this.textures.get(this.cutscene.imageKey).getSourceImage();
     const sourceAspect = texture.width / texture.height;
     const targetAspect = region.width / region.height;
+    const sizingMode = this.cutscene?.style?.imageSizingMode ?? 'contain';
 
     let drawWidth = region.width;
     let drawHeight = region.height;
-    if (sourceAspect > targetAspect) {
+    if (sizingMode === 'cover') {
+      if (sourceAspect > targetAspect) {
+        drawWidth = region.height * sourceAspect;
+      } else {
+        drawHeight = region.width / sourceAspect;
+      }
+    } else if (sourceAspect > targetAspect) {
       drawHeight = region.width / sourceAspect;
     } else {
       drawWidth = region.height * sourceAspect;
