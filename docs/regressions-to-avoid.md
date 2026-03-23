@@ -72,3 +72,9 @@ Known failure patterns and what future tasks must protect.
 **Observed risk:** chamber boot failures can look like deep content bugs when the real issue is scene registration or transition wiring.
 - Check scene registration and previous-scene transition contracts first.
 - Do not assume a chamber failure always lives inside that chamber's encounter/layout logic.
+
+## 14) Lore Screen Viewport Leak Regression
+**Observed risk:** chamber viewport blackout/matte/overlay elements can leak into lore screens and masquerade as lore-art or crop failures.
+- If the blacked-out region matches the gameplay viewport, suspect chamber overlay/mask leakage before suspecting lore art.
+- Check the originating chamber layer state before adding more black panels or layout patches to `LoreScreenScene`.
+- Do not pile extra lore-screen masking on top of a still-active chamber matte or blackout layer.
