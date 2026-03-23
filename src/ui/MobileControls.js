@@ -52,6 +52,7 @@ export class MobileControls {
     this.debugEnabled = false;
     this.debugSceneKey = null;
     this.debugTelemetry = null;
+    this.devWarpCallback = typeof scene.handleDevWarp === 'function' ? () => scene.handleDevWarp() : null;
 
     if (!this.enabled) {
       return;
@@ -108,6 +109,7 @@ export class MobileControls {
     this.jumpControl = this.createButton('JUMP', 'jump');
     this.attackControl = this.createButton('ATTACK', 'attack');
     this.interactControl = this.createButton('RITE', 'interact', 0.6);
+    this.devControl = this.createButton('DEV', 'devWarp', 0.48);
     this.createDebugOverlay();
 
     this.layout();
@@ -254,9 +256,11 @@ export class MobileControls {
     const jumpHitMultiplier = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.jumpHitMultiplier ?? MOBILE_CONTROLS_LAYOUT.actionButtons.hitMultiplier);
     const attackHitMultiplier = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.attackHitMultiplier ?? MOBILE_CONTROLS_LAYOUT.actionButtons.hitMultiplier);
     const interactHitMultiplier = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.interactHitMultiplier ?? MOBILE_CONTROLS_LAYOUT.actionButtons.hitMultiplier);
+    const devHitMultiplier = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.devHitMultiplier ?? 1.7);
     this.attackControl.setRadius(this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.attackRadius), attackHitMultiplier ?? defaultHitMultiplier);
     this.jumpControl.setRadius(this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.jumpRadius), jumpHitMultiplier ?? defaultHitMultiplier);
     this.interactControl.setRadius(this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.interactRadius), interactHitMultiplier ?? defaultHitMultiplier);
+    this.devControl.setRadius(this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.actionButtons.devRadius), devHitMultiplier);
   }
 
   startJoystick(pointer) {
@@ -319,6 +323,17 @@ export class MobileControls {
   }
 
   onPress(action, pointerId, control) {
+    if (action === 'devWarp') {
+      control.ring.setFillStyle(CONTROL_COLORS.active, FOCUSED_RING_ALPHA);
+      this.scene.time.delayedCall(90, () => {
+        if (control?.ring?.active) {
+          control.ring.setFillStyle(CONTROL_COLORS.inner, GAMEPLAY_RING_ALPHA);
+        }
+      });
+      this.devWarpCallback?.();
+      return;
+    }
+
     this.pointerActionById.set(pointerId, action);
     this.activePointers[action].add(pointerId);
 
@@ -332,6 +347,11 @@ export class MobileControls {
   }
 
   onRelease(action, pointerId, control) {
+    if (action === 'devWarp') {
+      control.ring.setFillStyle(CONTROL_COLORS.inner, GAMEPLAY_RING_ALPHA);
+      return;
+    }
+
     if (this.pointerActionById.get(pointerId) === action) {
       this.pointerActionById.delete(pointerId);
     }
@@ -467,6 +487,7 @@ export class MobileControls {
 
     const jumpRadius = this.jumpControl.radius;
     const interactRadius = this.interactControl.radius;
+    const devRadius = this.devControl.radius;
     const clampCenterX = (x, radius) => Phaser.Math.Clamp(x, radius + 12, width - radius - 12);
     const clampCenterY = (y, radius) => Phaser.Math.Clamp(y, radius + 12, height - safeAreaBottom - radius - 12);
 
@@ -481,6 +502,10 @@ export class MobileControls {
     this.interactControl.setPosition(
       clampCenterX(rightAnchorX - orientationLayout.interactOffsetX, interactRadius),
       clampCenterY(lowerAnchorY - orientationLayout.interactOffsetY, interactRadius)
+    );
+    this.devControl.setPosition(
+      clampCenterX(width - orientationLayout.devButtonInsetX, devRadius),
+      clampCenterY(orientationLayout.devButtonInsetY + this.getSafeAreaInsetPx('top'), devRadius)
     );
 
     this.updateDebugTelemetry({
@@ -534,6 +559,7 @@ export class MobileControls {
       `jump ${Math.round(this.jumpControl.hitArea.x)},${Math.round(this.jumpControl.hitArea.y)}`,
       `atk ${Math.round(this.attackControl.hitArea.x)},${Math.round(this.attackControl.hitArea.y)}`,
       `rite ${Math.round(this.interactControl.hitArea.x)},${Math.round(this.interactControl.hitArea.y)}`,
+      `dev ${Math.round(this.devControl.hitArea.x)},${Math.round(this.devControl.hitArea.y)}`,
       `state L${Number(this.state.left)} R${Number(this.state.right)} J${Number(this.state.jump)} A${Number(this.state.attack)} I${Number(this.state.interact)}`
     ];
 
@@ -567,6 +593,7 @@ export class MobileControls {
     this.attackControl.setVisible(gameplayVisible);
 
     this.interactControl.setVisible(mode !== 'init');
+    this.devControl.setVisible(mode === 'gameplay' && Boolean(this.devWarpCallback));
     this.releaseAll();
 
     if (mode === 'dialogue' || mode === 'dead') {

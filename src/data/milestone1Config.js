@@ -8,7 +8,7 @@ export const WORLD = {
 };
 
 export const PLAYER = {
-  maxHealth: 5,
+  maxHealth: 10,
   moveSpeed: 164,
   moveAcceleration: 2200,
   moveDeceleration: 2600,

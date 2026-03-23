@@ -26,7 +26,8 @@ export class SkitterServitor {
     const spriteKey = config.textureKey ?? ASSET_KEYS.skitter;
     const spritePresentation = config.presentation ?? {};
     const defaultPresentation = CONCEPT_PRESENTATION.skitter;
-    const crop = spritePresentation.crop ?? defaultPresentation.crop;
+    const shouldUseDefaultCrop = spriteKey === ASSET_KEYS.skitter;
+    const crop = spritePresentation.crop ?? (shouldUseDefaultCrop ? defaultPresentation.crop : null);
     const display = spritePresentation.display ?? defaultPresentation.display;
     const origin = spritePresentation.origin ?? defaultPresentation.origin;
 

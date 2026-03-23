@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Player } from '../entities/Player.js';
 import { SkitterServitor } from '../entities/SkitterServitor.js';
+import { AbyssalArchon } from '../entities/AbyssalArchon.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
@@ -110,6 +111,53 @@ const BLACK_AQUEDUCT_TOLL_KEEPER_CONFIG = {
   audioProfile: 'tollkeeper'
 };
 
+const BLACK_AQUEDUCT_ARCHON_CONFIG = {
+  name: 'ABYSSAL ARCHON',
+  subtitle: 'Canal Threshold Adjudicator',
+  health: 10,
+  contactDamage: 2,
+  contactDamageCooldownMs: 1050,
+  attackCooldownMs: 3100,
+  attackTelegraphMs: 660,
+  attackRecoveryMs: 480,
+  attackRange: 188,
+  approachRange: 320,
+  approachSpeed: 38,
+  idleAdvanceSpeed: 14,
+  windupDriftSpeed: 8,
+  attackSpeed: 182,
+  attackLiftVelocity: -124,
+  hitPulseMs: 260,
+  hurtRecoverMs: 200,
+  hurtRecoilVelocityX: 90,
+  hurtRecoilVelocityY: -54,
+  spawnX: 5060,
+  spawnY: WORLD.floorY + 2,
+  activationX: 4740,
+  body: { width: 78, height: 118, offsetX: 118, offsetY: 150 },
+  audioProfile: 'miniboss',
+  presentation: {
+    display: { width: 262, height: 284 },
+    origin: { x: 0.55, y: 0.985 },
+    alpha: 0.98,
+    tint: 0xcbd2c1,
+    scaleX: 1,
+    scaleY: 1
+  }
+};
+
+const BLACK_AQUEDUCT_CLIMAX_GATE = {
+  barrierX: 5180,
+  barrierY: WORLD.floorY - 68,
+  barrierWidth: 92,
+  barrierHeight: 232,
+  thresholdX: 5320,
+  thresholdY: WORLD.floorY - 74,
+  thresholdWidth: 220,
+  thresholdHeight: 220,
+  promptOffsetY: -158
+};
+
 const BLACK_AQUEDUCT_ENCOUNTER_POCKETS = [
   {
     id: 'black-aqueduct-pocket-early',
@@ -189,6 +237,8 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.isLoreTransitionActive = false;
     this.currentLoreZone = null;
     this.hasCompletedLoreBeat = false;
+    this.hasUnlockedForwardPath = false;
+    this.hasTriggeredForwardContract = false;
     this.enemies = [];
     this.encounterPockets = [];
   }
@@ -199,8 +249,10 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.createBackdrop();
     this.createPlayerAndColliders();
     this.createEncounterPockets();
+    this.createClimaxEncounter();
     this.createLoreAnchor();
     this.createUiAndInput();
+    this.createForwardThreshold();
     this.configureCameraAndLayout();
     this.registerLoreEvents();
     this.cameras.main.fadeIn(650, 0, 0, 0);
@@ -355,6 +407,26 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     return enemy;
   }
 
+  createClimaxEncounter() {
+    this.archonWakeLabel = this.add.text(BLACK_AQUEDUCT_ARCHON_CONFIG.spawnX, WORLD.floorY - 250, 'ABYSSAL ARCHON\nBOUND IN SUMP', {
+      fontFamily: 'monospace', fontSize: '16px', color: '#d5ddd1', align: 'center', stroke: '#0c0f10', strokeThickness: 4
+    }).setOrigin(0.5).setDepth(-4.76).setAlpha(0.82);
+
+    this.archon = new AbyssalArchon(this, BLACK_AQUEDUCT_ARCHON_CONFIG.spawnX, BLACK_AQUEDUCT_ARCHON_CONFIG.spawnY, BLACK_AQUEDUCT_ARCHON_CONFIG);
+    this.archon.setActive(false);
+    this.archon.sprite.setDepth(6.2);
+    this.archon.body.setCollideWorldBounds(true);
+    this.physics.add.collider(this.archon.sprite, this.platforms);
+    this.physics.add.overlap(this.player.attackHitbox, this.archon.sprite, (_attackZone, enemySprite) => {
+      this.handlePlayerHitArchon(enemySprite);
+    });
+    this.physics.add.overlap(this.player.sprite, this.archon.sprite, (_playerSprite, enemySprite) => {
+      this.handleArchonContactPlayer(enemySprite);
+    });
+
+    this.applyGameplayReadabilitySupport(this.archon.sprite, { fill: 0xd8ddcf, alpha: 0.18, scale: 1.28 });
+  }
+
   createLoreAnchor() {
     this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 146, BLACK_AQUEDUCT_LORE.backingWidth + 28, 286, 0x091011, 0.88).setDepth(-13.94);
     this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 94, BLACK_AQUEDUCT_LORE.backingWidth - 30, 188, 0x1b2425, 0.96).setDepth(-13.88);
@@ -393,6 +465,34 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.footholdLabel = this.add.text(4380, WORLD.floorY - 224, 'BLACK AQUEDUCT\nCHAMBER 01', {
       fontFamily: 'monospace', fontSize: '18px', color: '#cfd7cc', align: 'center', stroke: '#0c0f10', strokeThickness: 4
     }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.82);
+  }
+
+  createForwardThreshold() {
+    this.forwardBarrier = this.add.rectangle(
+      BLACK_AQUEDUCT_CLIMAX_GATE.barrierX,
+      BLACK_AQUEDUCT_CLIMAX_GATE.barrierY,
+      BLACK_AQUEDUCT_CLIMAX_GATE.barrierWidth,
+      BLACK_AQUEDUCT_CLIMAX_GATE.barrierHeight,
+      0x0b0f10,
+      0.38
+    ).setDepth(-4.86);
+    this.physics.add.existing(this.forwardBarrier, true);
+    this.physics.add.collider(this.player.sprite, this.forwardBarrier);
+
+    this.forwardThresholdZone = this.add.zone(
+      BLACK_AQUEDUCT_CLIMAX_GATE.thresholdX,
+      BLACK_AQUEDUCT_CLIMAX_GATE.thresholdY,
+      BLACK_AQUEDUCT_CLIMAX_GATE.thresholdWidth,
+      BLACK_AQUEDUCT_CLIMAX_GATE.thresholdHeight
+    ).setOrigin(0.5);
+    this.physics.add.existing(this.forwardThresholdZone, true);
+
+    this.forwardPrompt = this.add.text(
+      BLACK_AQUEDUCT_CLIMAX_GATE.thresholdX,
+      BLACK_AQUEDUCT_CLIMAX_GATE.thresholdY + BLACK_AQUEDUCT_CLIMAX_GATE.promptOffsetY,
+      'CLIMAX LOCKED',
+      { fontFamily: 'monospace', fontSize: '14px', color: '#d7ddd2', align: 'center', stroke: '#0c0f10', strokeThickness: 4 }
+    ).setOrigin(0.5).setDepth(-4.58).setAlpha(0.92).setVisible(false);
   }
 
   createUiAndInput() {
@@ -436,6 +536,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.mobileControls.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+      this.archon?.body?.setVelocity?.(0, 0);
 
       if ((Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) && !this.isRestartingRun) {
         this.isRestartingRun = true;
@@ -448,6 +549,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+      this.archon?.body?.setVelocity?.(0, 0);
       return;
     }
 
@@ -462,11 +564,16 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     };
 
     this.player.update(time, input);
+    this.updateArchonState(time);
     this.refreshEncounterPocketPresence();
     this.updateEncounterPockets(time);
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
+    this.archon?.update(time, this.player.sprite);
+    this.refreshArchonBossBar(time);
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
+    this.refreshForwardThresholdPresence();
+    this.tryAdvanceForwardThreshold(mobileInput);
     this.updateFootholdLabel(time);
     this.hud.update(this.player.health, PLAYER.maxHealth);
   }
@@ -562,7 +669,11 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
     this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+    this.archon?.body?.setVelocity?.(0, 0);
     this.audioDirector?.stopAmbientLoop();
+    this.hud?.setVisible(false);
+    this.mobileControls.setMode('init');
+    this.uiCamera?.setVisible(false);
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.pause();
@@ -587,8 +698,46 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
   resumeFromLore() {
     this.isLoreTransitionActive = false;
     this.mobileControls.setMode('gameplay');
+    this.hud?.setVisible(true);
+    this.uiCamera?.setVisible(true);
     this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.1 });
     this.cameras.main.fadeIn(500, 0, 0, 0);
+  }
+
+  handlePlayerHitArchon(enemySprite) {
+    if (!this.player.attackActive || this.archon?.dead || !this.isEnemyOverlapTarget(enemySprite, this.archon)) {
+      return;
+    }
+
+    if (this.archon.lastAttackHitId === this.player.attackId) {
+      return;
+    }
+
+    this.archon.lastAttackHitId = this.player.attackId;
+    this.archon.takeDamage(1, this.time.now);
+    this.archon.setActive(true);
+    this.audioDirector?.playPlayerHit();
+
+    if (this.archon.dead && !this.hasUnlockedForwardPath) {
+      this.unlockForwardPath();
+    }
+  }
+
+  handleArchonContactPlayer(enemySprite) {
+    if (this.archon?.dead || !this.isEnemyOverlapTarget(enemySprite, this.archon)) {
+      return;
+    }
+    if (!this.archon.canDealContactDamage(this.time.now)) {
+      return;
+    }
+
+    const tookDamage = this.player.receiveDamage(BLACK_AQUEDUCT_ARCHON_CONFIG.contactDamage, this.time.now);
+    if (tookDamage) {
+      this.archon.recordContactDamage(this.time.now);
+      const knockDirection = Math.sign(this.player.sprite.x - this.archon.sprite.x) || 1;
+      this.player.body.setVelocityX(knockDirection * 240);
+      this.player.body.setVelocityY(-228);
+    }
   }
 
   handlePlayerHitEnemy(_attackZone, enemySprite, enemy) {
@@ -627,6 +776,85 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     return target === enemy.sprite || target?.gameObject === enemy.sprite;
   }
 
+  updateArchonState(time) {
+    if (!this.archon || this.archon.dead) {
+      return;
+    }
+
+    if (!this.archon.active && this.player.sprite.x >= BLACK_AQUEDUCT_ARCHON_CONFIG.activationX) {
+      this.archon.setActive(true);
+      this.archonWakeLabel?.setText('ABYSSAL ARCHON\nSURFACED').setAlpha(0.96);
+    }
+  }
+
+  refreshArchonBossBar(time) {
+    if (!this.archon) {
+      return;
+    }
+
+    const visible = !this.archon.dead && (this.archon.active || this.player.sprite.x >= BLACK_AQUEDUCT_ARCHON_CONFIG.activationX - 110);
+    this.hud.setBossBarState({
+      visible,
+      name: BLACK_AQUEDUCT_ARCHON_CONFIG.name,
+      subtitle: BLACK_AQUEDUCT_ARCHON_CONFIG.subtitle,
+      current: this.archon.health,
+      max: this.archon.maxHealth,
+      telegraph: this.archon.getTelegraphProgress(time),
+      wounded: time < this.archon.hurtUntil
+    });
+
+    if (this.archon.dead) {
+      this.hud.setBossBarState({ visible: false });
+    }
+  }
+
+  unlockForwardPath() {
+    this.hasUnlockedForwardPath = true;
+    this.forwardBarrier?.setAlpha(0.08);
+    this.forwardBarrier?.setFillStyle(0x8ca284, 0.08);
+    if (this.forwardBarrier?.body) {
+      this.forwardBarrier.body.enable = false;
+      this.forwardBarrier.body.updateFromGameObject?.();
+    }
+    this.forwardPrompt?.setText('PATH FORWARD STABILIZED\nENTER THE PROCESSION THRESHOLD');
+    this.processionalLabel?.setText('BLACK AQUEDUCT\nTHRESHOLD UNSEALED');
+    this.archonWakeLabel?.setText('ABYSSAL ARCHON\nNULLIFIED').setAlpha(0.84);
+  }
+
+  refreshForwardThresholdPresence() {
+    this.currentForwardThreshold = null;
+    if (!this.forwardThresholdZone) {
+      return;
+    }
+
+    this.physics.overlap(this.player.sprite, this.forwardThresholdZone, () => {
+      this.currentForwardThreshold = this.forwardThresholdZone;
+    });
+
+    const promptVisible = Boolean(this.currentForwardThreshold) || (this.hasUnlockedForwardPath && !this.hasTriggeredForwardContract);
+    const promptText = this.hasUnlockedForwardPath
+      ? this.hasTriggeredForwardContract
+        ? 'FORWARD CONTRACT MARKED\nSECTOR 2 CHAMBER 2 NOT IN THIS PASS'
+        : 'PATH FORWARD STABILIZED\nPRESS RITE / [E] TO MARK DESCENT'
+      : 'CLIMAX LOCKED';
+    this.forwardPrompt?.setVisible(promptVisible).setText(promptText);
+  }
+
+  tryAdvanceForwardThreshold(mobileInput) {
+    if (!this.hasUnlockedForwardPath || !this.currentForwardThreshold) {
+      return;
+    }
+
+    const interactPressed = Phaser.Input.Keyboard.JustDown(this.keyInteract) || Phaser.Input.Keyboard.JustDown(this.keyEnter) || mobileInput.interactPressed;
+    if (!interactPressed) {
+      return;
+    }
+
+    this.hasTriggeredForwardContract = true;
+    this.forwardPrompt?.setVisible(true).setText('FORWARD CONTRACT MARKED\nSECTOR 2 CHAMBER 2 PENDING');
+    this.processionalLabel?.setText('DESCENT MARKED\nFURTHER CHAMBER PENDING');
+  }
+
   updateFootholdLabel(time) {
     const completionBoost = this.hasCompletedLoreBeat ? 0.12 : 0;
     this.footholdLabel?.setAlpha(0.68 + (Math.sin(time / 500) + 1) * 0.04 + completionBoost);
@@ -639,6 +867,22 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.physics.add.existing(platform, true);
     this.platforms.add(platform);
     return platform;
+  }
+
+  handleDevWarp() {
+    if (this.scene.isActive('LoreCutsceneScene')) {
+      return;
+    }
+
+    this.cleanupSceneUi?.();
+    this.audioDirector?.shutdown();
+    this.scene.start('Sector02Chamber01Scene', { devWarp: true, source: this.scene.key });
+  }
+
+  cleanupSceneUi() {
+    this.hud?.setBossBarState({ visible: false });
+    this.hud?.setVisible(true);
+    this.uiCamera?.setVisible(true);
   }
 
   setupMobileUiCamera() {
