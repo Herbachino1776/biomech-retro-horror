@@ -143,10 +143,17 @@ export class LoreCutsceneScene extends Phaser.Scene {
   }
 
   drawImageRegion(region) {
+    const imageStyle = this.cutscene?.style ?? {};
+    const imageOffsetX = imageStyle.imageOffsetX ?? 0;
+    const imageOffsetY = imageStyle.imageOffsetY ?? 0;
+    const imageScaleMultiplier = imageStyle.imageScaleMultiplier ?? 1;
+    const imageFrameAlpha = imageStyle.imageFrameAlpha ?? 0.96;
+    const imageStrokeAlpha = imageStyle.imageStrokeAlpha ?? 0.85;
+
     this.trackLayoutElement(
       this.add
-        .rectangle(region.centerX, region.centerY, region.width, region.height, 0x111515, 0.96)
-        .setStrokeStyle(2, this.cutscene?.style?.frameColor ?? COLORS.bone, 0.85)
+        .rectangle(region.centerX, region.centerY, region.width, region.height, 0x111515, imageFrameAlpha)
+        .setStrokeStyle(2, imageStyle.frameColor ?? COLORS.bone, imageStrokeAlpha)
         .setDepth(DEPTH.frame)
     );
 
@@ -159,8 +166,8 @@ export class LoreCutsceneScene extends Phaser.Scene {
           region.centerY,
           region.width - 8,
           region.height - 8,
-          this.cutscene?.style?.imageBackgroundColor ?? 0x17201f,
-          this.cutscene?.style?.imageBackgroundAlpha ?? 0.86
+          imageStyle.imageBackgroundColor ?? 0x17201f,
+          imageStyle.imageBackgroundAlpha ?? 0.86
         )
         .setDepth(DEPTH.image - 0.2)
     );
@@ -201,11 +208,14 @@ export class LoreCutsceneScene extends Phaser.Scene {
       drawWidth = region.height * sourceAspect;
     }
 
+    drawWidth *= imageScaleMultiplier;
+    drawHeight *= imageScaleMultiplier;
+
     const image = this.trackLayoutElement(this.add
-      .image(region.centerX, region.centerY, this.cutscene.imageKey)
+      .image(region.centerX + imageOffsetX, region.centerY + imageOffsetY, this.cutscene.imageKey)
       .setDisplaySize(drawWidth, drawHeight)
-      .setTint(this.cutscene?.style?.imageTint ?? 0xd4b9a5)
-      .setAlpha(this.cutscene?.style?.imageAlpha ?? 0.94)
+      .setTint(imageStyle.imageTint ?? 0xd4b9a5)
+      .setAlpha(imageStyle.imageAlpha ?? 0.94)
       .setDepth(DEPTH.image));
 
     const maskGraphic = this.trackLayoutMask(this.make.graphics({ x: 0, y: 0, add: false }));

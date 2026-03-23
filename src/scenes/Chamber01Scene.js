@@ -416,6 +416,25 @@ export class Chamber01Scene extends Phaser.Scene {
     });
   }
 
+  handleDevWarp() {
+    if (this.scene.isActive('LoreScreenScene') || this.scene.isActive('LoreCutsceneScene')) {
+      return;
+    }
+
+    this.cleanupSceneUi?.();
+    this.audioDirector?.shutdown();
+    this.scene.start('Sector02Chamber01Scene', {
+      devWarp: true,
+      source: this.scene.key
+    });
+  }
+
+  cleanupSceneUi() {
+    this.hud?.setBossBarState({ visible: false });
+    this.hud?.setVisible(true);
+    this.uiCamera?.setVisible(true);
+  }
+
   createLoreZones() {
     LORE_ENTRIES.forEach((entry) => {
       const zone = this.add.zone(entry.x, entry.y, entry.width, entry.height).setOrigin(0.5);
