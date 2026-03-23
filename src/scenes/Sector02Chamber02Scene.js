@@ -24,7 +24,7 @@ const COMPRESSION_VAULTS_BOOTSTRAP = {
   backdropDepth: -16,
   lowerBandY: WORLD.floorY - 78,
   lowerBandHeight: 286,
-  lowerBandAlpha: 0.24,
+  lowerBandAlpha: 0.2,
   pressureBandY: WORLD.floorY - 128,
   pressureBandHeight: 170
 };
@@ -40,11 +40,40 @@ const COMPRESSION_VAULTS_SEGMENTS = [
 ];
 
 const COMPRESSION_VAULTS_RIBS = [
-  { x: 1020, ribWidth: 28, ribHeight: 314, archWidth: 240, archHeight: 146, alpha: 0.18, depth: -11.74 },
-  { x: 2560, ribWidth: 32, ribHeight: 348, archWidth: 280, archHeight: 170, alpha: 0.22, depth: -11.82 },
-  { x: 4050, ribWidth: 30, ribHeight: 330, archWidth: 250, archHeight: 150, alpha: 0.2, depth: -11.78 },
-  { x: 5160, ribWidth: 34, ribHeight: 366, archWidth: 304, archHeight: 182, alpha: 0.24, depth: -11.88 }
+  { x: 1020, ribWidth: 28, ribHeight: 314, archWidth: 240, archHeight: 146, alpha: 0.14, depth: -11.74 },
+  { x: 2560, ribWidth: 32, ribHeight: 348, archWidth: 280, archHeight: 170, alpha: 0.16, depth: -11.82 },
+  { x: 4050, ribWidth: 30, ribHeight: 330, archWidth: 250, archHeight: 150, alpha: 0.16, depth: -11.78 },
+  { x: 5160, ribWidth: 34, ribHeight: 366, archWidth: 304, archHeight: 182, alpha: 0.18, depth: -11.88 }
 ];
+
+const COMPRESSION_VAULTS_ART_OVERLAYS = [
+  { key: ASSET_KEYS.sector02Chamber02BackgroundWallModule, x: 1615, y: 214, width: 1050, height: 474, tint: 0x8a8f86, alpha: 0.18, depth: -13.98 },
+  { key: ASSET_KEYS.sector02Chamber02BackgroundCompressionVault, x: 3230, y: 212, width: 1160, height: 490, tint: 0xa3aaa0, alpha: 0.2, depth: -13.99 },
+  { key: ASSET_KEYS.sector02Chamber02BackgroundThreshold, x: 4455, y: 210, width: 1080, height: 500, tint: 0x9ca39a, alpha: 0.22, depth: -13.98 },
+  { key: ASSET_KEYS.sector02Chamber02BackgroundClimaxCrucibleGate, x: 5215, y: 206, width: 960, height: 520, tint: 0xaeb6ab, alpha: 0.24, depth: -13.97 }
+];
+
+const COMPRESSION_VAULTS_BUTTRESSES = [
+  { x: 1460, y: WORLD.floorY - 154, width: 208, height: 256, capWidth: 288, capHeight: 26, alpha: 0.16, depth: -10.88 },
+  { x: 2880, y: WORLD.floorY - 166, width: 232, height: 280, capWidth: 326, capHeight: 28, alpha: 0.18, depth: -10.94 },
+  { x: 4300, y: WORLD.floorY - 162, width: 220, height: 270, capWidth: 308, capHeight: 28, alpha: 0.18, depth: -10.92 },
+  { x: 5090, y: WORLD.floorY - 176, width: 256, height: 306, capWidth: 352, capHeight: 30, alpha: 0.22, depth: -10.98 }
+];
+
+const COMPRESSION_VAULTS_CLIMAX_FRAMING = {
+  approachPlateX: 5000,
+  approachPlateY: WORLD.floorY - 146,
+  approachPlateWidth: 780,
+  approachPlateHeight: 282,
+  crucibleShadowWidth: 564,
+  crucibleShadowHeight: 44,
+  deaconDaisWidth: 356,
+  deaconDaisHeight: 44,
+  deaconDaisY: WORLD.floorY - 14,
+  deaconBackPlateWidth: 440,
+  deaconBackPlateHeight: 290,
+  deaconBackPlateY: WORLD.floorY - 174
+};
 
 const COMPRESSION_VAULTS_SKITTER_BASIC_01 = {
   ...SKITTER,
@@ -252,16 +281,16 @@ const COMPRESSION_VAULTS_PRESSURE_DEACON = {
   hurtRecoverMs: 210,
   hurtRecoilVelocityX: 92,
   hurtRecoilVelocityY: -56,
-  spawnX: 5220,
-  spawnY: WORLD.floorY + 2,
-  activationX: 4920,
-  body: { width: 92, height: 126, offsetX: 110, offsetY: 154 },
+  spawnX: 5196,
+  spawnY: WORLD.floorY - 2,
+  activationX: 4890,
+  body: { width: 96, height: 132, offsetX: 108, offsetY: 150 },
   audioProfile: 'miniboss',
   presentation: {
-    display: { width: 314, height: 334 },
-    origin: { x: 0.54, y: 0.985 },
-    alpha: 0.98,
-    tint: 0xcfd6c7,
+    display: { width: 332, height: 356 },
+    origin: { x: 0.54, y: 0.988 },
+    alpha: 0.985,
+    tint: 0xd9e0d3,
     scaleX: 1,
     scaleY: 1
   },
@@ -283,10 +312,16 @@ const COMPRESSION_VAULTS_PRESSURE_DEACON = {
     telegraphRadiusY: 30
   },
   blowout: {
-    scale: 1.18,
-    burstCount: 13,
-    puddleWidth: 214,
-    puddleHeight: 52
+    scale: 1.14,
+    burstCount: 26,
+    burstRadiusX: 182,
+    burstRadiusY: 84,
+    puddleWidth: 238,
+    puddleHeight: 42,
+    sprayCount: 42,
+    mistCount: 26,
+    emberCount: 15,
+    durationMs: 980
   }
 };
 
@@ -350,6 +385,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.renderSegmentBackdrop();
     this.renderCompressionArchitecture();
     this.renderWalkway();
+    this.renderClimaxApproach();
     this.renderGateThreshold();
     this.createInvisiblePlatform(COMPRESSION_VAULTS_BOOTSTRAP.worldWidth / 2, WORLD.floorY + 28, COMPRESSION_VAULTS_BOOTSTRAP.worldWidth, COMPRESSION_VAULTS_BOOTSTRAP.floorColliderHeight);
   }
@@ -367,6 +403,18 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
   }
 
   renderCompressionArchitecture() {
+    COMPRESSION_VAULTS_ART_OVERLAYS.forEach((overlay) => {
+      if (!this.textures.exists(overlay.key)) {
+        return;
+      }
+
+      this.add.image(overlay.x, overlay.y, overlay.key)
+        .setDisplaySize(overlay.width, overlay.height)
+        .setTint(overlay.tint)
+        .setAlpha(overlay.alpha)
+        .setDepth(overlay.depth);
+    });
+
     COMPRESSION_VAULTS_RIBS.forEach((marker) => {
       const ribY = WORLD.floorY - marker.ribHeight / 2 - 20;
       const leftRibX = marker.x - marker.archWidth / 2;
@@ -379,10 +427,26 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.add.ellipse(marker.x, WORLD.floorY + 12, marker.archWidth * 1.18, 26, 0x020303, marker.alpha).setDepth(-5.2);
     });
 
-    [860, 1680, 2420, 3250, 3980, 4710].forEach((x, index) => {
-      this.add.rectangle(x, WORLD.floorY - 188, 18, 144, 0x1b2324, 0.18 + index * 0.01).setDepth(-11.18);
-      this.add.rectangle(x, WORLD.floorY - 96, 132, 14, 0x2e3938, 0.12).setDepth(-11.12);
+    COMPRESSION_VAULTS_BUTTRESSES.forEach((buttress, index) => {
+      this.add.rectangle(buttress.x, buttress.y, buttress.width, buttress.height, 0x131818, buttress.alpha).setDepth(buttress.depth);
+      this.add.rectangle(buttress.x, buttress.y - buttress.height * 0.46, buttress.capWidth, buttress.capHeight, 0x252e2d, buttress.alpha * 0.88).setDepth(buttress.depth + 0.02);
+      this.add.ellipse(buttress.x, WORLD.floorY - 12, buttress.capWidth * 0.94, 26, 0x020404, 0.14 + index * 0.014).setDepth(-6.02);
     });
+
+    [860, 1680, 2420, 3250, 3980, 4710].forEach((x, index) => {
+      this.add.rectangle(x, WORLD.floorY - 188, 18, 144, 0x1b2324, 0.12 + index * 0.008).setDepth(-11.18);
+      this.add.rectangle(x, WORLD.floorY - 96, 132, 14, 0x2e3938, 0.09).setDepth(-11.12);
+    });
+  }
+
+  renderClimaxApproach() {
+    const frame = COMPRESSION_VAULTS_CLIMAX_FRAMING;
+    this.add.rectangle(frame.approachPlateX, frame.approachPlateY, frame.approachPlateWidth, frame.approachPlateHeight, 0x0a1011, 0.24).setDepth(-13.72);
+    this.add.ellipse(frame.approachPlateX + 38, WORLD.floorY - 18, frame.crucibleShadowWidth, frame.crucibleShadowHeight, 0x010203, 0.32).setDepth(-6.06);
+    this.add.rectangle(COMPRESSION_VAULTS_PRESSURE_DEACON.spawnX, frame.deaconBackPlateY, frame.deaconBackPlateWidth, frame.deaconBackPlateHeight, 0x101717, 0.28).setDepth(-10.86);
+    this.add.rectangle(COMPRESSION_VAULTS_PRESSURE_DEACON.spawnX, frame.deaconDaisY, frame.deaconDaisWidth, frame.deaconDaisHeight, 0x1c2323, 0.62).setDepth(-6.16);
+    this.add.rectangle(COMPRESSION_VAULTS_PRESSURE_DEACON.spawnX, frame.deaconDaisY - 16, frame.deaconDaisWidth * 0.84, 10, 0x788175, 0.16).setDepth(-6.14);
+    this.add.ellipse(COMPRESSION_VAULTS_PRESSURE_DEACON.spawnX, WORLD.floorY + 8, frame.deaconDaisWidth * 1.12, 34, 0x020304, 0.4).setDepth(-6.1);
   }
 
   renderWalkway() {
@@ -572,7 +636,8 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       COMPRESSION_VAULTS_PRESSURE_DEACON
     );
     this.pressureDeacon.setActive(false);
-    this.pressureDeacon.sprite.setDepth(6.24);
+    this.pressureDeacon.sprite.setDepth(6.28);
+    this.pressureDeacon.sprite.setPosition(COMPRESSION_VAULTS_PRESSURE_DEACON.spawnX, COMPRESSION_VAULTS_PRESSURE_DEACON.spawnY);
     this.pressureDeacon.body.setCollideWorldBounds(true);
     this.physics.add.collider(this.pressureDeacon.sprite, this.platforms);
     this.physics.add.overlap(this.player.attackHitbox, this.pressureDeacon.sprite, (_attackZone, enemySprite) => {
@@ -582,7 +647,8 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.handlePressureDeaconContactPlayer(enemySprite);
     });
 
-    this.applyGameplayReadabilitySupport(this.pressureDeacon.sprite, { fill: 0xd7ded1, alpha: 0.18, scale: 1.34 });
+    this.applyGameplayReadabilitySupport(this.pressureDeacon.sprite, { fill: 0xe0e6d7, alpha: 0.16, scale: 1.26 });
+    this.pressureDeacon.projectileTelegraph?.setStrokeStyle(2, 0x9fb180, 0.58);
   }
 
   createLoreAnchor() {
@@ -1031,9 +1097,15 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       y: (sprite.body?.bottom ?? sprite.y) - 20,
       depth: sprite.depth,
       scale: config.scale ?? 1,
+      durationMs: config.durationMs,
       burstCount: config.burstCount,
+      burstRadiusX: config.burstRadiusX,
+      burstRadiusY: config.burstRadiusY,
       puddleWidth: config.puddleWidth,
-      puddleHeight: config.puddleHeight
+      puddleHeight: config.puddleHeight,
+      sprayCount: config.sprayCount,
+      mistCount: config.mistCount,
+      emberCount: config.emberCount
     });
   }
 
@@ -1155,7 +1227,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     enemy.takeDamage(1, this.time.now);
     this.clearEliteProjectileState(enemy);
     if (enemy.dead && enemy.isElite) {
-      this.triggerSector02BlackOilPayoff(enemy, { scale: 0.9, burstCount: 8, puddleWidth: 154, puddleHeight: 34 });
+      this.triggerSector02BlackOilPayoff(enemy, { scale: 0.92, burstCount: 18, burstRadiusX: 126, burstRadiusY: 54, puddleWidth: 162, puddleHeight: 28, sprayCount: 28, mistCount: 14, emberCount: 7, durationMs: 900 });
     }
     this.audioDirector?.playPlayerHit();
   }
