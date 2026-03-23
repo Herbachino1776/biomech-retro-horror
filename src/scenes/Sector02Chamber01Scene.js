@@ -227,6 +227,8 @@ const BLACK_AQUEDUCT_ENCOUNTER_POCKETS = [
   }
 ];
 
+const SHOW_SECTOR02_DEBUG_LABELS = false;
+
 const BLACK_AQUEDUCT_LORE = {
   cutsceneId: 'sector02-chamber01-basin-reliquary',
   anchors: [
@@ -406,9 +408,11 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.add.ellipse(gateX, gateY, 260, 312, 0x364240, 0.82).setStrokeStyle(3, 0xd7d5c8, 0.52).setDepth(-4.92);
     }
 
-    this.processionalLabel = this.add.text(gateX - 22, WORLD.floorY - 270, 'BLACK AQUEDUCT\nPROCESSION THRESHOLD', {
-      fontFamily: 'monospace', fontSize: '17px', color: '#cfd7cc', align: 'center', stroke: '#0c0f10', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.8);
+    if (SHOW_SECTOR02_DEBUG_LABELS) {
+      this.processionalLabel = this.add.text(gateX - 22, WORLD.floorY - 270, 'BLACK AQUEDUCT\nPROCESSION THRESHOLD', {
+        fontFamily: 'monospace', fontSize: '17px', color: '#cfd7cc', align: 'center', stroke: '#0c0f10', strokeThickness: 4
+      }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.8);
+    }
   }
 
   createPlayerAndColliders() {
@@ -463,9 +467,11 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.physics.add.existing(zone, true);
 
     const markerShadow = this.add.ellipse(pocketConfig.zoneX, WORLD.floorY - 4, pocketConfig.markerWidth, pocketConfig.markerHeight, 0x030404, pocketConfig.markerAlpha).setDepth(-5.84);
-    const promptText = this.add.text(pocketConfig.zoneX, pocketConfig.zoneY + pocketConfig.promptOffsetY, pocketConfig.label, {
-      fontFamily: 'monospace', fontSize: '13px', color: '#d3cbc0', align: 'center', stroke: '#111515', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.82).setAlpha(0.82).setVisible(false);
+    const promptText = SHOW_SECTOR02_DEBUG_LABELS
+      ? this.add.text(pocketConfig.zoneX, pocketConfig.zoneY + pocketConfig.promptOffsetY, pocketConfig.label, {
+        fontFamily: 'monospace', fontSize: '13px', color: '#d3cbc0', align: 'center', stroke: '#111515', strokeThickness: 4
+      }).setOrigin(0.5).setDepth(-4.82).setAlpha(0.82).setVisible(false)
+      : null;
 
     const enemies = pocketConfig.enemies.map((enemyConfig) => this.createEncounterEnemy(enemyConfig, pocketConfig));
     return { ...pocketConfig, zone, markerShadow, promptText, enemies, activated: false, resolved: false };
@@ -505,9 +511,11 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
   }
 
   createClimaxEncounter() {
-    this.archonWakeLabel = this.add.text(BLACK_AQUEDUCT_ARCHON_CONFIG.spawnX, WORLD.floorY - 250, 'ABYSSAL ARCHON\nBOUND IN SUMP', {
-      fontFamily: 'monospace', fontSize: '16px', color: '#d5ddd1', align: 'center', stroke: '#0c0f10', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.76).setAlpha(0.82);
+    if (SHOW_SECTOR02_DEBUG_LABELS) {
+      this.archonWakeLabel = this.add.text(BLACK_AQUEDUCT_ARCHON_CONFIG.spawnX, WORLD.floorY - 250, 'ABYSSAL ARCHON\nBOUND IN SUMP', {
+        fontFamily: 'monospace', fontSize: '16px', color: '#d5ddd1', align: 'center', stroke: '#0c0f10', strokeThickness: 4
+      }).setOrigin(0.5).setDepth(-4.76).setAlpha(0.82);
+    }
 
     this.archon = new AbyssalArchon(this, BLACK_AQUEDUCT_ARCHON_CONFIG.spawnX, BLACK_AQUEDUCT_ARCHON_CONFIG.spawnY, BLACK_AQUEDUCT_ARCHON_CONFIG);
     this.archon.setActive(false);
@@ -528,9 +536,11 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     BLACK_AQUEDUCT_LORE.anchors.forEach((anchorConfig) => {
       this.loreAnchors.push(this.createLoreAnchor(anchorConfig));
     });
-    this.footholdLabel = this.add.text(4380, WORLD.floorY - 224, 'BLACK AQUEDUCT\nCHAMBER 01', {
-      fontFamily: 'monospace', fontSize: '18px', color: '#cfd7cc', align: 'center', stroke: '#0c0f10', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.82);
+    if (SHOW_SECTOR02_DEBUG_LABELS) {
+      this.footholdLabel = this.add.text(4380, WORLD.floorY - 224, 'BLACK AQUEDUCT\nCHAMBER 01', {
+        fontFamily: 'monospace', fontSize: '18px', color: '#cfd7cc', align: 'center', stroke: '#0c0f10', strokeThickness: 4
+      }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.82);
+    }
   }
 
   createLoreAnchor(anchorConfig) {
@@ -606,12 +616,14 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     ).setOrigin(0.5);
     this.physics.add.existing(this.forwardThresholdZone, true);
 
-    this.forwardPrompt = this.add.text(
-      BLACK_AQUEDUCT_CLIMAX_GATE.thresholdX,
-      BLACK_AQUEDUCT_CLIMAX_GATE.thresholdY + BLACK_AQUEDUCT_CLIMAX_GATE.promptOffsetY,
-      'CLIMAX LOCKED',
-      { fontFamily: 'monospace', fontSize: '14px', color: '#d7ddd2', align: 'center', stroke: '#0c0f10', strokeThickness: 4 }
-    ).setOrigin(0.5).setDepth(-4.58).setAlpha(0.92).setVisible(false);
+    this.forwardPrompt = SHOW_SECTOR02_DEBUG_LABELS
+      ? this.add.text(
+        BLACK_AQUEDUCT_CLIMAX_GATE.thresholdX,
+        BLACK_AQUEDUCT_CLIMAX_GATE.thresholdY + BLACK_AQUEDUCT_CLIMAX_GATE.promptOffsetY,
+        'CLIMAX LOCKED',
+        { fontFamily: 'monospace', fontSize: '14px', color: '#d7ddd2', align: 'center', stroke: '#0c0f10', strokeThickness: 4 }
+      ).setOrigin(0.5).setDepth(-4.58).setAlpha(0.92).setVisible(false)
+      : null;
   }
 
   createUiAndInput() {
@@ -708,14 +720,14 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.physics.overlap(this.player.sprite, pocket.zone, () => {
         playerInsidePocket = true;
       });
-      pocket.promptText.setVisible(playerInsidePocket && !pocket.activated && !pocket.resolved);
+      pocket.promptText?.setVisible(playerInsidePocket && !pocket.activated && !pocket.resolved);
     });
   }
 
   updateEncounterPockets(time) {
     this.encounterPockets.forEach((pocket) => {
       if (pocket.resolved) {
-        pocket.promptText.setVisible(false);
+        pocket.promptText?.setVisible(false);
         pocket.markerShadow.setAlpha(0.03);
         return;
       }
@@ -727,7 +739,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
 
       if (playerInsidePocket && !pocket.activated) {
         pocket.activated = true;
-        pocket.promptText.setText(`${pocket.label}\nRITUAL PRESSURE`).setVisible(true);
+        pocket.promptText?.setText(`${pocket.label}\nRITUAL PRESSURE`).setVisible(true);
         pocket.markerShadow.setAlpha(pocket.markerAlpha + 0.06);
         pocket.enemies.forEach((enemy, index) => {
           if (enemy.dead) {
@@ -748,7 +760,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       const remainingEnemies = pocket.enemies.filter((enemy) => !enemy.dead);
       if (pocket.activated && remainingEnemies.length === 0) {
         pocket.resolved = true;
-        pocket.promptText.setText(`${pocket.label}\nCHANNEL CLEARED`).setVisible(playerInsidePocket);
+        pocket.promptText?.setText(`${pocket.label}\nCHANNEL CLEARED`).setVisible(playerInsidePocket);
         pocket.markerShadow.setAlpha(0.04);
       }
     });
@@ -866,6 +878,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
 
     const damage = projectile.damage ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.damage;
     const tookDamage = this.player.receiveDamage(damage, this.time.now);
+    projectile.destroyProjectile();
     if (!tookDamage) {
       return;
     }
@@ -873,7 +886,6 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     const knockDirection = Math.sign(this.player.sprite.x - projectile.sprite.x) || 1;
     this.player.body.setVelocityX(knockDirection * 210);
     this.player.body.setVelocityY(-196);
-    projectile.destroyProjectile();
   }
 
   handlePlayerHitArchon(enemySprite) {

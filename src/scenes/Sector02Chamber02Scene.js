@@ -168,6 +168,8 @@ const COMPRESSION_VAULTS_ENCOUNTER_POCKETS = [
   }
 ];
 
+const SHOW_SECTOR02_DEBUG_LABELS = false;
+
 const COMPRESSION_VAULTS_FORWARD_GATE = {
   barrierX: 5310,
   barrierY: WORLD.floorY - 70,
@@ -296,9 +298,11 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.add.ellipse(gateX, gateY, 270, 320, 0x33403e, 0.82).setStrokeStyle(3, 0xd7d5c8, 0.52).setDepth(-4.92);
     }
 
-    this.processionalLabel = this.add.text(gateX - 18, WORLD.floorY - 274, 'COMPRESSION VAULTS\nCRUCIBLE GATE', {
-      fontFamily: 'monospace', fontSize: '17px', color: '#d2d8cd', align: 'center', stroke: '#0c0f10', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.82);
+    if (SHOW_SECTOR02_DEBUG_LABELS) {
+      this.processionalLabel = this.add.text(gateX - 18, WORLD.floorY - 274, 'COMPRESSION VAULTS\nCRUCIBLE GATE', {
+        fontFamily: 'monospace', fontSize: '17px', color: '#d2d8cd', align: 'center', stroke: '#0c0f10', strokeThickness: 4
+      }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.82);
+    }
   }
 
   renderLoreAssetPlacementHints() {
@@ -314,9 +318,11 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
         .setDepth(-13.68);
     }
 
-    this.add.text(muralX, WORLD.floorY - 252, 'COMPRESSION RECORD', {
-      fontFamily: 'monospace', fontSize: '16px', color: '#c6d0c2', align: 'center', stroke: '#0b0d0d', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.86).setAlpha(0.72);
+    if (SHOW_SECTOR02_DEBUG_LABELS) {
+      this.add.text(muralX, WORLD.floorY - 252, 'COMPRESSION RECORD', {
+        fontFamily: 'monospace', fontSize: '16px', color: '#c6d0c2', align: 'center', stroke: '#0b0d0d', strokeThickness: 4
+      }).setOrigin(0.5).setDepth(-4.86).setAlpha(0.72);
+    }
   }
 
   createPlayerAndColliders() {
@@ -327,9 +333,11 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
 
   createEncounterPockets() {
     this.encounterPockets = COMPRESSION_VAULTS_ENCOUNTER_POCKETS.map((pocketConfig) => this.createEncounterPocket(pocketConfig));
-    this.footholdLabel = this.add.text(4300, WORLD.floorY - 224, 'SECTOR 02\nCHAMBER 02', {
-      fontFamily: 'monospace', fontSize: '18px', color: '#cfd7cc', align: 'center', stroke: '#0c0f10', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.82);
+    if (SHOW_SECTOR02_DEBUG_LABELS) {
+      this.footholdLabel = this.add.text(4300, WORLD.floorY - 224, 'SECTOR 02\nCHAMBER 02', {
+        fontFamily: 'monospace', fontSize: '18px', color: '#cfd7cc', align: 'center', stroke: '#0c0f10', strokeThickness: 4
+      }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.82);
+    }
   }
 
   createEncounterPocket(pocketConfig) {
@@ -337,9 +345,11 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.physics.add.existing(zone, true);
 
     const markerShadow = this.add.ellipse(pocketConfig.zoneX, WORLD.floorY - 4, pocketConfig.markerWidth, pocketConfig.markerHeight, 0x020304, pocketConfig.markerAlpha).setDepth(-5.84);
-    const promptText = this.add.text(pocketConfig.zoneX, pocketConfig.zoneY + pocketConfig.promptOffsetY, pocketConfig.label, {
-      fontFamily: 'monospace', fontSize: '13px', color: '#d3cbc0', align: 'center', stroke: '#111515', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.82).setAlpha(0.82).setVisible(false);
+    const promptText = SHOW_SECTOR02_DEBUG_LABELS
+      ? this.add.text(pocketConfig.zoneX, pocketConfig.zoneY + pocketConfig.promptOffsetY, pocketConfig.label, {
+        fontFamily: 'monospace', fontSize: '13px', color: '#d3cbc0', align: 'center', stroke: '#111515', strokeThickness: 4
+      }).setOrigin(0.5).setDepth(-4.82).setAlpha(0.82).setVisible(false)
+      : null;
 
     const enemies = pocketConfig.enemies.map((enemyConfig) => this.createEncounterEnemy(enemyConfig, pocketConfig));
     return { ...pocketConfig, zone, markerShadow, promptText, enemies, activated: false, resolved: false };
@@ -402,12 +412,14 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     ).setOrigin(0.5);
     this.physics.add.existing(this.forwardThresholdZone, true);
 
-    this.forwardPrompt = this.add.text(
-      COMPRESSION_VAULTS_FORWARD_GATE.thresholdX,
-      COMPRESSION_VAULTS_FORWARD_GATE.thresholdY + COMPRESSION_VAULTS_FORWARD_GATE.promptOffsetY,
-      'CRUCIBLE GATE SEALED',
-      { fontFamily: 'monospace', fontSize: '14px', color: '#d7ddd2', align: 'center', stroke: '#0c0f10', strokeThickness: 4 }
-    ).setOrigin(0.5).setDepth(-4.58).setAlpha(0.92).setVisible(false);
+    this.forwardPrompt = SHOW_SECTOR02_DEBUG_LABELS
+      ? this.add.text(
+        COMPRESSION_VAULTS_FORWARD_GATE.thresholdX,
+        COMPRESSION_VAULTS_FORWARD_GATE.thresholdY + COMPRESSION_VAULTS_FORWARD_GATE.promptOffsetY,
+        'CRUCIBLE GATE SEALED',
+        { fontFamily: 'monospace', fontSize: '14px', color: '#d7ddd2', align: 'center', stroke: '#0c0f10', strokeThickness: 4 }
+      ).setOrigin(0.5).setDepth(-4.58).setAlpha(0.92).setVisible(false)
+      : null;
   }
 
   createUiAndInput() {
@@ -480,14 +492,14 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.physics.overlap(this.player.sprite, pocket.zone, () => {
         playerInsidePocket = true;
       });
-      pocket.promptText.setVisible(playerInsidePocket && !pocket.activated && !pocket.resolved);
+      pocket.promptText?.setVisible(playerInsidePocket && !pocket.activated && !pocket.resolved);
     });
   }
 
   updateEncounterPockets(time) {
     this.encounterPockets.forEach((pocket) => {
       if (pocket.resolved) {
-        pocket.promptText.setVisible(false);
+        pocket.promptText?.setVisible(false);
         pocket.markerShadow.setAlpha(0.03);
         return;
       }
@@ -499,7 +511,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
 
       if (playerInsidePocket && !pocket.activated) {
         pocket.activated = true;
-        pocket.promptText.setText(`${pocket.label}\nPRESSURE RISING`).setVisible(true);
+        pocket.promptText?.setText(`${pocket.label}\nPRESSURE RISING`).setVisible(true);
         pocket.markerShadow.setAlpha(pocket.markerAlpha + 0.06);
         pocket.enemies.forEach((enemy, index) => {
           if (enemy.dead) {
@@ -520,7 +532,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       const remainingEnemies = pocket.enemies.filter((enemy) => !enemy.dead);
       if (pocket.activated && remainingEnemies.length === 0) {
         pocket.resolved = true;
-        pocket.promptText.setText(`${pocket.label}\nSEAL RELIEVED`).setVisible(playerInsidePocket);
+        pocket.promptText?.setText(`${pocket.label}\nSEAL RELIEVED`).setVisible(playerInsidePocket);
         pocket.markerShadow.setAlpha(0.04);
       }
     });

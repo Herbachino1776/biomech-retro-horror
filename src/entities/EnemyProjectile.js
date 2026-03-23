@@ -59,6 +59,8 @@ export class EnemyProjectile {
 
     this.body.enable = true;
     this.body.setAllowGravity(false);
+    this.syncBodyToSprite();
+    this.body.reset(x, y);
     this.body.setVelocity(velocityX, velocityY);
     this.body.updateFromGameObject?.();
   }
@@ -81,8 +83,22 @@ export class EnemyProjectile {
     this.body.setAllowGravity(false);
     this.body.setCollideWorldBounds(false);
     this.body.setSize(this.config.bodySize.width, this.config.bodySize.height);
+    this.syncBodyToSprite();
     this.body.enable = false;
     this.sprite.setVisible(false).setActive(false);
+  }
+
+
+  syncBodyToSprite() {
+    if (!this.body || !this.sprite) {
+      return;
+    }
+
+    const displayWidth = this.sprite.displayWidth ?? this.config.presentation.displayWidth;
+    const displayHeight = this.sprite.displayHeight ?? this.config.presentation.displayHeight;
+    const offsetX = (displayWidth - this.config.bodySize.width) * 0.5;
+    const offsetY = (displayHeight - this.config.bodySize.height) * 0.5;
+    this.body.setOffset(offsetX, offsetY);
   }
 
   update(time, delta) {
