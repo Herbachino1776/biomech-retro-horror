@@ -103,37 +103,51 @@ export const LORE_CUTSCENES = {
       titleColor: '#9ab18a',
       bodyColor: '#d2c5b4',
       promptColor: '#86a06d',
-      imageTint: 0xcfd8c7,
-      imageAlpha: 0.96,
+      imageTint: 0xd9e1d4,
+      imageAlpha: 0.98,
       backgroundColor: '#000000',
-      imageSizingMode: 'cover',
+      imageSizingMode: 'contain',
       imageBackgroundColor: 0x000000,
-      imageBackgroundAlpha: 1,
-      imageFrameAlpha: 1,
-      imageStrokeAlpha: 0.28,
-      imageScaleMultiplier: 1.42,
-      imageOffsetX: 72,
-      imageOffsetY: 46,
+      imageBackgroundAlpha: 0,
+      imageFrameAlpha: 0,
+      imageStrokeAlpha: 0,
+      imageScaleMultiplier: 1.68,
+      imageOffsetX: 26,
+      imageOffsetY: -12,
+      textRegionColor: 0x050707,
+      textRegionAlpha: 0.76,
+      textRegionStrokeColor: 0xaab1a1,
+      textRegionStrokeAlpha: 0.3,
+      promptRegionColor: 0x030505,
+      promptRegionAlpha: 0.5,
+      promptRegionStrokeColor: 0x96ab8a,
+      promptRegionStrokeAlpha: 0.22,
       layoutOverrides: {
         portrait: {
-          imageHeightRatio: 0.54,
-          textHeightRatio: 0.33,
-          promptHeightRatio: 0.13
+          imageHeightRatio: 0.66,
+          textHeightRatio: 0.22,
+          promptHeightRatio: 0.12,
+          textPadding: 10,
+          bodySize: 13,
+          minBodySize: 10
         },
         landscape: {
-          imageHeightRatio: 0.62,
-          textHeightRatio: 0.25,
-          promptHeightRatio: 0.13
+          imageHeightRatio: 0.68,
+          textHeightRatio: 0.2,
+          promptHeightRatio: 0.12,
+          textPadding: 12,
+          bodySize: 14,
+          minBodySize: 11
         }
       },
       motion: {
-        panX: 24,
-        panY: -18,
-        zoom: 1.06,
-        duration: 9800,
+        panX: 10,
+        panY: -8,
+        zoom: 1.035,
+        duration: 9200,
         shakeX: 2,
-        shakeY: 3,
-        shakeDuration: 3600
+        shakeY: 2,
+        shakeDuration: 3400
       }
     }
   }
