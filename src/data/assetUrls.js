@@ -43,6 +43,7 @@ import sector02Chamber02LoreAltarUrl from '../../art/raw/sector02/chamber02/sect
 import sector02Chamber02LoreImageUrl from '../../art/raw/sector02/chamber02/sector02_chamber02_lore_image_01.png';
 import sector02Chamber02GateUrl from '../../art/raw/sector02/chamber02/sector02_chamber02_gate_01.png';
 import sector02Chamber02FloorUrl from '../../art/raw/sector02/chamber02/sector02_chamber02_floor_01.png';
+import sector02PressureShardProjectileUrl from '../../art/raw/sector02/chamber02/projectile_sector02_pressure_shard_01_alpha.png';
 import playerConceptUrl from '../../assets/concepts/player-concept-03-right-alpha.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
@@ -122,6 +123,7 @@ export const ASSET_URLS = {
   [ASSET_KEYS.sector02Chamber02LoreImage]: sector02Chamber02LoreImageUrl,
   [ASSET_KEYS.sector02Chamber02Gate]: sector02Chamber02GateUrl,
   [ASSET_KEYS.sector02Chamber02Floor]: sector02Chamber02FloorUrl,
+  [ASSET_KEYS.sector02PressureShardProjectile]: sector02PressureShardProjectileUrl,
   [ASSET_KEYS.player]: playerConceptUrl,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,
