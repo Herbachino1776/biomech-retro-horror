@@ -56,3 +56,19 @@ Known failure patterns and what future tasks must protect.
 **Observed risk:** cleanup work around Chamber 03 planning can destabilize the shipped Chamber 02 endpoint.
 - Preserve the current post-TOLL-KEEPER unlocked gate end state.
 - Do not add a fake Chamber 03 boot, broken transition stub, or replacement placeholder cinematic during cleanup-only passes.
+
+
+## 11) Chamber 02 -> Chamber 03 Handoff Regression
+**Observed risk:** Chamber 3 continuity can be broken by drifting back toward fragile lore-screen-only handoff logic.
+- Do not reintroduce the removed Chamber 02 -> Chamber 03 placeholder lore-screen transition as the main continuity path.
+- Preserve the real unlocked-gate -> `Chamber03Scene` handoff contract.
+
+## 12) Giant Chamber One-Pass Regression
+**Observed risk:** trying to build an entire sector-finale chamber in one pass creates destabilizing scope and hides root causes.
+- Keep a stable bootstrap layer before adding spectacle.
+- Build future chambers in milestone-safe slices instead of another Chamber 3 mega-build attempt.
+
+## 13) Misdiagnosed Chamber Boot Failure Regression
+**Observed risk:** chamber boot failures can look like deep content bugs when the real issue is scene registration or transition wiring.
+- Check scene registration and previous-scene transition contracts first.
+- Do not assume a chamber failure always lives inside that chamber's encounter/layout logic.

@@ -17,9 +17,11 @@ Create a playable vertical slice first:
 - Chamber 01 remains the playable foundation and still uses `LoreScreenScene` for its first shrine-driven lore beat.
 - Chamber 01 also uses `LoreCutsceneScene` for the later dead-god witness beat.
 - Chamber 01 culminates in the Half-Skull Ascendant miniboss encounter and gate-release payoff.
-- Chamber 02 uses `LoreCutsceneScene` for its shrine/exit-gate lore flow and post-lore reaction state.
-- Chamber 02 currently ends safely at its unlocked threshold rather than auto-handing off into Chamber 03.
-- Chamber 03 now exists as a rebuilt minimal bootstrap room that is direct-boot testable, uses the shared HUD/mobile controls path, and remains intentionally empty until its future Ossuary Choir Hall content pass.
+- Chamber 02 uses `LoreCutsceneScene` for its shrine/exit-gate lore flow, post-lore reaction state, and unlocked progression threshold.
+- Chamber 03 is now playable as the Ossuary Choir Hall sector-finale chamber rather than only a bootstrap stub.
+- Chamber 03's boss flow now hands off into a separate boss arena, giving Sector 1 a real finale/payoff path.
+- The Sector 1 arc is functionally in place across Chamber 01, Chamber 02, Chamber 03, and the separate boss arena, even though the project still has iterative polish debt.
+- Next forward progress is Bucket 2 / Cosmic Garden foothold work rather than more Chamber 3 rescue.
 - Restart/reset flow safely handles both lore-scene types because both are live in the shipped game.
 
 ## Tech Stack (Current Scaffold)
@@ -130,4 +132,4 @@ This still serves the game locally from `/`.
 5. Open PR-sized changes, not giant rewrites.
 
 ## Current Milestone Status
-Milestone 5 is active. See `docs/current-milestone.md`, `docs/milestone-roadmap.md`, and `docs/milestones.md` for the shipped Chamber 01/02 baseline plus the new Chamber 03 bootstrap status.
+Milestone 5 is closed in a first-pass sense. See `docs/current-milestone.md`, `docs/milestone-roadmap.md`, and `docs/milestones.md` for the Sector 1 closeout and the new Milestone 6 Bucket 2 / Cosmic Garden foothold direction.

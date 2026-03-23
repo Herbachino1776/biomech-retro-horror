@@ -12,54 +12,44 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Deployment: GitHub Pages project-site (`/biomech-retro-horror/` base in production)
 - Target support: iPhone portrait touch play + desktop keyboard parity
 
+## Fresh-Session Truth
+- Chamber 3 finally works because the scene handoff contract was fixed, not because Chamber 3 internals were endlessly patched in isolation.
+- The breakthrough was simple and surgical: ensure `Chamber03Scene` is registered, ensure Chamber 02's unlocked exit gate actually starts `Chamber03Scene`, and stop treating the failure as a deep chamber-content problem first.
+- Sector 1 now has a real Chamber 3, a separate boss arena, a playable boss flow, a payoff path, and a forward progression contract.
+- Known remaining Chamber 3 issues are real, but they are now secondary polish debt rather than the main blocker.
+- The next best step is **not** more Chamber 3 rescue.
+- The next best step is **Milestone 6: Bucket 2 foothold / Cosmic Garden start**.
+
 ## What Works Now
 - Start/title flow into Chamber 01 and death/restart loop.
-- Chamber 01 core loop (move/jump/attack/damage/death) remains stable.
-- Chamber 01 first lore shrine -> `LoreScreenScene` beat remains stable.
-- Chamber 01 dead-god witness beat -> `LoreCutsceneScene` -> Half-Skull Ascendant miniboss flow remains stable.
-- Chamber 01 miniboss defeat payoff and Chamber 01 -> Chamber 02 gate release are active.
-- Chamber 02 is playable with established platform/combat pacing.
-- Chamber 02 central shrine/ossuary lore trigger runs through `LoreCutsceneScene` and preserves diegetic presentation.
-- Chamber 02 post-lore reaction state is implemented: environmental ritual shift plus enemy wake/activation.
-- Chamber 02 TOLL-KEEPER encounter pair gates the exit and unlocks the end gate on defeat.
-- Chamber 02 exit gate unlock state remains active after the TOLL-KEEPER fight, and the restored baseline now stops safely at the Chamber 02 threshold without entering Chamber 03.
-- Chamber 01 + Chamber 02 ambience is integrated in the shipped slice.
-- Player footsteps/combat/death audio is present.
-- Skitter, TOLL-KEEPER, miniboss, lore/gate, and banishment cues are present.
-- Recent audio QA/polish is already reflected in the shipped baseline.
+- Chamber 01 core loop, lore beats, miniboss, and gate-release payoff remain stable.
+- Chamber 02 is playable with shrine/cutscene flow, TOLL-KEEPER gate unlock, and onward progression wiring intact.
+- Chamber 03 is playable in the active progression path.
+- Chamber 03 now hands off into a separate boss arena for the Sector 1 finale.
+- Sector 1 now has a complete functional arc: Chamber 01 -> Chamber 02 -> Chamber 03 -> boss flow -> onward progression contract.
 - Mobile controls remain corrected for portrait and landscape playability.
+- Desktop keyboard support remains intact.
 - Texture-first asset loading with fallback resilience remains stable.
+- GitHub Pages/Vite deployment invariants remain in force.
 
-## What Still Needs Work Now
-- Chamber 03 has been rebuilt into a minimal trustworthy bootstrap room and can now be used as the implementation baseline for future Chamber 03 work.
-- That bootstrap room is intentionally sparse: stable background/floor/player/camera/HUD/mobile-controls only, with future Ossuary Choir Hall content still pending.
-- Content expansion beyond the shipped Chamber 01 + Chamber 02 slice is the next milestone focus.
-- Combat presentation can still be polished further later, but current readability is sufficient for the shipped baseline.
+## Remaining Debt (Secondary)
+- Chamber 3 encounter/pacing polish can still improve.
+- Boss finale presentation and readability can still improve.
+- Additional audiovisual cleanup remains worthwhile later, but it should not block Bucket 2 work.
 
 ## Active Milestone
-**Milestone 5 — Content Expansion: active.**
+**Milestone 6 — Bucket 2 Foothold / Cosmic Garden Start: active.**
 
-### Milestone 5 Planning Definition
-- Core goal: extend the shipped Chamber 01 + Chamber 02 audio-integrated slice with the next playable content step.
-- Scope: next area/chamber progression using established control, combat, lore, and audio patterns.
-- Constraints: preserve mobile playability, preserve keyboard parity, and do not destabilize the current shipped baseline while expanding content.
+### Immediate Best Next Step
+- Establish the first safe continuation beyond Sector 1.
+- Build the initial Bucket 2 / Cosmic Garden arrival foothold.
+- Preserve the now-working Sector 1 progression contract while opening the next area.
 
-## Latest Completed Task
-- Emergency Chamber 03 direct-boot overrides remain removed from the active app path.
-- Normal BootScene title flow remains the trusted default entry.
-- Chamber 01 + Chamber 02 remain the active reliable baseline.
-- Chamber 03 has now been rebuilt into a clean bootstrap room using the shared HUD/mobile-controls path instead of scene-local emergency controls.
-- Chamber 02 still ends safely at its unlocked threshold while Chamber 03 progression wiring stays deferred for stability in this pass.
-
-## Exact Next Best Step After This Task
-Use the Chamber 03 chunked planning docs as the implementation contract:
-- `docs/chamber-03-master-plan.md`
-- `docs/chamber-03-implementation-roadmap.md`
-
-Immediate follow-through:
-- begin from the restored title -> Chamber 01 -> Chamber 02 baseline,
-- expand Chamber 03 from the new minimal bootstrap room in small milestone-disciplined slices,
-- keep using the rebuilt Chamber 03 scene rather than reviving any emergency debug implementation.
+## Lessons Learned to Preserve
+- **Bootstrap before spectacle.** Get the chamber booting and handing off correctly before layering setpiece content.
+- **Do not one-shot giant chamber builds.** The failed single-pass Chamber 3 mega-build was the wrong implementation strategy.
+- **When a chamber will not boot, check scene registration and transition wiring first.** Chamber flow bugs may be simpler than they look.
+- **Do not patch a broken chamber in isolation when the real blocker is the previous scene's handoff contract.**
 
 ## Most Important Constraints
 1. Do not regress GitHub Pages/Vite base-path behavior.
@@ -68,5 +58,5 @@ Immediate follow-through:
 4. Keep texture-first rendering; fallback only on load failure.
 5. Preserve dedicated cinematic lore-screen flow as the preferred lore delivery direction.
 6. Preserve in-world ritual shrine/ossuary lore trigger presentation direction.
-7. Preserve Chamber 01 + Chamber 02 stability while expanding content.
-8. End meaningful tasks with `npm run build`.
+7. Preserve the shipped Sector 1 arc while opening Bucket 2.
+8. End meaningful tasks with `npm run build` when code changes are involved.

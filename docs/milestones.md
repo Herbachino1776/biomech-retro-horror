@@ -35,15 +35,15 @@
 - reinforce chamber/lore transition mood with integrated cues
 - keep the audio pass scoped to the shipped Chamber 01 + Chamber 02 baseline
 
-## Milestone 5 — Content Expansion (Active)
-- extend beyond the shipped chamber 01 + chamber 02 baseline
-- restart Chamber 03 cleanly from the trusted rolled-back baseline
-- ship a minimal stable Chamber 03 bootstrap room before the larger Ossuary Choir Hall content pass
-- add the next playable area progression using established patterns
-- replace the old Chamber 02 placeholder lore handoff with a real gate/progression transition in a later scoped pass
-- preserve the shipped audio-integrated slice while expanding content
+## Milestone 5 — Content Expansion (Completed / Closed Out in a First Pass)
+- land Chamber 03 first-pass completion rather than leaving it as a bootstrap-only stub
+- put the Chamber 02 -> Chamber 03 progression contract back in place through real scene handoff wiring
+- ship the separate boss arena and first sector finale path
+- establish Sector 1 payoff and onward progression contract
+- record remaining Chamber 3/boss-finale work as polish debt rather than a blocker
 
-## Milestone 6 — Polish + Stability (Planned)
-- replace remaining temporary surfaces as needed
-- tighten hit feedback and transitions
-- maintain mobile browser usability and performance
+## Milestone 6 — Bucket 2 Foothold / Cosmic Garden Start (Active)
+- establish the first safe foothold beyond Sector 1
+- introduce Cosmic Garden as the next area bucket
+- prove progression continues after the Sector 1 finale
+- preserve the shipped Sector 1 arc while opening the next path
