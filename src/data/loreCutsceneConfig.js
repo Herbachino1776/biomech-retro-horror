@@ -88,7 +88,7 @@ export const LORE_CUTSCENES = {
   },
   'sector02-chamber01-basin-reliquary': {
     id: 'sector02-chamber01-basin-reliquary',
-    imageKey: ASSET_KEYS.sector02Chamber01AbyssalArchon,
+    imageKey: ASSET_KEYS.sector02Chamber01LoreImage,
     title: 'SECTOR 02 // BLACK AQUEDUCT RELIQUARY',
     body: sector02Chamber01LoreBody.length > 0
       ? sector02Chamber01LoreBody
@@ -99,72 +99,21 @@ export const LORE_CUTSCENES = {
       ],
     prompt: 'Press [E] / [Enter] or tap to continue',
     style: {
-      composition: 'black-aqueduct-closeup',
       frameColor: 0xaab1a1,
       titleColor: '#9ab18a',
       bodyColor: '#d2c5b4',
       promptColor: '#86a06d',
       imageTint: 0xd4dccf,
-      imageAlpha: 0.99,
+      imageAlpha: 0.96,
       backgroundColor: '#000000',
-      imageSizingMode: 'contain',
-      imageBackgroundColor: 0x000000,
-      imageBackgroundAlpha: 0,
-      imageFrameAlpha: 0,
-      imageStrokeAlpha: 0,
-      imageScaleMultiplier: 2.26,
-      imageOriginX: 0.54,
-      imageOriginY: 0.28,
-      imageOffsetX: 34,
-      imageOffsetY: 8,
-      textRegionColor: 0x040606,
-      textRegionAlpha: 0.9,
-      textRegionStrokeColor: 0xaab1a1,
-      textRegionStrokeAlpha: 0.42,
-      textRegionStrokeThickness: 2,
-      promptRegionColor: 0x020304,
-      promptRegionAlpha: 0.78,
-      promptRegionStrokeColor: 0x96ab8a,
-      promptRegionStrokeAlpha: 0.34,
-      promptRegionStrokeThickness: 1,
-      layoutOverrides: {
-        portrait: {
-          imageHeightRatio: 1,
-          textHeightRatio: 0.255,
-          textMinHeight: 154,
-          textWidthRatio: 0.84,
-          promptHeightRatio: 0.088,
-          promptMinHeight: 42,
-          promptWidthRatio: 0.72,
-          bottomInset: 10,
-          textPadding: 12,
-          bodySize: 12,
-          minBodySize: 9,
-          bodyLineSpacing: 2
-        },
-        landscape: {
-          imageHeightRatio: 1,
-          textHeightRatio: 0.24,
-          textMinHeight: 148,
-          textWidthRatio: 0.52,
-          promptHeightRatio: 0.1,
-          promptMinHeight: 44,
-          promptWidthRatio: 0.36,
-          bottomInset: 12,
-          textPadding: 14,
-          bodySize: 13,
-          minBodySize: 10,
-          bodyLineSpacing: 3
-        }
-      },
       motion: {
-        panX: 8,
-        panY: -6,
-        zoom: 1.02,
-        duration: 9600,
-        shakeX: 1.5,
+        panX: 12,
+        panY: -8,
+        zoom: 1.03,
+        duration: 9200,
+        shakeX: 2,
         shakeY: 2,
-        shakeDuration: 3800
+        shakeDuration: 3600
       }
     }
   }
