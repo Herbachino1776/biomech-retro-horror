@@ -1,8 +1,14 @@
 import sector02Chamber01LoreTextRaw from '../../art/raw/sector02/chamber01/sector02_chamber01_lore_text_01.txt?raw';
+import sector02Chamber02LoreTextRaw from '../../art/raw/sector02/chamber02/sector02_chamber02_lore_text_01.txt?raw';
 import { ASSET_KEYS } from './assetKeys.js';
 
 
 const sector02Chamber01LoreBody = sector02Chamber01LoreTextRaw
+  .split(/\n\s*\n/g)
+  .map((paragraph) => paragraph.trim())
+  .filter(Boolean);
+
+const sector02Chamber02LoreBody = sector02Chamber02LoreTextRaw
   .split(/\n\s*\n/g)
   .map((paragraph) => paragraph.trim())
   .filter(Boolean);
@@ -84,6 +90,37 @@ export const LORE_CUTSCENES = {
       imageTint: 0xd4b9a5,
       imageAlpha: 0.94,
       backgroundColor: '#000000'
+    }
+  },
+  'sector02-chamber02-compression-altar': {
+    id: 'sector02-chamber02-compression-altar',
+    imageKey: ASSET_KEYS.sector02Chamber02LoreImage,
+    title: 'SECTOR 02 // COMPRESSION VAULTS ALTAR',
+    body: sector02Chamber02LoreBody.length > 0
+      ? sector02Chamber02LoreBody
+      : [
+        'The vault does not judge the dead at first touch. It narrows them until judgment can hold.',
+        'Every sealed basin disciplines memory, burden, and refusal into a form the return engine can stack.',
+        'The altar records a chamber that compresses souls into obedient pressure before the next descent.'
+      ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xaeb6aa,
+      titleColor: '#9cb18f',
+      bodyColor: '#d4c8b7',
+      promptColor: '#88a171',
+      imageTint: 0xd7dfd2,
+      imageAlpha: 0.96,
+      backgroundColor: '#000000',
+      motion: {
+        panX: 10,
+        panY: -6,
+        zoom: 1.028,
+        duration: 9000,
+        shakeX: 2,
+        shakeY: 2,
+        shakeDuration: 3200
+      }
     }
   },
   'sector02-chamber01-basin-reliquary': {
