@@ -739,6 +739,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.uiCamera?.setVisible(false);
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.setGameplaySceneVisibility(false);
       this.scene.pause();
       this.scene.launch('LoreCutsceneScene', {
         cutsceneId: BLACK_AQUEDUCT_LORE.cutsceneId,
@@ -760,11 +761,17 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
 
   resumeFromLore() {
     this.isLoreTransitionActive = false;
+    this.setGameplaySceneVisibility(true);
+    this.applyResponsiveLayout();
     this.mobileControls.setMode('gameplay');
     this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
     this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.1 });
     this.cameras.main.fadeIn(500, 0, 0, 0);
+  }
+
+  setGameplaySceneVisibility(isVisible) {
+    this.scene.setVisible(isVisible, this.scene.key);
   }
 
   handlePlayerHitArchon(enemySprite) {
