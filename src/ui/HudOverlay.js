@@ -79,6 +79,7 @@ export class HudOverlay {
       .setScrollFactor(0)
       .setDepth(67)
       .setVisible(false);
+    this.bossBarVisible = false;
 
     this.elements = [
       this.frameBacking,
@@ -170,11 +171,12 @@ export class HudOverlay {
   }
 
   setBossBarState({ visible, name = '', subtitle = '', current = 0, max = 1, telegraph = 0, wounded = false } = {}) {
+    this.bossBarVisible = Boolean(visible);
     [this.bossBarFrame, this.bossBarUnderlay, this.bossTelegraph, this.bossBarFill, this.bossNamePlate, this.bossName, this.bossSubtitle].forEach((element) => {
-      element.setVisible(visible);
+      element.setVisible(this.bossBarVisible);
     });
 
-    if (!visible) {
+    if (!this.bossBarVisible) {
       return;
     }
 
@@ -193,8 +195,12 @@ export class HudOverlay {
   }
 
   setVisible(visible) {
-    this.elements.forEach((element) => {
-      element.setVisible(visible);
+    const uiVisible = Boolean(visible);
+    [this.frameBacking, this.frame, this.healthLabel, this.healthValue].forEach((element) => {
+      element.setVisible(uiVisible);
+    });
+    [this.bossBarFrame, this.bossBarUnderlay, this.bossTelegraph, this.bossBarFill, this.bossNamePlate, this.bossName, this.bossSubtitle].forEach((element) => {
+      element.setVisible(uiVisible && this.bossBarVisible);
     });
   }
 
