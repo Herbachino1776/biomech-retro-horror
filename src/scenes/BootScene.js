@@ -32,6 +32,17 @@ export class BootScene extends Phaser.Scene {
     this.load.image(ASSET_KEYS.chamber03BackgroundBossDais, ASSET_URLS[ASSET_KEYS.chamber03BackgroundBossDais]);
     this.load.image(ASSET_KEYS.chamber03Lore01, ASSET_URLS[ASSET_KEYS.chamber03Lore01]);
     this.load.image(ASSET_KEYS.chamber03BossPrecentor, ASSET_URLS[ASSET_KEYS.chamber03BossPrecentor]);
+    this.load.image(ASSET_KEYS.sector02Chamber01BackgroundEntryCanal, ASSET_URLS[ASSET_KEYS.sector02Chamber01BackgroundEntryCanal]);
+    this.load.image(ASSET_KEYS.sector02Chamber01BackgroundWallModule, ASSET_URLS[ASSET_KEYS.sector02Chamber01BackgroundWallModule]);
+    this.load.image(ASSET_KEYS.sector02Chamber01BackgroundSluiceOpening, ASSET_URLS[ASSET_KEYS.sector02Chamber01BackgroundSluiceOpening]);
+    this.load.image(ASSET_KEYS.sector02Chamber01BackgroundThreshold, ASSET_URLS[ASSET_KEYS.sector02Chamber01BackgroundThreshold]);
+    this.load.image(ASSET_KEYS.sector02Chamber01BackgroundClimax, ASSET_URLS[ASSET_KEYS.sector02Chamber01BackgroundClimax]);
+    this.load.image(ASSET_KEYS.sector02Chamber01EnemyBasic, ASSET_URLS[ASSET_KEYS.sector02Chamber01EnemyBasic]);
+    this.load.image(ASSET_KEYS.sector02Chamber01EnemyElite, ASSET_URLS[ASSET_KEYS.sector02Chamber01EnemyElite]);
+    this.load.image(ASSET_KEYS.sector02Chamber01LoreAltar, ASSET_URLS[ASSET_KEYS.sector02Chamber01LoreAltar]);
+    this.load.image(ASSET_KEYS.sector02Chamber01LoreImage, ASSET_URLS[ASSET_KEYS.sector02Chamber01LoreImage]);
+    this.load.image(ASSET_KEYS.sector02Chamber01Gate, ASSET_URLS[ASSET_KEYS.sector02Chamber01Gate]);
+    this.load.image(ASSET_KEYS.sector02Chamber01Floor, ASSET_URLS[ASSET_KEYS.sector02Chamber01Floor]);
     this.load.image(ASSET_KEYS.player, ASSET_URLS[ASSET_KEYS.player]);
     this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);

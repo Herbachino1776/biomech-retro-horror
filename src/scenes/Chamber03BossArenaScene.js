@@ -1037,7 +1037,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.audioDirector?.stopAmbientLoop({ fadeOut: false });
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.start('SectorCompleteScene', {
+      this.scene.start('Sector02Chamber01Scene', {
         enteredFrom: 'chamber03-boss-arena',
         progressionSource: 'ruptured-threshold-gate',
         reason: CHAMBER03_FINALE.holdingStateReason
