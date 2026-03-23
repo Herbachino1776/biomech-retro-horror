@@ -448,13 +448,20 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     }
   }
 
-  handlePlayerHitEnemy(attackZone, target, enemy) {
-    if (!this.isEnemyOverlapTarget(target, enemy) || enemy.dead || !this.player.isAttacking()) {
+  handlePlayerHitEnemy(_attackZone, target, enemy) {
+    if (!this.isEnemyOverlapTarget(target, enemy) || enemy.dead || !this.player.attackActive) {
       return;
     }
-    if (this.player.registerAttackHit(enemy.sprite)) {
-      enemy.takeDamage(this.player.attackDamage, this.time.now, this.player.sprite.x);
+
+    if (enemy.lastAttackHitId === this.player.attackId) {
+      return;
     }
+
+    enemy.lastAttackHitId = this.player.attackId;
+    const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
+    enemy.setHitReactionDirection(knockDirection);
+    enemy.takeDamage(1, this.time.now);
+    this.audioDirector?.playPlayerHit();
   }
 
   handleEnemyContactPlayer(_playerSprite, target, enemy) {
