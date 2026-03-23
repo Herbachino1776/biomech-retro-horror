@@ -88,7 +88,7 @@ export const LORE_CUTSCENES = {
   },
   'sector02-chamber01-basin-reliquary': {
     id: 'sector02-chamber01-basin-reliquary',
-    imageKey: ASSET_KEYS.sector02Chamber01LoreImage,
+    imageKey: ASSET_KEYS.sector02Chamber01AbyssalArchon,
     title: 'SECTOR 02 // BLACK AQUEDUCT RELIQUARY',
     body: sector02Chamber01LoreBody.length > 0
       ? sector02Chamber01LoreBody
@@ -103,20 +103,37 @@ export const LORE_CUTSCENES = {
       titleColor: '#9ab18a',
       bodyColor: '#d2c5b4',
       promptColor: '#86a06d',
-      imageTint: 0xc7ceb8,
-      imageAlpha: 0.98,
+      imageTint: 0xcfd8c7,
+      imageAlpha: 0.96,
       backgroundColor: '#000000',
       imageSizingMode: 'cover',
-      imageBackgroundColor: 0x24302d,
-      imageBackgroundAlpha: 0.42,
+      imageBackgroundColor: 0x000000,
+      imageBackgroundAlpha: 1,
+      imageFrameAlpha: 1,
+      imageStrokeAlpha: 0.28,
+      imageScaleMultiplier: 1.42,
+      imageOffsetX: 72,
+      imageOffsetY: 46,
+      layoutOverrides: {
+        portrait: {
+          imageHeightRatio: 0.54,
+          textHeightRatio: 0.33,
+          promptHeightRatio: 0.13
+        },
+        landscape: {
+          imageHeightRatio: 0.62,
+          textHeightRatio: 0.25,
+          promptHeightRatio: 0.13
+        }
+      },
       motion: {
-        panX: 20,
-        panY: -12,
-        zoom: 1.045,
-        duration: 9000,
-        shakeX: 3,
-        shakeY: 2,
-        shakeDuration: 3200
+        panX: 24,
+        panY: -18,
+        zoom: 1.06,
+        duration: 9800,
+        shakeX: 2,
+        shakeY: 3,
+        shakeDuration: 3600
       }
     }
   }
