@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Player } from '../entities/Player.js';
 import { SkitterServitor } from '../entities/SkitterServitor.js';
 import { AbyssalArchon } from '../entities/AbyssalArchon.js';
+import { EnemyProjectile } from '../entities/EnemyProjectile.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
@@ -143,6 +144,21 @@ const BLACK_AQUEDUCT_ARCHON_CONFIG = {
     tint: 0xcbd2c1,
     scaleX: 1,
     scaleY: 1
+  },
+  projectile: {
+    textureKey: ASSET_KEYS.sector02PressureShardProjectile,
+    cooldownMs: 3200,
+    windupMs: 540,
+    recoveryMs: 580,
+    minRange: 250,
+    maxRange: 620,
+    verticalTolerance: 180,
+    spawnOffsetX: 74,
+    spawnOffsetY: -104,
+    speed: 260,
+    damage: 2,
+    lifetimeMs: 2200,
+    rotationSpeed: 420
   }
 };
 
@@ -282,6 +298,8 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.enemies = [];
     this.encounterPockets = [];
     this.loreAnchors = [];
+    this.enemyProjectiles = [];
+    this.enemyProjectilesPaused = false;
   }
 
   create() {
@@ -289,6 +307,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.createAudio();
     this.createBackdrop();
     this.createPlayerAndColliders();
+    this.createEnemyProjectiles();
     this.createEncounterPockets();
     this.createClimaxEncounter();
     this.createLoreAnchors();
@@ -396,6 +415,43 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.player = new Player(this, BLACK_AQUEDUCT_BOOTSTRAP.spawnX, BLACK_AQUEDUCT_BOOTSTRAP.spawnY, PLAYER);
     this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xc2c9bf, alpha: 0.16, scale: 1.08 });
     this.physics.add.collider(this.player.sprite, this.platforms);
+  }
+
+  createEnemyProjectiles() {
+    this.enemyProjectiles = [];
+  }
+
+  spawnEnemyProjectile(config) {
+    let projectile = this.enemyProjectiles.find((entry) => !entry.active);
+    if (!projectile) {
+      projectile = new EnemyProjectile(this, {
+        speed: config.speed ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.speed,
+        damage: config.damage ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.damage,
+        lifetimeMs: config.lifetimeMs ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.lifetimeMs,
+        rotationSpeed: config.rotationSpeed ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.rotationSpeed,
+        bodySize: { width: 20, height: 20 },
+        depth: config.depth ?? 6.32,
+        presentation: {
+          displayWidth: 44,
+          displayHeight: 44,
+          alpha: 0.98,
+          fallbackFill: 0xc7d4c0,
+          fallbackStroke: 0x67807a
+        }
+      });
+
+      this.enemyProjectiles.push(projectile);
+      this.physics.add.overlap(this.player.sprite, projectile.sprite, (_playerSprite, projectileSprite) => {
+        this.handleEnemyProjectileHit(projectileSprite, projectile);
+      });
+    }
+
+    projectile.owner = config.owner ?? null;
+    projectile.fire(config);
+    if (this.enemyProjectilesPaused) {
+      projectile.pauseMotion();
+    }
+    return projectile;
   }
 
   createEncounterPockets() {
@@ -577,6 +633,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.scale.off('resize', this.applyResponsiveLayout, this);
       this.audioDirector?.shutdown();
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+      this.enemyProjectiles.forEach((projectile) => projectile.destroy());
     });
   }
 
@@ -600,6 +657,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
       this.archon?.body?.setVelocity?.(0, 0);
+      this.setEnemyProjectilesPaused(true);
 
       if ((Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) && !this.isRestartingRun) {
         this.isRestartingRun = true;
@@ -613,11 +671,13 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
       this.archon?.body?.setVelocity?.(0, 0);
+      this.setEnemyProjectilesPaused(true);
       return;
     }
 
     this.restartText.setVisible(false);
     this.mobileControls.setMode('gameplay');
+    this.setEnemyProjectilesPaused(false);
 
     const input = {
       left: this.cursors.left.isDown || mobileInput.left,
@@ -632,6 +692,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.updateEncounterPockets(time);
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
     this.archon?.update(time, this.player.sprite);
+    this.enemyProjectiles.forEach((projectile) => projectile.update(time, this.game.loop.delta));
     this.refreshArchonBossBar(time);
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
@@ -736,6 +797,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.player.body.setVelocity(0, 0);
     this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
     this.archon?.body?.setVelocity?.(0, 0);
+    this.setEnemyProjectilesPaused(true);
     this.audioDirector?.stopAmbientLoop();
     this.hud?.setVisible(false);
     this.mobileControls.setMode('init');
@@ -769,12 +831,49 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.mobileControls.setMode('gameplay');
     this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
+    this.setEnemyProjectilesPaused(false);
     this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.1 });
     this.cameras.main.fadeIn(500, 0, 0, 0);
   }
 
   setGameplaySceneVisibility(isVisible) {
     this.scene.setVisible(isVisible, this.scene.key);
+  }
+
+  setEnemyProjectilesPaused(paused) {
+    this.enemyProjectilesPaused = paused;
+    this.enemyProjectiles.forEach((projectile) => {
+      if (!projectile.active) {
+        return;
+      }
+
+      if (paused) {
+        projectile.pauseMotion();
+      } else {
+        projectile.resumeMotion();
+      }
+    });
+  }
+
+  handleEnemyProjectileHit(projectileSprite, projectile) {
+    if (!projectile?.active || !this.player?.sprite?.body?.enable) {
+      return;
+    }
+
+    if (projectileSprite !== projectile.sprite && projectileSprite?.gameObject !== projectile.sprite) {
+      return;
+    }
+
+    const damage = projectile.damage ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.damage;
+    const tookDamage = this.player.receiveDamage(damage, this.time.now);
+    if (!tookDamage) {
+      return;
+    }
+
+    const knockDirection = Math.sign(this.player.sprite.x - projectile.sprite.x) || 1;
+    this.player.body.setVelocityX(knockDirection * 210);
+    this.player.body.setVelocityY(-196);
+    projectile.destroyProjectile();
   }
 
   handlePlayerHitArchon(enemySprite) {
@@ -883,6 +982,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
 
   unlockForwardPath() {
     this.hasUnlockedForwardPath = true;
+    this.enemyProjectiles.forEach((projectile) => projectile.destroyProjectile());
     this.forwardBarrier?.setAlpha(0.08);
     this.forwardBarrier?.setFillStyle(0x8ca284, 0.08);
     if (this.forwardBarrier?.body) {
@@ -987,6 +1087,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.hud?.setBossBarState({ visible: false });
     this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
+    this.enemyProjectiles.forEach((projectile) => projectile.destroyProjectile());
   }
 
   setupMobileUiCamera() {
