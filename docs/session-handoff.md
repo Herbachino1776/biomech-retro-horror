@@ -19,6 +19,7 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Known remaining Chamber 3 issues are real, but they are now secondary polish debt rather than the main blocker.
 - The next best step is **not** more Chamber 3 rescue.
 - The next best step is **Milestone 6: Bucket 2 foothold / The Black Aqueduct start**.
+- Sector 2 Chamber 1 lore presentation is fixed; the actual bug was chamber viewport blackout leakage into the lore presentation layer, not the lore image itself.
 
 ## What Works Now
 - Start/title flow into Chamber 01 and death/restart loop.
@@ -45,12 +46,14 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Build the initial Bucket 2 / The Black Aqueduct foothold as a canal/transit/infrastructure zone rather than a garden biome.
 - Use black reflective liquid, necro-industrial canals, monumental gates/sluices, and oppressive symmetry as the current art-direction baseline.
 - Preserve the now-working Sector 1 progression contract while opening the next area.
+- Next major follow-through after Sector 2 Chamber 1 stabilization: plan and build Sector 2 Chamber 2 under the Pressure Gospel arc.
 
 ## Lessons Learned to Preserve
 - **Bootstrap before spectacle.** Get the chamber booting and handing off correctly before layering setpiece content.
 - **Do not one-shot giant chamber builds.** The failed single-pass Chamber 3 mega-build was the wrong implementation strategy.
 - **When a chamber will not boot, check scene registration and transition wiring first.** Chamber flow bugs may be simpler than they look.
 - **Do not patch a broken chamber in isolation when the real blocker is the previous scene's handoff contract.**
+- **When a lore screen shows a viewport-shaped blackout, compare it to the normal chamber viewport immediately.** Sector 2 Chamber 1's lore bug was simple once the chamber overlay leak was identified.
 
 ## Most Important Constraints
 1. Do not regress GitHub Pages/Vite base-path behavior.

@@ -37,7 +37,9 @@ Milestone 5 is now considered **complete / closed out in a first-pass sense**.
 - Define Bucket 2 as a canal/transit/system-infrastructure zone: black reflective liquid, monumental gates and sluices, severe symmetry, and oppressive empty scale.
 - Move the project forward from palace/judgment interior into the transit infrastructure of recurrence without destabilizing the shipped Sector 1 arc.
 - Build Sector 2 Chamber 1 from the established Chamber 3 blueprint, with new chamber-specific backgrounds, enemies, lore altar/trigger art, lore image, lore text, and gate/progression art.
+- Sector 2 Chamber 1 lore presentation is now fixed and stable enough that this chamber can stop being the main blocker.
 - Carry forward the lessons from Chamber 3: bootstrap before spectacle, preserve stable transition wiring, and expand in milestone-safe slices.
+- Next major step: plan and build Sector 2 Chamber 2 under the Pressure Gospel arc without reopening solved Sector 2 Chamber 1 lore-screen debugging.
 
 ## Do Not Change Casually
 - Base-path deployment contract (`/biomech-retro-horror/` prod, `/` dev).

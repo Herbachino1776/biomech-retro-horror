@@ -81,6 +81,8 @@ Concise record of technical/design decisions currently in force.
 - Lore screens must preserve source image aspect ratio; fit/crop in frame rather than stretching.
 - Per-screen layout overrides are allowed when one global composition harms portrait readability.
 - Chamber 02 post-lore doctrine is conservative state reaction: visible environmental shift + at least one threat activation, with no broad new system.
+- Lore-screen failures should first be checked against chamber viewport overlays/masks before altering lore composition.
+- If a blackout shape matches the gameplay viewport, inspect chamber scene layering and transition cleanup before reworking lore art, crop, or text layout.
 
 ## Lore Trigger Presentation Direction
 - Preferred lore trigger affordance is an **in-world ritual shrine / ossuary-style interactable**.
