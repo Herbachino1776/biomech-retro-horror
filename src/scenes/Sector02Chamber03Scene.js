@@ -69,7 +69,9 @@ const KILN_SKITTER_BASIC_01 = {
   eyeGlowYOffset: 10,
   eyeGlowAlphaBase: 0.3,
   eyeGlowWindupAlphaGain: 0.28,
-  body: { width: 54, height: 30, offsetX: 10, offsetY: 18 }
+  // Chamber 03 kiln sprites carry deeper bottom padding than the earlier Black Aqueduct variants.
+  // Keep the same combat body size, but lower the body within the art so the rendered feet sit back on the walkway plane.
+  body: { width: 54, height: 30, offsetX: 10, offsetY: 30 }
 };
 
 const KILN_SKITTER_BASIC_02 = {
@@ -105,7 +107,8 @@ const KILN_SKITTER_ELITE = {
   recoilVelocityX: 144,
   recoilVelocityY: -84,
   patrolDistance: 82,
-  body: { width: 74, height: 44, offsetX: 28, offsetY: 90 },
+  // The elite kiln custodian uses a taller render with extra lower-canvas space; a slightly deeper body offset re-grounds it without retuning combat.
+  body: { width: 74, height: 44, offsetX: 28, offsetY: 102 },
   presentation: {
     alpha: 0.98,
     display: { width: 296, height: 230 },
