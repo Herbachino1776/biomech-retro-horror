@@ -15,7 +15,6 @@ const KILN_OF_JUDGEMENT_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber03Scene',
   worldWidth: 6120,
   floorColliderHeight: 72,
-  combatFloorPlaneY: WORLD.floorY - 8,
   spawnX: 220,
   spawnY: PLAYER.startY,
   cameraLerp: { x: 0.08, y: 0.08 },
@@ -230,7 +229,6 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.currentLoreZone = null;
     this.hasEnteredForwardThreshold = false;
     this.forwardThresholdAwaitingFreshInteract = false;
-    this.combatFloorPlaneY = KILN_OF_JUDGEMENT_BOOTSTRAP.combatFloorPlaneY;
     this.enemies = [];
     this.encounterPockets = [];
     this.enemyProjectiles = [];
@@ -375,7 +373,6 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.player = new Player(this, KILN_OF_JUDGEMENT_BOOTSTRAP.spawnX, KILN_OF_JUDGEMENT_BOOTSTRAP.spawnY, PLAYER);
     this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd1c6b5, alpha: 0.16, scale: 1.08 });
     this.physics.add.collider(this.player.sprite, this.platforms);
-    this.combatFloorPlaneY = this.getPlayerCombatFloorPlaneY();
   }
 
   createEnemyProjectiles() {
@@ -453,7 +450,6 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       patrolDistance: enemyConfig.patrolDistance ?? baseConfig.patrolDistance,
       awakenPlayerX: enemyConfig.awakenPlayerX
     });
-    this.anchorEnemyToCombatFloor(enemy);
 
     enemy.encounterPocketId = pocketConfig.id;
     enemy.awakened = false;
@@ -486,36 +482,6 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       ? { fill: 0xe2d0b0, alpha: 0.18, scale: 1.2 }
       : { fill: 0xd9c6a8, alpha: 0.12, scale: 1.04 });
     return enemy;
-  }
-
-  getPlayerCombatFloorPlaneY() {
-    const playerBodyBottom = this.player?.sprite?.body?.bottom;
-    if (Number.isFinite(playerBodyBottom) && playerBodyBottom > 0) {
-      return playerBodyBottom;
-    }
-
-    const floorPlatform = this.platforms?.getChildren?.()?.[0];
-    const platformTop = floorPlatform?.body?.top;
-    if (Number.isFinite(platformTop)) {
-      return platformTop;
-    }
-
-    return KILN_OF_JUDGEMENT_BOOTSTRAP.combatFloorPlaneY;
-  }
-
-  anchorEnemyToCombatFloor(enemy) {
-    const body = enemy?.body;
-    const sprite = enemy?.sprite;
-    if (!body || !sprite) {
-      return;
-    }
-
-    const floorPlaneY = this.getPlayerCombatFloorPlaneY();
-    const displayOriginY = sprite.displayOriginY ?? sprite.height * (sprite.originY ?? 0.5);
-    const anchoredSpriteY = floorPlaneY - body.height - body.offset.y + displayOriginY;
-    sprite.setY(anchoredSpriteY);
-    body.updateFromGameObject?.();
-    this.combatFloorPlaneY = floorPlaneY;
   }
 
   createLoreAnchor() {
