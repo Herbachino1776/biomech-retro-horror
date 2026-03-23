@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Player } from '../entities/Player.js';
 import { SkitterServitor } from '../entities/SkitterServitor.js';
 import { EnemyProjectile } from '../entities/EnemyProjectile.js';
+import { PressureDeacon } from '../entities/PressureDeacon.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
@@ -9,6 +10,7 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
+import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
 
 const COMPRESSION_VAULTS_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber02Scene',
@@ -230,6 +232,64 @@ const COMPRESSION_VAULTS_FORWARD_GATE = {
   promptOffsetY: -162
 };
 
+const COMPRESSION_VAULTS_PRESSURE_DEACON = {
+  name: 'PRESSURE DEACON',
+  subtitle: 'Crucible Mouth Confessor',
+  health: 9,
+  contactDamage: 2,
+  contactDamageCooldownMs: 1000,
+  attackCooldownMs: 3300,
+  attackTelegraphMs: 700,
+  attackRecoveryMs: 520,
+  attackRange: 196,
+  approachRange: 336,
+  approachSpeed: 40,
+  idleAdvanceSpeed: 16,
+  windupDriftSpeed: 9,
+  attackSpeed: 188,
+  attackLiftVelocity: -120,
+  hitPulseMs: 260,
+  hurtRecoverMs: 210,
+  hurtRecoilVelocityX: 92,
+  hurtRecoilVelocityY: -56,
+  spawnX: 5220,
+  spawnY: WORLD.floorY + 2,
+  activationX: 4920,
+  body: { width: 92, height: 126, offsetX: 110, offsetY: 154 },
+  audioProfile: 'miniboss',
+  presentation: {
+    display: { width: 314, height: 334 },
+    origin: { x: 0.54, y: 0.985 },
+    alpha: 0.98,
+    tint: 0xcfd6c7,
+    scaleX: 1,
+    scaleY: 1
+  },
+  projectile: {
+    textureKey: ASSET_KEYS.sector02PressureShardProjectile,
+    cooldownMs: 3600,
+    windupMs: 640,
+    recoveryMs: 680,
+    minRange: 260,
+    maxRange: 560,
+    verticalTolerance: 164,
+    spawnOffsetX: 82,
+    spawnOffsetY: -112,
+    speed: 246,
+    damage: 1,
+    lifetimeMs: 2000,
+    rotationSpeed: 400,
+    telegraphRadiusX: 94,
+    telegraphRadiusY: 30
+  },
+  blowout: {
+    scale: 1.18,
+    burstCount: 13,
+    puddleWidth: 214,
+    puddleHeight: 52
+  }
+};
+
 export class Sector02Chamber02Scene extends Phaser.Scene {
   constructor() {
     super(COMPRESSION_VAULTS_BOOTSTRAP.sceneKey);
@@ -249,6 +309,9 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.enemyProjectiles = [];
     this.enemyProjectilesPaused = false;
     this.loreAnchor = null;
+    this.pressureDeacon = null;
+    this.hasEnteredForwardThreshold = false;
+    this.forwardThresholdAwaitingFreshInteract = false;
   }
 
   create() {
@@ -258,6 +321,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.createPlayerAndColliders();
     this.createEnemyProjectiles();
     this.createEncounterPockets();
+    this.createClimaxEncounter();
     this.createLoreAnchor();
     this.createUiAndInput();
     this.createForwardThreshold();
@@ -494,6 +558,33 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     return enemy;
   }
 
+  createClimaxEncounter() {
+    if (SHOW_SECTOR02_DEBUG_LABELS) {
+      this.processionalLabel = this.add.text(COMPRESSION_VAULTS_PRESSURE_DEACON.spawnX, WORLD.floorY - 252, 'PRESSURE DEACON\nBOUND IN CRUCIBLE', {
+        fontFamily: 'monospace', fontSize: '16px', color: '#d5ddd1', align: 'center', stroke: '#0c0f10', strokeThickness: 4
+      }).setOrigin(0.5).setDepth(-4.76).setAlpha(0.82);
+    }
+
+    this.pressureDeacon = new PressureDeacon(
+      this,
+      COMPRESSION_VAULTS_PRESSURE_DEACON.spawnX,
+      COMPRESSION_VAULTS_PRESSURE_DEACON.spawnY,
+      COMPRESSION_VAULTS_PRESSURE_DEACON
+    );
+    this.pressureDeacon.setActive(false);
+    this.pressureDeacon.sprite.setDepth(6.24);
+    this.pressureDeacon.body.setCollideWorldBounds(true);
+    this.physics.add.collider(this.pressureDeacon.sprite, this.platforms);
+    this.physics.add.overlap(this.player.attackHitbox, this.pressureDeacon.sprite, (_attackZone, enemySprite) => {
+      this.handlePlayerHitPressureDeacon(enemySprite);
+    });
+    this.physics.add.overlap(this.player.sprite, this.pressureDeacon.sprite, (_playerSprite, enemySprite) => {
+      this.handlePressureDeaconContactPlayer(enemySprite);
+    });
+
+    this.applyGameplayReadabilitySupport(this.pressureDeacon.sprite, { fill: 0xd7ded1, alpha: 0.18, scale: 1.34 });
+  }
+
   createLoreAnchor() {
     const anchorConfig = COMPRESSION_VAULTS_LORE.anchor;
 
@@ -596,6 +687,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.enemyProjectiles.forEach((projectile) => projectile.destroy());
       this.enemies.forEach((enemy) => enemy.projectileTelegraph?.destroy?.());
+      this.pressureDeacon?.projectileTelegraph?.destroy?.();
     });
   }
 
@@ -618,6 +710,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.mobileControls.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+      this.pressureDeacon?.body?.setVelocity?.(0, 0);
       this.setEnemyProjectilesPaused(true);
 
       if ((Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) && !this.isRestartingRun) {
@@ -631,6 +724,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+      this.pressureDeacon?.body?.setVelocity?.(0, 0);
       this.setEnemyProjectilesPaused(true);
       return;
     }
@@ -647,11 +741,14 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     };
 
     this.player.update(time, input);
+    this.updatePressureDeaconState(time);
     this.refreshEncounterPocketPresence();
     this.updateEncounterPockets(time);
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
+    this.pressureDeacon?.update(time, this.player.sprite);
     this.updateEliteProjectileState(time);
     this.enemyProjectiles.forEach((projectile) => projectile.update(time, this.game.loop.delta));
+    this.refreshPressureDeaconBossBar(time);
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
     this.refreshForwardThresholdPresence();
@@ -711,9 +808,6 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       }
     });
 
-    if (!this.hasUnlockedForwardPath && this.encounterPockets.length > 0 && this.encounterPockets.every((pocket) => pocket.resolved)) {
-      this.unlockForwardPath();
-    }
   }
 
   updateEliteProjectileState(time) {
@@ -851,6 +945,98 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.loreAnchor.prompt?.setVisible(isInside);
   }
 
+  updatePressureDeaconState(time) {
+    if (!this.pressureDeacon || this.pressureDeacon.dead) {
+      return;
+    }
+
+    if (!this.pressureDeacon.active && this.player.sprite.x >= COMPRESSION_VAULTS_PRESSURE_DEACON.activationX) {
+      this.pressureDeacon.setActive(true);
+      this.processionalLabel?.setText('PRESSURE DEACON\nPRESSURE ASCENDING').setAlpha(0.96);
+    }
+  }
+
+  refreshPressureDeaconBossBar(time) {
+    if (!this.pressureDeacon) {
+      return;
+    }
+
+    const visible = !this.pressureDeacon.dead && (
+      this.pressureDeacon.active
+      || this.player.sprite.x >= COMPRESSION_VAULTS_PRESSURE_DEACON.activationX - 120
+    );
+
+    this.hud.setBossBarState({
+      visible,
+      name: COMPRESSION_VAULTS_PRESSURE_DEACON.name,
+      subtitle: COMPRESSION_VAULTS_PRESSURE_DEACON.subtitle,
+      current: this.pressureDeacon.health,
+      max: this.pressureDeacon.maxHealth,
+      telegraph: this.pressureDeacon.getTelegraphProgress(time),
+      wounded: time < this.pressureDeacon.hurtUntil
+    });
+
+    if (this.pressureDeacon.dead) {
+      this.hud.setBossBarState({ visible: false });
+    }
+  }
+
+  handlePlayerHitPressureDeacon(enemySprite) {
+    if (!this.player.attackActive || this.pressureDeacon?.dead || !this.isEnemyOverlapTarget(enemySprite, this.pressureDeacon)) {
+      return;
+    }
+
+    if (this.pressureDeacon.lastAttackHitId === this.player.attackId) {
+      return;
+    }
+
+    this.pressureDeacon.lastAttackHitId = this.player.attackId;
+    this.pressureDeacon.takeDamage(1, this.time.now);
+    this.pressureDeacon.setActive(true);
+    this.audioDirector?.playPlayerHit();
+
+    if (this.pressureDeacon.dead && !this.hasUnlockedForwardPath) {
+      this.triggerSector02BlackOilPayoff(this.pressureDeacon, COMPRESSION_VAULTS_PRESSURE_DEACON.blowout);
+      this.unlockForwardPath();
+    }
+  }
+
+  handlePressureDeaconContactPlayer(enemySprite) {
+    if (this.pressureDeacon?.dead || !this.isEnemyOverlapTarget(enemySprite, this.pressureDeacon)) {
+      return;
+    }
+    if (!this.pressureDeacon.canDealContactDamage(this.time.now)) {
+      return;
+    }
+
+    const tookDamage = this.player.receiveDamage(COMPRESSION_VAULTS_PRESSURE_DEACON.contactDamage, this.time.now);
+    if (tookDamage) {
+      this.pressureDeacon.recordContactDamage(this.time.now);
+      const knockDirection = Math.sign(this.player.sprite.x - this.pressureDeacon.sprite.x) || 1;
+      this.player.body.setVelocityX(knockDirection * 240);
+      this.player.body.setVelocityY(-228);
+    }
+  }
+
+  triggerSector02BlackOilPayoff(targetEnemy, config = {}) {
+    const sprite = targetEnemy?.sprite;
+    if (!sprite || targetEnemy.blackOilPayoffTriggered) {
+      return;
+    }
+
+    targetEnemy.blackOilPayoffTriggered = true;
+    triggerSector02BlackOilBlowout(this, {
+      source: sprite,
+      x: sprite.x,
+      y: (sprite.body?.bottom ?? sprite.y) - 20,
+      depth: sprite.depth,
+      scale: config.scale ?? 1,
+      burstCount: config.burstCount,
+      puddleWidth: config.puddleWidth,
+      puddleHeight: config.puddleHeight
+    });
+  }
+
   tryBeginLoreSequence(mobileInput) {
     if (!this.currentLoreZone) {
       return;
@@ -875,6 +1061,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
     this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+    this.pressureDeacon?.body?.setVelocity?.(0, 0);
     this.setEnemyProjectilesPaused(true);
     this.audioDirector?.stopAmbientLoop();
     this.hud?.setVisible(false);
@@ -967,6 +1154,9 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     enemy.setHitReactionDirection(knockDirection);
     enemy.takeDamage(1, this.time.now);
     this.clearEliteProjectileState(enemy);
+    if (enemy.dead && enemy.isElite) {
+      this.triggerSector02BlackOilPayoff(enemy, { scale: 0.9, burstCount: 8, puddleWidth: 154, puddleHeight: 34 });
+    }
     this.audioDirector?.playPlayerHit();
   }
 
@@ -992,6 +1182,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
 
   unlockForwardPath() {
     this.hasUnlockedForwardPath = true;
+    this.enemyProjectilesPaused = false;
     this.enemyProjectiles.forEach((projectile) => projectile.destroyProjectile());
     this.forwardBarrier?.setAlpha(0.08);
     this.forwardBarrier?.setFillStyle(0x8ca284, 0.08);
@@ -1000,12 +1191,15 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.forwardBarrier.body.updateFromGameObject?.();
     }
     this.forwardPrompt?.setText('CRUCIBLE GATE UNSEALED\nPRESS RITE / [E] TO MARK DESCENT');
-    this.processionalLabel?.setText('COMPRESSION VAULTS\nPRESSURE RELIEVED');
+    this.processionalLabel?.setText('PRESSURE DEACON NULLIFIED\nCHAMBER 3 DESCENT MARKED');
   }
 
   refreshForwardThresholdPresence() {
+    const wasInsideThreshold = this.hasEnteredForwardThreshold;
     this.currentForwardThreshold = null;
     if (!this.forwardThresholdZone) {
+      this.hasEnteredForwardThreshold = false;
+      this.forwardThresholdAwaitingFreshInteract = false;
       return;
     }
 
@@ -1013,10 +1207,17 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.currentForwardThreshold = this.forwardThresholdZone;
     });
 
+    this.hasEnteredForwardThreshold = Boolean(this.currentForwardThreshold);
+    if (!this.hasEnteredForwardThreshold) {
+      this.forwardThresholdAwaitingFreshInteract = false;
+    } else if (!wasInsideThreshold) {
+      this.forwardThresholdAwaitingFreshInteract = true;
+    }
+
     const promptVisible = Boolean(this.currentForwardThreshold) || (this.hasUnlockedForwardPath && !this.hasTriggeredForwardContract);
     const promptText = this.hasUnlockedForwardPath
       ? this.hasTriggeredForwardContract
-        ? 'DESCENT MARKED\nSECTOR 2 CHAMBER 3 PENDING'
+        ? 'DESCENT MARKED\nCHAMBER 3 GATE CONSECRATED'
         : 'CRUCIBLE GATE UNSEALED\nPRESS RITE / [E] TO MARK DESCENT'
       : 'CRUCIBLE GATE SEALED';
     this.forwardPrompt?.setVisible(promptVisible).setText(promptText);
@@ -1027,14 +1228,24 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       return;
     }
 
+    const interactHeld = this.keyInteract?.isDown || this.keyEnter?.isDown || mobileInput.interactHeld;
+    if (this.forwardThresholdAwaitingFreshInteract) {
+      if (interactHeld) {
+        return;
+      }
+
+      this.forwardThresholdAwaitingFreshInteract = false;
+    }
+
     const interactPressed = Phaser.Input.Keyboard.JustDown(this.keyInteract) || Phaser.Input.Keyboard.JustDown(this.keyEnter) || mobileInput.interactPressed;
     if (!interactPressed) {
       return;
     }
 
     this.hasTriggeredForwardContract = true;
-    this.forwardPrompt?.setVisible(true).setText('DESCENT MARKED\nSECTOR 2 CHAMBER 3 PENDING');
-    this.processionalLabel?.setText('COMPRESSION VAULTS\nCRUCIBLE OF RETURN NEXT');
+    this.forwardPrompt?.setVisible(true).setText('DESCENT MARKED\nCHAMBER 3 GATE CONSECRATED');
+    this.processionalLabel?.setText('CRUCIBLE GATE OPEN\nCHAMBER 3 AWAITS BEYOND');
+    this.forwardBarrier?.setAlpha(0.04);
   }
 
   updateLabels(time) {

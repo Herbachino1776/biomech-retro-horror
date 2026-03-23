@@ -10,6 +10,7 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
+import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
 
 const BLACK_AQUEDUCT_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber01Scene',
@@ -915,6 +916,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.audioDirector?.playPlayerHit();
 
     if (this.archon.dead && !this.hasUnlockedForwardPath) {
+      this.triggerSector02BlackOilPayoff(this.archon, { scale: 1.12, burstCount: 12, puddleWidth: 204, puddleHeight: 48 });
       this.unlockForwardPath();
     }
   }
@@ -949,6 +951,9 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
     enemy.setHitReactionDirection(knockDirection);
     enemy.takeDamage(1, this.time.now);
+    if (enemy.dead && enemy.isTollKeeper) {
+      this.triggerSector02BlackOilPayoff(enemy, { scale: 0.92, burstCount: 8, puddleWidth: 154, puddleHeight: 34 });
+    }
     this.audioDirector?.playPlayerHit();
   }
 
@@ -970,6 +975,25 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
 
   isEnemyOverlapTarget(target, enemy) {
     return target === enemy.sprite || target?.gameObject === enemy.sprite;
+  }
+
+  triggerSector02BlackOilPayoff(targetEnemy, config = {}) {
+    const sprite = targetEnemy?.sprite;
+    if (!sprite || targetEnemy.blackOilPayoffTriggered) {
+      return;
+    }
+
+    targetEnemy.blackOilPayoffTriggered = true;
+    triggerSector02BlackOilBlowout(this, {
+      source: sprite,
+      x: sprite.x,
+      y: (sprite.body?.bottom ?? sprite.y) - 20,
+      depth: sprite.depth,
+      scale: config.scale ?? 1,
+      burstCount: config.burstCount,
+      puddleWidth: config.puddleWidth,
+      puddleHeight: config.puddleHeight
+    });
   }
 
   updateArchonState(time) {
