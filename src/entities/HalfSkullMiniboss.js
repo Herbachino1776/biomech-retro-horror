@@ -25,11 +25,12 @@ export class HalfSkullMiniboss {
     this.attackCommitAt = -Infinity;
     this.attackAudioLocked = false;
 
-    this.usingTexture = scene.textures.exists(ASSET_KEYS.chamber01HalfSkullMiniboss);
+    this.textureKey = config.textureKey ?? ASSET_KEYS.chamber01HalfSkullMiniboss;
+    this.usingTexture = scene.textures.exists(this.textureKey);
 
     this.sprite = this.usingTexture
       ? scene.add
-          .image(x, y, ASSET_KEYS.chamber01HalfSkullMiniboss)
+          .image(x, y, this.textureKey)
           .setOrigin(config.presentation.origin.x, config.presentation.origin.y)
           .setDisplaySize(config.presentation.display.width, config.presentation.display.height)
           .setTint(config.presentation.tint)

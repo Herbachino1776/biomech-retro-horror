@@ -73,6 +73,8 @@ export class LoreCutsceneScene extends Phaser.Scene {
 
     const backgroundColor = this.cutscene?.style?.backgroundColor ?? '#000000';
     this.cameras.main.setBackgroundColor(backgroundColor);
+    this.layoutElements = [];
+    this.layoutMasks = [];
 
     this.drawLayout();
     this.bindContinueInput();
@@ -82,12 +84,35 @@ export class LoreCutsceneScene extends Phaser.Scene {
       this.scale.off('resize', this.handleResize, this);
       this.input.off('pointerdown', this.requestContinue, this);
       stopLoreTransitionSounds(this.sound, { stopEnter: true, stopExit: false });
+      this.clearLayout();
     });
 
     this.cameras.main.fadeIn(500, 0, 0, 0);
   }
 
+  clearLayout() {
+    this.layoutElements?.forEach((element) => element?.destroy?.());
+    this.layoutMasks?.forEach((mask) => mask?.destroy?.());
+    this.layoutElements = [];
+    this.layoutMasks = [];
+  }
+
+  trackLayoutElement(element) {
+    if (element) {
+      this.layoutElements.push(element);
+    }
+    return element;
+  }
+
+  trackLayoutMask(maskGraphic) {
+    if (maskGraphic) {
+      this.layoutMasks.push(maskGraphic);
+    }
+    return maskGraphic;
+  }
+
   drawLayout() {
+    this.clearLayout();
     const { width, height } = this.scale;
     const isPortrait = height >= width;
     const layout = isPortrait ? LAYOUT.portrait : LAYOUT.landscape;
@@ -106,7 +131,7 @@ export class LoreCutsceneScene extends Phaser.Scene {
     const containerLeft = layout.outerMarginX;
     const containerTop = layout.outerMarginY;
 
-    this.add.rectangle(0, 0, width, height, 0x000000, 1).setOrigin(0).setDepth(DEPTH.backdrop);
+    this.trackLayoutElement(this.add.rectangle(0, 0, width, height, 0x000000, 1).setOrigin(0).setDepth(DEPTH.backdrop));
 
     const imageRegion = new Phaser.Geom.Rectangle(containerLeft, containerTop, containerWidth, imageHeight);
     const textRegion = new Phaser.Geom.Rectangle(containerLeft, imageRegion.bottom + sectionGap, containerWidth, textHeight);
@@ -118,25 +143,29 @@ export class LoreCutsceneScene extends Phaser.Scene {
   }
 
   drawImageRegion(region) {
-    this.add
-      .rectangle(region.centerX, region.centerY, region.width, region.height, 0x111515, 0.96)
-      .setStrokeStyle(2, this.cutscene?.style?.frameColor ?? COLORS.bone, 0.85)
-      .setDepth(DEPTH.frame);
+    this.trackLayoutElement(
+      this.add
+        .rectangle(region.centerX, region.centerY, region.width, region.height, 0x111515, 0.96)
+        .setStrokeStyle(2, this.cutscene?.style?.frameColor ?? COLORS.bone, 0.85)
+        .setDepth(DEPTH.frame)
+    );
 
     const hasImage = this.cutscene?.imageKey && this.textures.exists(this.cutscene.imageKey);
 
-    this.add
-      .rectangle(
-        region.centerX,
-        region.centerY,
-        region.width - 8,
-        region.height - 8,
-        this.cutscene?.style?.imageBackgroundColor ?? 0x17201f,
-        this.cutscene?.style?.imageBackgroundAlpha ?? 0.86
-      )
-      .setDepth(DEPTH.image - 0.2);
-    if (!hasImage) {
+    this.trackLayoutElement(
       this.add
+        .rectangle(
+          region.centerX,
+          region.centerY,
+          region.width - 8,
+          region.height - 8,
+          this.cutscene?.style?.imageBackgroundColor ?? 0x17201f,
+          this.cutscene?.style?.imageBackgroundAlpha ?? 0.86
+        )
+        .setDepth(DEPTH.image - 0.2)
+    );
+    if (!hasImage) {
+      this.trackLayoutElement(this.add
         .text(region.centerX, region.centerY, 'LORE IMAGE MISSING\nVISIBLE FALLBACK ACTIVE', {
           fontFamily: 'monospace',
           fontSize: '18px',
@@ -144,12 +173,12 @@ export class LoreCutsceneScene extends Phaser.Scene {
           align: 'center'
         })
         .setOrigin(0.5)
-        .setDepth(DEPTH.image);
+        .setDepth(DEPTH.image));
 
-      this.add
+      this.trackLayoutElement(this.add
         .rectangle(region.centerX, region.centerY, region.width * 0.48, region.height * 0.28, 0x8ca08c, 0.14)
         .setStrokeStyle(2, 0xcfd6c6, 0.48)
-        .setDepth(DEPTH.image - 0.1);
+        .setDepth(DEPTH.image - 0.1));
       return;
     }
 
@@ -172,14 +201,14 @@ export class LoreCutsceneScene extends Phaser.Scene {
       drawWidth = region.height * sourceAspect;
     }
 
-    const image = this.add
+    const image = this.trackLayoutElement(this.add
       .image(region.centerX, region.centerY, this.cutscene.imageKey)
       .setDisplaySize(drawWidth, drawHeight)
       .setTint(this.cutscene?.style?.imageTint ?? 0xd4b9a5)
       .setAlpha(this.cutscene?.style?.imageAlpha ?? 0.94)
-      .setDepth(DEPTH.image);
+      .setDepth(DEPTH.image));
 
-    const maskGraphic = this.make.graphics({ x: 0, y: 0, add: false });
+    const maskGraphic = this.trackLayoutMask(this.make.graphics({ x: 0, y: 0, add: false }));
     maskGraphic.fillStyle(0xffffff, 1);
     maskGraphic.fillRect(region.x, region.y, region.width, region.height);
     image.setMask(maskGraphic.createGeometryMask());
@@ -219,10 +248,10 @@ export class LoreCutsceneScene extends Phaser.Scene {
   drawTextRegion(region, layout) {
     const textPadding = layout.textPadding;
 
-    this.add
+    this.trackLayoutElement(this.add
       .rectangle(region.centerX, region.centerY, region.width, region.height, 0x0d1010, 0.94)
       .setStrokeStyle(1, this.cutscene?.style?.frameColor ?? COLORS.rust, 0.5)
-      .setDepth(DEPTH.textRegion);
+      .setDepth(DEPTH.textRegion));
 
     const title = this.cutscene?.title?.trim();
     const bodyText = Array.isArray(this.cutscene?.body)
@@ -234,7 +263,7 @@ export class LoreCutsceneScene extends Phaser.Scene {
     let nextY = region.top + textPadding;
 
     if (title) {
-      this.add
+      this.trackLayoutElement(this.add
         .text(textX, nextY, title, {
           fontFamily: 'monospace',
           fontSize: `${layout.titleSize}px`,
@@ -242,13 +271,13 @@ export class LoreCutsceneScene extends Phaser.Scene {
           stroke: '#050706',
           strokeThickness: 3
         })
-        .setDepth(DEPTH.text);
+        .setDepth(DEPTH.text));
       nextY += layout.titleSize + 8;
     }
 
     const availableHeight = region.bottom - textPadding - nextY;
     let bodyFontSize = layout.bodySize;
-    const body = this.add
+    const body = this.trackLayoutElement(this.add
       .text(textX, nextY, bodyText, {
         fontFamily: 'monospace',
         fontSize: `${bodyFontSize}px`,
@@ -258,7 +287,7 @@ export class LoreCutsceneScene extends Phaser.Scene {
         wordWrap: { width: maxWidth, useAdvancedWrap: true },
         lineSpacing: layout.bodyLineSpacing
       })
-      .setDepth(DEPTH.text);
+      .setDepth(DEPTH.text));
 
     while (body.height > availableHeight && bodyFontSize > layout.minBodySize) {
       bodyFontSize -= 1;
@@ -267,13 +296,13 @@ export class LoreCutsceneScene extends Phaser.Scene {
   }
 
   drawPromptRegion(region, layout) {
-    this.add
+    this.trackLayoutElement(this.add
       .rectangle(region.centerX, region.centerY, region.width, region.height, 0x050505, 0.7)
       .setStrokeStyle(1, this.cutscene?.style?.frameColor ?? COLORS.bone, 0.35)
-      .setDepth(DEPTH.promptRegion);
+      .setDepth(DEPTH.promptRegion));
 
     const prompt = this.cutscene?.prompt ?? 'Tap or press Enter to continue';
-    this.add
+    this.trackLayoutElement(this.add
       .text(region.centerX, region.centerY, prompt, {
         fontFamily: 'monospace',
         fontSize: `${layout.promptSize}px`,
@@ -282,7 +311,7 @@ export class LoreCutsceneScene extends Phaser.Scene {
         wordWrap: { width: region.width - layout.promptPadding * 2, useAdvancedWrap: true }
       })
       .setOrigin(0.5)
-      .setDepth(DEPTH.prompt);
+      .setDepth(DEPTH.prompt));
   }
 
   bindContinueInput() {

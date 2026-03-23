@@ -25,6 +25,7 @@ import sector02Chamber01BackgroundThresholdUrl from '../../art/raw/sector02/cham
 import sector02Chamber01BackgroundClimaxUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_bg_climax_01.png';
 import sector02Chamber01EnemyBasicUrl from '../../art/raw/sector02/chamber01/enemy_sector02_chamber01_basic_01.png';
 import sector02Chamber01EnemyEliteUrl from '../../art/raw/sector02/chamber01/enemy_sector02_chamber01_elite_01.png';
+import sector02Chamber01AbyssalArchonUrl from '../../art/raw/sector02/chamber01/miniboss_sector02_chamber01_abyssal_archon_01_alpha.png';
 import sector02Chamber01LoreAltarUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_lore_altar_01.png';
 import sector02Chamber01LoreImageUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_lore_image_01.png';
 import sector02Chamber01GateUrl from '../../art/raw/sector02/chamber01/sector02_chamber01_gate_01.png';
@@ -90,6 +91,7 @@ export const ASSET_URLS = {
   [ASSET_KEYS.sector02Chamber01BackgroundClimax]: sector02Chamber01BackgroundClimaxUrl,
   [ASSET_KEYS.sector02Chamber01EnemyBasic]: sector02Chamber01EnemyBasicUrl,
   [ASSET_KEYS.sector02Chamber01EnemyElite]: sector02Chamber01EnemyEliteUrl,
+  [ASSET_KEYS.sector02Chamber01AbyssalArchon]: sector02Chamber01AbyssalArchonUrl,
   [ASSET_KEYS.sector02Chamber01LoreAltar]: sector02Chamber01LoreAltarUrl,
   [ASSET_KEYS.sector02Chamber01LoreImage]: sector02Chamber01LoreImageUrl,
   [ASSET_KEYS.sector02Chamber01Gate]: sector02Chamber01GateUrl,
