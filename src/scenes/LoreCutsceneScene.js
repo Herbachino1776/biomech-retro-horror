@@ -47,6 +47,11 @@ const LAYOUT = {
   }
 };
 
+const TEXT_REGION_MODE = {
+  separate: 'separate',
+  overlay: 'overlay'
+};
+
 export class LoreCutsceneScene extends Phaser.Scene {
   constructor() {
     super('LoreCutsceneScene');
@@ -115,7 +120,8 @@ export class LoreCutsceneScene extends Phaser.Scene {
     this.clearLayout();
     const { width, height } = this.scale;
     const isPortrait = height >= width;
-    const layout = isPortrait ? LAYOUT.portrait : LAYOUT.landscape;
+    const layout = this.getActiveLayout(isPortrait);
+    const textRegionMode = this.cutscene?.style?.textRegionMode ?? TEXT_REGION_MODE.separate;
 
     const containerWidth = width - layout.outerMarginX * 2;
     const containerHeight = height - layout.outerMarginY * 2;
@@ -125,21 +131,66 @@ export class LoreCutsceneScene extends Phaser.Scene {
     const usableHeight = containerHeight - sectionGap * 2;
 
     const imageHeight = Math.floor((layout.imageHeightRatio / sectionTotal) * usableHeight);
-    const textHeight = Math.floor((layout.textHeightRatio / sectionTotal) * usableHeight);
-    const promptHeight = usableHeight - imageHeight - textHeight;
+    const promptHeight = Math.floor((layout.promptHeightRatio / sectionTotal) * usableHeight);
+    const remainingHeight = usableHeight - imageHeight - promptHeight;
+    const textHeight = textRegionMode === TEXT_REGION_MODE.overlay ? 0 : remainingHeight;
 
     const containerLeft = layout.outerMarginX;
     const containerTop = layout.outerMarginY;
 
     this.trackLayoutElement(this.add.rectangle(0, 0, width, height, 0x000000, 1).setOrigin(0).setDepth(DEPTH.backdrop));
 
-    const imageRegion = new Phaser.Geom.Rectangle(containerLeft, containerTop, containerWidth, imageHeight);
-    const textRegion = new Phaser.Geom.Rectangle(containerLeft, imageRegion.bottom + sectionGap, containerWidth, textHeight);
-    const promptRegion = new Phaser.Geom.Rectangle(containerLeft, textRegion.bottom + sectionGap, containerWidth, promptHeight);
+    const imageRegion = new Phaser.Geom.Rectangle(
+      containerLeft,
+      containerTop,
+      containerWidth,
+      imageHeight + (textRegionMode === TEXT_REGION_MODE.overlay ? Math.max(0, remainingHeight) : 0)
+    );
+    const overlayTextRegion = textRegionMode === TEXT_REGION_MODE.overlay
+      ? this.createOverlayTextRegion(imageRegion, layout)
+      : null;
+    const textRegion = textRegionMode === TEXT_REGION_MODE.overlay
+      ? overlayTextRegion
+      : new Phaser.Geom.Rectangle(containerLeft, imageRegion.bottom + sectionGap, containerWidth, textHeight);
+    const promptTop = textRegionMode === TEXT_REGION_MODE.overlay
+      ? imageRegion.bottom + sectionGap
+      : textRegion.bottom + sectionGap;
+    const promptRegion = new Phaser.Geom.Rectangle(containerLeft, promptTop, containerWidth, promptHeight);
 
     this.drawImageRegion(imageRegion);
-    this.drawTextRegion(textRegion, layout);
+    this.drawTextRegion(textRegion, layout, { overlay: textRegionMode === TEXT_REGION_MODE.overlay });
     this.drawPromptRegion(promptRegion, layout);
+  }
+
+
+  getActiveLayout(isPortrait) {
+    const baseLayout = isPortrait ? LAYOUT.portrait : LAYOUT.landscape;
+    const orientationKey = isPortrait ? 'portrait' : 'landscape';
+    const overrides = this.cutscene?.style?.layoutOverrides?.[orientationKey] ?? null;
+
+    if (!overrides) {
+      return baseLayout;
+    }
+
+    return {
+      ...baseLayout,
+      ...overrides
+    };
+  }
+
+  createOverlayTextRegion(imageRegion, layout) {
+    const overlayHeightRatio = Phaser.Math.Clamp(this.cutscene?.style?.overlayTextHeightRatio ?? 0.28, 0.18, 0.45);
+    const overlayInset = this.cutscene?.style?.overlayTextInset ?? 12;
+    const overlayWidth = imageRegion.width - overlayInset * 2;
+    const overlayHeight = Math.floor(imageRegion.height * overlayHeightRatio);
+    const overlayBottomInset = this.cutscene?.style?.overlayTextBottomInset ?? 16;
+
+    return new Phaser.Geom.Rectangle(
+      imageRegion.x + overlayInset,
+      imageRegion.bottom - overlayHeight - overlayBottomInset,
+      overlayWidth,
+      overlayHeight
+    );
   }
 
   drawImageRegion(region) {
@@ -255,12 +306,25 @@ export class LoreCutsceneScene extends Phaser.Scene {
     });
   }
 
-  drawTextRegion(region, layout) {
+  drawTextRegion(region, layout, { overlay = false } = {}) {
+    if (!region) {
+      return;
+    }
+
     const textPadding = layout.textPadding;
+    const textRegionFillAlpha = overlay
+      ? this.cutscene?.style?.overlayTextAlpha ?? 0.66
+      : 0.94;
+    const textRegionColor = overlay
+      ? this.cutscene?.style?.overlayTextColor ?? 0x000000
+      : 0x0d1010;
+    const textRegionStrokeAlpha = overlay
+      ? this.cutscene?.style?.overlayTextStrokeAlpha ?? 0.28
+      : 0.5;
 
     this.trackLayoutElement(this.add
-      .rectangle(region.centerX, region.centerY, region.width, region.height, 0x0d1010, 0.94)
-      .setStrokeStyle(1, this.cutscene?.style?.frameColor ?? COLORS.rust, 0.5)
+      .rectangle(region.centerX, region.centerY, region.width, region.height, textRegionColor, textRegionFillAlpha)
+      .setStrokeStyle(1, this.cutscene?.style?.frameColor ?? COLORS.rust, textRegionStrokeAlpha)
       .setDepth(DEPTH.textRegion));
 
     const title = this.cutscene?.title?.trim();

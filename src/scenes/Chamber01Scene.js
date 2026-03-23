@@ -113,6 +113,7 @@ export class Chamber01Scene extends Phaser.Scene {
       .setVisible(false);
 
     this.setupMobileUiCamera();
+    this.createDevShortcutButton();
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
@@ -133,6 +134,41 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.applyResponsiveLayout();
     this.hud.update(this.player.health, PLAYER.maxHealth);
+  }
+
+
+  getSafeAreaInsetPx(edge = 'top') {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return 0;
+    }
+
+    const cssVar = `--safe-area-inset-${edge}`;
+    const rawValue = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+    const parsed = Number.parseFloat(rawValue);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  createDevShortcutButton() {
+    // Temporary sector-jump shortcut for Bucket 2 lore/composition testing from the stable Chamber 01 entry point.
+    this.devShortcutButton = this.add.container(0, 0).setScrollFactor(0).setDepth(67).setVisible(!this.mobileControls.enabled);
+    const buttonBacking = this.add.rectangle(0, 0, 92, 34, 0x080909, 0.82).setStrokeStyle(1, 0x7f8d86, 0.78);
+    const buttonLabel = this.add.text(0, 0, 'DEV S2-C1', {
+      fontFamily: 'monospace',
+      fontSize: '12px',
+      color: '#d7ddd2',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+    this.devShortcutButton.add([buttonBacking, buttonLabel]);
+    this.devShortcutButton.setSize(92, 34);
+    this.devShortcutButton.setInteractive(
+      new Phaser.Geom.Rectangle(-46, -17, 92, 34),
+      Phaser.Geom.Rectangle.Contains
+    );
+    this.devShortcutButton.on('pointerdown', () => this.handleDevWarp());
+
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.devShortcutButton?.removeInteractive?.();
+    });
   }
 
   update(time) {
@@ -344,6 +380,12 @@ export class Chamber01Scene extends Phaser.Scene {
 
     if (this.uiCamera) {
       this.uiCamera.setViewport(0, 0, width, height);
+    }
+
+    if (this.devShortcutButton) {
+      this.devShortcutButton
+        .setVisible(!this.mobileControls.enabled)
+        .setPosition(width - 64, this.getSafeAreaInsetPx('top') + 30);
     }
 
     if (isPortraitMobile) {
