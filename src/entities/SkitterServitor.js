@@ -60,6 +60,7 @@ export class SkitterServitor {
 
     this.body = this.sprite.body;
     this.body.setCollideWorldBounds(true);
+    this.bodyConfig = { ...config.body };
 
     const scaleX = Math.abs(this.sprite.scaleX) || 1;
     const scaleY = Math.abs(this.sprite.scaleY) || 1;
@@ -305,27 +306,27 @@ export class SkitterServitor {
 
     if (this.combatState === 'windup') {
       const pulse = 0.82 + Math.sin(time * 0.03) * 0.05;
-      this.sprite.setScale(this.baseScaleX * 0.92, this.baseScaleY * 1.04);
+      this.applyPresentationScale(this.baseScaleX * 0.92, this.baseScaleY * 1.04);
       this.setVisualTint(0x98725a);
       this.sprite.setAlpha(this.getStateAlpha('windup', pulse));
       return;
     }
 
     if (this.combatState === 'attack') {
-      this.sprite.setScale(this.baseScaleX * 1.04, this.baseScaleY * 0.98);
+      this.applyPresentationScale(this.baseScaleX * 1.04, this.baseScaleY * 0.98);
       this.setVisualTint(0x8f6f55);
       this.sprite.setAlpha(this.getStateAlpha('attack', 0.95));
       return;
     }
 
     if (this.combatState === 'hurt') {
-      this.sprite.setScale(this.baseScaleX * 1.02, this.baseScaleY * 0.96);
+      this.applyPresentationScale(this.baseScaleX * 1.02, this.baseScaleY);
       this.setVisualTint(0x6f8c59);
       this.sprite.setAlpha(this.getStateAlpha('hurt', 0.88));
       return;
     }
 
-    this.sprite.setScale(this.baseScaleX, this.baseScaleY);
+    this.applyPresentationScale(this.baseScaleX, this.baseScaleY);
     this.sprite.setAlpha(this.baseAlpha);
 
     if (time < this.lastDamageFlashTime + 120) {
@@ -338,6 +339,30 @@ export class SkitterServitor {
 
   getStateAlpha(state, fallbackAlpha) {
     return this.stateAlphas[state] ?? fallbackAlpha;
+  }
+
+  applyPresentationScale(scaleX, scaleY) {
+    const previousBottom = this.sprite.getBounds?.().bottom ?? this.sprite.y;
+    this.sprite.setScale(scaleX, scaleY);
+
+    const nextBottom = this.sprite.getBounds?.().bottom ?? this.sprite.y;
+    if (Number.isFinite(previousBottom) && Number.isFinite(nextBottom)) {
+      this.sprite.y += previousBottom - nextBottom;
+    }
+
+    this.syncBodyToSpriteScale();
+  }
+
+  syncBodyToSpriteScale() {
+    if (!this.body || !this.bodyConfig) {
+      return;
+    }
+
+    const scaleX = Math.abs(this.sprite.scaleX) || 1;
+    const scaleY = Math.abs(this.sprite.scaleY) || 1;
+    this.body.setSize(this.bodyConfig.width / scaleX, this.bodyConfig.height / scaleY);
+    this.body.setOffset(this.bodyConfig.offsetX / scaleX, this.bodyConfig.offsetY / scaleY);
+    this.body.updateFromGameObject?.();
   }
 
 
