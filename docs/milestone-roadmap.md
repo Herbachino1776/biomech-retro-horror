@@ -54,18 +54,19 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 **Completion Notes:** the shipped Chamber 01 + Chamber 02 slice now includes chamber ambience, player footsteps/combat/death feedback, skitter/TOLL-KEEPER/miniboss cues, and lore/gate/banishment treatment; recent audio QA/polish is already reflected in the current baseline.
 
 ## Milestone 5 — Content Expansion
-**Purpose:** extend the playable slice beyond the current Chamber 01 + Chamber 02 baseline.
-**Scope / Includes:** next playable area/chamber progression using established control/combat/lore/audio patterns.
-**Acceptance Criteria:** next content step is playable without regressing the current baseline quality bar.
+**Purpose:** extend the playable slice through Chamber 03 and the first sector finale.
+**Scope / Includes:** Chamber 03 first-pass completion, real Chamber 02 -> Chamber 03 progression, separate boss arena, and Sector 1 payoff/progression contract.
+**Acceptance Criteria:** Sector 1 reaches a functional Chamber 03 outcome and first finale without regressing the earlier slice.
 **Dependencies:** Milestones 1–4 stable.
-**Do Not Expand Prematurely:** open-world structure, broad branching map, or new systems not required by the next playable area.
-**Status:** next planned / active.
-**Planning Notes:** Chamber 03 is the first major content-expansion target under Milestone 5. The trusted rolled-back Chamber 01 + Chamber 02 repo was the restart baseline, Chamber 03 has now been rebuilt as an intentionally minimal bootstrap chamber using reused Chamber 01 / Chamber 02 art plus the shared HUD/mobile-controls path, and Chamber 02's unlocked end gate still stops safely short of the Chamber 03 handoff until that progression wiring is re-enabled in a later stability pass.
+**Do Not Expand Prematurely:** endless Chamber 3 rescue work once forward progress is unlocked, open-world structure, broad branching map, or new systems not required by the sector finale.
+**Status:** completed enough to close.
+**Completion Notes:** Chamber 3 finally landed once the scene handoff contract was fixed: `Chamber03Scene` registration was restored, Chamber 02's unlocked exit gate was wired to start `Chamber03Scene`, and the work stopped treating Chamber 3 boot failure as a chamber-internal problem first. Sector 1 now has a playable Chamber 03, a separate boss arena, and a real finale/progression contract, with remaining debt reclassified as polish.
 
-## Milestone 6 — Polish, Testing, and Release Slice
-**Purpose:** stabilize and package a coherent release-quality vertical slice.
-**Scope / Includes:** regression cleanup, performance/readability polish, deployment verification, final docs pass.
-**Acceptance Criteria:** reproducible build/deploy success, stable input parity, milestone docs aligned with shipped behavior.
-**Dependencies:** prior milestones substantially complete.
-**Do Not Expand Prematurely:** new mechanics/content additions during stabilization.
-**Status:** planned.
+## Milestone 6 — Bucket 2 Foothold / Cosmic Garden Start
+**Purpose:** prove safe forward progression beyond Sector 1.
+**Scope / Includes:** Bucket 2 foothold, Cosmic Garden arrival, and the first stable continuation after the Sector 1 finale.
+**Acceptance Criteria:** the game clearly continues beyond Sector 1 into a recognizable Bucket 2 starting state without destabilizing the existing arc.
+**Dependencies:** Milestone 5 closed in a first-pass sense.
+**Do Not Expand Prematurely:** broad Bucket 2 overbuild, unrelated system expansion, or reopening Chamber 3 rescue as the default task.
+**Status:** active next milestone.
+**Planning Notes:** carry forward the Chamber 3 lessons—bootstrap before spectacle, fix scene-flow contracts before deep content patching, and build the next area in milestone-safe slices rather than another giant one-pass chamber attempt.

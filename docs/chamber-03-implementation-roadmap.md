@@ -1,6 +1,20 @@
 # Chamber 03 Implementation Roadmap
 
-Status: active bootstrap track. **This roadmap exists to prevent another oversized implementation attempt.** The trusted rolled-back Chamber 01 + Chamber 02 repo was the clean restart baseline, the old Chamber 02 exit-gate placeholder lore payoff remains removed, and Milestone 5B now exists in code as a rebuilt minimal Chamber 03 bootstrap scene while the Chamber 02 -> Chamber 03 handoff stays disabled for stability.
+Status: Milestone 5 closeout reference. **This roadmap exists to preserve the Chamber 3 lessons, not to reopen rescue work by default.** The trusted rolled-back Chamber 01 + Chamber 02 repo was the clean restart baseline, the old Chamber 02 exit-gate placeholder lore payoff remains removed, and the eventual Chamber 3 breakthrough came from restoring the actual Chamber 02 -> Chamber 03 handoff contract rather than endlessly patching Chamber 3 in isolation.
+
+## What Actually Shipped
+- Chamber 03 reached first-pass playable completion inside the active progression flow.
+- Sector 1 now includes a separate boss arena and a real finale/progression contract.
+- Milestone 5 is complete enough to close, even though Chamber 3 and the finale still carry polish debt.
+
+## What Was Intentionally Deferred
+- Additional Chamber 3 presentation polish, pacing cleanup, and audiovisual refinement.
+- Further boss-finale spectacle layers beyond the now-functional shipped flow.
+
+## What Should Be Polished Later
+- Chamber 3 readability/tuning.
+- Boss arena presentation and finale feedback.
+- Any remaining cleanup that improves the shipped Sector 1 arc without reopening core rescue work.
 
 ## Warning from the Future
 The prior Chamber 03 mistake was trying to build the full chamber in one pass.

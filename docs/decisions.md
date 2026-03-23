@@ -46,8 +46,10 @@ Concise record of technical/design decisions currently in force.
 - Milestone 3 was defined as **Encounter Expansion + Combat Readability** and is now complete for the shipped Chamber 01 + Chamber 02 slice.
 - Milestone 3 implementation landed in the intended order: regular enemy encounter depth pass first, miniboss refinement second, limited combat presentation support third.
 - Milestone 4 (**Audio Identity**) is complete for the shipped Chamber 01 + Chamber 02 slice.
-- Milestone 5 (**Content Expansion**) is now the active milestone.
+- Milestone 5 (**Content Expansion**) is complete enough to close once forward progress is unlocked, even if some polish debt remains.
+- Milestone 6 (**Bucket 2 Foothold / Cosmic Garden Start**) is now the active milestone.
 - Major chamber expansion should be implemented in milestone slices rather than one oversized pass.
+- Bootstrap before spectacle: get scene registration, handoff wiring, and stable boot flow working before layering chamber spectacle.
 
 ## Chamber Progression Doctrine
 - Chamber 03 is the planned **Ossuary Choir Hall** and Bucket 01 sector finale.
@@ -55,10 +57,11 @@ Concise record of technical/design decisions currently in force.
 - All future chambers should aim for **Chamber-03-level consequence, length, and complexity** even when their implementation is chunked.
 - Every future chamber should include substantial encounter design plus a climax entity: miniboss, elite/high-level enemy, or true boss.
 - Chambers should differentiate through art/theme, trigger placement, pacing, enemy placement, and climax tier rather than by lowering stakes.
-- Chamber 02's old exit-gate placeholder lore-screen payoff has been intentionally removed from the trusted baseline.
-- During the current restoration baseline, Chamber 02 ends safely at its unlocked threshold and does not enter Chamber 03 by default.
-- Chamber 03 now exists as a rebuilt minimal bootstrap room that is suitable for isolated/direct-boot testing but is not yet part of the active shipped progression flow.
-- Emergency debug boot overrides and direct boot into Chamber 03 must remain disabled in the active shipped flow by default.
+- Chamber 02's old exit-gate placeholder lore-screen payoff must stay removed; the real progression contract is a stable in-world handoff into `Chamber03Scene`.
+- Chamber 3's breakthrough came from fixing the scene handoff contract—register `Chamber03Scene`, wire Chamber 02's unlocked exit gate to start it, and do not keep patching Chamber 3 internals first when boot flow is broken.
+- Chamber 03 now sets the scale/consequence benchmark for future chambers.
+- Separate boss arenas are appropriate for sector-ending chambers when they improve finale framing, pacing, or consequence.
+- Future chambers should still vary through theme bucket, art/background set, terrain treatment, trigger placement, enemy placement, pacing, climax tier, and lore framing rather than by shrinking stakes.
 
 ## Lore Presentation Direction
 - Lore is a core identity system, not optional garnish.

@@ -1,70 +1,45 @@
 # Current Milestone
 
 ## Current Project State
-The project has completed **Milestone 4: Audio Identity Pass**.
-The restored trusted baseline is now the title screen plus playable Chamber 01 and Chamber 02, with normal BootScene flow back in place, Chamber 01/02 stability prioritized again, integrated ambient/audio cue coverage for the shipped chambers, and maintained mobile/desktop usability.
+The project has now completed **Milestone 5: Content Expansion** enough to close in a first-pass sense.
+Sector 1 now has a functionally complete Chamber 03 path, a separate boss arena, and a real sector-finale progression contract. Some polish debt remains, but it is no longer the main blocker to forward progress.
 
 ## What Is Currently Working
-- Boot/title flow reliably enters the current Chamber 01 -> Chamber 02 vertical slice.
+- Boot/title flow reliably enters the Chamber 01 -> Chamber 02 -> Chamber 03 progression arc.
 - Core player loop works: movement, jump, attack, damage, death, footsteps, and full restart/reset.
-- Chamber 01 baseline encounter remains stable and readable.
-- Chamber 01 lore shrine still unlocks the chamber gate flow without regressing the original lore-screen cadence.
-- Chamber 01 dead-god witness beat still triggers the Half-Skull Ascendant miniboss.
-- Chamber 01 miniboss telegraphing, contact danger, defeat payoff, banishment cue, and gate release remain active in the shipped flow.
-- Chamber 01 -> Chamber 02 transition remains stable.
-- Chamber 02 enemy encounters remain active with conservative wake timing and readable spacing.
-- Chamber 02 TOLL-KEEPER encounter pair gates the chamber exit and now has clearer end-gate readiness feedback.
-- Chamber 02 central lore trigger still uses a dedicated cinematic cutscene flow and now retains a clear diegetic shrine/ossuary affordance at the trigger site.
-- Chamber 02 exit gate unlock state remains intact after the TOLL-KEEPER fight, and the trusted default flow still ends safely at the Chamber 02 threshold instead of entering Chamber 03 automatically.
-- Chamber 03 has been rebuilt as a clean minimal bootstrap room with working player/camera/HUD/mobile-control support for isolated testing.
-- Chamber 01 and Chamber 02 ambience are integrated in the shipped flow.
-- Player combat/death feedback, skitter, TOLL-KEEPER, miniboss, lore/gate, and banishment audio cues are present in the shipped slice.
-- Mobile controls remain screen-space anchored and usable in portrait + landscape.
-- Desktop keyboard controls remain available.
-- Texture-first rendering with fallback-only resilience remains in place.
-- Vite/GitHub Pages deployment model is still configured (`/biomech-retro-horror/` production base).
+- Chamber 01 baseline encounter, lore, miniboss, and gate-release flow remain stable.
+- Chamber 02 enemy encounters, shrine/cutscene flow, TOLL-KEEPER gate unlock, and onward threshold remain active.
+- Chamber 03 now works as a real playable chamber rather than a bootstrap-only room.
+- Chamber 03 progression now reaches a separate boss arena through the intended finale handoff.
+- Sector 1 now has a real Chamber 03 payoff flow and a first sector finale instead of stopping before consequence.
+- Chamber 01, Chamber 02, Chamber 03, and the sector-finale path all preserve mobile controls, desktop keyboard support, and base-path-safe deployment behavior.
 
-## Milestone 4 Closeout Status
-Milestone 4 is now considered **complete / closed out** for the currently shipped Chamber 01 + Chamber 02 slice.
+## Milestone 5 Closeout Status
+Milestone 5 is now considered **complete / closed out in a first-pass sense**.
 
-### Milestone 4 Closeout Rationale
-- Chamber 01 and Chamber 02 both ship with integrated ambient loops.
-- Player footsteps, attack/hurt/death feedback, enemy combat/death cues, miniboss cues, lore transition cues, gate cues, and banishment sting are wired into the shipped flow.
-- Audio treatment remains aligned to the existing Chamber 01 + Chamber 02 vertical slice rather than forcing new content scope.
-- The recent audio QA/polish pass has already been folded into the current shipped baseline.
-- Mobile/desktop usability and deployment invariants remain preserved.
-
-## Milestone 4 Acceptance Criteria (Completed)
-1. Functional chamber ambience is shipped for the active playable slice.
-2. Combat feedback SFX are shipped for player, skitter, TOLL-KEEPER, and miniboss encounters.
-3. Lore transition, gate, and banishment cues are shipped in the active flow.
-4. Chamber 01 -> Chamber 02 progression remains stable.
-5. Death/restart/reset still works without soft-locking scene flow.
-6. Portrait mobile playability remains intact.
-7. Landscape usability remains intact.
+### Milestone 5 Closeout Rationale
+- Chamber 3 / Sector 1 content expansion is now functionally complete enough that the next meaningful work is beyond Sector 1, not more Chamber 3 rescue.
+- The Chamber 02 -> Chamber 03 handoff contract is live, Chamber 03 is registered in the active scene flow, and the finale path now reaches a separate boss arena.
+- Sector 1 now has the intended consequence chain: Chamber 03, boss flow, sector-finale payoff, and forward progression contract.
+- Remaining Chamber 3 issues are polish debt, not a blocker to opening Bucket 2 work.
 
 ## Known Remaining Rough Edges (Non-Blocking)
-- Chamber 03 is now a clean rebuilt bootstrap room rather than the old emergency debug scene, but it is still not full Ossuary Choir Hall gameplay content.
-- Chamber 03 currently focuses on stable movement/camera/input/bootstrap presentation only; encounter, lore, boss, and spectacle layers remain pending.
-- Combat presentation remains intentionally restrained and should only expand when content work needs it.
-- Future milestone work should add new playable content without destabilizing the shipped Chamber 01 + Chamber 02 baseline.
+- Chamber 3 and the boss finale still have presentation and pacing polish debt.
+- Sector 1 can still benefit from encounter tuning, readability cleanup, and audiovisual refinement.
+- Closing Milestone 5 does not mean the game is finished; it means Chamber 3 rescue is no longer the highest-leverage task.
 
-## Next Milestone Definition
-**Milestone 5: Content Expansion** is the active implementation milestone.
+## Active Focus
+**Milestone 6: Bucket 2 Foothold** is now the active milestone.
 
-### Core Goal
-Extend the shipped Chamber 01 + Chamber 02 baseline into the next playable content step while preserving the now-complete audio-integrated slice.
-
-### Immediate Milestone 5 Direction
-- Chamber 03 is the next major content target under Milestone 5.
-- Chamber 03 planning remains anchored to the **Ossuary Choir Hall** sector-finale vision.
-- Chamber 03 has now been rebuilt from scratch from the restored Chamber 01/02 baseline as a minimal bootstrap chamber.
-- Emergency debug boot overrides remain removed from the active flow; direct boot remains an optional inactive debug switch only.
-- Chamber 02 currently still ends safely at its restored threshold while Chamber 03 progression wiring remains pending-by-choice for stability.
+### Milestone 6 Direction
+- Establish the first safe continuation beyond Sector 1.
+- Begin Bucket 2 through a **Cosmic Garden** arrival / foothold pass.
+- Prove progression beyond the Sector 1 finale without destabilizing the shipped Sector 1 arc.
+- Carry forward the lessons from Chamber 3: bootstrap before spectacle, preserve stable transition wiring, and expand in milestone-safe slices.
 
 ## Do Not Change Casually
 - Base-path deployment contract (`/biomech-retro-horror/` prod, `/` dev).
 - Mobile/desktop input parity and screen-space anchoring rules.
 - Asset key/url indirection and fallback-only resilience behavior.
-- Chamber 01 and Chamber 02 scene-flow contracts unless intentionally retuned.
+- Chamber 01 -> Chamber 02 -> Chamber 03 -> boss arena flow contracts unless intentionally retuned.
 - Lore-screen readability constraints in portrait iPhone-sized viewports.
