@@ -408,6 +408,9 @@ export class MobileControls {
     const snapshot = {
       left: this.state.left,
       right: this.state.right,
+      jumpHeld: this.state.jump,
+      attackHeld: this.state.attack,
+      interactHeld: this.state.interact,
       jumpPressed: this.justPressed.jump,
       attackPressed: this.justPressed.attack,
       interactPressed: this.justPressed.interact

@@ -276,6 +276,9 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.hasCompletedLoreBeat = false;
     this.hasUnlockedForwardPath = false;
     this.hasTriggeredForwardContract = false;
+    this.currentForwardThreshold = null;
+    this.hasEnteredForwardThreshold = false;
+    this.forwardThresholdAwaitingFreshInteract = false;
     this.enemies = [];
     this.encounterPockets = [];
     this.loreAnchors = [];
@@ -892,14 +895,25 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
   }
 
   refreshForwardThresholdPresence() {
+    const wasInsideThreshold = this.hasEnteredForwardThreshold;
     this.currentForwardThreshold = null;
     if (!this.forwardThresholdZone) {
+      this.hasEnteredForwardThreshold = false;
+      this.forwardThresholdAwaitingFreshInteract = false;
       return;
     }
 
     this.physics.overlap(this.player.sprite, this.forwardThresholdZone, () => {
       this.currentForwardThreshold = this.forwardThresholdZone;
     });
+
+    this.hasEnteredForwardThreshold = Boolean(this.currentForwardThreshold);
+
+    if (!this.hasEnteredForwardThreshold) {
+      this.forwardThresholdAwaitingFreshInteract = false;
+    } else if (!wasInsideThreshold) {
+      this.forwardThresholdAwaitingFreshInteract = true;
+    }
 
     const promptVisible = Boolean(this.currentForwardThreshold) || (this.hasUnlockedForwardPath && !this.hasTriggeredForwardContract);
     const promptText = this.hasUnlockedForwardPath
@@ -913,6 +927,15 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
   tryAdvanceForwardThreshold(mobileInput) {
     if (!this.hasUnlockedForwardPath || !this.currentForwardThreshold) {
       return;
+    }
+
+    const interactHeld = this.keyInteract?.isDown || this.keyEnter?.isDown || mobileInput.interactHeld;
+    if (this.forwardThresholdAwaitingFreshInteract) {
+      if (interactHeld) {
+        return;
+      }
+
+      this.forwardThresholdAwaitingFreshInteract = false;
     }
 
     const interactPressed = Phaser.Input.Keyboard.JustDown(this.keyInteract) || Phaser.Input.Keyboard.JustDown(this.keyEnter) || mobileInput.interactPressed;
