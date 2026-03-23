@@ -129,20 +129,32 @@ export const LORE_CUTSCENES = {
       promptRegionStrokeThickness: 1,
       layoutOverrides: {
         portrait: {
-          imageHeightRatio: 0.6,
-          textHeightRatio: 0.24,
-          promptHeightRatio: 0.16,
+          imageHeightRatio: 1,
+          textHeightRatio: 0.255,
+          textMinHeight: 154,
+          textWidthRatio: 0.84,
+          promptHeightRatio: 0.088,
+          promptMinHeight: 42,
+          promptWidthRatio: 0.72,
+          bottomInset: 10,
           textPadding: 12,
-          bodySize: 13,
-          minBodySize: 10
+          bodySize: 12,
+          minBodySize: 9,
+          bodyLineSpacing: 2
         },
         landscape: {
-          imageHeightRatio: 0.58,
+          imageHeightRatio: 1,
           textHeightRatio: 0.24,
-          promptHeightRatio: 0.18,
+          textMinHeight: 148,
+          textWidthRatio: 0.52,
+          promptHeightRatio: 0.1,
+          promptMinHeight: 44,
+          promptWidthRatio: 0.36,
+          bottomInset: 12,
           textPadding: 14,
-          bodySize: 14,
-          minBodySize: 11
+          bodySize: 13,
+          minBodySize: 10,
+          bodyLineSpacing: 3
         }
       },
       motion: {
