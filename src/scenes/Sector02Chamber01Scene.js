@@ -423,6 +423,13 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
 
   createEnemyProjectiles() {
     this.enemyProjectiles = [];
+    this.enemyProjectileGroup = this.physics.add.group({
+      allowGravity: false,
+      immovable: true
+    });
+    this.physics.add.overlap(this.player.sprite, this.enemyProjectileGroup, (_playerSprite, projectileSprite) => {
+      this.handleEnemyProjectileHit(projectileSprite);
+    });
   }
 
   spawnEnemyProjectile(config) {
@@ -451,13 +458,13 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       });
 
       this.enemyProjectiles.push(projectile);
-      this.physics.add.overlap(this.player.sprite, projectile.sprite, (_playerSprite, projectileSprite) => {
-        this.handleEnemyProjectileHit(projectileSprite, projectile);
-      });
     }
 
     projectile.owner = config.owner ?? null;
     projectile.fire(config);
+    if (projectile.sprite && !this.enemyProjectileGroup.contains(projectile.sprite)) {
+      this.enemyProjectileGroup.add(projectile.sprite);
+    }
     if (this.enemyProjectilesPaused) {
       projectile.pauseMotion();
     }
@@ -873,12 +880,9 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     });
   }
 
-  handleEnemyProjectileHit(projectileSprite, projectile) {
+  handleEnemyProjectileHit(projectileSprite) {
+    const projectile = this.enemyProjectiles.find((entry) => entry.sprite === projectileSprite || projectileSprite?.gameObject === entry.sprite);
     if (!projectile?.active || projectile.inImpact || !this.player?.sprite?.body?.enable) {
-      return;
-    }
-
-    if (projectileSprite !== projectile.sprite && projectileSprite?.gameObject !== projectile.sprite) {
       return;
     }
 

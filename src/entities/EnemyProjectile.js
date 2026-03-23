@@ -98,12 +98,21 @@ export class EnemyProjectile {
     this.body = this.sprite.body;
     this.body.setAllowGravity(false);
     this.body.setCollideWorldBounds(false);
-    this.body.setSize(this.config.bodySize.width, this.config.bodySize.height);
+    this.applyBodySize();
     this.syncBodyToSprite();
     this.body.enable = false;
     this.sprite.setVisible(false).setActive(false);
   }
 
+  applyBodySize() {
+    if (!this.body || !this.sprite) {
+      return;
+    }
+
+    const scaleX = Math.abs(this.sprite.scaleX) || 1;
+    const scaleY = Math.abs(this.sprite.scaleY) || 1;
+    this.body.setSize(this.config.bodySize.width / scaleX, this.config.bodySize.height / scaleY);
+  }
 
   syncBodyToSprite() {
     if (!this.body || !this.sprite) {
@@ -112,8 +121,10 @@ export class EnemyProjectile {
 
     const displayWidth = this.sprite.displayWidth ?? this.config.presentation.displayWidth;
     const displayHeight = this.sprite.displayHeight ?? this.config.presentation.displayHeight;
-    const offsetX = (displayWidth - this.config.bodySize.width) * 0.5;
-    const offsetY = (displayHeight - this.config.bodySize.height) * 0.5;
+    const scaleX = Math.abs(this.sprite.scaleX) || 1;
+    const scaleY = Math.abs(this.sprite.scaleY) || 1;
+    const offsetX = ((displayWidth - this.config.bodySize.width) * 0.5) / scaleX;
+    const offsetY = ((displayHeight - this.config.bodySize.height) * 0.5) / scaleY;
     this.body.setOffset(offsetX, offsetY);
   }
 
