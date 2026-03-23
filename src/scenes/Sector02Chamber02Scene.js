@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Player } from '../entities/Player.js';
 import { SkitterServitor } from '../entities/SkitterServitor.js';
+import { EnemyProjectile } from '../entities/EnemyProjectile.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
@@ -115,58 +116,105 @@ const COMPRESSION_VAULTS_TOLL_KEEPER = {
   audioProfile: 'tollkeeper'
 };
 
+const COMPRESSION_VAULTS_ELITE_PROJECTILE = {
+  cooldownMs: 4200,
+  windupMs: 580,
+  recoveryMs: 720,
+  minRange: 240,
+  maxRange: 520,
+  verticalTolerance: 148,
+  spawnOffsetX: 64,
+  spawnOffsetY: -82,
+  speed: 248,
+  damage: 1,
+  lifetimeMs: 1900,
+  rotationSpeed: 420,
+  telegraphRadiusX: 74,
+  telegraphRadiusY: 24
+};
+
 const COMPRESSION_VAULTS_ENCOUNTER_POCKETS = [
   {
     id: 'compression-vaults-entry-seal',
     label: 'ENTRY LOCK',
-    zoneX: 1260,
+    zoneX: 1240,
     zoneY: WORLD.floorY - 72,
-    zoneWidth: 560,
+    zoneWidth: 520,
     zoneHeight: 226,
-    markerWidth: 336,
+    markerWidth: 324,
     markerHeight: 74,
     markerAlpha: 0.08,
     promptOffsetY: -136,
     enemies: [
-      { type: 'basic01', x: 1180, y: PLAYER.startY, patrolDistance: 84, wakeDelayMs: 0 },
-      { type: 'basic02', x: 1425, y: PLAYER.startY, patrolDistance: 110, wakeDelayMs: 120 }
+      { type: 'basic01', x: 1155, y: PLAYER.startY, patrolDistance: 80, wakeDelayMs: 0 },
+      { type: 'basic02', x: 1388, y: PLAYER.startY, patrolDistance: 104, wakeDelayMs: 140 }
     ]
   },
   {
-    id: 'compression-vaults-mid-pressure',
-    label: 'COMPRESSION BAY',
-    zoneX: 2860,
+    id: 'compression-vaults-mid-procession',
+    label: 'PROCESSION NARROWS',
+    zoneX: 2760,
     zoneY: WORLD.floorY - 72,
-    zoneWidth: 760,
+    zoneWidth: 680,
     zoneHeight: 236,
-    markerWidth: 412,
+    markerWidth: 388,
     markerHeight: 80,
     markerAlpha: 0.1,
-    promptOffsetY: -142,
+    promptOffsetY: -146,
     enemies: [
-      { type: 'basic01', x: 2510, y: PLAYER.startY, patrolDistance: 108, wakeDelayMs: 0 },
-      { type: 'basic02', x: 2790, y: PLAYER.startY, patrolDistance: 120, wakeDelayMs: 120 },
-      { type: 'basic02', x: 3070, y: PLAYER.startY, patrolDistance: 126, wakeDelayMs: 240 }
+      { type: 'basic01', x: 2430, y: PLAYER.startY, patrolDistance: 104, wakeDelayMs: 0 },
+      { type: 'basic02', x: 2720, y: PLAYER.startY, patrolDistance: 118, wakeDelayMs: 120 },
+      { type: 'basic01', x: 2995, y: PLAYER.startY, patrolDistance: 96, wakeDelayMs: 260 }
     ]
   },
   {
     id: 'compression-vaults-threshold-seal',
     label: 'THRESHOLD PRESSURE',
-    zoneX: 4540,
+    zoneX: 4510,
     zoneY: WORLD.floorY - 74,
-    zoneWidth: 920,
+    zoneWidth: 940,
     zoneHeight: 242,
-    markerWidth: 468,
+    markerWidth: 474,
     markerHeight: 84,
     markerAlpha: 0.12,
-    promptOffsetY: -148,
+    promptOffsetY: -152,
     enemies: [
-      { type: 'basic01', x: 4210, y: PLAYER.startY, patrolDistance: 104, wakeDelayMs: 0 },
-      { type: 'elite', x: 4550, y: PLAYER.startY, patrolDistance: 82, wakeDelayMs: 180 },
-      { type: 'basic02', x: 4890, y: PLAYER.startY, patrolDistance: 126, wakeDelayMs: 320 }
+      { type: 'basic02', x: 4185, y: PLAYER.startY, patrolDistance: 114, wakeDelayMs: 0 },
+      { type: 'elite', x: 4540, y: PLAYER.startY, patrolDistance: 78, wakeDelayMs: 180, projectileCadence: 'measured' },
+      { type: 'basic01', x: 4865, y: PLAYER.startY, patrolDistance: 116, wakeDelayMs: 320 }
     ]
   }
 ];
+
+const COMPRESSION_VAULTS_LORE = {
+  cutsceneId: 'sector02-chamber02-compression-altar',
+  anchor: {
+    id: 'compression-vault-altar',
+    label: 'READ THE COMPRESSION ALTAR',
+    zoneX: 3400,
+    zoneY: WORLD.floorY - 78,
+    zoneWidth: 196,
+    zoneHeight: 204,
+    promptOffsetY: -170,
+    altarX: 3400,
+    altarY: WORLD.floorY - 102,
+    altarDisplayWidth: 178,
+    altarDisplayHeight: 178,
+    supportWidth: 238,
+    supportHeight: 126,
+    supportTopY: WORLD.floorY - 78,
+    shadowWidth: 292,
+    wallPlateWidth: 568,
+    wallPlateHeight: 330,
+    wallPlateY: WORLD.floorY - 144,
+    muralX: 3400,
+    muralY: 214,
+    muralWidth: 436,
+    muralHeight: 268,
+    muralBackingWidth: 522,
+    muralBackingHeight: 322
+  }
+};
 
 const SHOW_SECTOR02_DEBUG_LABELS = false;
 
@@ -190,11 +238,17 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
   init(data) {
     this.transitionContext = data ?? {};
     this.isRestartingRun = false;
+    this.isLoreTransitionActive = false;
+    this.hasCompletedLoreBeat = false;
     this.hasUnlockedForwardPath = false;
     this.hasTriggeredForwardContract = false;
     this.currentForwardThreshold = null;
+    this.currentLoreZone = null;
     this.enemies = [];
     this.encounterPockets = [];
+    this.enemyProjectiles = [];
+    this.enemyProjectilesPaused = false;
+    this.loreAnchor = null;
   }
 
   create() {
@@ -202,10 +256,13 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.createAudio();
     this.createBackdrop();
     this.createPlayerAndColliders();
+    this.createEnemyProjectiles();
     this.createEncounterPockets();
+    this.createLoreAnchor();
     this.createUiAndInput();
     this.createForwardThreshold();
     this.configureCameraAndLayout();
+    this.registerLoreEvents();
     this.cameras.main.fadeIn(650, 0, 0, 0);
   }
 
@@ -230,7 +287,6 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.renderCompressionArchitecture();
     this.renderWalkway();
     this.renderGateThreshold();
-    this.renderLoreAssetPlacementHints();
     this.createInvisiblePlatform(COMPRESSION_VAULTS_BOOTSTRAP.worldWidth / 2, WORLD.floorY + 28, COMPRESSION_VAULTS_BOOTSTRAP.worldWidth, COMPRESSION_VAULTS_BOOTSTRAP.floorColliderHeight);
   }
 
@@ -305,30 +361,60 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     }
   }
 
-  renderLoreAssetPlacementHints() {
-    const muralX = 2940;
-    const muralY = 214;
-    this.add.rectangle(muralX, muralY, 520, 310, 0x141a1b, 0.2).setDepth(-13.74);
-
-    if (this.textures.exists(ASSET_KEYS.sector02Chamber02LoreImage)) {
-      this.add.image(muralX, muralY, ASSET_KEYS.sector02Chamber02LoreImage)
-        .setDisplaySize(448, 272)
-        .setTint(0xd8dfd0)
-        .setAlpha(0.34)
-        .setDepth(-13.68);
-    }
-
-    if (SHOW_SECTOR02_DEBUG_LABELS) {
-      this.add.text(muralX, WORLD.floorY - 252, 'COMPRESSION RECORD', {
-        fontFamily: 'monospace', fontSize: '16px', color: '#c6d0c2', align: 'center', stroke: '#0b0d0d', strokeThickness: 4
-      }).setOrigin(0.5).setDepth(-4.86).setAlpha(0.72);
-    }
-  }
-
   createPlayerAndColliders() {
     this.player = new Player(this, COMPRESSION_VAULTS_BOOTSTRAP.spawnX, COMPRESSION_VAULTS_BOOTSTRAP.spawnY, PLAYER);
     this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xc2c9bf, alpha: 0.16, scale: 1.08 });
     this.physics.add.collider(this.player.sprite, this.platforms);
+  }
+
+  createEnemyProjectiles() {
+    this.enemyProjectiles = [];
+    this.enemyProjectileGroup = this.physics.add.group({
+      allowGravity: false,
+      immovable: true
+    });
+    this.physics.add.overlap(this.player.sprite, this.enemyProjectileGroup, (_playerSprite, projectileSprite) => {
+      this.handleEnemyProjectileHit(projectileSprite);
+    });
+  }
+
+  spawnEnemyProjectile(config) {
+    let projectile = this.enemyProjectiles.find((entry) => !entry.active);
+    if (!projectile) {
+      projectile = new EnemyProjectile(this, {
+        speed: config.speed ?? COMPRESSION_VAULTS_ELITE_PROJECTILE.speed,
+        damage: config.damage ?? COMPRESSION_VAULTS_ELITE_PROJECTILE.damage,
+        lifetimeMs: config.lifetimeMs ?? COMPRESSION_VAULTS_ELITE_PROJECTILE.lifetimeMs,
+        rotationSpeed: config.rotationSpeed ?? COMPRESSION_VAULTS_ELITE_PROJECTILE.rotationSpeed,
+        bodySize: { width: 28, height: 28 },
+        depth: config.depth ?? 6.32,
+        presentation: {
+          displayWidth: 42,
+          displayHeight: 42,
+          alpha: 0.98,
+          fallbackFill: 0xc7d4c0,
+          fallbackStroke: 0x67807a
+        },
+        impact: {
+          durationMs: 130,
+          alpha: 0.88,
+          scaleMultiplier: 1.18,
+          tint: 0xe0ead2
+        }
+      });
+
+      this.enemyProjectiles.push(projectile);
+    }
+
+    projectile.owner = config.owner ?? null;
+    projectile.fire(config);
+    if (projectile.sprite && !this.enemyProjectileGroup.contains(projectile.sprite)) {
+      this.enemyProjectileGroup.add(projectile.sprite);
+    }
+    if (this.enemyProjectilesPaused) {
+      projectile.pauseMotion();
+    }
+    return projectile;
   }
 
   createEncounterPockets() {
@@ -376,6 +462,22 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     enemy.awakenAtTime = null;
     enemy.pocketWakeAtTime = null;
     enemy.isElite = enemyConfig.type === 'elite';
+    enemy.projectileConfig = enemy.isElite ? { ...COMPRESSION_VAULTS_ELITE_PROJECTILE } : null;
+    enemy.projectileState = 'idle';
+    enemy.projectileWindupStartedAt = -Infinity;
+    enemy.projectileFireAt = -Infinity;
+    enemy.projectileRecoverUntil = -Infinity;
+    enemy.lastProjectileTime = -Infinity;
+    enemy.projectileTelegraph = enemy.isElite
+      ? this.add.ellipse(
+        enemy.sprite.x,
+        enemy.sprite.y + COMPRESSION_VAULTS_ELITE_PROJECTILE.spawnOffsetY,
+        COMPRESSION_VAULTS_ELITE_PROJECTILE.telegraphRadiusX,
+        COMPRESSION_VAULTS_ELITE_PROJECTILE.telegraphRadiusY,
+        0xcad8be,
+        0.1
+      ).setStrokeStyle(2, 0xaec797, 0.52).setDepth(enemy.sprite.depth + 0.08).setVisible(false)
+      : null;
 
     this.physics.add.collider(enemy.sprite, this.platforms);
     this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (attackZone, enemySprite) => {
@@ -390,6 +492,57 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       ? { fill: 0xd2d8c3, alpha: 0.16, scale: 1.22 }
       : { fill: 0xbec7b5, alpha: 0.12, scale: 1.04 });
     return enemy;
+  }
+
+  createLoreAnchor() {
+    const anchorConfig = COMPRESSION_VAULTS_LORE.anchor;
+
+    this.add.rectangle(anchorConfig.altarX, anchorConfig.wallPlateY, anchorConfig.wallPlateWidth, anchorConfig.wallPlateHeight, 0x091011, 0.88).setDepth(-13.94);
+    if (this.textures.exists(ASSET_KEYS.sector02Chamber02BackgroundCompressionVault)) {
+      this.add.image(anchorConfig.altarX, anchorConfig.wallPlateY, ASSET_KEYS.sector02Chamber02BackgroundCompressionVault)
+        .setDisplaySize(anchorConfig.wallPlateWidth + 32, anchorConfig.wallPlateHeight + 22)
+        .setTint(0x7f8b87)
+        .setAlpha(0.16)
+        .setDepth(-13.84);
+    }
+
+    this.add.rectangle(anchorConfig.muralX, WORLD.floorY - 96, anchorConfig.muralBackingWidth - 24, 188, 0x1a2324, 0.96).setDepth(-13.88);
+    this.add.rectangle(anchorConfig.muralX, anchorConfig.muralY, anchorConfig.muralWidth + 24, anchorConfig.muralHeight + 20, 0x161f1f, 0.94).setDepth(-13.72);
+    if (this.textures.exists(ASSET_KEYS.sector02Chamber02LoreImage)) {
+      this.add.image(anchorConfig.muralX, anchorConfig.muralY, ASSET_KEYS.sector02Chamber02LoreImage)
+        .setDisplaySize(anchorConfig.muralWidth, anchorConfig.muralHeight)
+        .setTint(0xd8e0d0)
+        .setAlpha(0.97)
+        .setDepth(-13.66);
+    } else {
+      this.add.text(anchorConfig.muralX, anchorConfig.muralY, 'COMPRESSION VAULTS\nLORE IMAGE FALLBACK', {
+        fontFamily: 'monospace', fontSize: '22px', color: '#d5dacd', align: 'center'
+      }).setOrigin(0.5).setDepth(-13.64);
+    }
+
+    this.add.rectangle(anchorConfig.altarX, anchorConfig.supportTopY, anchorConfig.supportWidth, anchorConfig.supportHeight, 0x111718, 0.96).setDepth(-6.22);
+    this.add.rectangle(anchorConfig.altarX, WORLD.floorY - 12, anchorConfig.supportWidth + 92, 18, 0x090b0c, 0.84).setDepth(-6.14);
+    this.add.ellipse(anchorConfig.altarX, WORLD.floorY - 18, anchorConfig.shadowWidth, 28, 0x263130, 0.18).setDepth(-6.12);
+    this.add.ellipse(anchorConfig.altarX, WORLD.floorY + 10, anchorConfig.shadowWidth + 176, 38, 0x020404, 0.34).setDepth(-6.04);
+
+    if (this.textures.exists(ASSET_KEYS.sector02Chamber02LoreAltar)) {
+      this.add.image(anchorConfig.altarX, anchorConfig.altarY, ASSET_KEYS.sector02Chamber02LoreAltar)
+        .setDisplaySize(anchorConfig.altarDisplayWidth, anchorConfig.altarDisplayHeight)
+        .setTint(0xc5d0c1)
+        .setAlpha(0.88)
+        .setDepth(-6.08);
+    } else {
+      this.add.ellipse(anchorConfig.altarX, anchorConfig.altarY + 6, 128, 132, 0x66706b, 0.76).setDepth(-6.08);
+    }
+
+    const zone = this.add.zone(anchorConfig.zoneX, anchorConfig.zoneY, anchorConfig.zoneWidth, anchorConfig.zoneHeight).setOrigin(0.5);
+    this.physics.add.existing(zone, true);
+
+    const prompt = this.add.text(anchorConfig.zoneX, anchorConfig.zoneY + anchorConfig.promptOffsetY, anchorConfig.label, {
+      fontFamily: 'monospace', fontSize: '14px', color: '#cfdbc9', align: 'center', stroke: '#0d1010', strokeThickness: 4
+    }).setOrigin(0.5).setDepth(-4.6).setAlpha(0.9).setVisible(false);
+
+    this.loreAnchor = { ...anchorConfig, zone, prompt };
   }
 
   createForwardThreshold() {
@@ -440,6 +593,9 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
       this.audioDirector?.shutdown();
+      this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+      this.enemyProjectiles.forEach((projectile) => projectile.destroy());
+      this.enemies.forEach((enemy) => enemy.projectileTelegraph?.destroy?.());
     });
   }
 
@@ -451,6 +607,10 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.hud.update(this.player.health, PLAYER.maxHealth);
   }
 
+  registerLoreEvents() {
+    this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+  }
+
   update(time) {
     const mobileInput = this.mobileControls.getInputState();
 
@@ -458,6 +618,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.mobileControls.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+      this.setEnemyProjectilesPaused(true);
 
       if ((Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) && !this.isRestartingRun) {
         this.isRestartingRun = true;
@@ -466,8 +627,17 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       return;
     }
 
+    if (this.isLoreTransitionActive) {
+      this.mobileControls.setMode('dialogue');
+      this.player.body.setVelocity(0, 0);
+      this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+      this.setEnemyProjectilesPaused(true);
+      return;
+    }
+
     this.restartText.setVisible(false);
     this.mobileControls.setMode('gameplay');
+    this.setEnemyProjectilesPaused(false);
 
     const input = {
       left: this.cursors.left.isDown || mobileInput.left,
@@ -480,6 +650,10 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.refreshEncounterPocketPresence();
     this.updateEncounterPockets(time);
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
+    this.updateEliteProjectileState(time);
+    this.enemyProjectiles.forEach((projectile) => projectile.update(time, this.game.loop.delta));
+    this.refreshLoreZonePresence();
+    this.tryBeginLoreSequence(mobileInput);
     this.refreshForwardThresholdPresence();
     this.tryAdvanceForwardThreshold(mobileInput);
     this.updateLabels(time);
@@ -542,6 +716,243 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     }
   }
 
+  updateEliteProjectileState(time) {
+    this.enemies.forEach((enemy) => {
+      if (!enemy.isElite || enemy.dead || !enemy.awakened || this.enemyProjectilesPaused) {
+        this.clearEliteProjectileState(enemy);
+        return;
+      }
+
+      this.updateEliteProjectileTelegraph(enemy, time);
+
+      if (enemy.projectileState === 'windup') {
+        enemy.body.setVelocityX(0);
+        if (time >= enemy.projectileFireAt) {
+          this.fireEliteProjectile(enemy, time);
+          enemy.projectileState = 'recover';
+          enemy.projectileRecoverUntil = time + enemy.projectileConfig.recoveryMs;
+          enemy.lastProjectileTime = time;
+        }
+        return;
+      }
+
+      if (enemy.projectileState === 'recover') {
+        enemy.body.setVelocityX(0);
+        if (time >= enemy.projectileRecoverUntil) {
+          this.clearEliteProjectileState(enemy);
+        }
+        return;
+      }
+
+      if (!this.canEliteFireProjectile(enemy, time)) {
+        return;
+      }
+
+      enemy.projectileState = 'windup';
+      enemy.projectileWindupStartedAt = time;
+      enemy.projectileFireAt = time + enemy.projectileConfig.windupMs;
+      enemy.body.setVelocityX(0);
+    });
+  }
+
+  canEliteFireProjectile(enemy, time) {
+    if (
+      enemy.projectileState !== 'idle' ||
+      enemy.combatState !== 'stalk' ||
+      time < enemy.lastProjectileTime + enemy.projectileConfig.cooldownMs ||
+      !enemy.body?.blocked?.down ||
+      !this.player?.sprite?.body?.enable
+    ) {
+      return false;
+    }
+
+    const dx = this.player.sprite.x - enemy.sprite.x;
+    const dy = this.player.sprite.y - enemy.sprite.y;
+    const absDx = Math.abs(dx);
+    enemy.direction = Math.sign(dx) || enemy.direction;
+
+    return absDx >= enemy.projectileConfig.minRange
+      && absDx <= enemy.projectileConfig.maxRange
+      && Math.abs(dy) <= enemy.projectileConfig.verticalTolerance;
+  }
+
+  fireEliteProjectile(enemy, time) {
+    const spawnX = enemy.sprite.x + enemy.direction * enemy.projectileConfig.spawnOffsetX;
+    const spawnY = enemy.sprite.y + enemy.projectileConfig.spawnOffsetY;
+    const target = new Phaser.Math.Vector2(
+      this.player.body?.center?.x ?? this.player.sprite.x,
+      (this.player.body?.center?.y ?? this.player.sprite.y) - ((this.player.body?.height ?? 0) * 0.18)
+    );
+    const velocity = target.subtract(new Phaser.Math.Vector2(spawnX, spawnY)).normalize().scale(enemy.projectileConfig.speed);
+
+    if (Number.isNaN(velocity.x) || Number.isNaN(velocity.y)) {
+      velocity.set(enemy.direction * enemy.projectileConfig.speed, 0);
+    }
+
+    this.spawnEnemyProjectile({
+      owner: enemy,
+      x: spawnX,
+      y: spawnY,
+      velocityX: velocity.x,
+      velocityY: velocity.y,
+      damage: enemy.projectileConfig.damage,
+      lifetimeMs: enemy.projectileConfig.lifetimeMs,
+      rotationSpeed: enemy.projectileConfig.rotationSpeed,
+      textureKey: ASSET_KEYS.sector02PressureShardProjectile,
+      tint: 0xd2e1c4,
+      depth: enemy.sprite.depth + 0.04
+    });
+
+    this.audioDirector?.playEnemyAttack(enemy.config.audioProfile ?? 'tollkeeper');
+    enemy.lastAttackTime = time;
+  }
+
+  clearEliteProjectileState(enemy) {
+    enemy.projectileState = 'idle';
+    enemy.projectileWindupStartedAt = -Infinity;
+    enemy.projectileFireAt = -Infinity;
+    enemy.projectileRecoverUntil = -Infinity;
+    enemy.projectileTelegraph?.setVisible(false);
+  }
+
+  updateEliteProjectileTelegraph(enemy, time) {
+    if (!enemy.projectileTelegraph) {
+      return;
+    }
+
+    if (enemy.projectileState !== 'windup' || enemy.dead) {
+      enemy.projectileTelegraph.setVisible(false);
+      return;
+    }
+
+    const progress = Phaser.Math.Clamp((time - enemy.projectileWindupStartedAt) / enemy.projectileConfig.windupMs, 0, 1);
+    const pulse = 1 + Math.sin(time / 40) * 0.08;
+    enemy.projectileTelegraph
+      .setVisible(true)
+      .setPosition(enemy.sprite.x + enemy.direction * 32, enemy.sprite.y + enemy.projectileConfig.spawnOffsetY)
+      .setScale(0.92 + progress * 0.22, pulse)
+      .setAlpha(0.12 + progress * 0.16)
+      .setAngle((time / 18) % 360);
+  }
+
+  refreshLoreZonePresence() {
+    this.currentLoreZone = null;
+
+    if (!this.loreAnchor || this.isLoreTransitionActive || this.hasCompletedLoreBeat) {
+      this.loreAnchor?.prompt?.setVisible(false);
+      return;
+    }
+
+    let isInside = false;
+    this.physics.overlap(this.player.sprite, this.loreAnchor.zone, () => {
+      isInside = true;
+      this.currentLoreZone = this.loreAnchor;
+    });
+    this.loreAnchor.prompt?.setVisible(isInside);
+  }
+
+  tryBeginLoreSequence(mobileInput) {
+    if (!this.currentLoreZone) {
+      return;
+    }
+
+    const interactPressed = Phaser.Input.Keyboard.JustDown(this.keyInteract) || Phaser.Input.Keyboard.JustDown(this.keyEnter) || mobileInput.interactPressed;
+    if (!interactPressed) {
+      return;
+    }
+
+    this.beginLoreSequence();
+  }
+
+  beginLoreSequence() {
+    if (this.isLoreTransitionActive) {
+      return;
+    }
+
+    this.isLoreTransitionActive = true;
+    this.currentLoreZone = null;
+    this.loreAnchor?.prompt?.setVisible(false);
+    this.mobileControls.setMode('dialogue');
+    this.player.body.setVelocity(0, 0);
+    this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+    this.setEnemyProjectilesPaused(true);
+    this.audioDirector?.stopAmbientLoop();
+    this.hud?.setVisible(false);
+    this.mobileControls.setMode('init');
+    this.uiCamera?.setVisible(false);
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.setGameplaySceneVisibility(false);
+      this.scene.pause();
+      this.scene.launch('LoreCutsceneScene', {
+        cutsceneId: COMPRESSION_VAULTS_LORE.cutsceneId,
+        returnSceneKey: this.scene.key
+      });
+    });
+
+    this.cameras.main.fadeOut(420, 0, 0, 0);
+  }
+
+  handleLoreCutsceneComplete({ cutsceneId } = {}) {
+    if (cutsceneId !== COMPRESSION_VAULTS_LORE.cutsceneId) {
+      return;
+    }
+
+    this.hasCompletedLoreBeat = true;
+    this.resumeFromLore();
+  }
+
+  resumeFromLore() {
+    this.isLoreTransitionActive = false;
+    this.setGameplaySceneVisibility(true);
+    this.applyResponsiveLayout();
+    this.mobileControls.setMode('gameplay');
+    this.hud?.setVisible(true);
+    this.uiCamera?.setVisible(true);
+    this.setEnemyProjectilesPaused(false);
+    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.11 });
+    this.cameras.main.fadeIn(500, 0, 0, 0);
+  }
+
+  setGameplaySceneVisibility(isVisible) {
+    this.scene.setVisible(isVisible, this.scene.key);
+  }
+
+  setEnemyProjectilesPaused(paused) {
+    this.enemyProjectilesPaused = paused;
+    this.enemyProjectiles.forEach((projectile) => {
+      if (!projectile.active) {
+        return;
+      }
+
+      if (paused) {
+        projectile.pauseMotion();
+      } else {
+        projectile.resumeMotion();
+      }
+    });
+  }
+
+  handleEnemyProjectileHit(projectileSprite) {
+    const projectile = this.enemyProjectiles.find((entry) => entry.sprite === projectileSprite || projectileSprite?.gameObject === entry.sprite);
+    if (!projectile?.active || projectile.inImpact || !this.player?.sprite?.body?.enable) {
+      return;
+    }
+
+    const impactX = Phaser.Math.Clamp(this.player.body.center.x, this.player.body.left + 8, this.player.body.right - 8);
+    const impactY = this.player.body.center.y - this.player.body.height * 0.1;
+    const damage = projectile.damage ?? COMPRESSION_VAULTS_ELITE_PROJECTILE.damage;
+    const tookDamage = this.player.receiveDamage(damage, this.time.now);
+    projectile.playImpact(impactX, impactY);
+    if (!tookDamage) {
+      return;
+    }
+
+    const knockDirection = Math.sign(this.player.sprite.x - projectile.sprite.x) || 1;
+    this.player.body.setVelocityX(knockDirection * 210);
+    this.player.body.setVelocityY(-196);
+  }
+
   handlePlayerHitEnemy(_attackZone, enemySprite, enemy) {
     if (!this.player.attackActive || enemy.dead || !this.isEnemyOverlapTarget(enemySprite, enemy)) {
       return;
@@ -555,6 +966,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
     enemy.setHitReactionDirection(knockDirection);
     enemy.takeDamage(1, this.time.now);
+    this.clearEliteProjectileState(enemy);
     this.audioDirector?.playPlayerHit();
   }
 
@@ -580,6 +992,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
 
   unlockForwardPath() {
     this.hasUnlockedForwardPath = true;
+    this.enemyProjectiles.forEach((projectile) => projectile.destroyProjectile());
     this.forwardBarrier?.setAlpha(0.08);
     this.forwardBarrier?.setFillStyle(0x8ca284, 0.08);
     if (this.forwardBarrier?.body) {
@@ -626,8 +1039,9 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
 
   updateLabels(time) {
     const completionBoost = this.hasUnlockedForwardPath ? 0.12 : 0;
-    this.footholdLabel?.setAlpha(0.68 + (Math.sin(time / 520) + 1) * 0.04 + completionBoost);
-    this.processionalLabel?.setAlpha(0.72 + (Math.sin(time / 640) + 1) * 0.035 + completionBoost * 0.65);
+    const loreBoost = this.hasCompletedLoreBeat ? 0.08 : 0;
+    this.footholdLabel?.setAlpha(0.68 + (Math.sin(time / 520) + 1) * 0.04 + completionBoost + loreBoost * 0.5);
+    this.processionalLabel?.setAlpha(0.72 + (Math.sin(time / 640) + 1) * 0.035 + completionBoost * 0.65 + loreBoost * 0.45);
   }
 
   createInvisiblePlatform(x, y, width, height) {
@@ -639,6 +1053,10 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
   }
 
   handleDevWarp() {
+    if (this.scene.isActive('LoreCutsceneScene')) {
+      return;
+    }
+
     this.cleanupSceneUi?.();
     this.audioDirector?.shutdown();
     this.scene.start('Sector02Chamber02Scene', { devWarp: true, source: this.scene.key });
@@ -648,6 +1066,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.hud?.setBossBarState({ visible: false });
     this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
+    this.enemyProjectiles.forEach((projectile) => projectile.destroyProjectile());
   }
 
   setupMobileUiCamera() {
