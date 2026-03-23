@@ -18,7 +18,7 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Sector 1 now has a real Chamber 3, a separate boss arena, a playable boss flow, a payoff path, and a forward progression contract.
 - Known remaining Chamber 3 issues are real, but they are now secondary polish debt rather than the main blocker.
 - The next best step is **not** more Chamber 3 rescue.
-- The next best step is **Milestone 6: Bucket 2 foothold / Cosmic Garden start**.
+- The next best step is **Milestone 6: Bucket 2 foothold / The Black Aqueduct start**.
 
 ## What Works Now
 - Start/title flow into Chamber 01 and death/restart loop.
@@ -38,11 +38,12 @@ Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbol
 - Additional audiovisual cleanup remains worthwhile later, but it should not block Bucket 2 work.
 
 ## Active Milestone
-**Milestone 6 — Bucket 2 Foothold / Cosmic Garden Start: active.**
+**Milestone 6 — Bucket 2 Foothold / The Black Aqueduct Start: active.**
 
 ### Immediate Best Next Step
 - Establish the first safe continuation beyond Sector 1.
-- Build the initial Bucket 2 / Cosmic Garden arrival foothold.
+- Build the initial Bucket 2 / The Black Aqueduct foothold as a canal/transit/infrastructure zone rather than a garden biome.
+- Use black reflective liquid, necro-industrial canals, monumental gates/sluices, and oppressive symmetry as the current art-direction baseline.
 - Preserve the now-working Sector 1 progression contract while opening the next area.
 
 ## Lessons Learned to Preserve

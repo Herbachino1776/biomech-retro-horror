@@ -33,8 +33,10 @@ Milestone 5 is now considered **complete / closed out in a first-pass sense**.
 
 ### Milestone 6 Direction
 - Establish the first safe continuation beyond Sector 1.
-- Begin Bucket 2 through a **Cosmic Garden** arrival / foothold pass.
-- Prove progression beyond the Sector 1 finale without destabilizing the shipped Sector 1 arc.
+- Begin Bucket 2 through **The Black Aqueduct** as the next area start and foothold pass.
+- Define Bucket 2 as a canal/transit/system-infrastructure zone: black reflective liquid, monumental gates and sluices, severe symmetry, and oppressive empty scale.
+- Move the project forward from palace/judgment interior into the transit infrastructure of recurrence without destabilizing the shipped Sector 1 arc.
+- Build Sector 2 Chamber 1 from the established Chamber 3 blueprint, with new chamber-specific backgrounds, enemies, lore altar/trigger art, lore image, lore text, and gate/progression art.
 - Carry forward the lessons from Chamber 3: bootstrap before spectacle, preserve stable transition wiring, and expand in milestone-safe slices.
 
 ## Do Not Change Casually

@@ -62,11 +62,11 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 **Status:** completed enough to close.
 **Completion Notes:** Chamber 3 finally landed once the scene handoff contract was fixed: `Chamber03Scene` registration was restored, Chamber 02's unlocked exit gate was wired to start `Chamber03Scene`, and the work stopped treating Chamber 3 boot failure as a chamber-internal problem first. Sector 1 now has a playable Chamber 03, a separate boss arena, and a real finale/progression contract, with remaining debt reclassified as polish.
 
-## Milestone 6 — Bucket 2 Foothold / Cosmic Garden Start
+## Milestone 6 — Bucket 2 Foothold / The Black Aqueduct Start
 **Purpose:** prove safe forward progression beyond Sector 1.
-**Scope / Includes:** Bucket 2 foothold, Cosmic Garden arrival, and the first stable continuation after the Sector 1 finale.
-**Acceptance Criteria:** the game clearly continues beyond Sector 1 into a recognizable Bucket 2 starting state without destabilizing the existing arc.
+**Scope / Includes:** Bucket 2 foothold, The Black Aqueduct start, and the first stable continuation after the Sector 1 finale.
+**Acceptance Criteria:** the game clearly continues beyond Sector 1 into a recognizable Black Aqueduct starting state without destabilizing the existing arc.
 **Dependencies:** Milestone 5 closed in a first-pass sense.
 **Do Not Expand Prematurely:** broad Bucket 2 overbuild, unrelated system expansion, or reopening Chamber 3 rescue as the default task.
 **Status:** active next milestone.
-**Planning Notes:** carry forward the Chamber 3 lessons—bootstrap before spectacle, fix scene-flow contracts before deep content patching, and build the next area in milestone-safe slices rather than another giant one-pass chamber attempt.
+**Planning Notes:** treat Bucket 2 as the transit infrastructure of recurrence—channels, sluices, gates, basins, conveyance, and soul-transit rather than a nature/garden zone. Sector 2 Chamber 1 should follow the Chamber 3 blueprint with new chamber-specific backgrounds, enemies, lore altar/trigger art, lore image, lore text, and gate/progression art. Carry forward the Chamber 3 lessons—bootstrap before spectacle, fix scene-flow contracts before deep content patching, and build the next area in milestone-safe slices rather than another giant one-pass chamber attempt.
