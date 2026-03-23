@@ -1315,9 +1315,20 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     }
 
     this.hasTriggeredForwardContract = true;
-    this.forwardPrompt?.setVisible(true).setText('DESCENT MARKED\nCHAMBER 3 GATE CONSECRATED');
-    this.processionalLabel?.setText('CRUCIBLE GATE OPEN\nCHAMBER 3 AWAITS BEYOND');
+    this.forwardPrompt?.setVisible(true).setText('DESCENT MARKED\nENTERING THE KILN OF JUDGEMENT');
+    this.processionalLabel?.setText('CRUCIBLE GATE OPEN\nKILN OF JUDGEMENT AWAITS');
     this.forwardBarrier?.setAlpha(0.04);
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.cleanupSceneUi?.();
+      this.audioDirector?.shutdown();
+      this.scene.start('Sector02Chamber03Scene', {
+        fromScene: this.scene.key,
+        fromGate: 'compression-vaults-threshold'
+      });
+    });
+
+    this.cameras.main.fadeOut(320, 0, 0, 0);
   }
 
   updateLabels(time) {

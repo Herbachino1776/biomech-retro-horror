@@ -1,5 +1,6 @@
 import sector02Chamber01LoreTextRaw from '../../art/raw/sector02/chamber01/sector02_chamber01_lore_text_01.txt?raw';
 import sector02Chamber02LoreTextRaw from '../../art/raw/sector02/chamber02/sector02_chamber02_lore_text_01.txt?raw';
+import sector02Chamber03LoreTextRaw from '../../art/raw/sector02/chamber03/sector02_chamber03_lore_text_01.txt?raw';
 import { ASSET_KEYS } from './assetKeys.js';
 
 
@@ -9,6 +10,11 @@ const sector02Chamber01LoreBody = sector02Chamber01LoreTextRaw
   .filter(Boolean);
 
 const sector02Chamber02LoreBody = sector02Chamber02LoreTextRaw
+  .split(/\n\s*\n/g)
+  .map((paragraph) => paragraph.trim())
+  .filter(Boolean);
+
+const sector02Chamber03LoreBody = sector02Chamber03LoreTextRaw
   .split(/\n\s*\n/g)
   .map((paragraph) => paragraph.trim())
   .filter(Boolean);
@@ -120,6 +126,37 @@ export const LORE_CUTSCENES = {
         shakeX: 2,
         shakeY: 2,
         shakeDuration: 3200
+      }
+    }
+  },
+  'sector02-chamber03-kiln-altar': {
+    id: 'sector02-chamber03-kiln-altar',
+    imageKey: ASSET_KEYS.sector02Chamber03LoreImage,
+    title: 'SECTOR 02 // KILN OF JUDGEMENT',
+    body: sector02Chamber03LoreBody.length > 0
+      ? sector02Chamber03LoreBody
+      : [
+        'The banisher does not feed on heat alone. It requires a grief that keeps returning.',
+        'Beneath the kiln, sorrow is refined until the chamber can call it cleanliness.',
+        'The altar records a judgment engine that stays pure by making something below it suffer.'
+      ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xb7b499,
+      titleColor: '#9eb48a',
+      bodyColor: '#d9cdb9',
+      promptColor: '#8ca46f',
+      imageTint: 0xd9d7c5,
+      imageAlpha: 0.96,
+      backgroundColor: '#000000',
+      motion: {
+        panX: 10,
+        panY: -8,
+        zoom: 1.03,
+        duration: 9000,
+        shakeX: 2,
+        shakeY: 2,
+        shakeDuration: 3400
       }
     }
   },
