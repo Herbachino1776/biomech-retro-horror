@@ -1,43 +1,49 @@
 import Phaser from 'phaser';
 
 const REGULAR_PROFILE = {
-  ringWidth: 54,
-  ringHeight: 19,
-  ringAlpha: 0.21,
-  bloodCount: 24,
-  tarCount: 10,
-  mistCount: 6,
-  bloodWidth: [2, 4],
-  bloodHeight: [4, 8],
-  tarWidth: [1, 3],
-  tarHeight: [3, 6],
-  mistWidth: [10, 18],
-  mistHeight: [5, 10],
-  burstRadiusX: 58,
-  burstRadiusY: 30,
-  bloodLift: [22, 44],
-  tarLift: [14, 30],
-  mistLift: [10, 20],
-  durationMs: 420,
-  durationJitterMs: 80,
+  ringWidth: 70,
+  ringHeight: 24,
+  ringAlpha: 0.24,
+  bloodCount: 34,
+  tarCount: 15,
+  mistCount: 10,
+  bloodWidth: [2, 5],
+  bloodHeight: [5, 10],
+  tarWidth: [2, 4],
+  tarHeight: [4, 8],
+  mistWidth: [12, 22],
+  mistHeight: [6, 12],
+  burstRadiusX: 76,
+  burstRadiusY: 42,
+  bloodLift: [30, 60],
+  tarLift: [20, 42],
+  mistLift: [12, 28],
+  durationMs: 560,
+  durationJitterMs: 110,
   depthOffset: 0.14
 };
 
 const ELITE_PROFILE = {
   ...REGULAR_PROFILE,
-  ringWidth: 74,
-  ringHeight: 24,
-  ringAlpha: 0.24,
-  bloodCount: 36,
-  tarCount: 16,
-  mistCount: 9,
-  burstRadiusX: 78,
-  burstRadiusY: 42,
-  bloodLift: [28, 60],
-  tarLift: [18, 42],
-  mistLift: [12, 28],
-  durationMs: 500,
-  durationJitterMs: 100
+  ringWidth: 92,
+  ringHeight: 30,
+  ringAlpha: 0.28,
+  bloodCount: 52,
+  tarCount: 24,
+  mistCount: 16,
+  bloodWidth: [3, 6],
+  bloodHeight: [6, 12],
+  tarWidth: [2, 5],
+  tarHeight: [5, 10],
+  mistWidth: [15, 28],
+  mistHeight: [8, 15],
+  burstRadiusX: 110,
+  burstRadiusY: 58,
+  bloodLift: [40, 84],
+  tarLift: [26, 56],
+  mistLift: [16, 36],
+  durationMs: 680,
+  durationJitterMs: 130
 };
 
 const COLORS = {
@@ -55,16 +61,17 @@ function spawnBurstParticle(scene, centerX, centerY, baseDepth, profile, {
   liftRange,
   alpha,
   color,
-  xMultiplier = 0.14,
-  angleRange = 54,
+  xMultiplier = 0.2,
+  xTravelMultiplier = 1.22,
+  angleRange = 72,
   depthStep = 0
 }) {
   const offsetX = Phaser.Math.Between(-profile.burstRadiusX, profile.burstRadiusX);
-  const driftY = Phaser.Math.Between(-profile.burstRadiusY * 0.2, profile.burstRadiusY * 0.16);
+  const driftY = Phaser.Math.Between(-profile.burstRadiusY * 0.34, profile.burstRadiusY * 0.1);
   const particle = scene.add
     .ellipse(
       centerX + offsetX * xMultiplier,
-      centerY + Phaser.Math.Between(-4, 6),
+      centerY + Phaser.Math.Between(-6, 4),
       Phaser.Math.Between(widthRange[0], widthRange[1]),
       Phaser.Math.Between(heightRange[0], heightRange[1]),
       color,
@@ -74,7 +81,7 @@ function spawnBurstParticle(scene, centerX, centerY, baseDepth, profile, {
 
   scene.tweens.add({
     targets: particle,
-    x: centerX + offsetX,
+    x: centerX + offsetX * xTravelMultiplier,
     y: centerY - Phaser.Math.Between(liftRange[0], liftRange[1]) + driftY,
     alpha: 0,
     angle: Phaser.Math.Between(-angleRange, angleRange),
@@ -95,15 +102,15 @@ export function triggerEnemyDeathRuptureBurst(scene, { x, y, depth = 6, isElite 
 
   const releaseRing = scene.add
     .ellipse(centerX, centerY + 2, profile.ringWidth, profile.ringHeight, COLORS.bloodA, profile.ringAlpha)
-    .setStrokeStyle(1, COLORS.tarA, 0.26)
+    .setStrokeStyle(1, COLORS.tarA, 0.3)
     .setDepth(depth + profile.depthOffset - 0.01);
 
   scene.tweens.add({
     targets: releaseRing,
-    scaleX: 1.85,
-    scaleY: 1.25,
+    scaleX: 2.05,
+    scaleY: 1.36,
     alpha: 0,
-    duration: profile.durationMs,
+    duration: profile.durationMs + 120,
     ease: 'Quad.easeOut',
     onComplete: () => releaseRing.destroy()
   });
@@ -113,10 +120,11 @@ export function triggerEnemyDeathRuptureBurst(scene, { x, y, depth = 6, isElite 
       widthRange: profile.bloodWidth,
       heightRange: profile.bloodHeight,
       liftRange: profile.bloodLift,
-      alpha: 0.92,
+      alpha: 0.94,
       color: index % 5 === 0 ? COLORS.bloodSpec : index % 3 === 0 ? COLORS.bloodB : COLORS.bloodA,
-      xMultiplier: 0.1,
-      angleRange: 70,
+      xMultiplier: 0.16,
+      xTravelMultiplier: 1.32,
+      angleRange: 86,
       depthStep: index * 0.0008
     });
   }
@@ -126,10 +134,11 @@ export function triggerEnemyDeathRuptureBurst(scene, { x, y, depth = 6, isElite 
       widthRange: profile.tarWidth,
       heightRange: profile.tarHeight,
       liftRange: profile.tarLift,
-      alpha: 0.88,
+      alpha: 0.9,
       color: index % 2 === 0 ? COLORS.tarA : COLORS.tarB,
-      xMultiplier: 0.12,
-      angleRange: 42,
+      xMultiplier: 0.18,
+      xTravelMultiplier: 1.28,
+      angleRange: 58,
       depthStep: 0.04 + index * 0.001
     });
   }
@@ -139,10 +148,11 @@ export function triggerEnemyDeathRuptureBurst(scene, { x, y, depth = 6, isElite 
       widthRange: profile.mistWidth,
       heightRange: profile.mistHeight,
       liftRange: profile.mistLift,
-      alpha: 0.2,
+      alpha: 0.24,
       color: COLORS.mist,
-      xMultiplier: 0.09,
-      angleRange: 28,
+      xMultiplier: 0.14,
+      xTravelMultiplier: 1.14,
+      angleRange: 34,
       depthStep: 0.02 + index * 0.001
     });
   }
