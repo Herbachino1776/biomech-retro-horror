@@ -58,7 +58,7 @@ const KILN_SKITTER_BASIC_01 = {
   patrolDistance: 104,
   presentation: {
     alpha: 0.97,
-    display: { width: 184, height: 150 },
+    display: { width: 178, height: 148 },
     origin: { x: 0.52, y: 0.92 },
     stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 }
   },
@@ -79,7 +79,7 @@ const KILN_SKITTER_BASIC_02 = {
   patrolDistance: 118,
   presentation: {
     ...KILN_SKITTER_BASIC_01.presentation,
-    display: { width: 188, height: 154 }
+    display: { width: 186, height: 152 }
   },
   eyeGlowColor: 0xe6dfb6
 };
@@ -108,7 +108,7 @@ const KILN_SKITTER_ELITE = {
   body: { width: 74, height: 44, offsetX: 28, offsetY: 90 },
   presentation: {
     alpha: 0.98,
-    display: { width: 296, height: 230 },
+    display: { width: 292, height: 226 },
     origin: { x: 0.52, y: 0.965 },
     stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.46 }
   },
