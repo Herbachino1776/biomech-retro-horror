@@ -1,31 +1,45 @@
 export class HudOverlay {
   constructor(scene) {
     this.scene = scene;
-    this.frame = scene.add.rectangle(16, 16, 220, 62, 0x0f1313, 0.84).setOrigin(0).setScrollFactor(0).setDepth(30);
-    this.frame.setStrokeStyle(2, 0x64453a, 0.92);
+    this.integritySegments = [];
+    this.integritySegmentGeometry = {
+      count: 5,
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      gap: 0
+    };
+
+    this.frame = scene.add.rectangle(16, 16, 220, 66, 0x0e1212, 0.9).setOrigin(0).setScrollFactor(0).setDepth(30);
+    this.frame.setStrokeStyle(2, 0x6f5247, 0.9);
+
     this.frameBacking = scene.add
-      .rectangle(0, 0, 0, 0, 0x090807, 0.28)
+      .rectangle(0, 0, 0, 0, 0x070707, 0.44)
       .setOrigin(0)
       .setScrollFactor(0)
       .setDepth(29.5);
 
     this.healthLabel = scene.add
-      .text(30, 28, 'VESSEL INTEGRITY', {
+      .text(30, 26, 'VESSEL INTEGRITY', {
         fontFamily: 'monospace',
         fontSize: '12px',
-        color: '#8f7d72'
+        color: '#b59f8f'
       })
       .setScrollFactor(0)
       .setDepth(31);
 
-    this.healthValue = scene.add
-      .text(30, 44, '5 / 5', {
-        fontFamily: 'monospace',
-        fontSize: '18px',
-        color: '#d2c2ac'
-      })
+    this.integrityBarUnderlay = scene.add
+      .rectangle(0, 0, 0, 0, 0x14100f, 0.95)
+      .setOrigin(0)
       .setScrollFactor(0)
-      .setDepth(31);
+      .setDepth(30.5);
+
+    this.integrityBarPlate = scene.add
+      .rectangle(0, 0, 0, 0, 0x0a0b0b, 0.84)
+      .setOrigin(0)
+      .setScrollFactor(0)
+      .setDepth(30.75);
 
     this.bossBarFrame = scene.add.rectangle(0, 0, 0, 0, 0x090807, 0.86).setScrollFactor(0).setDepth(66).setVisible(false);
     this.bossBarFrame.setStrokeStyle(2, 0x6b5647, 0.9);
@@ -61,7 +75,8 @@ export class HudOverlay {
       this.frameBacking,
       this.frame,
       this.healthLabel,
-      this.healthValue,
+      this.integrityBarUnderlay,
+      this.integrityBarPlate,
       this.bossBarFrame,
       this.bossBarUnderlay,
       this.bossTelegraph,
@@ -89,6 +104,23 @@ export class HudOverlay {
     return Number.isFinite(parsed) ? parsed : 0;
   }
 
+  ensureIntegritySegments(count) {
+    while (this.integritySegments.length < count) {
+      const segment = this.scene.add.rectangle(0, 0, 0, 0, 0x2f2724, 1).setOrigin(0).setScrollFactor(0).setDepth(31);
+      this.integritySegments.push(segment);
+      this.elements.push(segment);
+    }
+
+    while (this.integritySegments.length > count) {
+      const segment = this.integritySegments.pop();
+      const index = this.elements.indexOf(segment);
+      if (index >= 0) {
+        this.elements.splice(index, 1);
+      }
+      segment.destroy();
+    }
+  }
+
   layout() {
     const width = this.scene.scale.width;
     const height = this.scene.scale.height;
@@ -96,13 +128,12 @@ export class HudOverlay {
     const safeAreaTop = this.getSafeAreaInsetPx('top');
     const safeAreaBottom = this.getSafeAreaInsetPx('bottom');
 
-    const frameX = isPortrait ? 12 : 16;
+    const frameX = isPortrait ? 10 : 16;
     const frameY = safeAreaTop + (isPortrait ? 10 : 14);
-    const frameWidth = Math.min(width - frameX * 2, isPortrait ? 176 : 220);
-    const frameHeight = isPortrait ? 50 : 62;
-    const healthLabelX = frameX + (isPortrait ? 12 : 14);
-    const healthLabelY = frameY + (isPortrait ? 9 : 12);
-    const healthValueY = frameY + (isPortrait ? 24 : 30);
+    const frameWidth = Math.min(width - frameX * 2, isPortrait ? 188 : 238);
+    const frameHeight = isPortrait ? 56 : 66;
+    const labelX = frameX + (isPortrait ? 12 : 14);
+    const labelY = frameY + (isPortrait ? 8 : 11);
 
     if (this.frame.setDisplaySize) {
       this.frame.setPosition(frameX, frameY).setDisplaySize(frameWidth, frameHeight);
@@ -110,13 +141,34 @@ export class HudOverlay {
       this.frame.setPosition(frameX, frameY).setSize(frameWidth, frameHeight);
     }
 
-    this.frameBacking.setPosition(frameX + 5, frameY + 5).setSize(frameWidth - 10, frameHeight - 10);
-    this.healthLabel
-      .setPosition(healthLabelX, healthLabelY)
-      .setFontSize(isPortrait ? '10px' : '12px');
-    this.healthValue
-      .setPosition(healthLabelX, healthValueY)
-      .setFontSize(isPortrait ? '15px' : '18px');
+    this.frameBacking.setPosition(frameX + 4, frameY + 4).setSize(frameWidth - 8, frameHeight - 8);
+    this.healthLabel.setPosition(labelX, labelY).setFontSize(isPortrait ? '10px' : '12px');
+
+    const barX = frameX + (isPortrait ? 11 : 14);
+    const barY = frameY + (isPortrait ? 28 : 34);
+    const barWidth = frameWidth - (isPortrait ? 22 : 28);
+    const barHeight = isPortrait ? 16 : 18;
+
+    this.integrityBarUnderlay.setPosition(barX - 1, barY - 1).setSize(barWidth + 2, barHeight + 2);
+    this.integrityBarPlate.setPosition(barX, barY).setSize(barWidth, barHeight);
+
+    const segmentCount = this.integritySegmentGeometry.count;
+    const gap = isPortrait ? 3 : 4;
+    const segmentWidth = Math.max(8, (barWidth - gap * (segmentCount - 1)) / segmentCount);
+    this.integritySegmentGeometry = {
+      count: segmentCount,
+      x: barX,
+      y: barY,
+      width: segmentWidth,
+      height: barHeight,
+      gap
+    };
+
+    this.ensureIntegritySegments(segmentCount);
+    this.integritySegments.forEach((segment, index) => {
+      const segmentX = barX + index * (segmentWidth + gap);
+      segment.setPosition(segmentX, barY).setSize(segmentWidth, barHeight);
+    });
 
     const frameWidthBoss = Math.min(width - (isPortrait ? 24 : 36), isPortrait ? 232 : 520);
     const frameHeightBoss = isPortrait ? 26 : 52;
@@ -143,7 +195,19 @@ export class HudOverlay {
   }
 
   update(current, max) {
-    this.healthValue.setText(`${Math.max(current, 0)} / ${max}`);
+    const safeMax = Math.max(1, Math.round(max));
+    const clampedCurrent = Math.max(0, Math.min(safeMax, Math.round(current)));
+
+    if (safeMax !== this.integritySegmentGeometry.count) {
+      this.integritySegmentGeometry.count = safeMax;
+      this.layout();
+    }
+
+    this.integritySegments.forEach((segment, index) => {
+      const filled = index < clampedCurrent;
+      segment.setFillStyle(filled ? 0xa68868 : 0x2f2724, filled ? 1 : 0.84);
+      segment.setStrokeStyle(1, filled ? 0xdbc8ab : 0x59493f, filled ? 0.66 : 0.5);
+    });
   }
 
   setBossBarState({ visible, name = '', subtitle = '', current = 0, max = 1, telegraph = 0, wounded = false } = {}) {
@@ -172,7 +236,7 @@ export class HudOverlay {
 
   setVisible(visible) {
     const uiVisible = Boolean(visible);
-    [this.frameBacking, this.frame, this.healthLabel, this.healthValue].forEach((element) => {
+    [this.frameBacking, this.frame, this.healthLabel, this.integrityBarUnderlay, this.integrityBarPlate, ...this.integritySegments].forEach((element) => {
       element.setVisible(uiVisible);
     });
     [this.bossBarFrame, this.bossBarUnderlay, this.bossTelegraph, this.bossBarFill, this.bossNamePlate, this.bossName, this.bossSubtitle].forEach((element) => {

@@ -2,12 +2,15 @@ import Phaser from 'phaser';
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { getNormalizedDisplaySize, getNormalizedOrigin, getNormalizedYOffset } from '../systems/conceptSpriteNormalizer.js';
+import { vesselIntegrityState } from '../systems/VesselIntegrityState.js';
 
 export class Player {
   constructor(scene, x, y, config) {
     this.scene = scene;
     this.config = config;
-    this.health = config.maxHealth;
+    const integritySnapshot = vesselIntegrityState.getIntegritySnapshot();
+    this.maxHealth = integritySnapshot.max;
+    this.health = integritySnapshot.current;
     this.facing = 1;
     this.attackActive = false;
     this.attackPhase = 'idle';
@@ -149,7 +152,7 @@ export class Player {
       return false;
     }
 
-    this.health -= amount;
+    this.damage(amount);
     this.lastHitTime = time;
 
     this.scene.audioDirector?.playPlayerHurt();
@@ -159,6 +162,38 @@ export class Player {
     }
 
     return true;
+  }
+
+  damage(amount = 1) {
+    const next = vesselIntegrityState.damage(amount);
+    this.health = next.current;
+    this.maxHealth = next.max;
+    return this.health;
+  }
+
+  heal(amount = 1) {
+    const next = vesselIntegrityState.heal(amount);
+    this.health = next.current;
+    this.maxHealth = next.max;
+    return this.health;
+  }
+
+  partialRestore(amount = 1) {
+    return this.heal(amount);
+  }
+
+  fullRestore() {
+    const next = vesselIntegrityState.fullRestore();
+    this.health = next.current;
+    this.maxHealth = next.max;
+    return this.health;
+  }
+
+  setMaxIntegrity(amount) {
+    const next = vesselIntegrityState.setMaxIntegrity(amount);
+    this.health = next.current;
+    this.maxHealth = next.max;
+    return this.maxHealth;
   }
 
   die() {

@@ -796,7 +796,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.scale.on('resize', this.applyResponsiveLayout, this);
     this.applyResponsiveLayout();
     this.mobileControls.setMode('gameplay');
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   update(time) {
@@ -842,7 +842,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.refreshBossThresholdPresence();
     this.tryBeginBossArenaTransition(mobileInput);
     this.updateBossThresholdAura(time);
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   refreshEncounterPocketPresence() {
