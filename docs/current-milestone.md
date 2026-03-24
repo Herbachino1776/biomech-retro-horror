@@ -1,49 +1,37 @@
 # Current Milestone
 
 ## Current Project State
-The project has now completed **Milestone 5: Content Expansion** enough to close in a first-pass sense.
-Sector 1 now has a functionally complete Chamber 03 path, a separate boss arena, and a real sector-finale progression contract. Some polish debt remains, but it is no longer the main blocker to forward progress.
+- **Milestone 5 (Sector 1 Content Expansion) is closed** in first-pass terms.
+- **Milestone 6 (Bucket 2 / Sector 2: The Black Aqueduct) has progressed far beyond foothold status**.
+- Sector 2 now has a playable Chamber 1 -> Chamber 2 -> Chamber 3 arc, with a real chamber boss payoff in Chamber 3.
 
-## What Is Currently Working
-- Boot/title flow reliably enters the Chamber 01 -> Chamber 02 -> Chamber 03 progression arc.
-- Core player loop works: movement, jump, attack, damage, death, footsteps, and full restart/reset.
-- Chamber 01 baseline encounter, lore, miniboss, and gate-release flow remain stable.
-- Chamber 02 enemy encounters, shrine/cutscene flow, TOLL-KEEPER gate unlock, and onward threshold remain active.
-- Chamber 03 now works as a real playable chamber rather than a bootstrap-only room.
-- Chamber 03 progression now reaches a separate boss arena through the intended finale handoff.
-- Sector 1 now has a real Chamber 03 payoff flow and a first sector finale instead of stopping before consequence.
-- Chamber 01, Chamber 02, Chamber 03, and the sector-finale path all preserve mobile controls, desktop keyboard support, and base-path-safe deployment behavior.
+## What Is Working in the Current Build
+- Sector 1 progression is live: Chamber 01 -> Chamber 02 -> Chamber 03 -> separate boss arena finale.
+- Sector 2 progression is live: Black Aqueduct Intake -> Compression Vaults -> Kiln of Judgement.
+- Sector 2 boss/completion contract is live in Chamber 3 through The Sorrow Engine flow.
+- Sector 2 lore cutscene usage is live across the arc and tied into chamber progression gates.
+- Projectile combat tech is live and reusable (enemy projectile spawn/update/hit contract runs in Sector 2).
+- Black Oil / Tar-laced Blood kill-payoff language is implemented and used in Sector 2 combat outcomes.
 
-## Milestone 5 Closeout Status
-Milestone 5 is now considered **complete / closed out in a first-pass sense**.
+## Active Focus (Explicit)
+**Active focus is Sector 2 stabilization/polish wrap + documentation hardening (not a new foothold build).**
 
-### Milestone 5 Closeout Rationale
-- Chamber 3 / Sector 1 content expansion is now functionally complete enough that the next meaningful work is beyond Sector 1, not more Chamber 3 rescue.
-- The Chamber 02 -> Chamber 03 handoff contract is live, Chamber 03 is registered in the active scene flow, and the finale path now reaches a separate boss arena.
-- Sector 1 now has the intended consequence chain: Chamber 03, boss flow, sector-finale payoff, and forward progression contract.
-- Remaining Chamber 3 issues are polish debt, not a blocker to opening Bucket 2 work.
+Rationale:
+- Sector 2 now exists as a full prototype arc, so the highest leverage work is consistency, regression prevention, and cleanup.
+- The current risk is not missing core rooms; it is re-breaking hard-won contracts (handoffs, viewport behavior, projectile damage contract, shared enemy grounding).
+- Sector 3 planning can run in parallel at pre-production level, but should not displace current stabilization.
 
-## Known Remaining Rough Edges (Non-Blocking)
-- Chamber 3 and the boss finale still have presentation and pacing polish debt.
-- Sector 1 can still benefit from encounter tuning, readability cleanup, and audiovisual refinement.
-- Closing Milestone 5 does not mean the game is finished; it means Chamber 3 rescue is no longer the highest-leverage task.
-
-## Active Focus
-**Milestone 6: Bucket 2 Foothold** is now the active milestone.
-
-### Milestone 6 Direction
-- Establish the first safe continuation beyond Sector 1.
-- Begin Bucket 2 through **The Black Aqueduct** as the next area start and foothold pass.
-- Define Bucket 2 as a canal/transit/system-infrastructure zone: black reflective liquid, monumental gates and sluices, severe symmetry, and oppressive empty scale.
-- Move the project forward from palace/judgment interior into the transit infrastructure of recurrence without destabilizing the shipped Sector 1 arc.
-- Build Sector 2 Chamber 1 from the established Chamber 3 blueprint, with new chamber-specific backgrounds, enemies, lore altar/trigger art, lore image, lore text, and gate/progression art.
-- Sector 2 Chamber 1 lore presentation is now fixed and stable enough that this chamber can stop being the main blocker.
-- Carry forward the lessons from Chamber 3: bootstrap before spectacle, preserve stable transition wiring, and expand in milestone-safe slices.
-- Next major step: plan and build Sector 2 Chamber 2 under the Pressure Gospel arc without reopening solved Sector 2 Chamber 1 lore-screen debugging.
+## Immediate Priorities
+1. Preserve stable chamber-to-chamber handoff behavior in Sector 2.
+2. Preserve mobile threshold interaction contract (fresh post-entry interact required).
+3. Preserve lore scene viewport integrity (no chamber overlay leakage).
+4. Preserve projectile gameplay contract (visual projectile must still hurt correctly).
+5. Avoid chamber-local patches for shared enemy presentation regressions.
+6. Keep docs synchronized to actual build behavior so fresh sessions start from reality.
 
 ## Do Not Change Casually
-- Base-path deployment contract (`/biomech-retro-horror/` prod, `/` dev).
-- Mobile/desktop input parity and screen-space anchoring rules.
-- Asset key/url indirection and fallback-only resilience behavior.
-- Chamber 01 -> Chamber 02 -> Chamber 03 -> boss arena flow contracts unless intentionally retuned.
-- Lore-screen readability constraints in portrait iPhone-sized viewports.
+- Base-path deployment contract (`/biomech-retro-horror/` in production, `/` in local dev).
+- Mobile controls and desktop keyboard parity.
+- Scene registration and handoff wiring between Sector 2 chambers.
+- Lore cutscene scene isolation from chamber viewport matte/blackout layers.
+- Shared enemy presentation logic without cross-chamber verification.

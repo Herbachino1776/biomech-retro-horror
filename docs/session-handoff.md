@@ -1,66 +1,61 @@
 # Session Handoff
 
-Use this file to start a fresh planning/implementation session quickly.
+Use this file to start a fresh planning/implementation session from real current state.
 
-## Project Identity (Non-Negotiable)
-Biomech Retro Horror is a browser-playable **biomechanical ritual horror** vertical slice.
-Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbolic lore, and milestone discipline over feature sprawl.
+## Where the Project Actually Is
+The game is beyond a small vertical-slice stub.
 
-## Current Stack + Deployment Model
-- Engine/runtime: Phaser 3 (ES modules)
-- Toolchain: Vite
-- Deployment: GitHub Pages project-site (`/biomech-retro-horror/` base in production)
-- Target support: iPhone portrait touch play + desktop keyboard parity
+- **Sector 1 arc is functionally present:**
+  - Chamber 01
+  - Chamber 02
+  - Chamber 03
+  - separate boss arena finale
+  - real boss payoff and onward progression contract
+- **Sector 2 arc is functionally present in prototype form (Bucket 2: The Black Aqueduct / The Pressure Gospel):**
+  - Chamber 1: Black Aqueduct Intake
+  - Chamber 2: The Compression Vaults
+  - Chamber 3: The Kiln of Judgement
+  - Chamber 3 boss payoff: The Sorrow Engine
+  - lore beats integrated with progression flow
+  - projectile combat tech active in shipped encounters
+  - Black Oil / Tar-laced Blood payoff language active
 
-## Fresh-Session Truth
-- Chamber 3 finally works because the scene handoff contract was fixed, not because Chamber 3 internals were endlessly patched in isolation.
-- The breakthrough was simple and surgical: ensure `Chamber03Scene` is registered, ensure Chamber 02's unlocked exit gate actually starts `Chamber03Scene`, and stop treating the failure as a deep chamber-content problem first.
-- Sector 1 now has a real Chamber 3, a separate boss arena, a playable boss flow, a payoff path, and a forward progression contract.
-- Known remaining Chamber 3 issues are real, but they are now secondary polish debt rather than the main blocker.
-- The next best step is **not** more Chamber 3 rescue.
-- The next best step is **Milestone 6: Bucket 2 foothold / The Black Aqueduct start**.
-- Sector 2 Chamber 1 lore presentation is fixed; the actual bug was chamber viewport blackout leakage into the lore presentation layer, not the lore image itself.
+## Current Build/Platform Baseline
+- Phaser 3 + Vite
+- GitHub Pages project-site base path: `/biomech-retro-horror/`
+- Mobile iPhone-sized browser playability is required
+- Desktop keyboard parity is required
 
-## What Works Now
-- Start/title flow into Chamber 01 and death/restart loop.
-- Chamber 01 core loop, lore beats, miniboss, and gate-release payoff remain stable.
-- Chamber 02 is playable with shrine/cutscene flow, TOLL-KEEPER gate unlock, and onward progression wiring intact.
-- Chamber 03 is playable in the active progression path.
-- Chamber 03 now hands off into a separate boss arena for the Sector 1 finale.
-- Sector 1 now has a complete functional arc: Chamber 01 -> Chamber 02 -> Chamber 03 -> boss flow -> onward progression contract.
-- Mobile controls remain corrected for portrait and landscape playability.
-- Desktop keyboard support remains intact.
-- Texture-first asset loading with fallback resilience remains stable.
-- GitHub Pages/Vite deployment invariants remain in force.
+## Major Fixes That Were Hard-Won
+1. **Chamber 3 handoff/registration breakthrough**
+   - Chamber flow failures were solved by restoring scene registration + transition wiring contracts, not by chamber-internal guesswork.
+2. **Sector 2 Chamber 1 -> Chamber 2 threshold fresh-press fix**
+   - Progression now requires an intentional fresh interact after threshold entry.
+3. **Sector 2 Chamber 2 viewport/bootstrap fix**
+   - Chamber 2 was stabilized by mirroring the proven Chamber 3 viewport/bootstrap pattern.
+4. **Lore viewport blackout leak diagnosis/fix**
+   - Lore blackout artifact traced to chamber viewport/overlay leakage, not lore art composition failure.
+5. **Projectile bug root-cause lesson**
+   - “Looks right but doesn’t hurt” was a gameplay contract miss, not a presentation issue.
+6. **Enemy grounding regression lesson**
+   - Regression came from shared enemy presentation logic; chamber-local patching was the wrong repair strategy.
 
-## Remaining Debt (Secondary)
-- Chamber 3 encounter/pacing polish can still improve.
-- Boss finale presentation and readability can still improve.
-- Additional audiovisual cleanup remains worthwhile later, but it should not block Bucket 2 work.
+## What Must Not Be Broken
+- Base-path-safe deploy behavior.
+- Mobile controls visibility/alignment and desktop keyboard parity.
+- Sector 1 and Sector 2 end-to-end scene handoff contracts.
+- Fresh-interact threshold progression rule.
+- Lore scene isolation from chamber viewport blackout/matte layers.
+- Shared enemy presentation consistency across chambers.
+- Projectile hit/damage lifecycle contract.
 
-## Active Milestone
-**Milestone 6 — Bucket 2 Foothold / The Black Aqueduct Start: active.**
+## Recent Hard-Won Lessons (Concise)
+- Bootstrap and scene contracts first; spectacle/content layering second.
+- If a chamber fails to load, verify registration/handoff before touching encounter content.
+- If lore blackout shape matches gameplay viewport, inspect camera overlays/layer leakage first.
+- If projectile visuals work but damage fails, audit overlap/damage contract first.
+- Fix shared presentation regressions at the shared layer, then validate all chambers.
 
-### Immediate Best Next Step
-- Establish the first safe continuation beyond Sector 1.
-- Build the initial Bucket 2 / The Black Aqueduct foothold as a canal/transit/infrastructure zone rather than a garden biome.
-- Use black reflective liquid, necro-industrial canals, monumental gates/sluices, and oppressive symmetry as the current art-direction baseline.
-- Preserve the now-working Sector 1 progression contract while opening the next area.
-- Next major follow-through after Sector 2 Chamber 1 stabilization: plan and build Sector 2 Chamber 2 under the Pressure Gospel arc.
-
-## Lessons Learned to Preserve
-- **Bootstrap before spectacle.** Get the chamber booting and handing off correctly before layering setpiece content.
-- **Do not one-shot giant chamber builds.** The failed single-pass Chamber 3 mega-build was the wrong implementation strategy.
-- **When a chamber will not boot, check scene registration and transition wiring first.** Chamber flow bugs may be simpler than they look.
-- **Do not patch a broken chamber in isolation when the real blocker is the previous scene's handoff contract.**
-- **When a lore screen shows a viewport-shaped blackout, compare it to the normal chamber viewport immediately.** Sector 2 Chamber 1's lore bug was simple once the chamber overlay leak was identified.
-
-## Most Important Constraints
-1. Do not regress GitHub Pages/Vite base-path behavior.
-2. Keep mobile controls visible, fixed, and aligned in portrait and landscape.
-3. Preserve desktop keyboard controls.
-4. Keep texture-first rendering; fallback only on load failure.
-5. Preserve dedicated cinematic lore-screen flow as the preferred lore delivery direction.
-6. Preserve in-world ritual shrine/ossuary lore trigger presentation direction.
-7. Preserve the shipped Sector 1 arc while opening Bucket 2.
-8. End meaningful tasks with `npm run build` when code changes are involved.
+## Most Likely Next Step
+**Primary next step:** Sector 2 stabilization/polish wrap + documentation parity hardening.  
+**Parallel planning step:** begin Sector 3 pre-production framing without introducing unneeded systems yet.

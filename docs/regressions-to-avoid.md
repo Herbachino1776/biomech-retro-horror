@@ -3,78 +3,53 @@
 Known failure patterns and what future tasks must protect.
 
 ## 1) GitHub Pages / Vite Base-Path Regressions
-**Observed risk:** builds work locally but fail on project-site deploy when base path drifts.
+**Observed risk:** local works but project-site deploy breaks.  
 - Keep production base `/biomech-retro-horror/` and dev base `/`.
-- Avoid hardcoded paths that bypass centralized URL mapping.
+- Avoid ad-hoc absolute URL paths.
 
 ## 2) Mobile Controls Visibility / Alignment Regressions
-**Observed risk:** controls can become clipped/off-screen in portrait or misaligned after resize/orientation edits.
-- Keep controls fixed to screen space.
-- Re-layout controls on resize/orientation changes.
-- Keep visible controls and hit areas aligned.
-- Preserve both portrait and landscape playability.
-- Respect iPhone portrait safe-area constraints.
+**Observed risk:** controls drift, clip, or desync from hit areas.  
+- Keep controls screen-space anchored.
+- Re-layout on resize/orientation changes.
+- Preserve portrait + landscape usability.
 
 ## 3) Desktop Keyboard Parity Regressions
-**Observed risk:** mobile-centric edits can accidentally break keyboard control flow.
-- Preserve movement/jump/attack/interact/restart keyboard support.
-- Validate both input paths after control/UI work.
+**Observed risk:** mobile-focused edits break keyboard flow.  
+- Preserve keyboard move/jump/attack/interact/restart parity.
 
-## 4) Fallback-vs-Art Regressions
-**Observed risk:** fallback geometry accidentally became primary visuals.
+## 4) Chamber Handoff Contract Regressions
+**Observed risk:** chamber seems “broken” when registration/handoff is the real fault.  
+- Check scene registration first.
+- Check threshold/transition target wiring second.
+- For threshold progression issues, validate fresh-interact contract before content patching.
+
+## 5) Fresh-Interact Threshold Regressions (Mobile + Desktop)
+**Observed risk:** progression triggers immediately/incorrectly on stale button hold.  
+- Threshold progression must require a **fresh post-entry interact press**.
+- Do not accept pre-held interact input as valid progression intent.
+
+## 6) Lore Screen Viewport Leak Regressions
+**Observed risk:** viewport-shaped blackout appears in lore and gets misdiagnosed as art/layout failure.  
+- Compare blackout shape to gameplay viewport first.
+- Suspect chamber overlay/matte/viewport leakage before blaming lore assets.
+- Remove inherited chamber blackout layers from lore scenes.
+
+## 7) Projectile Contract Regressions
+**Observed risk:** projectile looks correct but does not hurt player.  
+- Audit basic gameplay contract first: overlap registration, damage call path, projectile active/body state, lifecycle cleanup.
+- Do not jump straight to art/telegraph tuning when core hit contract is broken.
+
+## 8) Enemy Grounding Regressions
+**Observed risk:** enemy grounding drifts and gets patched room-by-room.  
+- Verify whether regression source is shared enemy presentation logic before touching chamber-specific offsets.
+- Fix shared path once; then validate all chambers.
+
+## 9) Restart / Scene Flow Regressions
+**Observed risk:** death/restart can soft-lock or leave stale state.  
+- Preserve start -> chamber -> death/restart contract.
+- Verify both keyboard and mobile restart paths.
+
+## 10) Fallback-vs-Art Regressions
+**Observed risk:** fallback primitives become accidental primary visuals.  
 - Loaded textures remain primary.
-- Fallback visuals activate only when texture loading fails.
-- Keep fallback labels/readability aids without replacing art path.
-
-## 5) Floor / Sprite Grounding Regressions
-**Observed risk:** stand-ins looked sunk into floor or visually floating after origin/display tuning.
-- Keep collision behavior stable while tuning display origin/body offsets.
-- Validate grounding against floor reference at gameplay camera zoom.
-
-## 6) Combat Loop Timing Regressions
-**Observed risk:** hit registration drift when overlap windows/cooldowns change casually.
-- Do not change attack timing/hitbox enable windows without explicit retuning.
-- Preserve deterministic contact damage + invulnerability behavior.
-
-## 7) Restart / Scene Flow Regressions
-**Observed risk:** death/restart handling can soft-lock scene flow.
-- Preserve start → chamber → death/restart contract.
-- Verify restart input works on both desktop and mobile paths.
-
-## 8) Lore Presentation Backslide Regressions
-**Observed risk:** lore can regress from cinematic screen transitions back to generic always-on dialogue overlays, or removed placeholder flows can get reintroduced as fake progress.
-- Preserve dedicated lore-screen transition cadence where implemented.
-- Keep lore pacing discrete and ritual/cinematic in tone.
-- Do not reintroduce the removed Chamber 02 exit-gate placeholder lore payoff as a substitute for real Chamber 03 continuity.
-
-## 9) Lore Trigger Presentation Regressions
-**Observed risk:** interactable lore markers can drift back toward debug-style UI objects.
-- Preserve in-world ritual shrine/ossuary-style lore trigger presentation.
-- Keep placeholders diegetic and in-world readable, not debug-box literal.
-
-## 10) Chamber 02 Endpoint Regression
-**Observed risk:** cleanup work around Chamber 03 planning can destabilize the shipped Chamber 02 endpoint.
-- Preserve the current post-TOLL-KEEPER unlocked gate end state.
-- Do not add a fake Chamber 03 boot, broken transition stub, or replacement placeholder cinematic during cleanup-only passes.
-
-
-## 11) Chamber 02 -> Chamber 03 Handoff Regression
-**Observed risk:** Chamber 3 continuity can be broken by drifting back toward fragile lore-screen-only handoff logic.
-- Do not reintroduce the removed Chamber 02 -> Chamber 03 placeholder lore-screen transition as the main continuity path.
-- Preserve the real unlocked-gate -> `Chamber03Scene` handoff contract.
-
-## 12) Giant Chamber One-Pass Regression
-**Observed risk:** trying to build an entire sector-finale chamber in one pass creates destabilizing scope and hides root causes.
-- Keep a stable bootstrap layer before adding spectacle.
-- Build future chambers in milestone-safe slices instead of another Chamber 3 mega-build attempt.
-
-## 13) Misdiagnosed Chamber Boot Failure Regression
-**Observed risk:** chamber boot failures can look like deep content bugs when the real issue is scene registration or transition wiring.
-- Check scene registration and previous-scene transition contracts first.
-- Do not assume a chamber failure always lives inside that chamber's encounter/layout logic.
-
-## 14) Lore Screen Viewport Leak Regression
-**Observed risk:** chamber viewport blackout/matte/overlay elements can leak into lore screens and masquerade as lore-art or crop failures.
-- If the blacked-out region matches the gameplay viewport, suspect chamber overlay/mask leakage before suspecting lore art.
-- Check the originating chamber layer state before adding more black panels or layout patches to `LoreScreenScene`.
-- Do not pile extra lore-screen masking on top of a still-active chamber matte or blackout layer.
+- Fallback visuals are resilience-only.

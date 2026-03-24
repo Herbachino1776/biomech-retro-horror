@@ -1,30 +1,32 @@
 # Biomech Retro Horror
 
-A 1990s-inspired retro horror game project with oppressive biomechanical aesthetics, built for a GitHub + Codex workflow.
+A browser-playable retro horror action prototype built with Phaser 3 + Vite, developed in a GitHub + Codex workflow.
 
-## Objective
-Create a playable vertical slice first:
-- Chamber 01 and Chamber 02 playable in sequence
-- 1 player character
-- regular skitter encounters plus TOLL-KEEPER variants
-- 1 miniboss
-- chamber-specific cinematic lore flows
-- 1 title screen
-- 1 death / restart loop
-- 1 coherent visual biome
+## Project State (March 2026)
+This is no longer a Chamber 01-only proof-of-concept.
 
-## Shipped Slice Reality
-- Chamber 01 remains the playable foundation and still uses `LoreScreenScene` for its first shrine-driven lore beat.
-- Chamber 01 also uses `LoreCutsceneScene` for the later dead-god witness beat.
-- Chamber 01 culminates in the Half-Skull Ascendant miniboss encounter and gate-release payoff.
-- Chamber 02 uses `LoreCutsceneScene` for its shrine/exit-gate lore flow, post-lore reaction state, and unlocked progression threshold.
-- Chamber 03 is now playable as the Ossuary Choir Hall sector-finale chamber rather than only a bootstrap stub.
-- Chamber 03's boss flow now hands off into a separate boss arena, giving Sector 1 a real finale/payoff path.
-- The Sector 1 arc is functionally in place across Chamber 01, Chamber 02, Chamber 03, and the separate boss arena, even though the project still has iterative polish debt.
-- Next forward progress is Bucket 2 / The Black Aqueduct foothold work rather than more Chamber 3 rescue.
-- Restart/reset flow safely handles both lore-scene types because both are live in the shipped game.
+- **Sector 1 (Ossuary / dead-god palace arc)** is functionally in place:
+  - Chamber 01
+  - Chamber 02
+  - Chamber 03
+  - separate boss arena finale
+  - real boss payoff + progression onward
+- **Sector 2 (Bucket 2: The Black Aqueduct / The Pressure Gospel arc)** is functionally in place in prototype form:
+  - Chamber 1: **Black Aqueduct Intake**
+  - Chamber 2: **The Compression Vaults**
+  - Chamber 3: **The Kiln of Judgement**
+  - Sector 2 chamber boss payoff in Chamber 3 (**The Sorrow Engine**)
+  - established kill-payoff language (**Black Oil / Tar-laced Blood**)
+  - working projectile tech used in live encounters
 
-## Tech Stack (Current Scaffold)
+The game is still iterative and polish-heavy, but the current build is beyond a tiny vertical slice.
+
+## Current Direction
+- Preserve Sector 1 and Sector 2 functionality while reducing regressions.
+- Stabilize and polish Sector 2 end-to-end behavior.
+- Keep forward planning grounded for Sector 3 without pretending the game is content-complete.
+
+## Tech Stack
 - Engine: Phaser 3
 - Runtime: Node.js (npm)
 - Dev server / bundler: Vite
@@ -41,11 +43,10 @@ Create a playable vertical slice first:
 /docs
 /prompts
 /src
+  /audio
   /data
-    gameConfig.js
   /entities
   /scenes
-    BootScene.js
   /systems
   /ui
   main.js
@@ -67,7 +68,7 @@ npm install
 npm run dev
 ```
 
-Vite will print a local URL (usually `http://localhost:5173`). Open it in your browser.
+Vite prints a local URL (usually `http://localhost:5173`).
 
 ### 3) Build for production
 
@@ -85,7 +86,7 @@ npm run preview
 
 ## GitHub Pages Deployment
 
-This project is deployed as a **project site** (not a user/org root site), so the production base path must be:
+This project is deployed as a **project site**. Production base path must remain:
 
 `/biomech-retro-horror/`
 
@@ -97,7 +98,7 @@ Expected live URL:
 
 1. In GitHub, open **Settings → Pages**.
 2. Set **Source** to **GitHub Actions**.
-3. Ensure your default branch is `main` (or update `.github/workflows/deploy-pages.yml` if different).
+3. Ensure default branch is `main` (or adjust `.github/workflows/deploy-pages.yml`).
 
 ### Deploy
 
@@ -108,28 +109,15 @@ Every push to `main` triggers `.github/workflows/deploy-pages.yml` to:
 3. upload `dist/` as the Pages artifact
 4. deploy to GitHub Pages
 
-### Play the deployed build
+### Play deployed build
 
 Open:
 
 `https://herbachino1776.github.io/biomech-retro-horror/`
 
-### Local dev remains unchanged
-
-Use:
-
-```bash
-npm run dev
-```
-
-This still serves the game locally from `/`.
-
-## Workflow
-1. Read `AGENTS.md`.
-2. Read repo docs in `/docs` and treat them as source of truth.
-3. Implement the current milestone only.
-4. Keep changes small and modular.
-5. Open PR-sized changes, not giant rewrites.
-
-## Current Milestone Status
-Milestone 5 is closed in a first-pass sense. See `docs/current-milestone.md`, `docs/milestone-roadmap.md`, and `docs/milestones.md` for the Sector 1 closeout and the new Milestone 6 Bucket 2 / The Black Aqueduct foothold direction.
+## Working Norms
+1. Read `AGENTS.md` and doctrine docs before major implementation work.
+2. Keep milestone scope explicit and avoid silent unrelated rewrites.
+3. Preserve mobile portrait playability and desktop keyboard parity.
+4. Preserve base-path-safe deployment behavior.
+5. End meaningful code tasks with build verification.
