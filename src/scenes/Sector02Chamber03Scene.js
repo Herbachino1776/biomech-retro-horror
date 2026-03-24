@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Player } from '../entities/Player.js';
 import { SkitterServitor } from '../entities/SkitterServitor.js';
 import { EnemyProjectile } from '../entities/EnemyProjectile.js';
+import { PressureDeacon } from '../entities/PressureDeacon.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
@@ -211,6 +212,83 @@ const KILN_FORWARD_GATE = {
   promptOffsetY: -166
 };
 
+const KILN_SORROW_ENGINE = {
+  name: 'THE SORROW ENGINE',
+  subtitle: 'Banisher Altar Rupture Core',
+  health: 12,
+  contactDamage: 2,
+  contactDamageCooldownMs: 900,
+  attackCooldownMs: 2900,
+  attackTelegraphMs: 660,
+  attackRecoveryMs: 560,
+  attackRange: 208,
+  approachRange: 370,
+  approachSpeed: 44,
+  idleAdvanceSpeed: 18,
+  windupDriftSpeed: 11,
+  attackSpeed: 206,
+  attackLiftVelocity: -130,
+  hitPulseMs: 300,
+  hurtRecoverMs: 240,
+  hurtRecoilVelocityX: 96,
+  hurtRecoilVelocityY: -68,
+  spawnX: 5334,
+  spawnY: WORLD.floorY - 2,
+  activationX: 5020,
+  body: { width: 102, height: 136, offsetX: 108, offsetY: 148 },
+  audioProfile: 'miniboss',
+  presentation: {
+    display: { width: 346, height: 372 },
+    origin: { x: 0.54, y: 0.988 },
+    alpha: 0.99,
+    tint: 0xd8c9b6,
+    scaleX: 1,
+    scaleY: 1
+  },
+  projectile: {
+    textureKey: ASSET_KEYS.sector02PressureShardProjectile,
+    cooldownMs: 4200,
+    windupMs: 700,
+    recoveryMs: 760,
+    minRange: 280,
+    maxRange: 620,
+    verticalTolerance: 176,
+    spawnOffsetX: 84,
+    spawnOffsetY: -116,
+    speed: 252,
+    damage: 1,
+    lifetimeMs: 2100,
+    rotationSpeed: 420,
+    telegraphRadiusX: 96,
+    telegraphRadiusY: 30
+  },
+  deathPayoff: {
+    shakeDurationMs: 3000,
+    shakeIntensity: 0.017,
+    explosionDelayMs: 3000
+  },
+  blowout: {
+    scale: 1.44,
+    burstCount: 54,
+    burstRadiusX: 270,
+    burstRadiusY: 132,
+    puddleWidth: 340,
+    puddleHeight: 58,
+    sprayCount: 98,
+    mistCount: 62,
+    emberCount: 38,
+    durationMs: 1540,
+    puddleFadeMs: 2800,
+    alpha: 1,
+    puddleAlpha: 0.46,
+    splashColor: 0x020202,
+    heavyColor: 0x030304,
+    highlightColor: 0x131518,
+    mistColor: 0x141515,
+    redSpeckColor: 0x6f0f12
+  }
+};
+
 const SHOW_SECTOR02_DEBUG_LABELS = false;
 
 export class Sector02Chamber03Scene extends Phaser.Scene {
@@ -234,6 +312,10 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.enemyProjectiles = [];
     this.enemyProjectilesPaused = false;
     this.loreAnchor = null;
+    this.sorrowEngine = null;
+    this.sorrowEngineDeathSequenceActive = false;
+    this.sorrowEngineDeathFinished = false;
+    this.hasTriggeredBossReveal = false;
   }
 
   create() {
@@ -243,6 +325,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.createPlayerAndColliders();
     this.createEnemyProjectiles();
     this.createEncounterPockets();
+    this.createClimaxEncounter();
     this.createLoreAnchor();
     this.createUiAndInput();
     this.createForwardThreshold();
@@ -494,6 +577,30 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.loreAnchor = { ...anchor, zone, prompt };
   }
 
+  createClimaxEncounter() {
+    this.sorrowEngine = new PressureDeacon(
+      this,
+      KILN_SORROW_ENGINE.spawnX,
+      KILN_SORROW_ENGINE.spawnY,
+      {
+        ...KILN_SORROW_ENGINE,
+        textureKey: ASSET_KEYS.sector02Chamber03BossSorrowEngine
+      }
+    );
+    this.sorrowEngine.setActive(false);
+    this.sorrowEngine.sprite.setDepth(6.32);
+    this.sorrowEngine.body.setCollideWorldBounds(true);
+    this.physics.add.collider(this.sorrowEngine.sprite, this.platforms);
+    this.physics.add.overlap(this.player.attackHitbox, this.sorrowEngine.sprite, (_attackZone, enemySprite) => {
+      this.handlePlayerHitSorrowEngine(enemySprite);
+    });
+    this.physics.add.overlap(this.player.sprite, this.sorrowEngine.sprite, (_playerSprite, enemySprite) => {
+      this.handleSorrowEngineContactPlayer(enemySprite);
+    });
+    this.applyGameplayReadabilitySupport(this.sorrowEngine.sprite, { fill: 0xd9cab0, alpha: 0.18, scale: 1.26 });
+    this.sorrowEngine.projectileTelegraph?.setStrokeStyle(2, 0x7f6f58, 0.62);
+  }
+
   createForwardThreshold() {
     this.forwardBarrier = this.add.rectangle(KILN_FORWARD_GATE.barrierX, KILN_FORWARD_GATE.barrierY, KILN_FORWARD_GATE.barrierWidth, KILN_FORWARD_GATE.barrierHeight, 0x120c0a, 0.38).setDepth(-4.86);
     this.physics.add.existing(this.forwardBarrier, true);
@@ -523,6 +630,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.enemyProjectiles.forEach((projectile) => projectile.destroy());
       this.enemies.forEach((enemy) => enemy.projectileTelegraph?.destroy?.());
+      this.sorrowEngine?.projectileTelegraph?.destroy?.();
     });
   }
 
@@ -557,6 +665,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+      this.sorrowEngine?.body?.setVelocity?.(0, 0);
       this.setEnemyProjectilesPaused(true);
       return;
     }
@@ -572,13 +681,16 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     };
 
     this.player.update(time, input);
+    this.updateSorrowEngineState(time);
     this.refreshEncounterPocketPresence();
     this.updateEncounterPockets(time);
     this.enemies.forEach((enemy) => {
       enemy.update(time, this.player.sprite.x);
       this.updateEliteProjectileState(enemy, time);
     });
+    this.sorrowEngine?.update(time, this.player.sprite);
     this.enemyProjectiles.forEach((projectile) => projectile.update(time, this.game.loop.delta));
+    this.refreshSorrowEngineBossBar(time);
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
     this.refreshForwardThresholdPresence();
@@ -637,9 +749,40 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       }
     });
 
-    if (!this.hasUnlockedForwardPath && this.encounterPockets.length > 0 && this.encounterPockets.every((pocket) => pocket.resolved)) {
-      this.unlockForwardPath();
+  }
+
+  updateSorrowEngineState() {
+    if (!this.sorrowEngine || this.sorrowEngineDeathSequenceActive || this.sorrowEngine.dead) {
+      return;
     }
+
+    const pocketsCleared = this.encounterPockets.length > 0 && this.encounterPockets.every((pocket) => pocket.resolved);
+    if (!pocketsCleared || !this.hasCompletedLoreBeat) {
+      return;
+    }
+
+    if (!this.sorrowEngine.active && this.player.sprite.x >= KILN_SORROW_ENGINE.activationX) {
+      this.sorrowEngine.setActive(true);
+      this.hasTriggeredBossReveal = true;
+      this.forwardPrompt?.setText('THE SORROW ENGINE STIRS');
+    }
+  }
+
+  refreshSorrowEngineBossBar(time) {
+    if (!this.sorrowEngine) {
+      return;
+    }
+
+    const visible = this.sorrowEngine.active && !this.sorrowEngineDeathFinished;
+    this.hud.setBossBarState({
+      visible,
+      name: KILN_SORROW_ENGINE.name,
+      subtitle: KILN_SORROW_ENGINE.subtitle,
+      current: this.sorrowEngine.health,
+      max: this.sorrowEngine.maxHealth,
+      telegraph: this.sorrowEngine.getTelegraphProgress(time),
+      wounded: time < this.sorrowEngine.hurtUntil
+    });
   }
 
   refreshLoreZonePresence() {
@@ -917,6 +1060,91 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     }
   }
 
+  handlePlayerHitSorrowEngine(enemySprite) {
+    if (!this.player.attackActive || this.sorrowEngine?.dead || !this.isEnemyOverlapTarget(enemySprite, this.sorrowEngine)) {
+      return;
+    }
+
+    if (this.sorrowEngine.lastAttackHitId === this.player.attackId) {
+      return;
+    }
+
+    this.sorrowEngine.lastAttackHitId = this.player.attackId;
+    this.sorrowEngine.takeDamage(1, this.time.now);
+    this.sorrowEngine.setActive(true);
+    this.audioDirector?.playPlayerHit();
+
+    if (this.sorrowEngine.dead && !this.sorrowEngineDeathSequenceActive) {
+      this.beginSorrowEngineDeathSequence();
+    }
+  }
+
+  handleSorrowEngineContactPlayer(enemySprite) {
+    if (this.sorrowEngine?.dead || !this.isEnemyOverlapTarget(enemySprite, this.sorrowEngine)) {
+      return;
+    }
+
+    if (!this.sorrowEngine.canDealContactDamage(this.time.now)) {
+      return;
+    }
+
+    const tookDamage = this.player.receiveDamage(KILN_SORROW_ENGINE.contactDamage, this.time.now);
+    if (!tookDamage) {
+      return;
+    }
+
+    this.sorrowEngine.recordContactDamage(this.time.now);
+    const knockDirection = Math.sign(this.player.sprite.x - this.sorrowEngine.sprite.x) || 1;
+    this.player.body.setVelocityX(knockDirection * 242);
+    this.player.body.setVelocityY(-226);
+  }
+
+  beginSorrowEngineDeathSequence() {
+    if (!this.sorrowEngine || this.sorrowEngineDeathSequenceActive) {
+      return;
+    }
+
+    this.sorrowEngineDeathSequenceActive = true;
+    this.sorrowEngineDeathFinished = false;
+    this.tweens.killTweensOf(this.sorrowEngine.sprite);
+    this.sorrowEngine.sprite.setAlpha(0.74).setTint(0x0c0c0d);
+    this.tweens.add({
+      targets: this.sorrowEngine.sprite,
+      alpha: 0.9,
+      yoyo: true,
+      repeat: -1,
+      duration: 120,
+      ease: 'Sine.inOut'
+    });
+    this.sorrowEngine.projectileTelegraph?.setVisible(false);
+    this.hud.setBossBarState({
+      visible: true,
+      name: KILN_SORROW_ENGINE.name,
+      subtitle: 'RUPTURE IMMINENT',
+      current: 0,
+      max: this.sorrowEngine.maxHealth,
+      telegraph: 1,
+      wounded: true
+    });
+
+    this.cameras.main.shake(KILN_SORROW_ENGINE.deathPayoff.shakeDurationMs, KILN_SORROW_ENGINE.deathPayoff.shakeIntensity, true);
+    this.time.delayedCall(KILN_SORROW_ENGINE.deathPayoff.explosionDelayMs, () => {
+      if (!this.sorrowEngine?.sprite?.active) {
+        return;
+      }
+
+      this.triggerSector02BlackOilPayoff(this.sorrowEngine, KILN_SORROW_ENGINE.blowout);
+      this.audioDirector?.playBanishmentSting();
+      this.tweens.killTweensOf(this.sorrowEngine.sprite);
+      this.sorrowEngine.sprite.setVisible(false);
+      this.sorrowEngineDeathFinished = true;
+      this.hud.setBossBarState({ visible: false });
+      if (!this.hasUnlockedForwardPath) {
+        this.unlockForwardPath();
+      }
+    });
+  }
+
   isEnemyOverlapTarget(target, enemy) {
     return target === enemy.sprite || target?.gameObject === enemy.sprite;
   }
@@ -954,7 +1182,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       this.forwardBarrier.body.enable = false;
       this.forwardBarrier.body.updateFromGameObject?.();
     }
-    this.forwardPrompt?.setText('BANISHER GATE UNSEALED\nPRESS RITE / [E] TO DESCEND');
+    this.forwardPrompt?.setText('SORROW ENGINE RUPTURED\nPRESS RITE / [E] TO DESCEND');
   }
 
   refreshForwardThresholdPresence() {
@@ -979,8 +1207,10 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     const promptText = this.hasUnlockedForwardPath
       ? this.hasTriggeredForwardContract
         ? 'DESCENT MARKED\nSECTOR HOLDING THRESHOLD'
-        : 'BANISHER GATE UNSEALED\nPRESS RITE / [E] TO DESCEND'
-      : 'BANISHER GATE SEALED';
+        : 'SORROW ENGINE RUPTURED\nPRESS RITE / [E] TO DESCEND'
+      : this.hasTriggeredBossReveal
+        ? 'SLAUGHTER THE SORROW ENGINE'
+        : 'BANISHER GATE SEALED';
     this.forwardPrompt?.setVisible(promptVisible).setText(promptText);
   }
 
