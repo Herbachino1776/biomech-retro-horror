@@ -1039,9 +1039,6 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     enemy.setHitReactionDirection(knockDirection);
     enemy.takeDamage(1, this.time.now);
     this.clearEliteProjectileState(enemy);
-    if (enemy.dead && enemy.isElite) {
-      this.triggerSector02BlackOilPayoff(enemy, { scale: 0.92, burstCount: 18, burstRadiusX: 126, burstRadiusY: 54, puddleWidth: 162, puddleHeight: 28, sprayCount: 28, mistCount: 14, emberCount: 7, durationMs: 900 });
-    }
     this.audioDirector?.playPlayerHit();
   }
 
