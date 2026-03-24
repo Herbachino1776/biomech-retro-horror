@@ -200,7 +200,7 @@ export class Chamber02Scene extends Phaser.Scene {
     });
 
     this.applyResponsiveLayout();
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   renderProcessionalBackdrop() {
@@ -538,7 +538,7 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
 
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   handlePlayerHitEnemy(_attackZone, enemySprite, enemy) {

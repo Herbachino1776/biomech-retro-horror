@@ -514,7 +514,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.scale.on('resize', this.applyResponsiveLayout, this);
     this.applyResponsiveLayout();
     this.mobileControls.setMode('gameplay');
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
     this.updateBossHud(this.time.now);
   }
 
@@ -707,7 +707,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.refreshProgressionThresholdPresence();
     this.tryUseProgressionThreshold(mobileInput);
     this.updateFinaleGatePulse(time);
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
     this.updateBossHud(time);
   }
 

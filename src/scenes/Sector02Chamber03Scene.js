@@ -639,7 +639,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.scale.on('resize', this.applyResponsiveLayout, this);
     this.applyResponsiveLayout();
     this.mobileControls.setMode('gameplay');
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   registerLoreEvents() {
@@ -695,7 +695,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.tryBeginLoreSequence(mobileInput);
     this.refreshForwardThresholdPresence();
     this.tryAdvanceForwardThreshold(mobileInput);
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   refreshEncounterPocketPresence() {

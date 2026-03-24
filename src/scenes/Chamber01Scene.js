@@ -134,7 +134,7 @@ export class Chamber01Scene extends Phaser.Scene {
     });
 
     this.applyResponsiveLayout();
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   update(time) {
@@ -170,7 +170,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.enemy.update(time, this.player.sprite.x);
     this.miniboss.update(time, this.player.sprite);
     this.updateMinibossArenaFeedback(time);
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
     this.hud.setBossBarState({
       visible: this.minibossEncounterStarted && !this.minibossDefeated,
       name: CHAMBER01_MINIBOSS.name,

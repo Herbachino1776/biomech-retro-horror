@@ -1,4 +1,5 @@
 import { ASSET_KEYS } from '../data/assetKeys.js';
+import { vesselIntegrityState } from './VesselIntegrityState.js';
 
 const CHAMBER01_SCENE_KEY = 'Chamber01Scene';
 const CHAMBER02_SCENE_KEY = 'Chamber02Scene';
@@ -36,5 +37,6 @@ export function restartRunFromDeath(scene) {
   if (scene.scene.isActive(CHAMBER01_SCENE_KEY) || scene.scene.isPaused(CHAMBER01_SCENE_KEY)) {
     scene.scene.stop(CHAMBER01_SCENE_KEY);
   }
+  vesselIntegrityState.resetForFreshRun();
   scene.scene.start(CHAMBER01_SCENE_KEY);
 }
