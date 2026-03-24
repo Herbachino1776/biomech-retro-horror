@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
+import { triggerEnemyDeathRuptureBurst } from '../systems/EnemyDeathRuptureBurst.js';
 
 export class SkitterServitor {
   constructor(scene, x, y, config) {
@@ -267,6 +268,12 @@ export class SkitterServitor {
       this.body.enable = false;
       this.eyeGlow.setVisible(false);
       this.setVisualTint(0x1f1714);
+      triggerEnemyDeathRuptureBurst(this.scene, {
+        x: this.sprite.x,
+        y: (this.body?.bottom ?? this.sprite.y) - 16,
+        depth: this.sprite.depth,
+        isElite: Boolean(this.isElite || this.isTollKeeper || this.config.isElite)
+      });
       this.scene.tweens.add({
         targets: this.sprite,
         alpha: this.getStateAlpha('dead', 0.4),

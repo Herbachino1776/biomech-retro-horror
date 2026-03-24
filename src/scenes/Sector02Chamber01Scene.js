@@ -951,9 +951,6 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
     enemy.setHitReactionDirection(knockDirection);
     enemy.takeDamage(1, this.time.now);
-    if (enemy.dead && enemy.isTollKeeper) {
-      this.triggerSector02BlackOilPayoff(enemy, { scale: 0.92, burstCount: 8, puddleWidth: 154, puddleHeight: 34 });
-    }
     this.audioDirector?.playPlayerHit();
   }
 
