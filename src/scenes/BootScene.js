@@ -75,7 +75,6 @@ export class BootScene extends Phaser.Scene {
     this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
     this.load.image(ASSET_KEYS.laughingEngine, ASSET_URLS[ASSET_KEYS.laughingEngine]);
-    this.load.image(ASSET_KEYS.uiFrame, ASSET_URLS[ASSET_KEYS.uiFrame]);
     this.preloadAudioAsset(ASSET_KEYS.playerFootstepSlate01);
     this.preloadAudioAsset(ASSET_KEYS.playerFootstepSlate02);
     this.preloadAudioAsset(ASSET_KEYS.playerFootstepSlate03);
