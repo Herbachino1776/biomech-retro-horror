@@ -578,7 +578,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
           .setTint(0xd8e0d0)
           .setAlpha(0.98)
           .setDepth(-13.65);
-      } else {
+      } else if (SHOW_SECTOR02_DEBUG_LABELS) {
         this.add.text(anchorConfig.muralX, anchorConfig.muralY, 'BLACK AQUEDUCT\nLORE IMAGE FALLBACK', {
           fontFamily: 'monospace', fontSize: '22px', color: '#d5dacd', align: 'center'
         }).setOrigin(0.5).setDepth(-13.64);

@@ -183,9 +183,12 @@ export class MobileControls {
       text,
       hitArea,
       radius: 1,
+      hitRadius: 1,
       setRadius: (radius, hitMultiplier) => {
-        const hitDiameter = radius * 2 * hitMultiplier;
+        const hitRadius = radius * hitMultiplier;
+        const hitDiameter = hitRadius * 2;
         control.radius = radius;
+        control.hitRadius = hitRadius;
         shadow.setSize(radius * 2.12, radius * 1.08);
         outer.setRadius(radius);
         outer.setStrokeStyle(Math.max(1, Math.round(radius * 0.07)), CONTROL_COLORS.stroke, 0.54);
@@ -195,6 +198,7 @@ export class MobileControls {
         ring.setStrokeStyle(Math.max(1, Math.round(radius * 0.06)), CONTROL_COLORS.stroke, 0.9);
         text.setFontSize(radius >= 34 ? '13px' : '11px');
         hitArea.setSize(hitDiameter, hitDiameter);
+        hitArea.setInteractive(new Phaser.Geom.Circle(0, 0, hitRadius), Phaser.Geom.Circle.Contains);
       },
       setPosition: (x, y) => {
         shadow.setPosition(x, y + Math.max(4, control.radius * 0.14));
@@ -214,7 +218,7 @@ export class MobileControls {
         if (!visible) {
           hitArea.disableInteractive();
         } else {
-          hitArea.setInteractive({ useHandCursor: false });
+          hitArea.setInteractive(new Phaser.Geom.Circle(0, 0, control.hitRadius), Phaser.Geom.Circle.Contains);
         }
       }
     };
@@ -242,6 +246,7 @@ export class MobileControls {
     const joystickBaseRadius = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.joystick.baseRadius);
     const joystickKnobRadius = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.joystick.knobRadius);
     const joystickHitDiameter = this.getOrientationValue(MOBILE_CONTROLS_LAYOUT.joystick.hitDiameter);
+    const joystickHitRadius = joystickHitDiameter / 2;
 
     this.joystickShadow.setSize(joystickBaseRadius * 2.4, joystickBaseRadius * 1.18);
     this.joystickBase.setRadius(joystickBaseRadius).setStrokeStyle(2, CONTROL_COLORS.stroke, 0.48);
@@ -249,6 +254,7 @@ export class MobileControls {
     this.joystickCore.setRadius(joystickBaseRadius * 0.64).setStrokeStyle(1, CONTROL_COLORS.stroke, 0.16);
     this.joystickKnob.setRadius(joystickKnobRadius).setStrokeStyle(2, CONTROL_COLORS.stroke, 0.92);
     this.joystickZone.setSize(joystickHitDiameter, joystickHitDiameter);
+    this.joystickZone.setInteractive(new Phaser.Geom.Circle(0, 0, joystickHitRadius), Phaser.Geom.Circle.Contains);
     this.joystickMarkLeft.setFontSize(joystickBaseRadius > 50 ? '12px' : '11px');
     this.joystickMarkRight.setFontSize(joystickBaseRadius > 50 ? '12px' : '11px');
 

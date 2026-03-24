@@ -671,7 +671,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
         .setTint(0xd8e0d0)
         .setAlpha(0.97)
         .setDepth(-13.66);
-    } else {
+    } else if (SHOW_SECTOR02_DEBUG_LABELS) {
       this.add.text(anchorConfig.muralX, anchorConfig.muralY, 'COMPRESSION VAULTS\nLORE IMAGE FALLBACK', {
         fontFamily: 'monospace', fontSize: '22px', color: '#d5dacd', align: 'center'
       }).setOrigin(0.5).setDepth(-13.64);

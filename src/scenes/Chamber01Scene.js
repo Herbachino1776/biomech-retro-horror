@@ -19,6 +19,8 @@ import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
 
+const SHOW_CHAMBER01_DEBUG_LABELS = false;
+
 export class Chamber01Scene extends Phaser.Scene {
   constructor() {
     super('Chamber01Scene');
@@ -313,7 +315,7 @@ export class Chamber01Scene extends Phaser.Scene {
       this.add.image(1435, 202, ASSET_KEYS.chamber01RibArch).setDisplaySize(760, 360).setTint(0xd4c5af).setAlpha(0.5).setDepth(-6);
     }
 
-    if (!hasBackdropConcept) {
+    if (!hasBackdropConcept && SHOW_CHAMBER01_DEBUG_LABELS) {
       this.add.text(1032, 355, 'ALTAR ENGINE // FALLBACK SAFETY', {
         fontFamily: 'monospace',
         fontSize: '12px',

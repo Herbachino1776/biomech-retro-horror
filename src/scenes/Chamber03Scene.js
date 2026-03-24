@@ -308,6 +308,7 @@ const CHAMBER03_ENCOUNTER_POCKETS = [
     ]
   }
 ];
+const SHOW_CHAMBER03_DEBUG_LABELS = false;
 
 export class Chamber03Scene extends Phaser.Scene {
   constructor() {
@@ -415,16 +416,18 @@ export class Chamber03Scene extends Phaser.Scene {
       .rectangle(x, segment.y + 16, segment.width - 34, segment.height - 46, frameColor, 0.48)
       .setDepth(segment.depth + 0.02);
 
-    this.add
-      .text(x, segment.y + 12, `CHAMBER 03\nSEGMENT ${index + 1}`, {
-        fontFamily: 'monospace',
-        fontSize: '16px',
-        color: '#d6c7b2',
-        align: 'center'
-      })
-      .setOrigin(0.5)
-      .setAlpha(0.74)
-      .setDepth(segment.depth + 0.04);
+    if (SHOW_CHAMBER03_DEBUG_LABELS) {
+      this.add
+        .text(x, segment.y + 12, `CHAMBER 03\nSEGMENT ${index + 1}`, {
+          fontFamily: 'monospace',
+          fontSize: '16px',
+          color: '#d6c7b2',
+          align: 'center'
+        })
+        .setOrigin(0.5)
+        .setAlpha(0.74)
+        .setDepth(segment.depth + 0.04);
+    }
   }
 
   renderArchitecturalMarkers() {
@@ -620,19 +623,21 @@ export class Chamber03Scene extends Phaser.Scene {
         pocketConfig.markerAlpha
       )
       .setDepth(-4.95);
-    const promptText = this.add
-      .text(pocketConfig.zoneX, pocketConfig.zoneY + pocketConfig.promptOffsetY, pocketConfig.label, {
-        fontFamily: 'monospace',
-        fontSize: '13px',
-        color: '#d2c4b2',
-        align: 'center',
-        stroke: '#130e0d',
-        strokeThickness: 4
-      })
-      .setOrigin(0.5)
-      .setDepth(-4.86)
-      .setAlpha(0.82)
-      .setVisible(false);
+    const promptText = SHOW_CHAMBER03_DEBUG_LABELS
+      ? this.add
+        .text(pocketConfig.zoneX, pocketConfig.zoneY + pocketConfig.promptOffsetY, pocketConfig.label, {
+          fontFamily: 'monospace',
+          fontSize: '13px',
+          color: '#d2c4b2',
+          align: 'center',
+          stroke: '#130e0d',
+          strokeThickness: 4
+        })
+        .setOrigin(0.5)
+        .setDepth(-4.86)
+        .setAlpha(0.82)
+        .setVisible(false)
+      : null;
 
     const enemies = pocketConfig.enemies.map((enemyConfig) => this.createEncounterEnemy(enemyConfig, pocketConfig));
     const pocket = {
