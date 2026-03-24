@@ -1,22 +1,22 @@
 import Phaser from 'phaser';
 
 const HIT_SPLATTER_PROFILE = {
-  dropletCount: 8,
-  tarCount: 3,
-  mistCount: 2,
-  burstRadiusX: 16,
-  burstRadiusY: 10,
-  dropletWidth: [1, 3],
-  dropletHeight: [2, 6],
-  tarWidth: [1, 2],
-  tarHeight: [2, 4],
-  mistWidth: [5, 10],
-  mistHeight: [3, 6],
-  liftDroplet: [8, 18],
-  liftTar: [6, 12],
-  liftMist: [4, 10],
-  durationMs: 200,
-  durationJitterMs: 40,
+  dropletCount: 13,
+  tarCount: 5,
+  mistCount: 4,
+  burstRadiusX: 24,
+  burstRadiusY: 14,
+  dropletWidth: [1, 4],
+  dropletHeight: [3, 8],
+  tarWidth: [2, 4],
+  tarHeight: [4, 7],
+  mistWidth: [8, 16],
+  mistHeight: [4, 8],
+  liftDroplet: [14, 28],
+  liftTar: [10, 20],
+  liftMist: [8, 16],
+  durationMs: 290,
+  durationJitterMs: 60,
   depthOffset: 0.09
 };
 
@@ -35,17 +35,18 @@ function spawnHitParticle(scene, centerX, centerY, depth, {
   liftRange,
   alpha,
   color,
-  xMultiplier = 0.12,
-  angleRange = 36,
+  xMultiplier = 0.2,
+  xTravelMultiplier = 1.18,
+  angleRange = 44,
   depthStep = 0
 }) {
   const offsetX = Phaser.Math.Between(-HIT_SPLATTER_PROFILE.burstRadiusX, HIT_SPLATTER_PROFILE.burstRadiusX);
-  const driftY = Phaser.Math.Between(-HIT_SPLATTER_PROFILE.burstRadiusY * 0.2, HIT_SPLATTER_PROFILE.burstRadiusY * 0.18);
+  const driftY = Phaser.Math.Between(-HIT_SPLATTER_PROFILE.burstRadiusY * 0.34, HIT_SPLATTER_PROFILE.burstRadiusY * 0.08);
 
   const particle = scene.add
     .ellipse(
       centerX + offsetX * xMultiplier,
-      centerY + Phaser.Math.Between(-3, 4),
+      centerY + Phaser.Math.Between(-4, 3),
       Phaser.Math.Between(widthRange[0], widthRange[1]),
       Phaser.Math.Between(heightRange[0], heightRange[1]),
       color,
@@ -55,7 +56,7 @@ function spawnHitParticle(scene, centerX, centerY, depth, {
 
   scene.tweens.add({
     targets: particle,
-    x: centerX + offsetX,
+    x: centerX + offsetX * xTravelMultiplier,
     y: centerY - Phaser.Math.Between(liftRange[0], liftRange[1]) + driftY,
     alpha: 0,
     angle: Phaser.Math.Between(-angleRange, angleRange),
@@ -78,7 +79,7 @@ export function triggerEnemyHitSplatterBurst(scene, { x, y, depth = 6 } = {}) {
       widthRange: HIT_SPLATTER_PROFILE.dropletWidth,
       heightRange: HIT_SPLATTER_PROFILE.dropletHeight,
       liftRange: HIT_SPLATTER_PROFILE.liftDroplet,
-      alpha: 0.88,
+      alpha: 0.9,
       color: index % 4 === 0 ? HIT_SPLATTER_COLORS.oxbloodSpec : index % 2 === 0 ? HIT_SPLATTER_COLORS.maroonB : HIT_SPLATTER_COLORS.maroonA,
       depthStep: index * 0.001
     });
@@ -89,9 +90,11 @@ export function triggerEnemyHitSplatterBurst(scene, { x, y, depth = 6 } = {}) {
       widthRange: HIT_SPLATTER_PROFILE.tarWidth,
       heightRange: HIT_SPLATTER_PROFILE.tarHeight,
       liftRange: HIT_SPLATTER_PROFILE.liftTar,
-      alpha: 0.82,
+      alpha: 0.84,
       color: index % 2 === 0 ? HIT_SPLATTER_COLORS.tarA : HIT_SPLATTER_COLORS.tarB,
-      xMultiplier: 0.1,
+      xMultiplier: 0.14,
+      xTravelMultiplier: 1.26,
+      angleRange: 50,
       depthStep: 0.04 + index * 0.001
     });
   }
@@ -101,9 +104,11 @@ export function triggerEnemyHitSplatterBurst(scene, { x, y, depth = 6 } = {}) {
       widthRange: HIT_SPLATTER_PROFILE.mistWidth,
       heightRange: HIT_SPLATTER_PROFILE.mistHeight,
       liftRange: HIT_SPLATTER_PROFILE.liftMist,
-      alpha: 0.16,
+      alpha: 0.2,
       color: HIT_SPLATTER_COLORS.mist,
-      angleRange: 20,
+      xMultiplier: 0.16,
+      xTravelMultiplier: 1.12,
+      angleRange: 30,
       depthStep: 0.02 + index * 0.001
     });
   }
