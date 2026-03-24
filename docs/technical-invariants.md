@@ -1,47 +1,42 @@
 # Technical Invariants
 
-Do-not-break checklist for milestone and deployment stability.
+Do-not-break checklist for current stability.
 
 ## Deployment / Build Invariants
 - Production base path remains `/biomech-retro-horror/`.
 - Local development base remains `/`.
-- Every meaningful task ends with `npm run build` verification.
+- Meaningful code tasks end with `npm run build` verification.
 
 ## Input / Platform Invariants
-- Mobile touch controls remain visible and usable on iPhone portrait layouts.
-- Mobile controls are screen-space anchored and must not drift with world/camera movement.
-- Mobile control visuals and hit areas remain aligned.
-- Mobile layout remains playable in both portrait and landscape orientations.
-- Desktop keyboard support remains intact (move/jump/attack/interact/restart).
+- Mobile touch controls remain visible/usable on iPhone-sized browsers.
+- Controls remain screen-space anchored (`scrollFactor(0)` behavior preserved).
+- Control visuals and hit areas stay aligned.
+- Portrait and landscape remain playable.
+- Desktop keyboard support remains intact.
+
+## Viewport / Layout Invariants
+- Chamber 3 responsive viewport/bootstrap pattern is the known-good reference for mobile layout stability.
+- New chamber viewport/bootstrap fixes should follow the Chamber 3 proven pattern unless a stronger tested pattern replaces it.
+
+## Progression / Threshold Invariants
+- Threshold progression requires intentional **fresh interact press after entry**.
+- Pre-held interact state must not auto-advance progression.
+
+## Lore Scene Invariants
+- Lore remains a discrete scene transition pattern (`LoreScreenScene` / `LoreCutsceneScene`).
+- Lore scenes must not inherit chamber viewport blackout/matte/overlay layers.
+- If lore blackout shape mirrors gameplay viewport, treat as chamber overlay leakage until disproven.
 
 ## Rendering / Asset Invariants
-- Asset key + URL mapping stays centralized.
-- Loaded textures remain primary rendering path.
-- Fallback visuals are resilience-only when texture load fails.
-- Do not silently invert fallback-vs-art priority.
+- Asset key + URL mapping remains centralized.
+- Loaded textures remain primary visual path.
+- Fallback primitives are resilience-only when texture loading fails.
 
-## Gameplay Stability Invariants
-- Chamber 01 playable loop remains stable.
-- Chamber 02 central lore beat and post-TOLL-KEEPER unlocked-gate endpoint remain stable.
-- Scene flow contract remains stable: start/boot → chamber → death/restart.
-- Combat timing contracts are not changed casually.
-- Floor grounding adjustments must preserve collision behavior.
+## Combat / Entity Invariants
+- Projectile tech preserves full gameplay contract: active body, overlap, damage, and cleanup.
+- Shared enemy presentation logic must remain stable across chambers.
+- Grounding regressions should be fixed in shared presentation paths when that is the root source, not chamber-by-chamber.
 
-## Lore Presentation Invariants
-- Lore moments should use **discrete scene/state transitions**.
-- Lore flow should support fade-to-black then fade-in cadence.
-- Lore screens should support subtle pan/zoom drift.
-- Lore screens should support distinct music/sound treatment from active gameplay.
-- Chamber 01 first lore beat pattern (Laughing Engine/furnace art prototype) remains stable; Chamber 02 now uses the reusable `LoreCutsceneScene` + `LORE_CUTSCENES` path.
-- New chamber lore beats should reuse that cutscene system by changing config/art/text/style values only.
-- The removed Chamber 02 exit-gate placeholder lore payoff must stay removed until a real Chamber 02 -> Chamber 03 gate/progression-object transition is implemented.
-- Chamber 03 bootstrap work must keep using the shared HUD/mobile-controls path rather than scene-local emergency touch controls.
-- Lore writing remains cryptic, area-specific, and foreshadowing-oriented.
-
-## Lore Trigger Invariants
-- Lore trigger affordances should remain diegetic in-world ritual/shrine forms.
-- Avoid reverting visible trigger presentation to debug-style “LORE” marker boxes.
-
-## Change-Type Discipline
-- Prefer text/code changes unless binary changes are explicitly required.
-- Treat regressions as issues to diagnose/fix, not blindly reimplement.
+## Scene Flow Invariants
+- Sector 1 and Sector 2 chamber chains must remain playable end-to-end.
+- Scene registration + transition wiring are first checks for any chamber boot/handoff failure.
