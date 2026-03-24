@@ -1,32 +1,8 @@
-import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
-import { ASSET_KEYS } from '../data/assetKeys.js';
-
 export class HudOverlay {
   constructor(scene) {
     this.scene = scene;
-
-    const hasUiFrame = scene.textures.exists(ASSET_KEYS.uiFrame);
-    const frame = hasUiFrame
-      ? scene.add
-          .image(16, 16, ASSET_KEYS.uiFrame)
-          .setOrigin(0)
-          .setCrop(
-            CONCEPT_PRESENTATION.uiFrame.crop.x,
-            CONCEPT_PRESENTATION.uiFrame.crop.y,
-            CONCEPT_PRESENTATION.uiFrame.crop.width,
-            CONCEPT_PRESENTATION.uiFrame.crop.height
-          )
-          .setScrollFactor(0)
-          .setDepth(30)
-          .setTint(0xd2c2ac)
-          .setAlpha(0.9)
-      : scene.add.rectangle(16, 16, 220, 62, 0x0f1313, 0.84).setOrigin(0).setScrollFactor(0).setDepth(30);
-
-    if (!hasUiFrame) {
-      frame.setStrokeStyle(2, 0x64453a, 0.92);
-    }
-
-    this.frame = frame;
+    this.frame = scene.add.rectangle(16, 16, 220, 62, 0x0f1313, 0.84).setOrigin(0).setScrollFactor(0).setDepth(30);
+    this.frame.setStrokeStyle(2, 0x64453a, 0.92);
     this.frameBacking = scene.add
       .rectangle(0, 0, 0, 0, 0x090807, 0.28)
       .setOrigin(0)

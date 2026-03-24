@@ -104,10 +104,6 @@ export const CONCEPT_PRESENTATION = {
     slabTintWithConcept: 0x3b2e29,
     slabTintFallbackOnly: 0x1f1714,
     anchorXs: [405, 1215, 2025]
-  },
-  uiFrame: {
-    // Trim the lower flourish from the atlas selection so the vessel HUD keeps only the frame/bar presentation.
-    crop: { x: 276, y: 720, width: 984, height: 206 }
   }
 };
 
