@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { triggerEnemyDeathRuptureBurst } from '../systems/EnemyDeathRuptureBurst.js';
+import { triggerEnemyHitSplatterBurst } from '../systems/EnemyHitSplatterBurst.js';
 
 export class SkitterServitor {
   constructor(scene, x, y, config) {
@@ -258,6 +259,11 @@ export class SkitterServitor {
     this.contactDamageWindowUntil = time;
     this.nextAttackAllowedAt = time + this.config.attackCooldownMs;
     this.setVisualTint(0x6f8c59);
+    triggerEnemyHitSplatterBurst(this.scene, {
+      x: this.sprite.x + this.hurtPushDirection * 8,
+      y: (this.body?.center?.y ?? this.sprite.y) - 8,
+      depth: this.sprite.depth
+    });
 
     if (this.health <= 0) {
       this.scene.audioDirector?.playEnemyDeath(this.config.audioProfile ?? 'enemy');

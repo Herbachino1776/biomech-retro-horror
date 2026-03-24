@@ -1,52 +1,52 @@
 import Phaser from 'phaser';
 
 const REGULAR_PROFILE = {
-  ringWidth: 46,
-  ringHeight: 16,
-  ringAlpha: 0.18,
-  bloodCount: 18,
-  tarCount: 8,
-  mistCount: 5,
-  bloodWidth: [1, 3],
-  bloodHeight: [3, 7],
+  ringWidth: 54,
+  ringHeight: 19,
+  ringAlpha: 0.21,
+  bloodCount: 24,
+  tarCount: 10,
+  mistCount: 6,
+  bloodWidth: [2, 4],
+  bloodHeight: [4, 8],
   tarWidth: [1, 3],
-  tarHeight: [2, 5],
-  mistWidth: [8, 16],
-  mistHeight: [4, 8],
-  burstRadiusX: 48,
-  burstRadiusY: 26,
-  bloodLift: [18, 38],
-  tarLift: [12, 26],
-  mistLift: [8, 18],
-  durationMs: 380,
-  durationJitterMs: 70,
+  tarHeight: [3, 6],
+  mistWidth: [10, 18],
+  mistHeight: [5, 10],
+  burstRadiusX: 58,
+  burstRadiusY: 30,
+  bloodLift: [22, 44],
+  tarLift: [14, 30],
+  mistLift: [10, 20],
+  durationMs: 420,
+  durationJitterMs: 80,
   depthOffset: 0.14
 };
 
 const ELITE_PROFILE = {
   ...REGULAR_PROFILE,
-  ringWidth: 58,
-  ringHeight: 20,
-  ringAlpha: 0.22,
-  bloodCount: 30,
-  tarCount: 12,
-  mistCount: 7,
-  burstRadiusX: 64,
-  burstRadiusY: 34,
-  bloodLift: [24, 52],
-  tarLift: [16, 36],
-  mistLift: [10, 24],
-  durationMs: 460,
-  durationJitterMs: 90
+  ringWidth: 74,
+  ringHeight: 24,
+  ringAlpha: 0.24,
+  bloodCount: 36,
+  tarCount: 16,
+  mistCount: 9,
+  burstRadiusX: 78,
+  burstRadiusY: 42,
+  bloodLift: [28, 60],
+  tarLift: [18, 42],
+  mistLift: [12, 28],
+  durationMs: 500,
+  durationJitterMs: 100
 };
 
 const COLORS = {
-  bloodA: 0x9a191d,
-  bloodB: 0x6f1216,
-  bloodSpec: 0xc0423e,
+  bloodA: 0x5a131c,
+  bloodB: 0x761a24,
+  bloodSpec: 0x8b252e,
   tarA: 0x0b0a0a,
-  tarB: 0x171415,
-  mist: 0x4e2b2a
+  tarB: 0x171113,
+  mist: 0x311a1d
 };
 
 function spawnBurstParticle(scene, centerX, centerY, baseDepth, profile, {
