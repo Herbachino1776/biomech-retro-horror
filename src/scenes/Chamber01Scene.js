@@ -425,10 +425,10 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    // Temporary Sector 2 Chamber 3 shortcut so the Chamber 01 mobile DEV button can jump straight to the current Kiln of Judgement test room.
+    // Temporary Sector 2 Chamber 2 shortcut so the Chamber 01 mobile DEV button can jump straight to the current Pressure Deacon test room.
     this.cleanupSceneUi?.();
     this.audioDirector?.shutdown();
-    this.scene.start('Sector02Chamber03Scene', {
+    this.scene.start('Sector02Chamber02Scene', {
       devWarp: true,
       source: this.scene.key
     });
