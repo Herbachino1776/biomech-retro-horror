@@ -636,7 +636,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.enemyProjectiles.forEach((projectile) => projectile.destroy());
       this.enemies.forEach((enemy) => enemy.projectileTelegraph?.destroy?.());
-      this.sorrowEngine?.projectileTelegraph?.destroy?.();
+      this.sorrowEngine?.destroyCombatTelegraphs?.();
     });
   }
 

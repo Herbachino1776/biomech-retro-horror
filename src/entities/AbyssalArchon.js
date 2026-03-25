@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { HalfSkullMiniboss } from './HalfSkullMiniboss.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
+import { GroundBurstAttack } from '../systems/GroundBurstAttack.js';
 
 const DEFAULT_PROJECTILE_CONFIG = {
   cooldownMs: 3200,
@@ -37,6 +38,8 @@ export class AbyssalArchon extends HalfSkullMiniboss {
     this.projectileRecoverUntil = -Infinity;
     this.lastProjectileTime = -Infinity;
 
+
+    this.groundBurst = new GroundBurstAttack(scene, this, config.groundBurst ?? {});
     this.projectileTelegraph = scene.add
       .ellipse(x, y + this.projectileConfig.spawnOffsetY, this.projectileConfig.telegraphRadiusX, this.projectileConfig.telegraphRadiusY, 0xcad8be, 0.12)
       .setStrokeStyle(2, 0xaec797, 0.55)
@@ -48,6 +51,7 @@ export class AbyssalArchon extends HalfSkullMiniboss {
     super.setActive(active);
     if (!active && !this.dead) {
       this.clearProjectileState();
+      this.groundBurst?.resetState();
     }
   }
 
@@ -61,9 +65,20 @@ export class AbyssalArchon extends HalfSkullMiniboss {
 
     if (!this.active) {
       this.clearProjectileState();
+      this.groundBurst?.resetState();
       this.attackState = 'idle';
       this.body.setVelocityX(0);
       this.updateVisuals(time);
+      return;
+    }
+
+    this.groundBurst?.update(time, player);
+    if (this.groundBurst?.isBusy()) {
+      this.clearProjectileState();
+      this.attackState = 'idle';
+      this.body.setVelocityX(0);
+      this.updateVisuals(time);
+      this.updateProjectileTelegraph(time);
       return;
     }
 
@@ -112,6 +127,7 @@ export class AbyssalArchon extends HalfSkullMiniboss {
     if (
       this.projectileState !== 'idle' ||
       this.attackState !== 'idle' ||
+      this.groundBurst?.isBusy?.() ||
       time < this.hurtUntil ||
       time < this.lastProjectileTime + this.projectileConfig.cooldownMs ||
       !this.body.blocked.down
@@ -163,6 +179,7 @@ export class AbyssalArchon extends HalfSkullMiniboss {
   clearAttackState() {
     super.clearAttackState();
     this.clearProjectileState();
+    this.groundBurst?.resetState();
   }
 
   clearProjectileState() {
@@ -182,7 +199,11 @@ export class AbyssalArchon extends HalfSkullMiniboss {
   }
 
   getTelegraphProgress(time = this.scene.time.now) {
-    return Math.max(super.getTelegraphProgress(time), this.getProjectileTelegraphProgress(time));
+    return Math.max(
+      super.getTelegraphProgress(time),
+      this.getProjectileTelegraphProgress(time),
+      this.groundBurst?.getTelegraphProgress(time) ?? 0
+    );
   }
 
   updateProjectileTelegraph(time) {
@@ -205,10 +226,16 @@ export class AbyssalArchon extends HalfSkullMiniboss {
       .setAngle((time / 16) % 360);
   }
 
+  destroyCombatTelegraphs() {
+    this.projectileTelegraph?.destroy?.();
+    this.groundBurst?.destroy?.();
+  }
+
   takeDamage(amount, time = this.scene.time.now) {
     const tookDamage = super.takeDamage(amount, time);
     if (tookDamage) {
       this.clearProjectileState();
+      this.groundBurst?.resetState();
     }
 
     if (this.dead) {
