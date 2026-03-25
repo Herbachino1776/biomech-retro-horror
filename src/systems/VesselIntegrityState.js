@@ -66,6 +66,22 @@ class VesselIntegrityState {
     return this.getIntegritySnapshot();
   }
 
+  increaseMaxIntegrity(amount = 1, { restoreCurrent = true } = {}) {
+    const applied = clampToWhole(amount);
+    if (applied <= 0) {
+      return this.getIntegritySnapshot();
+    }
+
+    this.maxIntegrity += applied;
+    if (restoreCurrent) {
+      this.currentIntegrity = Math.min(this.maxIntegrity, this.currentIntegrity + applied);
+    } else {
+      this.currentIntegrity = Math.min(this.currentIntegrity, this.maxIntegrity);
+    }
+
+    return this.getIntegritySnapshot();
+  }
+
   resetForFreshRun() {
     this.maxIntegrity = DEFAULT_MAX_INTEGRITY;
     this.currentIntegrity = this.maxIntegrity;

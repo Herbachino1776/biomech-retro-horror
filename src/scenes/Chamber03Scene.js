@@ -8,6 +8,7 @@ import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
+import { applyChamberEntryRestore } from '../systems/VesselRunEconomy.js';
 
 const CHAMBER03_BOOTSTRAP = {
   worldWidth: 4800,
@@ -593,6 +594,9 @@ export class Chamber03Scene extends Phaser.Scene {
 
   createPlayerAndColliders() {
     this.player = new Player(this, CHAMBER03_BOOTSTRAP.spawnX, CHAMBER03_BOOTSTRAP.spawnY, PLAYER);
+    const entryIntegrity = applyChamberEntryRestore(this.transitionContext);
+    this.player.health = entryIntegrity.current;
+    this.player.maxHealth = entryIntegrity.max;
     this.applyGameplayReadabilitySupport(this.player.sprite, CHAMBER03_BOOTSTRAP.playerHalo);
     this.physics.add.collider(this.player.sprite, this.platforms);
     this.enemies = [];

@@ -1,15 +1,12 @@
+import Phaser from 'phaser';
+
 export class HudOverlay {
   constructor(scene) {
     this.scene = scene;
-    this.integritySegments = [];
-    this.integritySegmentGeometry = {
-      count: 5,
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      gap: 0
-    };
+    this.integrityBarGeometry = { x: 0, y: 0, width: 0, height: 0 };
+    this.currentRatio = 1;
+    this.currentTrailRatio = 1;
+    this.currentMax = 5;
 
     this.frame = scene.add.rectangle(16, 16, 220, 66, 0x0e1212, 0.9).setOrigin(0).setScrollFactor(0).setDepth(30);
     this.frame.setStrokeStyle(2, 0x6f5247, 0.9);
@@ -40,6 +37,18 @@ export class HudOverlay {
       .setOrigin(0)
       .setScrollFactor(0)
       .setDepth(30.75);
+
+    this.integrityBarTrail = scene.add
+      .rectangle(0, 0, 0, 0, 0x6f4b42, 0.62)
+      .setOrigin(0)
+      .setScrollFactor(0)
+      .setDepth(30.9);
+
+    this.integrityBarFill = scene.add
+      .rectangle(0, 0, 0, 0, 0xa68868, 0.98)
+      .setOrigin(0)
+      .setScrollFactor(0)
+      .setDepth(31);
 
     this.bossBarFrame = scene.add.rectangle(0, 0, 0, 0, 0x090807, 0.86).setScrollFactor(0).setDepth(66).setVisible(false);
     this.bossBarFrame.setStrokeStyle(2, 0x6b5647, 0.9);
@@ -77,6 +86,8 @@ export class HudOverlay {
       this.healthLabel,
       this.integrityBarUnderlay,
       this.integrityBarPlate,
+      this.integrityBarTrail,
+      this.integrityBarFill,
       this.bossBarFrame,
       this.bossBarUnderlay,
       this.bossTelegraph,
@@ -102,23 +113,6 @@ export class HudOverlay {
     const rawValue = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
     const parsed = Number.parseFloat(rawValue);
     return Number.isFinite(parsed) ? parsed : 0;
-  }
-
-  ensureIntegritySegments(count) {
-    while (this.integritySegments.length < count) {
-      const segment = this.scene.add.rectangle(0, 0, 0, 0, 0x2f2724, 1).setOrigin(0).setScrollFactor(0).setDepth(31);
-      this.integritySegments.push(segment);
-      this.elements.push(segment);
-    }
-
-    while (this.integritySegments.length > count) {
-      const segment = this.integritySegments.pop();
-      const index = this.elements.indexOf(segment);
-      if (index >= 0) {
-        this.elements.splice(index, 1);
-      }
-      segment.destroy();
-    }
   }
 
   layout() {
@@ -151,24 +145,8 @@ export class HudOverlay {
 
     this.integrityBarUnderlay.setPosition(barX - 1, barY - 1).setSize(barWidth + 2, barHeight + 2);
     this.integrityBarPlate.setPosition(barX, barY).setSize(barWidth, barHeight);
-
-    const segmentCount = this.integritySegmentGeometry.count;
-    const gap = isPortrait ? 3 : 4;
-    const segmentWidth = Math.max(8, (barWidth - gap * (segmentCount - 1)) / segmentCount);
-    this.integritySegmentGeometry = {
-      count: segmentCount,
-      x: barX,
-      y: barY,
-      width: segmentWidth,
-      height: barHeight,
-      gap
-    };
-
-    this.ensureIntegritySegments(segmentCount);
-    this.integritySegments.forEach((segment, index) => {
-      const segmentX = barX + index * (segmentWidth + gap);
-      segment.setPosition(segmentX, barY).setSize(segmentWidth, barHeight);
-    });
+    this.integrityBarGeometry = { x: barX, y: barY, width: barWidth, height: barHeight };
+    this.refreshIntegrityBarGeometry();
 
     const frameWidthBoss = Math.min(width - (isPortrait ? 24 : 36), isPortrait ? 232 : 520);
     const frameHeightBoss = isPortrait ? 26 : 52;
@@ -195,19 +173,26 @@ export class HudOverlay {
   }
 
   update(current, max) {
-    const safeMax = Math.max(1, Math.round(max));
-    const clampedCurrent = Math.max(0, Math.min(safeMax, Math.round(current)));
+    const safeMax = Math.max(1, Number(max) || 1);
+    const clampedCurrent = Phaser.Math.Clamp(Number(current) || 0, 0, safeMax);
+    const targetRatio = clampedCurrent / safeMax;
+    const frameDelta = Math.max(1 / 120, this.scene.game?.loop?.delta / 1000 || 1 / 60);
+    const fillLerp = Phaser.Math.Clamp(frameDelta * 16, 0, 1);
+    const trailLerp = Phaser.Math.Clamp(frameDelta * 7, 0, 1);
 
-    if (safeMax !== this.integritySegmentGeometry.count) {
-      this.integritySegmentGeometry.count = safeMax;
-      this.layout();
-    }
+    this.currentMax = safeMax;
+    this.currentRatio = Phaser.Math.Linear(this.currentRatio, targetRatio, fillLerp);
+    this.currentTrailRatio = Phaser.Math.Linear(this.currentTrailRatio, targetRatio, trailLerp);
+    this.refreshIntegrityBarGeometry();
+  }
 
-    this.integritySegments.forEach((segment, index) => {
-      const filled = index < clampedCurrent;
-      segment.setFillStyle(filled ? 0xa68868 : 0x2f2724, filled ? 1 : 0.84);
-      segment.setStrokeStyle(1, filled ? 0xdbc8ab : 0x59493f, filled ? 0.66 : 0.5);
-    });
+  refreshIntegrityBarGeometry() {
+    const { x, y, width, height } = this.integrityBarGeometry;
+    const fillWidth = Math.max(0, width * Phaser.Math.Clamp(this.currentRatio, 0, 1));
+    const trailWidth = Math.max(fillWidth, width * Phaser.Math.Clamp(this.currentTrailRatio, 0, 1));
+
+    this.integrityBarTrail.setPosition(x, y).setSize(trailWidth, height);
+    this.integrityBarFill.setPosition(x, y).setSize(fillWidth, height);
   }
 
   setBossBarState({ visible, name = '', subtitle = '', current = 0, max = 1, telegraph = 0, wounded = false } = {}) {
@@ -236,7 +221,7 @@ export class HudOverlay {
 
   setVisible(visible) {
     const uiVisible = Boolean(visible);
-    [this.frameBacking, this.frame, this.healthLabel, this.integrityBarUnderlay, this.integrityBarPlate, ...this.integritySegments].forEach((element) => {
+    [this.frameBacking, this.frame, this.healthLabel, this.integrityBarUnderlay, this.integrityBarPlate, this.integrityBarTrail, this.integrityBarFill].forEach((element) => {
       element.setVisible(uiVisible);
     });
     [this.bossBarFrame, this.bossBarUnderlay, this.bossTelegraph, this.bossBarFill, this.bossNamePlate, this.bossName, this.bossSubtitle].forEach((element) => {
