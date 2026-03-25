@@ -247,6 +247,34 @@ const KILN_SORROW_ENGINE = {
     scaleX: 1,
     scaleY: 1
   },
+
+  lineSweep: {
+    enabled: true,
+    cooldownMs: 7600,
+    windupMs: 1080,
+    activeMs: 260,
+    recoveryMs: 860,
+    minRange: 210,
+    maxRange: 580,
+    width: 152,
+    originOffsetX: 36,
+    originOffsetY: -24,
+    damage: 2,
+    knockbackX: 282,
+    knockbackY: -214,
+    telegraphStyle: {
+      fillColor: 0x120509,
+      fillAlpha: 0.22,
+      outerRingColor: 0x5a1b23,
+      outerRingAlpha: 0.72,
+      innerRingColor: 0x2b1018,
+      innerRingAlpha: 0.7,
+      sigilColor: 0x214345,
+      sigilAlpha: 0.34,
+      runeColor: 0x341016,
+      runeAlpha: 0.72
+    }
+  },
   projectile: {
     textureKey: ASSET_KEYS.sector02PressureShardProjectile,
     cooldownMs: 4200,
