@@ -1,25 +1,29 @@
 import Phaser from 'phaser';
 
 const REGULAR_PROFILE = {
-  ringWidth: 70,
-  ringHeight: 24,
-  ringAlpha: 0.24,
-  bloodCount: 34,
-  tarCount: 15,
-  mistCount: 10,
-  bloodWidth: [2, 5],
-  bloodHeight: [5, 10],
-  tarWidth: [2, 4],
-  tarHeight: [4, 8],
-  mistWidth: [12, 22],
-  mistHeight: [6, 12],
-  burstRadiusX: 76,
-  burstRadiusY: 42,
-  bloodLift: [30, 60],
-  tarLift: [20, 42],
-  mistLift: [12, 28],
-  durationMs: 560,
-  durationJitterMs: 110,
+  ringWidth: 84,
+  ringHeight: 28,
+  ringAlpha: 0.28,
+  bloodCount: 42,
+  heavyBloodCount: 6,
+  tarCount: 20,
+  mistCount: 12,
+  bloodWidth: [2, 6],
+  bloodHeight: [6, 12],
+  heavyBloodWidth: [4, 8],
+  heavyBloodHeight: [9, 14],
+  tarWidth: [2, 5],
+  tarHeight: [5, 10],
+  mistWidth: [14, 24],
+  mistHeight: [7, 13],
+  burstRadiusX: 90,
+  burstRadiusY: 52,
+  bloodLift: [38, 74],
+  heavyBloodLift: [24, 50],
+  tarLift: [26, 52],
+  mistLift: [14, 34],
+  durationMs: 660,
+  durationJitterMs: 120,
   depthOffset: 0.14
 };
 
@@ -27,32 +31,37 @@ const ELITE_PROFILE = {
   ...REGULAR_PROFILE,
   ringWidth: 92,
   ringHeight: 30,
-  ringAlpha: 0.28,
-  bloodCount: 52,
-  tarCount: 24,
-  mistCount: 16,
-  bloodWidth: [3, 6],
-  bloodHeight: [6, 12],
-  tarWidth: [2, 5],
-  tarHeight: [5, 10],
-  mistWidth: [15, 28],
-  mistHeight: [8, 15],
-  burstRadiusX: 110,
-  burstRadiusY: 58,
-  bloodLift: [40, 84],
-  tarLift: [26, 56],
-  mistLift: [16, 36],
-  durationMs: 680,
-  durationJitterMs: 130
+  ringAlpha: 0.32,
+  bloodCount: 60,
+  heavyBloodCount: 10,
+  tarCount: 30,
+  mistCount: 20,
+  bloodWidth: [3, 7],
+  bloodHeight: [7, 14],
+  heavyBloodWidth: [5, 9],
+  heavyBloodHeight: [10, 16],
+  tarWidth: [2, 6],
+  tarHeight: [6, 11],
+  mistWidth: [16, 30],
+  mistHeight: [8, 16],
+  burstRadiusX: 128,
+  burstRadiusY: 66,
+  bloodLift: [48, 96],
+  heavyBloodLift: [34, 66],
+  tarLift: [30, 64],
+  mistLift: [18, 42],
+  durationMs: 760,
+  durationJitterMs: 150
 };
 
 const COLORS = {
-  bloodA: 0x5a131c,
-  bloodB: 0x761a24,
-  bloodSpec: 0x8b252e,
+  bloodA: 0x4a1018,
+  bloodB: 0x631620,
+  bloodSpec: 0x74212a,
+  bloodHeavy: 0x381015,
   tarA: 0x0b0a0a,
-  tarB: 0x171113,
-  mist: 0x311a1d
+  tarB: 0x151011,
+  mist: 0x271517
 };
 
 function spawnBurstParticle(scene, centerX, centerY, baseDepth, profile, {
@@ -126,6 +135,20 @@ export function triggerEnemyDeathRuptureBurst(scene, { x, y, depth = 6, isElite 
       xTravelMultiplier: 1.32,
       angleRange: 86,
       depthStep: index * 0.0008
+    });
+  }
+
+  for (let index = 0; index < profile.heavyBloodCount; index += 1) {
+    spawnBurstParticle(scene, centerX, centerY, depth, profile, {
+      widthRange: profile.heavyBloodWidth,
+      heightRange: profile.heavyBloodHeight,
+      liftRange: profile.heavyBloodLift,
+      alpha: 0.9,
+      color: index % 2 === 0 ? COLORS.bloodHeavy : COLORS.bloodB,
+      xMultiplier: 0.13,
+      xTravelMultiplier: 1.18,
+      angleRange: 54,
+      depthStep: 0.09 + index * 0.001
     });
   }
 
