@@ -60,14 +60,14 @@ const CHAMBER03_BOSS_COMBAT = {
   phaseOne: {
     driftSpeed: 44,
     retreatSpeed: 58,
-    lungeTelegraphMs: 960,
+    lungeTelegraphMs: 1080,
     lungeSpeed: 282,
     lungeLiftVelocity: -112,
     lungeDurationMs: 300,
-    lungeRecoveryMs: 1240,
+    lungeRecoveryMs: 1320,
     lungeCooldownMs: 3200,
-    pulseTelegraphMs: 1080,
-    pulseRecoveryMs: 1080,
+    pulseTelegraphMs: 1180,
+    pulseRecoveryMs: 1160,
     pulseCooldownMs: 4240,
     pulseSpeed: 212,
     pulseDamage: 1,
@@ -77,14 +77,14 @@ const CHAMBER03_BOSS_COMBAT = {
   phaseTwo: {
     driftSpeed: 58,
     retreatSpeed: 74,
-    lungeTelegraphMs: 760,
+    lungeTelegraphMs: 900,
     lungeSpeed: 336,
     lungeLiftVelocity: -146,
     lungeDurationMs: 340,
-    lungeRecoveryMs: 940,
+    lungeRecoveryMs: 1040,
     lungeCooldownMs: 2460,
-    pulseTelegraphMs: 860,
-    pulseRecoveryMs: 860,
+    pulseTelegraphMs: 980,
+    pulseRecoveryMs: 980,
     pulseCooldownMs: 3380,
     pulseSpeed: 242,
     pulseDamage: 1,
@@ -97,7 +97,7 @@ const CHAMBER03_BOSS_COMBAT = {
   hurtRecoverMs: 260,
   hurtRecoilVelocityX: 132,
   hurtRecoilVelocityY: -96,
-  projectileIntervalMs: 260,
+  projectileIntervalMs: 360,
   projectileWidth: 60,
   projectileHeight: 28,
   projectileLifetimeMs: 1800,
@@ -1456,9 +1456,6 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       return null;
     }
 
-    const shadow = this.add
-      .ellipse(target.x, WORLD.floorY + 6, 104 * scale, 22 * scale, 0x050404, alpha * 1.05)
-      .setDepth(target.depth - 0.6);
     const halo = this.add
       .ellipse(target.x, target.y - 6, 84 * scale, 118 * scale, fill, alpha)
       .setDepth(target.depth - 0.4);
@@ -1466,14 +1463,12 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.events.on(Phaser.Scenes.Events.UPDATE, () => {
       if (!target.active) {
         halo.setVisible(false);
-        shadow.setVisible(false);
         return;
       }
 
       halo.setVisible(target.visible).setPosition(target.x, target.y - 8).setAlpha(target.visible ? alpha : 0);
-      shadow.setVisible(target.visible).setPosition(target.x, WORLD.floorY + 6).setAlpha(target.visible ? alpha * 1.05 : 0);
     });
 
-    return { halo, shadow };
+    return { halo };
   }
 }

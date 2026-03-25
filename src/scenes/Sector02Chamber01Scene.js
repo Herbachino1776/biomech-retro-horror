@@ -1191,20 +1191,17 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       return null;
     }
 
-    const shadow = this.add.ellipse(target.x, WORLD.floorY + 6, 104 * scale, 22 * scale, 0x050404, alpha * 1.05).setDepth(target.depth - 0.6);
     const halo = this.add.ellipse(target.x, target.y - 6, 84 * scale, 118 * scale, fill, alpha).setDepth(target.depth - 0.4);
 
     this.events.on(Phaser.Scenes.Events.UPDATE, () => {
       if (!target.active) {
         halo.setVisible(false);
-        shadow.setVisible(false);
         return;
       }
 
       halo.setVisible(target.visible).setPosition(target.x, target.y - 8).setAlpha(target.visible ? alpha : 0);
-      shadow.setVisible(target.visible).setPosition(target.x, WORLD.floorY + 6).setAlpha(target.visible ? alpha * 1.05 : 0);
     });
 
-    return { halo, shadow };
+    return { halo };
   }
 }
