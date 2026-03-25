@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { HalfSkullMiniboss } from './HalfSkullMiniboss.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { GroundBurstAttack } from '../systems/GroundBurstAttack.js';
+import { LineSweepAttack } from '../systems/LineSweepAttack.js';
 
 const DEFAULT_PROJECTILE_CONFIG = {
   cooldownMs: 3200,
@@ -40,6 +41,7 @@ export class AbyssalArchon extends HalfSkullMiniboss {
 
 
     this.groundBurst = new GroundBurstAttack(scene, this, config.groundBurst ?? {});
+    this.lineSweep = new LineSweepAttack(scene, this, config.lineSweep ?? {});
     this.projectileTelegraph = scene.add
       .ellipse(x, y + this.projectileConfig.spawnOffsetY, this.projectileConfig.telegraphRadiusX, this.projectileConfig.telegraphRadiusY, 0xcad8be, 0.12)
       .setStrokeStyle(2, 0xaec797, 0.55)
@@ -52,6 +54,7 @@ export class AbyssalArchon extends HalfSkullMiniboss {
     if (!active && !this.dead) {
       this.clearProjectileState();
       this.groundBurst?.resetState();
+      this.lineSweep?.resetState();
     }
   }
 
@@ -60,12 +63,14 @@ export class AbyssalArchon extends HalfSkullMiniboss {
       this.updateVisuals(time);
       this.body.setVelocityX(0);
       this.projectileTelegraph?.setVisible(false);
+      this.lineSweep?.resetState();
       return;
     }
 
     if (!this.active) {
       this.clearProjectileState();
       this.groundBurst?.resetState();
+      this.lineSweep?.resetState();
       this.attackState = 'idle';
       this.body.setVelocityX(0);
       this.updateVisuals(time);
@@ -74,6 +79,17 @@ export class AbyssalArchon extends HalfSkullMiniboss {
 
     this.groundBurst?.update(time, player);
     if (this.groundBurst?.isBusy()) {
+      this.clearProjectileState();
+      this.lineSweep?.resetState();
+      this.attackState = 'idle';
+      this.body.setVelocityX(0);
+      this.updateVisuals(time);
+      this.updateProjectileTelegraph(time);
+      return;
+    }
+
+    this.lineSweep?.update(time, player);
+    if (this.lineSweep?.isBusy()) {
       this.clearProjectileState();
       this.attackState = 'idle';
       this.body.setVelocityX(0);
@@ -128,6 +144,7 @@ export class AbyssalArchon extends HalfSkullMiniboss {
       this.projectileState !== 'idle' ||
       this.attackState !== 'idle' ||
       this.groundBurst?.isBusy?.() ||
+      this.lineSweep?.isBusy?.() ||
       time < this.hurtUntil ||
       time < this.lastProjectileTime + this.projectileConfig.cooldownMs ||
       !this.body.blocked.down
@@ -180,6 +197,7 @@ export class AbyssalArchon extends HalfSkullMiniboss {
     super.clearAttackState();
     this.clearProjectileState();
     this.groundBurst?.resetState();
+    this.lineSweep?.resetState();
   }
 
   clearProjectileState() {
@@ -202,7 +220,8 @@ export class AbyssalArchon extends HalfSkullMiniboss {
     return Math.max(
       super.getTelegraphProgress(time),
       this.getProjectileTelegraphProgress(time),
-      this.groundBurst?.getTelegraphProgress(time) ?? 0
+      this.groundBurst?.getTelegraphProgress(time) ?? 0,
+      this.lineSweep?.getTelegraphProgress(time) ?? 0
     );
   }
 
@@ -229,6 +248,7 @@ export class AbyssalArchon extends HalfSkullMiniboss {
   destroyCombatTelegraphs() {
     this.projectileTelegraph?.destroy?.();
     this.groundBurst?.destroy?.();
+    this.lineSweep?.destroy?.();
   }
 
   takeDamage(amount, time = this.scene.time.now) {
@@ -236,6 +256,7 @@ export class AbyssalArchon extends HalfSkullMiniboss {
     if (tookDamage) {
       this.clearProjectileState();
       this.groundBurst?.resetState();
+      this.lineSweep?.resetState();
     }
 
     if (this.dead) {

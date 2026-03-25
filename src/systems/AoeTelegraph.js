@@ -68,17 +68,42 @@ export class AoeTelegraph {
     this.graphics.lineBetween(x, y - outerRadius * 0.48, x, y + outerRadius * 0.48);
   }
 
-  drawLine({ startX, startY, endX, endY, width = 12, progress = 0 }) {
+  drawLine({ startX, startY, endX, endY, width = 12, progress = 0, time = this.scene.time.now, active = false }) {
     this.graphics.clear();
     this.graphics.setVisible(true);
     this.visible = true;
     this.shape = { type: 'line', startX, startY, endX, endY, width };
 
-    const alpha = 0.24 + Phaser.Math.Clamp(progress, 0, 1) * 0.34;
-    this.graphics.lineStyle(width, this.style.outerRingColor, alpha * 0.8);
+    const easedProgress = Phaser.Math.Easing.Cubic.Out(Phaser.Math.Clamp(progress, 0, 1));
+    const pulse = 1 + Math.sin(time / 56) * 0.06;
+    const lineWidth = width * (0.9 + easedProgress * 0.18) * pulse;
+    const edgeWidth = Math.max(2, lineWidth * 0.18);
+    const spineWidth = Math.max(2, lineWidth * 0.36);
+    const activeBoost = active ? 1.2 : 1;
+
+    this.graphics.lineStyle(lineWidth, 0x090405, 0.36 * activeBoost);
     this.graphics.lineBetween(startX, startY, endX, endY);
-    this.graphics.lineStyle(Math.max(2, width * 0.35), this.style.sigilColor, alpha * 0.76);
+
+    this.graphics.lineStyle(lineWidth * 0.82, this.style.outerRingColor, (0.28 + easedProgress * 0.24) * activeBoost);
     this.graphics.lineBetween(startX, startY, endX, endY);
+
+    this.graphics.lineStyle(spineWidth, this.style.innerRingColor, (0.4 + easedProgress * 0.22) * activeBoost);
+    this.graphics.lineBetween(startX, startY, endX, endY);
+
+    this.graphics.lineStyle(edgeWidth, this.style.sigilColor, (0.24 + easedProgress * 0.22) * activeBoost);
+    this.graphics.lineBetween(startX, startY, endX, endY);
+
+    const runeCount = 4;
+    const dx = endX - startX;
+    const dy = endY - startY;
+    for (let i = 1; i <= runeCount; i += 1) {
+      const t = i / (runeCount + 1);
+      const runeX = startX + dx * t;
+      const runeY = startY + dy * t;
+      const runeRadius = Math.max(2.5, width * 0.12 + easedProgress * 1.2);
+      this.graphics.fillStyle(this.style.runeColor, (0.34 + easedProgress * 0.26) * activeBoost);
+      this.graphics.fillCircle(runeX, runeY, runeRadius);
+    }
   }
 
   clear() {
