@@ -60,15 +60,15 @@ const CHAMBER03_BOSS_COMBAT = {
   phaseOne: {
     driftSpeed: 44,
     retreatSpeed: 58,
-    lungeTelegraphMs: 880,
+    lungeTelegraphMs: 960,
     lungeSpeed: 282,
     lungeLiftVelocity: -112,
     lungeDurationMs: 300,
-    lungeRecoveryMs: 1120,
+    lungeRecoveryMs: 1240,
     lungeCooldownMs: 3200,
-    pulseTelegraphMs: 980,
-    pulseRecoveryMs: 960,
-    pulseCooldownMs: 3980,
+    pulseTelegraphMs: 1080,
+    pulseRecoveryMs: 1080,
+    pulseCooldownMs: 4240,
     pulseSpeed: 212,
     pulseDamage: 1,
     contactDamage: 1,
@@ -77,15 +77,15 @@ const CHAMBER03_BOSS_COMBAT = {
   phaseTwo: {
     driftSpeed: 58,
     retreatSpeed: 74,
-    lungeTelegraphMs: 680,
+    lungeTelegraphMs: 760,
     lungeSpeed: 336,
     lungeLiftVelocity: -146,
     lungeDurationMs: 340,
-    lungeRecoveryMs: 820,
+    lungeRecoveryMs: 940,
     lungeCooldownMs: 2460,
-    pulseTelegraphMs: 760,
-    pulseRecoveryMs: 720,
-    pulseCooldownMs: 3120,
+    pulseTelegraphMs: 860,
+    pulseRecoveryMs: 860,
+    pulseCooldownMs: 3380,
     pulseSpeed: 242,
     pulseDamage: 1,
     contactDamage: 1,
@@ -97,13 +97,13 @@ const CHAMBER03_BOSS_COMBAT = {
   hurtRecoverMs: 260,
   hurtRecoilVelocityX: 132,
   hurtRecoilVelocityY: -96,
-  projectileIntervalMs: 170,
+  projectileIntervalMs: 260,
   projectileWidth: 60,
   projectileHeight: 28,
   projectileLifetimeMs: 1800,
   projectileSpawnOffsetX: 118,
   projectileSpawnOffsetY: 26,
-  projectilePhaseTwoSpreadY: 22,
+  projectilePhaseTwoSpreadY: 28,
   arenaPaddingX: 164
 };
 
@@ -1084,18 +1084,22 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
   }
 
   chooseBossAttack(time, absDx) {
+    const boss = this.bossCombat;
     const phase = this.getBossPhaseConfig();
-    const pulseReady = time >= this.bossCombat.lastPulseAt + phase.pulseCooldownMs;
-    const lungeReady = time >= this.bossCombat.lastLungeAt + phase.lungeCooldownMs;
-    const shouldPulse = pulseReady && (absDx > CHAMBER03_BOSS_COMBAT.idealRange + 36 || this.bossCombat.attackPatternIndex % 4 === 3);
+    const pulseReady = time >= boss.lastPulseAt + phase.pulseCooldownMs;
+    const lungeReady = time >= boss.lastLungeAt + phase.lungeCooldownMs;
+    const shouldPulse = pulseReady
+      && boss.state === 'idle'
+      && boss.attackLabel !== 'RECOVER'
+      && (absDx > CHAMBER03_BOSS_COMBAT.idealRange + 44 || boss.attackPatternIndex % 4 === 3);
 
     if (shouldPulse) {
       this.startBossTelegraph('telegraph-pulse', phase.pulseTelegraphMs, time, 'CHOIR PULSE');
       return;
     }
 
-    if (lungeReady) {
-      this.startBossTelegraph('telegraph-lunge', phase.lungeTelegraphMs, time, this.bossCombat.phase === 1 ? 'JUDGMENT DESCENDS' : 'MARROW REND');
+    if (lungeReady && boss.state === 'idle') {
+      this.startBossTelegraph('telegraph-lunge', phase.lungeTelegraphMs, time, boss.phase === 1 ? 'JUDGMENT DESCENDS' : 'MARROW REND');
     }
   }
 
