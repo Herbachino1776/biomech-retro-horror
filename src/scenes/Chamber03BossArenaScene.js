@@ -7,6 +7,7 @@ import { COLORS, PLAYER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
+import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 
 const CHAMBER03_BOSS_ARENA = {
   worldWidth: 1920,
@@ -132,6 +133,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossAttackHitId = -1;
     this.isSectorFinaleActive = false;
     this.currentProgressionThresholdZone = null;
+    this.integrityRewardTracker = new Set();
   }
 
   create() {
@@ -354,6 +356,9 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
   createPlayerAndColliders() {
     this.player = new Player(this, CHAMBER03_BOSS_ARENA.spawnX, CHAMBER03_BOSS_ARENA.spawnY, PLAYER);
+    const entryIntegrity = applyChamberEntryRestore(this.transitionContext);
+    this.player.health = entryIntegrity.current;
+    this.player.maxHealth = entryIntegrity.max;
     this.applyGameplayReadabilitySupport(this.player.sprite, CHAMBER03_BOSS_ARENA.playerHalo);
     this.physics.add.collider(this.player.sprite, this.platforms);
   }
@@ -826,6 +831,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
     this.bossCombat.defeated = true;
     this.bossCombat.state = 'defeated';
+    grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'chamber03-precentor-true-boss');
     this.cancelBossProjectileTimer();
     this.clearBossProjectiles();
     this.tweens.killTweensOf([this.bossSprite, this.bossFallbackLabel, this.bossArrivalAura, this.bossArrivalHalo].filter(Boolean));

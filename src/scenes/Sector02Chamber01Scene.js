@@ -11,6 +11,7 @@ import { PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
+import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 
 const BLACK_AQUEDUCT_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber01Scene',
@@ -303,6 +304,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.loreAnchors = [];
     this.enemyProjectiles = [];
     this.enemyProjectilesPaused = false;
+    this.integrityRewardTracker = new Set();
   }
 
   create() {
@@ -418,6 +420,9 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
 
   createPlayerAndColliders() {
     this.player = new Player(this, BLACK_AQUEDUCT_BOOTSTRAP.spawnX, BLACK_AQUEDUCT_BOOTSTRAP.spawnY, PLAYER);
+    const entryIntegrity = applyChamberEntryRestore(this.transitionContext);
+    this.player.health = entryIntegrity.current;
+    this.player.maxHealth = entryIntegrity.max;
     this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xc2c9bf, alpha: 0.16, scale: 1.08 });
     this.physics.add.collider(this.player.sprite, this.platforms);
   }
@@ -916,6 +921,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.audioDirector?.playPlayerHit();
 
     if (this.archon.dead && !this.hasUnlockedForwardPath) {
+      grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber01-archon-miniboss');
       this.triggerSector02BlackOilPayoff(this.archon, { scale: 1.12, burstCount: 12, puddleWidth: 204, puddleHeight: 48 });
       this.unlockForwardPath();
     }

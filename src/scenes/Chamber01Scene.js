@@ -18,6 +18,7 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
+import { grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 
 const SHOW_CHAMBER01_DEBUG_LABELS = false;
 
@@ -75,6 +76,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.isMinibossRewardActive = false;
     this.minibossEncounterStarted = false;
     this.minibossDefeated = false;
+    this.integrityRewardTracker = new Set();
     this.minibossDeathFlashUntil = -Infinity;
     this.minibossDeathPulse = null;
     this.minibossRewardReleaseTimer = null;
@@ -682,6 +684,7 @@ export class Chamber01Scene extends Phaser.Scene {
   handleMinibossDefeated() {
     this.minibossDefeated = true;
     this.miniboss.setActive(false);
+    grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'chamber01-halfskull-miniboss');
     this.isMinibossRewardActive = true;
     this.minibossDeathFlashUntil = this.time.now + 520;
     this.spawnMinibossBloodPool(this.miniboss.sprite.x, WORLD.floorY - 5);

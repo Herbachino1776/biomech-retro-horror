@@ -11,6 +11,7 @@ import { PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
+import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 
 const KILN_OF_JUDGEMENT_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber03Scene',
@@ -316,6 +317,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.sorrowEngineDeathSequenceActive = false;
     this.sorrowEngineDeathFinished = false;
     this.hasTriggeredBossReveal = false;
+    this.integrityRewardTracker = new Set();
   }
 
   create() {
@@ -454,6 +456,9 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
 
   createPlayerAndColliders() {
     this.player = new Player(this, KILN_OF_JUDGEMENT_BOOTSTRAP.spawnX, KILN_OF_JUDGEMENT_BOOTSTRAP.spawnY, PLAYER);
+    const entryIntegrity = applyChamberEntryRestore(this.transitionContext);
+    this.player.health = entryIntegrity.current;
+    this.player.maxHealth = entryIntegrity.max;
     this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd1c6b5, alpha: 0.16, scale: 1.08 });
     this.physics.add.collider(this.player.sprite, this.platforms);
   }
@@ -1137,6 +1142,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       this.sorrowEngineDeathFinished = true;
       this.hud.setBossBarState({ visible: false });
       if (!this.hasUnlockedForwardPath) {
+        grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber03-sorrow-engine-true-boss');
         this.unlockForwardPath();
       }
     });

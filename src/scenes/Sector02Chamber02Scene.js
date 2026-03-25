@@ -11,6 +11,7 @@ import { PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
+import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 
 const COMPRESSION_VAULTS_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber02Scene',
@@ -347,6 +348,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.pressureDeacon = null;
     this.hasEnteredForwardThreshold = false;
     this.forwardThresholdAwaitingFreshInteract = false;
+    this.integrityRewardTracker = new Set();
   }
 
   create() {
@@ -491,6 +493,9 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
 
   createPlayerAndColliders() {
     this.player = new Player(this, COMPRESSION_VAULTS_BOOTSTRAP.spawnX, COMPRESSION_VAULTS_BOOTSTRAP.spawnY, PLAYER);
+    const entryIntegrity = applyChamberEntryRestore(this.transitionContext);
+    this.player.health = entryIntegrity.current;
+    this.player.maxHealth = entryIntegrity.max;
     this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xc2c9bf, alpha: 0.16, scale: 1.08 });
     this.physics.add.collider(this.player.sprite, this.platforms);
   }
@@ -1062,6 +1067,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.audioDirector?.playPlayerHit();
 
     if (this.pressureDeacon.dead && !this.hasUnlockedForwardPath) {
+      grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber02-pressure-deacon-miniboss');
       this.triggerSector02BlackOilPayoff(this.pressureDeacon, COMPRESSION_VAULTS_PRESSURE_DEACON.blowout);
       this.unlockForwardPath();
     }

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { CONCEPT_PRESENTATION, DEBUG_BOOT_OVERRIDES } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { ASSET_URLS } from '../data/assetUrls.js';
+import { vesselIntegrityState } from '../systems/VesselIntegrityState.js';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -247,6 +248,7 @@ export class BootScene extends Phaser.Scene {
     }
 
     this.hasStarted = true;
+    vesselIntegrityState.resetForFreshRun();
 
     if (this.sound?.context?.state === 'suspended') {
       this.sound.context.resume().catch(() => {

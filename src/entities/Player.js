@@ -196,6 +196,13 @@ export class Player {
     return this.maxHealth;
   }
 
+  increaseMaxIntegrity(amount = 1) {
+    const next = vesselIntegrityState.increaseMaxIntegrity(amount, { restoreCurrent: true });
+    this.health = next.current;
+    this.maxHealth = next.max;
+    return this.maxHealth;
+  }
+
   die() {
     this.isDead = true;
     this.endAttack();
