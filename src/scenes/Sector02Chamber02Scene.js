@@ -296,6 +296,35 @@ const COMPRESSION_VAULTS_PRESSURE_DEACON = {
     scaleX: 1,
     scaleY: 1
   },
+
+  groundBurst: {
+    enabled: true,
+    cooldownMs: 6400,
+    windupMs: 980,
+    activeMs: 140,
+    recoveryMs: 860,
+    minRange: 124,
+    maxRange: 410,
+    radius: 136,
+    damage: 1,
+    yTolerance: 150,
+    burstOffsetY: -2,
+    burstColor: 0x3f171c,
+    burstAlpha: 0.44,
+    telegraphStyle: {
+      fillColor: 0x140609,
+      fillAlpha: 0.22,
+      outerRingColor: 0x5e1b22,
+      outerRingAlpha: 0.78,
+      innerRingColor: 0x311118,
+      innerRingAlpha: 0.64,
+      sigilColor: 0x15373a,
+      sigilAlpha: 0.28,
+      runeColor: 0x2a1217,
+      runeAlpha: 0.72,
+      depth: 6.12
+    }
+  },
   projectile: {
     textureKey: ASSET_KEYS.sector02PressureShardProjectile,
     cooldownMs: 3600,
@@ -759,7 +788,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.enemyProjectiles.forEach((projectile) => projectile.destroy());
       this.enemies.forEach((enemy) => enemy.projectileTelegraph?.destroy?.());
-      this.pressureDeacon?.projectileTelegraph?.destroy?.();
+      this.pressureDeacon?.destroyCombatTelegraphs?.();
     });
   }
 
