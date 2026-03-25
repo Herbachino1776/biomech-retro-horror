@@ -24,6 +24,10 @@ export class SkitterServitor {
     this.contactDamageWindowUntil = -Infinity;
     this.hurtPushDirection = 0;
     this.attackAudioLocked = false;
+    this.lastSeenPlayerAt = -Infinity;
+    this.pursuitCommittedUntil = -Infinity;
+    this.wasAwakenedLastUpdate = this.awakened;
+    this.wakeRushUntil = -Infinity;
 
     const spriteKey = config.textureKey ?? ASSET_KEYS.skitter;
     const spritePresentation = config.presentation ?? {};
@@ -86,6 +90,12 @@ export class SkitterServitor {
     }
 
     this.updateAwakeningState(time, playerX);
+    if (this.awakened && !this.wasAwakenedLastUpdate) {
+      this.wakeRushUntil = time + (this.config.wakeRushMs ?? 420);
+      this.nextAttackAllowedAt = Math.min(this.nextAttackAllowedAt, time + (this.config.wakeAttackLeadInMs ?? 160));
+      this.enterState('stalk', time);
+    }
+    this.wasAwakenedLastUpdate = this.awakened;
     this.updateState(time, playerX);
 
     if (!this.awakened) {
@@ -119,8 +129,16 @@ export class SkitterServitor {
     const dx = playerX - this.sprite.x;
     const absDx = Math.abs(dx);
     const closeEnoughToAggro = absDx < this.config.aggroRange;
+    const pursuitCommitMs = this.config.pursuitCommitMs ?? 980;
+    const pursueAfterLosingAggro = time < this.pursuitCommittedUntil;
+    const shouldPursue = closeEnoughToAggro || pursueAfterLosingAggro;
 
-    if (closeEnoughToAggro && this.combatState !== 'hurt') {
+    if (closeEnoughToAggro) {
+      this.lastSeenPlayerAt = time;
+      this.pursuitCommittedUntil = time + pursuitCommitMs;
+    }
+
+    if (shouldPursue && this.combatState !== 'hurt') {
       this.direction = Math.sign(dx) || this.direction;
     }
 
@@ -158,44 +176,58 @@ export class SkitterServitor {
         break;
       case 'stalk':
       default:
-        if (closeEnoughToAggro) {
-          this.runAggroStalk(absDx);
+        if (shouldPursue) {
+          this.runAggroStalk(absDx, time);
           if (absDx <= this.config.attackTriggerRange && time >= this.nextAttackAllowedAt) {
             this.enterState('windup', time, this.config.windupMs);
           }
         } else {
-          this.runPatrol();
+          this.runPatrol(absDx);
         }
         break;
     }
   }
 
-  runAggroStalk(absDx) {
+  runAggroStalk(absDx, time) {
     const lowerBound = this.config.preferredRange - this.config.rangeBand;
     const upperBound = this.config.preferredRange + this.config.rangeBand;
+    const wakeRushFactor = time < this.wakeRushUntil ? (this.config.wakeRushSpeedFactor ?? 1.16) : 1;
+    const baseSpeed = this.config.speed * wakeRushFactor;
 
     if (absDx < lowerBound) {
-      this.body.setVelocityX(-this.direction * this.config.speed * 0.55);
+      this.body.setVelocityX(-this.direction * baseSpeed * 0.34);
       return;
     }
 
     if (absDx > upperBound) {
-      this.body.setVelocityX(this.direction * this.config.speed);
+      this.body.setVelocityX(this.direction * baseSpeed * 1.12);
       return;
     }
 
-    this.body.setVelocityX(this.direction * this.config.speed * 0.18);
+    this.body.setVelocityX(this.direction * baseSpeed * 0.44);
   }
 
   runCooldownSpacing(absDx) {
-    const needsSpace = absDx < this.config.preferredRange * 0.82;
-    const retreatSpeed = this.config.speed * (needsSpace ? 0.48 : 0.22);
-    this.body.setVelocityX(-this.direction * retreatSpeed);
+    const retreatRange = this.config.preferredRange * 0.74;
+    const reengageRange = this.config.preferredRange * 1.34;
+
+    if (absDx < retreatRange) {
+      this.body.setVelocityX(-this.direction * this.config.speed * 0.46);
+      return;
+    }
+
+    if (absDx > reengageRange) {
+      this.body.setVelocityX(this.direction * this.config.speed * 0.48);
+      return;
+    }
+
+    this.body.setVelocityX(this.direction * this.config.speed * 0.08);
   }
 
-  runPatrol() {
+  runPatrol(absDx) {
     const patrolMin = this.originX - this.config.patrolDistance;
     const patrolMax = this.originX + this.config.patrolDistance;
+    const farFromHome = Math.abs(this.sprite.x - this.originX) > this.config.patrolDistance * 0.45;
 
     if (this.sprite.x < patrolMin) {
       this.direction = 1;
@@ -204,7 +236,13 @@ export class SkitterServitor {
       this.direction = -1;
     }
 
-    this.body.setVelocityX(this.direction * this.config.speed * 0.45);
+    if (farFromHome && absDx > this.config.aggroRange * 1.15) {
+      this.direction = Math.sign(this.originX - this.sprite.x) || this.direction;
+      this.body.setVelocityX(this.direction * this.config.speed * 0.58);
+      return;
+    }
+
+    this.body.setVelocityX(this.direction * this.config.speed * 0.52);
   }
 
   beginAttack(time) {

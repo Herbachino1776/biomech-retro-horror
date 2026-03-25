@@ -79,9 +79,9 @@ const COMPRESSION_VAULTS_CLIMAX_FRAMING = {
 const COMPRESSION_VAULTS_SKITTER_BASIC_01 = {
   ...SKITTER,
   textureKey: ASSET_KEYS.sector02Chamber02EnemyBasic01,
-  speed: 50,
+  speed: 52,
   aggroRange: 244,
-  patrolDistance: 100,
+  patrolDistance: 118,
   presentation: {
     alpha: 0.97,
     display: { width: 178, height: 148 },
@@ -101,8 +101,8 @@ const COMPRESSION_VAULTS_SKITTER_BASIC_01 = {
 const COMPRESSION_VAULTS_SKITTER_BASIC_02 = {
   ...COMPRESSION_VAULTS_SKITTER_BASIC_01,
   textureKey: ASSET_KEYS.sector02Chamber02EnemyBasic02,
-  speed: 54,
-  patrolDistance: 118,
+  speed: 56,
+  patrolDistance: 132,
   presentation: {
     ...COMPRESSION_VAULTS_SKITTER_BASIC_01.presentation,
     display: { width: 186, height: 152 }
@@ -115,7 +115,7 @@ const COMPRESSION_VAULTS_TOLL_KEEPER = {
   textureKey: ASSET_KEYS.sector02Chamber02EnemyElite,
   variantName: 'PRESSURE TOLL-KEEPER',
   health: 7,
-  speed: 42,
+  speed: 45,
   aggroRange: 286,
   attackCooldownMs: 3100,
   windupMs: 840,
@@ -130,7 +130,7 @@ const COMPRESSION_VAULTS_TOLL_KEEPER = {
   lungeJumpVelocity: -90,
   recoilVelocityX: 144,
   recoilVelocityY: -84,
-  patrolDistance: 80,
+  patrolDistance: 94,
   body: { width: 74, height: 44, offsetX: 28, offsetY: 90 },
   presentation: {
     alpha: 0.98,
@@ -212,8 +212,9 @@ const COMPRESSION_VAULTS_ENCOUNTER_POCKETS = [
     promptOffsetY: -152,
     enemies: [
       { type: 'basic02', x: 4185, y: PLAYER.startY, patrolDistance: 114, wakeDelayMs: 0 },
-      { type: 'elite', x: 4540, y: PLAYER.startY, patrolDistance: 78, wakeDelayMs: 180, projectileCadence: 'measured' },
-      { type: 'basic01', x: 4865, y: PLAYER.startY, patrolDistance: 116, wakeDelayMs: 320 }
+      { type: 'basic01', x: 4380, y: PLAYER.startY, patrolDistance: 102, wakeDelayMs: 90 },
+      { type: 'elite', x: 4540, y: PLAYER.startY, patrolDistance: 78, wakeDelayMs: 160, projectileCadence: 'measured' },
+      { type: 'basic01', x: 4865, y: PLAYER.startY, patrolDistance: 116, wakeDelayMs: 230 }
     ]
   }
 ];
@@ -859,7 +860,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
           if (enemy.dead) {
             return;
           }
-          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 80;
+          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 54;
         });
       }
 

@@ -77,8 +77,9 @@ const CHAMBER02_TOLL_KEEPER_SPAWNS = [
 ];
 
 const CHAMBER02_ENEMY_SPAWNS = [
-  { x: 1600, y: 402, awakenPlayerX: 1360 },
-  { x: 2410, y: 402, awakenPlayerX: 2050 }
+  { x: 1600, y: 402, awakenPlayerX: 1360, patrolDistance: 210, wakeDelayMs: 220 },
+  { x: 2410, y: 402, awakenPlayerX: 2050, patrolDistance: 196, wakeDelayMs: 150 },
+  { x: 2795, y: 402, awakenPlayerX: 2440, patrolDistance: 188, wakeDelayMs: 260 }
 ];
 
 const CHAMBER02_LORE_ENTRY = {
