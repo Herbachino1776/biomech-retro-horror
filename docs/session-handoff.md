@@ -56,6 +56,11 @@ The game is beyond a small vertical-slice stub.
 - If projectile visuals work but damage fails, audit overlap/damage contract first.
 - Fix shared presentation regressions at the shared layer, then validate all chambers.
 
+## Combat Sidequest Roadmap Note
+- A defined combat-sidequest roadmap now exists in `docs/combat-sidequest-roadmap.md`.
+- This is approved future-lane planning, not a claim that those systems are already implemented.
+- First approved sidequest milestone for future implementation: **Milestone 7A — Vessel Run Economy**.
+
 ## Most Likely Next Step
 **Primary next step:** Sector 2 stabilization/polish wrap + documentation parity hardening.  
 **Parallel planning step:** begin Sector 3 pre-production framing without introducing unneeded systems yet.
