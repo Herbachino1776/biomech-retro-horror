@@ -297,7 +297,15 @@ const CHAMBER03_ENCOUNTER_POCKETS = [
         y: PLAYER.startY,
         awakenPlayerX: undefined,
         patrolDistance: 108,
-        wakeDelayMs: 140
+        wakeDelayMs: 90
+      },
+      {
+        type: 'skitter',
+        x: 3815,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 94,
+        wakeDelayMs: 160
       },
       {
         type: 'tollkeeper',
@@ -897,7 +905,7 @@ export class Chamber03Scene extends Phaser.Scene {
         return;
       }
 
-      enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 60;
+      enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 42;
     });
   }
 

@@ -55,7 +55,7 @@ const BLACK_AQUEDUCT_SKITTER_CONFIG = {
   textureKey: ASSET_KEYS.sector02Chamber01EnemyBasic,
   aggroRange: 244,
   speed: 52,
-  patrolDistance: 110,
+  patrolDistance: 124,
   awakenPlayerX: undefined,
   wakeDelayMs: 0,
   presentation: {
@@ -79,7 +79,7 @@ const BLACK_AQUEDUCT_TOLL_KEEPER_CONFIG = {
   textureKey: ASSET_KEYS.sector02Chamber01EnemyElite,
   variantName: 'AQUEDUCT TOLL-KEEPER',
   health: 7,
-  speed: 44,
+  speed: 46,
   aggroRange: 280,
   attackCooldownMs: 3000,
   windupMs: 820,
@@ -94,7 +94,7 @@ const BLACK_AQUEDUCT_TOLL_KEEPER_CONFIG = {
   lungeJumpVelocity: -92,
   recoilVelocityX: 144,
   recoilVelocityY: -84,
-  patrolDistance: 84,
+  patrolDistance: 96,
   awakenPlayerX: undefined,
   wakeDelayMs: 0,
   body: { width: 72, height: 42, offsetX: 28, offsetY: 94 },
@@ -205,9 +205,9 @@ const BLACK_AQUEDUCT_ENCOUNTER_POCKETS = [
     markerHeight: 74,
     markerAlpha: 0.1,
     enemies: [
-      { type: 'skitter', x: 2300, y: PLAYER.startY, patrolDistance: 120, wakeDelayMs: 0 },
-      { type: 'skitter', x: 2570, y: PLAYER.startY, patrolDistance: 100, wakeDelayMs: 110 },
-      { type: 'skitter', x: 2825, y: PLAYER.startY, patrolDistance: 136, wakeDelayMs: 240 }
+      { type: 'skitter', x: 2265, y: PLAYER.startY, patrolDistance: 126, wakeDelayMs: 0 },
+      { type: 'skitter', x: 2535, y: PLAYER.startY, patrolDistance: 112, wakeDelayMs: 70 },
+      { type: 'skitter', x: 2805, y: PLAYER.startY, patrolDistance: 142, wakeDelayMs: 170 }
     ]
   },
   {
@@ -764,7 +764,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
           if (enemy.dead) {
             return;
           }
-          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 70;
+          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 48;
         });
       }
 

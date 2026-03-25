@@ -55,9 +55,9 @@ const KILN_OF_JUDGEMENT_BUTTRESSES = [
 const KILN_SKITTER_BASIC_01 = {
   ...SKITTER,
   textureKey: ASSET_KEYS.sector02Chamber03EnemyBasic01,
-  speed: 52,
+  speed: 54,
   aggroRange: 250,
-  patrolDistance: 104,
+  patrolDistance: 120,
   presentation: {
     alpha: 0.97,
     display: { width: 178, height: 148 },
@@ -77,8 +77,8 @@ const KILN_SKITTER_BASIC_01 = {
 const KILN_SKITTER_BASIC_02 = {
   ...KILN_SKITTER_BASIC_01,
   textureKey: ASSET_KEYS.sector02Chamber03EnemyBasic02,
-  speed: 56,
-  patrolDistance: 118,
+  speed: 58,
+  patrolDistance: 134,
   presentation: {
     ...KILN_SKITTER_BASIC_01.presentation,
     display: { width: 186, height: 152 }
@@ -91,7 +91,7 @@ const KILN_SKITTER_ELITE = {
   textureKey: ASSET_KEYS.sector02Chamber03EnemyElite,
   variantName: 'KILN BANISHER CUSTODIAN',
   health: 7,
-  speed: 44,
+  speed: 46,
   aggroRange: 292,
   attackCooldownMs: 3040,
   windupMs: 860,
@@ -106,7 +106,7 @@ const KILN_SKITTER_ELITE = {
   lungeJumpVelocity: -92,
   recoilVelocityX: 144,
   recoilVelocityY: -84,
-  patrolDistance: 82,
+  patrolDistance: 96,
   body: { width: 74, height: 44, offsetX: 28, offsetY: 90 },
   presentation: {
     alpha: 0.98,
@@ -155,8 +155,9 @@ const KILN_ENCOUNTER_POCKETS = [
     markerWidth: 438, markerHeight: 82, markerAlpha: 0.1, promptOffsetY: -148,
     enemies: [
       { type: 'basic02', x: 2485, y: PLAYER.startY, patrolDistance: 122 },
-      { type: 'basic01', x: 2760, y: PLAYER.startY, patrolDistance: 108, wakeDelayMs: 110 },
-      { type: 'elite', x: 3055, y: PLAYER.startY, patrolDistance: 78, wakeDelayMs: 320, projectileCadence: 'measured' }
+      { type: 'basic01', x: 2760, y: PLAYER.startY, patrolDistance: 108, wakeDelayMs: 80 },
+      { type: 'basic01', x: 2920, y: PLAYER.startY, patrolDistance: 96, wakeDelayMs: 160 },
+      { type: 'elite', x: 3055, y: PLAYER.startY, patrolDistance: 78, wakeDelayMs: 250, projectileCadence: 'measured' }
     ]
   },
   {
@@ -734,7 +735,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
           if (enemy.dead) {
             return;
           }
-          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 80;
+          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 52;
         });
       }
 
