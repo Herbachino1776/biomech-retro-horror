@@ -35,3 +35,8 @@ Rationale:
 - Scene registration and handoff wiring between Sector 2 chambers.
 - Lore cutscene scene isolation from chamber viewport matte/blackout layers.
 - Shared enemy presentation logic without cross-chamber verification.
+
+## Planned Future Sidequest Lane
+- A dedicated combat sidequest roadmap is now documented in `docs/combat-sidequest-roadmap.md`.
+- This roadmap is a planned future lane and **not** a statement that all listed systems are active now.
+- Current active milestone focus remains Sector 2 stabilization/polish wrap + docs parity.

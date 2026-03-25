@@ -52,3 +52,10 @@ Concise record of technical/design decisions currently in force.
 - Before gameplay/controls/deployment/asset-loading/UI/lore changes, read doctrine docs.
 - Prefer text/code edits unless binary edits are explicitly required.
 - End meaningful code tasks with `npm run build` verification.
+
+## Combat Sidequest Doctrine (Planned Lane)
+- Combat economy direction should be intentional run-level tuning, not chamber-reset-driven recovery loops.
+- Vessel Integrity presentation is planned to evolve into a smooth draining bar (non-segmented HUD language).
+- Enemy aggression and encounter chemistry are prioritized over spongeiness-only difficulty tuning.
+- Rite remains a lore interaction pillar and is planned to later expand into a contextual combat finisher on staggered major enemies.
+- Surprise altar-to-boss-pit transitions are an approved future encounter structure.
