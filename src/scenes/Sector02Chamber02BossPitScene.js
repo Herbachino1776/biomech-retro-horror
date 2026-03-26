@@ -33,6 +33,7 @@ const BOSS_PIT_VICTORY = {
   preExplosionShakeMs: 3000,
   preExplosionShakeIntensity: 0.0058,
   goreFountainCadenceMs: 140,
+  explosionFadeDurationMs: 320,
   postExplosionDespawnDelayMs: 320,
   fadeOutDurationMs: 1300,
   fadeOutDelayMs: 780
@@ -41,9 +42,9 @@ const BOSS_PIT_VICTORY = {
 const BOSS_PIT_BOSS = {
   name: 'THE HORN GATE WITNESS',
   subtitle: 'Pitbound Litigator',
-  spawnX: 1610,
+  spawnX: 960,
   spawnY: WORLD.floorY - 2,
-  activationX: 1140,
+  activationX: 760,
   textureKey: ASSET_KEYS.bossPit01TheHornGateWitness,
   health: 9,
   contactDamage: 2,
@@ -321,6 +322,7 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
 
     this.time.delayedCall(BOSS_PIT_VICTORY.preExplosionShakeMs, () => {
       this.stopVictoryGoreFountain();
+      this.startBossExplosionFade();
       triggerSector02BlackOilBlowout(this, {
         source: this.boss.sprite,
         x: this.boss.sprite.x,
@@ -349,13 +351,27 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
 
     this.tweens.killTweensOf(this.boss.sprite);
     this.boss.sprite
-      .setAlpha(0.92)
+      .setAlpha(1)
       .setVisible(true)
       .setScale(
         this.boss.baseScaleX * this.boss.config.presentation.scaleX,
         this.boss.baseScaleY * this.boss.config.presentation.scaleY
       )
       .setAngle(0);
+  }
+
+  startBossExplosionFade() {
+    if (!this.boss?.sprite?.active) {
+      return;
+    }
+
+    this.tweens.killTweensOf(this.boss.sprite);
+    this.tweens.add({
+      targets: this.boss.sprite,
+      alpha: 0,
+      duration: BOSS_PIT_VICTORY.explosionFadeDurationMs,
+      ease: 'Sine.easeInOut'
+    });
   }
 
   despawnBossAfterPayoff() {
@@ -472,6 +488,8 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
           return;
         }
         hasStartedReturnScene = true;
+        this.cameras.main.resetFX();
+        this.cameras.main.setAlpha(1);
         this.returnFadeFallbackTimer?.remove(false);
         this.returnFadeFallbackTimer = null;
         this.scene.start(BOSS_PIT_RETURN.returnSceneKey, {
