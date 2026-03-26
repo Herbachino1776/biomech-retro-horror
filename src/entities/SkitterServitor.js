@@ -28,6 +28,17 @@ export class SkitterServitor {
     this.pursuitCommittedUntil = -Infinity;
     this.wasAwakenedLastUpdate = this.awakened;
     this.wakeRushUntil = -Infinity;
+    this.poiseConfig = {
+      max: Math.max(1, config.poise?.max ?? 0),
+      recoverDelayMs: Math.max(0, config.poise?.recoverDelayMs ?? 1400),
+      recoverPerSecond: Math.max(0, config.poise?.recoverPerSecond ?? 1.4),
+      staggerDurationMs: Math.max(260, config.poise?.staggerDurationMs ?? 1800),
+      finisherRange: Math.max(68, config.poise?.finisherRange ?? 132)
+    };
+    this.poise = this.poiseConfig.max;
+    this.poiseBroken = false;
+    this.lastPoiseDamageAt = -Infinity;
+    this.staggerUntil = -Infinity;
 
     const spriteKey = config.textureKey ?? ASSET_KEYS.skitter;
     const spritePresentation = config.presentation ?? {};
@@ -82,6 +93,7 @@ export class SkitterServitor {
   }
 
   update(time, playerX) {
+    this.updatePoiseState(time);
     this.updateVisuals(time);
 
     if (this.dead) {
@@ -96,6 +108,13 @@ export class SkitterServitor {
       this.enterState('stalk', time);
     }
     this.wasAwakenedLastUpdate = this.awakened;
+
+    if (this.isStaggered(time)) {
+      this.body.setVelocity(0, 0);
+      this.contactDamageWindowUntil = time;
+      return;
+    }
+
     this.updateState(time, playerX);
 
     if (!this.awakened) {
@@ -340,6 +359,64 @@ export class SkitterServitor {
     this.body.setVelocityY(this.config.recoilVelocityY);
   }
 
+  applyPoiseDamage(amount = 1, time = this.scene.time.now) {
+    if (this.dead || amount <= 0) {
+      return false;
+    }
+
+    this.lastPoiseDamageAt = time;
+    this.poise = Phaser.Math.Clamp(this.poise - amount, 0, this.poiseConfig.max);
+    if (this.poise <= 0 && !this.poiseBroken) {
+      this.enterStagger(time);
+      return true;
+    }
+
+    return false;
+  }
+
+  updatePoiseState(time) {
+    if (this.dead || this.poiseBroken) {
+      return;
+    }
+
+    if (time < this.lastPoiseDamageAt + this.poiseConfig.recoverDelayMs) {
+      return;
+    }
+
+    const dtSeconds = Math.max(0, this.scene.game.loop.delta / 1000);
+    this.poise = Phaser.Math.Clamp(this.poise + this.poiseConfig.recoverPerSecond * dtSeconds, 0, this.poiseConfig.max);
+  }
+
+  enterStagger(time = this.scene.time.now) {
+    this.poiseBroken = true;
+    this.staggerUntil = time + this.poiseConfig.staggerDurationMs;
+    this.clearAttackState(time, 'staggered');
+    this.body.setVelocity(0, 0);
+    this.contactDamageWindowUntil = time;
+  }
+
+  isStaggered(time = this.scene.time.now) {
+    if (!this.poiseBroken || this.dead) {
+      return false;
+    }
+
+    if (time <= this.staggerUntil) {
+      return true;
+    }
+
+    this.poiseBroken = false;
+    this.poise = this.poiseConfig.max;
+    return false;
+  }
+
+  canReceiveRiteFinisher(playerSprite, time = this.scene.time.now) {
+    if (!this.isStaggered(time) || !playerSprite?.active) {
+      return false;
+    }
+
+    return Phaser.Math.Distance.Between(playerSprite.x, playerSprite.y, this.sprite.x, this.sprite.y) <= this.poiseConfig.finisherRange;
+  }
+
   updateVisuals(time) {
     if (this.dead) {
       this.updateEyeGlow(time);
@@ -372,6 +449,15 @@ export class SkitterServitor {
       this.sprite.setScale(this.baseScaleX * 1.02, this.baseScaleY * 0.96);
       this.setVisualTint(0x6f8c59);
       this.sprite.setAlpha(this.getStateAlpha('hurt', 0.88));
+      return;
+    }
+
+    if (this.poiseBroken) {
+      const pulse = 0.8 + Math.sin(time * 0.026) * 0.06;
+      this.sprite.setScale(this.baseScaleX * 0.9, this.baseScaleY * 0.94);
+      this.sprite.setAngle(this.direction * 12);
+      this.setVisualTint(0xb4ab95);
+      this.sprite.setAlpha(this.getStateAlpha('staggered', pulse));
       return;
     }
 

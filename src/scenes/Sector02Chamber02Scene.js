@@ -145,6 +145,13 @@ const COMPRESSION_VAULTS_TOLL_KEEPER = {
   eyeGlowYOffset: 18,
   eyeGlowAlphaBase: 0.42,
   eyeGlowWindupAlphaGain: 0.44,
+  poise: {
+    max: 4,
+    recoverDelayMs: 1700,
+    recoverPerSecond: 1.1,
+    staggerDurationMs: 1400,
+    finisherRange: 126
+  },
   audioProfile: 'tollkeeper'
 };
 
@@ -163,6 +170,13 @@ const COMPRESSION_VAULTS_ELITE_PROJECTILE = {
   rotationSpeed: 420,
   telegraphRadiusX: 74,
   telegraphRadiusY: 24
+};
+
+const MAJOR_FINISHER = {
+  ritePromptText: 'RITE FINISHER READY',
+  promptOffsetY: -132,
+  elite: { poiseDamagePerHit: 1, shakeDurationMs: 130, shakeIntensity: 0.0046, subtitle: 'RITE WINDOW: TOLL-KEEPER' },
+  miniboss: { poiseDamagePerHit: 1, shakeDurationMs: 260, shakeIntensity: 0.0084, subtitle: 'RITE WINDOW: PRESSURE DEACON' }
 };
 
 const COMPRESSION_VAULTS_ENCOUNTER_POCKETS = [
@@ -288,6 +302,13 @@ const COMPRESSION_VAULTS_PRESSURE_DEACON = {
   activationX: 4890,
   body: { width: 96, height: 132, offsetX: 108, offsetY: 150 },
   audioProfile: 'miniboss',
+  poise: {
+    max: 7,
+    recoverDelayMs: 1800,
+    recoverPerSecond: 1.2,
+    staggerDurationMs: 2200,
+    finisherRange: 160
+  },
   presentation: {
     display: { width: 332, height: 356 },
     origin: { x: 0.54, y: 0.988 },
@@ -376,6 +397,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.enemyProjectilesPaused = false;
     this.loreAnchor = null;
     this.pressureDeacon = null;
+    this.currentRiteFinisherTarget = null;
     this.hasEnteredForwardThreshold = false;
     this.forwardThresholdAwaitingFreshInteract = false;
     this.integrityRewardTracker = new Set();
@@ -775,6 +797,19 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.restartText = this.add.text(this.scale.width / 2, 90, '', {
       fontFamily: 'monospace', fontSize: '22px', color: '#d2c2ac', align: 'center'
     }).setScrollFactor(0).setDepth(35).setOrigin(0.5).setVisible(false);
+    this.riteFinisherPrompt = this.add
+      .text(this.scale.width / 2, this.scale.height * 0.22, MAJOR_FINISHER.ritePromptText, {
+        fontFamily: 'monospace',
+        fontSize: '13px',
+        color: '#e7dbc1',
+        align: 'center',
+        stroke: '#100b0a',
+        strokeThickness: 4
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(35)
+      .setVisible(false);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
@@ -808,6 +843,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     const mobileInput = this.mobileControls.getInputState();
 
     if (this.player.isDead) {
+      this.riteFinisherPrompt?.setVisible(false);
       this.mobileControls.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
@@ -822,6 +858,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     }
 
     if (this.isLoreTransitionActive) {
+      this.riteFinisherPrompt?.setVisible(false);
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
@@ -850,12 +887,98 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.updateEliteProjectileState(time);
     this.enemyProjectiles.forEach((projectile) => projectile.update(time, this.game.loop.delta));
     this.refreshPressureDeaconBossBar(time);
+    this.refreshRiteFinisherTarget();
+    if (this.tryTriggerContextualRiteFinisher(mobileInput)) {
+      this.updateLabels(time);
+      this.hud.update(this.player.health, this.player.maxHealth);
+      return;
+    }
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
     this.refreshForwardThresholdPresence();
     this.tryAdvanceForwardThreshold(mobileInput);
     this.updateLabels(time);
     this.hud.update(this.player.health, this.player.maxHealth);
+  }
+
+  refreshRiteFinisherTarget() {
+    const playerSprite = this.player?.sprite;
+    if (!playerSprite?.active) {
+      this.currentRiteFinisherTarget = null;
+      this.riteFinisherPrompt?.setVisible(false);
+      return;
+    }
+
+    const eligibleElites = this.enemies.filter((enemy) => enemy.isElite && enemy.canReceiveRiteFinisher?.(playerSprite, this.time.now));
+    const eligibleTargets = [
+      ...eligibleElites,
+      this.pressureDeacon?.canReceiveRiteFinisher?.(playerSprite, this.time.now) ? this.pressureDeacon : null
+    ].filter(Boolean);
+
+    this.currentRiteFinisherTarget = eligibleTargets.sort((a, b) => (
+      Phaser.Math.Distance.Between(playerSprite.x, playerSprite.y, a.sprite.x, a.sprite.y)
+      - Phaser.Math.Distance.Between(playerSprite.x, playerSprite.y, b.sprite.x, b.sprite.y)
+    ))[0] ?? null;
+
+    if (!this.currentRiteFinisherTarget) {
+      this.riteFinisherPrompt?.setVisible(false);
+      return;
+    }
+
+    this.riteFinisherPrompt
+      ?.setVisible(true)
+      .setPosition(this.scale.width / 2, Math.max(76, this.scale.height * 0.2));
+  }
+
+  tryTriggerContextualRiteFinisher(mobileInput) {
+    if (!this.currentRiteFinisherTarget) {
+      return false;
+    }
+
+    const interactPressed = Phaser.Input.Keyboard.JustDown(this.keyInteract) || Phaser.Input.Keyboard.JustDown(this.keyEnter) || mobileInput.interactPressed;
+    if (!interactPressed) {
+      return false;
+    }
+
+    const target = this.currentRiteFinisherTarget;
+    this.currentRiteFinisherTarget = null;
+    this.riteFinisherPrompt?.setVisible(false);
+
+    if (target === this.pressureDeacon) {
+      this.executePressureDeaconFinisher(target);
+      return true;
+    }
+
+    this.executeEliteFinisher(target);
+    return true;
+  }
+
+  executeEliteFinisher(target) {
+    if (!target || target.dead) {
+      return;
+    }
+
+    this.cameras.main.shake(MAJOR_FINISHER.elite.shakeDurationMs, MAJOR_FINISHER.elite.shakeIntensity, true);
+    this.triggerSector02BlackOilPayoff(target, { scale: 0.56, burstCount: 10, sprayCount: 16, mistCount: 8, emberCount: 4, durationMs: 620 });
+    target.setHitReactionDirection(Math.sign(target.sprite.x - this.player.sprite.x) || this.player.facing);
+    target.takeDamage(Math.max(1, target.health), this.time.now);
+    this.audioDirector?.playBanishmentSting();
+  }
+
+  executePressureDeaconFinisher(target) {
+    if (!target || target.dead) {
+      return;
+    }
+
+    this.cameras.main.shake(MAJOR_FINISHER.miniboss.shakeDurationMs, MAJOR_FINISHER.miniboss.shakeIntensity, true);
+    target.setActive(true);
+    target.takeDamage(Math.max(1, target.health), this.time.now);
+    this.audioDirector?.playBanishmentSting();
+    if (!this.hasUnlockedForwardPath) {
+      grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber02-pressure-deacon-miniboss');
+      this.triggerSector02BlackOilPayoff(target, COMPRESSION_VAULTS_PRESSURE_DEACON.blowout);
+      this.unlockForwardPath();
+    }
   }
 
   refreshEncounterPocketPresence() {
@@ -1070,7 +1193,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.hud.setBossBarState({
       visible,
       name: COMPRESSION_VAULTS_PRESSURE_DEACON.name,
-      subtitle: COMPRESSION_VAULTS_PRESSURE_DEACON.subtitle,
+      subtitle: this.pressureDeacon.isStaggered?.(time) ? MAJOR_FINISHER.miniboss.subtitle : COMPRESSION_VAULTS_PRESSURE_DEACON.subtitle,
       current: this.pressureDeacon.health,
       max: this.pressureDeacon.maxHealth,
       telegraph: this.pressureDeacon.getTelegraphProgress(time),
@@ -1092,6 +1215,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     }
 
     this.pressureDeacon.lastAttackHitId = this.player.attackId;
+    this.pressureDeacon.applyPoiseDamage(MAJOR_FINISHER.miniboss.poiseDamagePerHit, this.time.now);
     this.pressureDeacon.takeDamage(1, this.time.now);
     this.pressureDeacon.setActive(true);
     this.audioDirector?.playPlayerHit();
@@ -1260,6 +1384,9 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     enemy.lastAttackHitId = this.player.attackId;
     const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
     enemy.setHitReactionDirection(knockDirection);
+    if (enemy.isElite) {
+      enemy.applyPoiseDamage(MAJOR_FINISHER.elite.poiseDamagePerHit, this.time.now);
+    }
     enemy.takeDamage(1, this.time.now);
     this.clearEliteProjectileState(enemy);
     this.audioDirector?.playPlayerHit();
