@@ -121,6 +121,13 @@ const KILN_SKITTER_ELITE = {
   eyeGlowYOffset: 18,
   eyeGlowAlphaBase: 0.42,
   eyeGlowWindupAlphaGain: 0.44,
+  poise: {
+    max: 4,
+    recoverDelayMs: 1700,
+    recoverPerSecond: 1.1,
+    staggerDurationMs: 1460,
+    finisherRange: 128
+  },
   audioProfile: 'tollkeeper'
 };
 
@@ -139,6 +146,12 @@ const KILN_ELITE_PROJECTILE = {
   rotationSpeed: 400,
   telegraphRadiusX: 74,
   telegraphRadiusY: 22
+};
+
+const MAJOR_FINISHER = {
+  ritePromptText: 'RITE FINISHER READY',
+  elite: { poiseDamagePerHit: 1, shakeDurationMs: 160, shakeIntensity: 0.0054 },
+  boss: { poiseDamagePerHit: 1, shakeDurationMs: 420, shakeIntensity: 0.012, subtitle: 'RITE WINDOW: CORE EXPOSED' }
 };
 
 const KILN_ENCOUNTER_POCKETS = [
@@ -239,6 +252,13 @@ const KILN_SORROW_ENGINE = {
   activationX: 5020,
   body: { width: 102, height: 136, offsetX: 108, offsetY: 148 },
   audioProfile: 'miniboss',
+  poise: {
+    max: 10,
+    recoverDelayMs: 2200,
+    recoverPerSecond: 1,
+    staggerDurationMs: 2800,
+    finisherRange: 172
+  },
   presentation: {
     display: { width: 346, height: 372 },
     origin: { x: 0.54, y: 0.988 },
@@ -347,6 +367,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.sorrowEngineDeathFinished = false;
     this.hasTriggeredBossReveal = false;
     this.integrityRewardTracker = new Set();
+    this.currentRiteFinisherTarget = null;
   }
 
   create() {
@@ -652,6 +673,14 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.mobileControls = new MobileControls(this);
     this.setupMobileUiCamera();
     this.restartText = this.add.text(this.scale.width / 2, 90, '', { fontFamily: 'monospace', fontSize: '22px', color: '#d2c2ac', align: 'center' }).setScrollFactor(0).setDepth(35).setOrigin(0.5).setVisible(false);
+    this.riteFinisherPrompt = this.add.text(this.scale.width / 2, this.scale.height * 0.2, MAJOR_FINISHER.ritePromptText, {
+      fontFamily: 'monospace',
+      fontSize: '13px',
+      color: '#ecd8bc',
+      align: 'center',
+      stroke: '#110b09',
+      strokeThickness: 4
+    }).setScrollFactor(0).setDepth(35).setOrigin(0.5).setVisible(false);
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
     this.keyInteract = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
@@ -684,6 +713,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     const mobileInput = this.mobileControls.getInputState();
 
     if (this.player.isDead) {
+      this.riteFinisherPrompt?.setVisible(false);
       this.mobileControls.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
@@ -696,6 +726,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     }
 
     if (this.isLoreTransitionActive) {
+      this.riteFinisherPrompt?.setVisible(false);
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
@@ -725,11 +756,87 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.sorrowEngine?.update(time, this.player.sprite);
     this.enemyProjectiles.forEach((projectile) => projectile.update(time, this.game.loop.delta));
     this.refreshSorrowEngineBossBar(time);
+    this.refreshRiteFinisherTarget();
+    if (this.tryTriggerContextualRiteFinisher(mobileInput)) {
+      this.hud.update(this.player.health, this.player.maxHealth);
+      return;
+    }
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
     this.refreshForwardThresholdPresence();
     this.tryAdvanceForwardThreshold(mobileInput);
     this.hud.update(this.player.health, this.player.maxHealth);
+  }
+
+  refreshRiteFinisherTarget() {
+    const playerSprite = this.player?.sprite;
+    if (!playerSprite?.active || this.sorrowEngineDeathSequenceActive) {
+      this.currentRiteFinisherTarget = null;
+      this.riteFinisherPrompt?.setVisible(false);
+      return;
+    }
+
+    const eligibleElites = this.enemies.filter((enemy) => enemy.isElite && enemy.canReceiveRiteFinisher?.(playerSprite, this.time.now));
+    const eligibleTargets = [
+      ...eligibleElites,
+      this.sorrowEngine?.canReceiveRiteFinisher?.(playerSprite, this.time.now) ? this.sorrowEngine : null
+    ].filter(Boolean);
+
+    this.currentRiteFinisherTarget = eligibleTargets.sort((a, b) => (
+      Phaser.Math.Distance.Between(playerSprite.x, playerSprite.y, a.sprite.x, a.sprite.y)
+      - Phaser.Math.Distance.Between(playerSprite.x, playerSprite.y, b.sprite.x, b.sprite.y)
+    ))[0] ?? null;
+
+    this.riteFinisherPrompt?.setVisible(Boolean(this.currentRiteFinisherTarget));
+  }
+
+  tryTriggerContextualRiteFinisher(mobileInput) {
+    if (!this.currentRiteFinisherTarget) {
+      return false;
+    }
+
+    const interactPressed = Phaser.Input.Keyboard.JustDown(this.keyInteract) || Phaser.Input.Keyboard.JustDown(this.keyEnter) || mobileInput.interactPressed;
+    if (!interactPressed) {
+      return false;
+    }
+
+    const target = this.currentRiteFinisherTarget;
+    this.currentRiteFinisherTarget = null;
+    this.riteFinisherPrompt?.setVisible(false);
+
+    if (target === this.sorrowEngine) {
+      this.executeSorrowEngineFinisher(target);
+      return true;
+    }
+
+    this.executeEliteFinisher(target);
+    return true;
+  }
+
+  executeEliteFinisher(target) {
+    if (!target || target.dead) {
+      return;
+    }
+
+    this.cameras.main.shake(MAJOR_FINISHER.elite.shakeDurationMs, MAJOR_FINISHER.elite.shakeIntensity, true);
+    this.triggerSector02BlackOilPayoff(target, { scale: 0.58, burstCount: 10, sprayCount: 18, mistCount: 10, emberCount: 4, durationMs: 680 });
+    target.setHitReactionDirection(Math.sign(target.sprite.x - this.player.sprite.x) || this.player.facing);
+    target.takeDamage(Math.max(1, target.health), this.time.now);
+    this.audioDirector?.playBanishmentSting();
+  }
+
+  executeSorrowEngineFinisher(target) {
+    if (!target || target.dead || this.sorrowEngineDeathSequenceActive) {
+      return;
+    }
+
+    this.cameras.main.shake(MAJOR_FINISHER.boss.shakeDurationMs, MAJOR_FINISHER.boss.shakeIntensity, true);
+    target.setActive(true);
+    target.takeDamage(Math.max(1, target.health), this.time.now);
+    this.audioDirector?.playBanishmentSting();
+    if (target.dead) {
+      this.beginSorrowEngineDeathSequence();
+    }
   }
 
   refreshEncounterPocketPresence() {
@@ -811,7 +918,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.hud.setBossBarState({
       visible,
       name: KILN_SORROW_ENGINE.name,
-      subtitle: KILN_SORROW_ENGINE.subtitle,
+      subtitle: this.sorrowEngine.isStaggered?.(time) ? MAJOR_FINISHER.boss.subtitle : KILN_SORROW_ENGINE.subtitle,
       current: this.sorrowEngine.health,
       max: this.sorrowEngine.maxHealth,
       telegraph: this.sorrowEngine.getTelegraphProgress(time),
@@ -1071,6 +1178,9 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     enemy.lastAttackHitId = this.player.attackId;
     const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
     enemy.setHitReactionDirection(knockDirection);
+    if (enemy.isElite) {
+      enemy.applyPoiseDamage(MAJOR_FINISHER.elite.poiseDamagePerHit, this.time.now);
+    }
     enemy.takeDamage(1, this.time.now);
     this.clearEliteProjectileState(enemy);
     this.audioDirector?.playPlayerHit();
@@ -1101,6 +1211,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     }
 
     this.sorrowEngine.lastAttackHitId = this.player.attackId;
+    this.sorrowEngine.applyPoiseDamage(MAJOR_FINISHER.boss.poiseDamagePerHit, this.time.now);
     this.sorrowEngine.takeDamage(1, this.time.now);
     this.sorrowEngine.setActive(true);
     this.audioDirector?.playPlayerHit();
