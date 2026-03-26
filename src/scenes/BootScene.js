@@ -72,6 +72,9 @@ export class BootScene extends Phaser.Scene {
     this.load.image(ASSET_KEYS.sector02Chamber03Gate, ASSET_URLS[ASSET_KEYS.sector02Chamber03Gate]);
     this.load.image(ASSET_KEYS.sector02Chamber03Floor, ASSET_URLS[ASSET_KEYS.sector02Chamber03Floor]);
     this.load.image(ASSET_KEYS.sector02PressureShardProjectile, ASSET_URLS[ASSET_KEYS.sector02PressureShardProjectile]);
+    this.load.image(ASSET_KEYS.bossPit01BackgroundHornGate, ASSET_URLS[ASSET_KEYS.bossPit01BackgroundHornGate]);
+    this.load.image(ASSET_KEYS.bossPit01TheHornGateWitness, ASSET_URLS[ASSET_KEYS.bossPit01TheHornGateWitness]);
+    this.load.image(ASSET_KEYS.bossPit01AltarTrap, ASSET_URLS[ASSET_KEYS.bossPit01AltarTrap]);
     this.load.image(ASSET_KEYS.player, ASSET_URLS[ASSET_KEYS.player]);
     this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);

@@ -10,6 +10,7 @@ import { LoreCutsceneScene } from './scenes/LoreCutsceneScene.js';
 import { SectorCompleteScene } from './scenes/SectorCompleteScene.js';
 import { Sector02Chamber01Scene } from './scenes/Sector02Chamber01Scene.js';
 import { Sector02Chamber02Scene } from './scenes/Sector02Chamber02Scene.js';
+import { Sector02Chamber02BossPitScene } from './scenes/Sector02Chamber02BossPitScene.js';
 import { Sector02Chamber03Scene } from './scenes/Sector02Chamber03Scene.js';
 
 const config = {
@@ -25,6 +26,7 @@ const config = {
     SectorCompleteScene,
     Sector02Chamber01Scene,
     Sector02Chamber02Scene,
+    Sector02Chamber02BossPitScene,
     Sector02Chamber03Scene
   ],
   physics: {

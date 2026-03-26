@@ -4,6 +4,10 @@ const CHAMBER_ENTRY_RESTORE_AMOUNT = 1;
 const MAJOR_KILL_MAX_REWARD_AMOUNT = 1;
 
 export function applyChamberEntryRestore(transitionContext = {}) {
+  if (transitionContext.skipEntryRestore) {
+    return vesselIntegrityState.getIntegritySnapshot();
+  }
+
   const enteredFromOtherChamber = Boolean(transitionContext.enteredFrom || transitionContext.fromScene);
   if (!enteredFromOtherChamber) {
     return vesselIntegrityState.getIntegritySnapshot();

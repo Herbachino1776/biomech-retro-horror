@@ -234,16 +234,15 @@ const COMPRESSION_VAULTS_ENCOUNTER_POCKETS = [
 ];
 
 const COMPRESSION_VAULTS_LORE = {
-  cutsceneId: 'sector02-chamber02-compression-altar',
   anchor: {
-    id: 'compression-vault-altar',
+    id: 'compression-vault-trap-altar',
     label: 'READ THE COMPRESSION ALTAR',
-    zoneX: 3400,
+    zoneX: 980,
     zoneY: WORLD.floorY - 78,
     zoneWidth: 196,
     zoneHeight: 204,
     promptOffsetY: -170,
-    altarX: 3400,
+    altarX: 980,
     altarY: WORLD.floorY - 102,
     altarDisplayWidth: 178,
     altarDisplayHeight: 178,
@@ -254,7 +253,7 @@ const COMPRESSION_VAULTS_LORE = {
     wallPlateWidth: 568,
     wallPlateHeight: 330,
     wallPlateY: WORLD.floorY - 144,
-    muralX: 3400,
+    muralX: 980,
     muralY: 214,
     muralWidth: 436,
     muralHeight: 268,
@@ -387,6 +386,8 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.isRestartingRun = false;
     this.isLoreTransitionActive = false;
     this.hasCompletedLoreBeat = false;
+    this.hasTriggeredTrapAltar = false;
+    this.hasCompletedBossPitLoop = Boolean(this.transitionContext?.bossPitCompleted);
     this.hasUnlockedForwardPath = false;
     this.hasTriggeredForwardContract = false;
     this.currentForwardThreshold = null;
@@ -415,7 +416,10 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.createUiAndInput();
     this.createForwardThreshold();
     this.configureCameraAndLayout();
-    this.registerLoreEvents();
+    if (this.transitionContext?.returnFromBossPit) {
+      this.hasCompletedLoreBeat = true;
+      this.hasTriggeredTrapAltar = true;
+    }
     this.cameras.main.fadeIn(650, 0, 0, 0);
   }
 
@@ -544,7 +548,13 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
   }
 
   createPlayerAndColliders() {
-    this.player = new Player(this, COMPRESSION_VAULTS_BOOTSTRAP.spawnX, COMPRESSION_VAULTS_BOOTSTRAP.spawnY, PLAYER);
+    const spawnX = this.transitionContext?.returnFromBossPit
+      ? this.transitionContext.returnPlayerX ?? COMPRESSION_VAULTS_LORE.anchor.altarX + 56
+      : COMPRESSION_VAULTS_BOOTSTRAP.spawnX;
+    const spawnY = this.transitionContext?.returnFromBossPit
+      ? this.transitionContext.returnPlayerY ?? COMPRESSION_VAULTS_BOOTSTRAP.spawnY
+      : COMPRESSION_VAULTS_BOOTSTRAP.spawnY;
+    this.player = new Player(this, spawnX, spawnY, PLAYER);
     const entryIntegrity = applyChamberEntryRestore(this.transitionContext);
     this.player.health = entryIntegrity.current;
     this.player.maxHealth = entryIntegrity.max;
@@ -745,6 +755,13 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
         .setTint(0xc5d0c1)
         .setAlpha(0.88)
         .setDepth(-6.08);
+      if (this.textures.exists(ASSET_KEYS.bossPit01AltarTrap)) {
+        this.add.image(anchorConfig.altarX, anchorConfig.altarY + 2, ASSET_KEYS.bossPit01AltarTrap)
+          .setDisplaySize(anchorConfig.altarDisplayWidth, anchorConfig.altarDisplayHeight)
+          .setTint(0xb7c0b4)
+          .setAlpha(0.16)
+          .setDepth(-6.06);
+      }
     } else {
       this.add.ellipse(anchorConfig.altarX, anchorConfig.altarY + 6, 128, 132, 0x66706b, 0.76).setDepth(-6.08);
     }
@@ -820,7 +837,6 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
       this.audioDirector?.shutdown();
-      this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.enemyProjectiles.forEach((projectile) => projectile.destroy());
       this.enemies.forEach((enemy) => enemy.projectileTelegraph?.destroy?.());
       this.pressureDeacon?.destroyCombatTelegraphs?.();
@@ -833,10 +849,6 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.applyResponsiveLayout();
     this.mobileControls.setMode('gameplay');
     this.hud.update(this.player.health, this.player.maxHealth);
-  }
-
-  registerLoreEvents() {
-    this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
   }
 
   update(time) {
@@ -1156,7 +1168,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
   refreshLoreZonePresence() {
     this.currentLoreZone = null;
 
-    if (!this.loreAnchor || this.isLoreTransitionActive || this.hasCompletedLoreBeat) {
+    if (!this.loreAnchor || this.isLoreTransitionActive || this.hasCompletedBossPitLoop) {
       this.loreAnchor?.prompt?.setVisible(false);
       return;
     }
@@ -1288,6 +1300,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     }
 
     this.isLoreTransitionActive = true;
+    this.hasTriggeredTrapAltar = true;
     this.currentLoreZone = null;
     this.loreAnchor?.prompt?.setVisible(false);
     this.mobileControls.setMode('dialogue');
@@ -1301,36 +1314,23 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.uiCamera?.setVisible(false);
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.setGameplaySceneVisibility(false);
-      this.scene.pause();
-      this.scene.launch('LoreCutsceneScene', {
-        cutsceneId: COMPRESSION_VAULTS_LORE.cutsceneId,
-        returnSceneKey: this.scene.key
+      this.cleanupSceneUi?.();
+      this.audioDirector?.shutdown();
+      this.scene.start('Sector02Chamber02BossPitScene', {
+        fromScene: this.scene.key,
+        altarX: COMPRESSION_VAULTS_LORE.anchor.altarX,
+        altarY: COMPRESSION_VAULTS_BOOTSTRAP.spawnY
       });
     });
 
+    this.tweens.add({
+      targets: this.player.sprite,
+      y: this.player.sprite.y + 38,
+      duration: 260,
+      ease: 'Sine.easeIn'
+    });
+    this.cameras.main.shake(240, 0.0038, true);
     this.cameras.main.fadeOut(420, 0, 0, 0);
-  }
-
-  handleLoreCutsceneComplete({ cutsceneId } = {}) {
-    if (cutsceneId !== COMPRESSION_VAULTS_LORE.cutsceneId) {
-      return;
-    }
-
-    this.hasCompletedLoreBeat = true;
-    this.resumeFromLore();
-  }
-
-  resumeFromLore() {
-    this.isLoreTransitionActive = false;
-    this.setGameplaySceneVisibility(true);
-    this.applyResponsiveLayout();
-    this.mobileControls.setMode('gameplay');
-    this.hud?.setVisible(true);
-    this.uiCamera?.setVisible(true);
-    this.setEnemyProjectilesPaused(false);
-    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.11 });
-    this.cameras.main.fadeIn(500, 0, 0, 0);
   }
 
   setGameplaySceneVisibility(isVisible) {
