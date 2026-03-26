@@ -249,6 +249,9 @@ export class AbyssalArchon extends HalfSkullMiniboss {
     this.projectileTelegraph?.destroy?.();
     this.groundBurst?.destroy?.();
     this.lineSweep?.destroy?.();
+    this.projectileTelegraph = null;
+    this.groundBurst = null;
+    this.lineSweep = null;
   }
 
   takeDamage(amount, time = this.scene.time.now) {
