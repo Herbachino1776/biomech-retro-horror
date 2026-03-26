@@ -400,6 +400,8 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
 
     this.stopVictoryGoreFountain();
     this.boss.sprite.setVisible(false).setAlpha(0);
+    this.boss.setActive(false);
+    this.boss.body?.setEnable(false);
     this.boss.destroyCombatTelegraphs?.();
   }
 

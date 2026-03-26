@@ -27,6 +27,10 @@ export class AoeTelegraph {
   }
 
   drawCircle({ x, y, radius, progress = 0, time = this.scene.time.now }) {
+    if (!this.graphics) {
+      return;
+    }
+
     if (!radius || radius <= 0) {
       this.clear();
       return;
@@ -69,6 +73,10 @@ export class AoeTelegraph {
   }
 
   drawLine({ startX, startY, endX, endY, width = 12, progress = 0, time = this.scene.time.now, active = false }) {
+    if (!this.graphics) {
+      return;
+    }
+
     this.graphics.clear();
     this.graphics.setVisible(true);
     this.visible = true;
@@ -107,6 +115,12 @@ export class AoeTelegraph {
   }
 
   clear() {
+    if (!this.graphics) {
+      this.visible = false;
+      this.shape = null;
+      return;
+    }
+
     this.graphics.clear();
     this.graphics.setVisible(false);
     this.visible = false;
