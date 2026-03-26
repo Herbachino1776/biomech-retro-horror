@@ -419,6 +419,9 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.createForwardThreshold();
     this.configureCameraAndLayout();
     if (this.transitionContext?.returnFromBossPit) {
+      this.scene.setVisible(true, this.scene.key);
+      this.cameras.main.resetFX();
+      this.cameras.main.setAlpha(1);
       this.hasCompletedLoreBeat = true;
       this.hasTriggeredTrapAltar = true;
       this.hasCompletedBossPitLoop = true;
@@ -1360,6 +1363,8 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
 
   stageBossPitReturnBeforeFadeIn() {
     this.isBossPitReturnSequenceActive = true;
+    this.hud?.setVisible(true);
+    this.uiCamera?.setVisible(true);
     this.mobileControls.setMode('dialogue');
     this.player.body.setEnable(false);
     this.player.attackHitbox?.body?.setEnable(false);
