@@ -10,6 +10,8 @@ import { PLAYER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
+import { grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
+import { bossPitRunState } from '../systems/BossPitRunState.js';
 
 const BOSS_PIT_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber02BossPitScene',
@@ -24,6 +26,12 @@ const BOSS_PIT_RETURN = {
   returnSceneKey: 'Sector02Chamber02Scene',
   returnXOffset: 56,
   returnYOffset: 0
+};
+const BOSS_PIT_VICTORY = {
+  preExplosionShakeMs: 3000,
+  preExplosionShakeIntensity: 0.0058,
+  fadeOutDurationMs: 1300,
+  fadeOutDelayMs: 780
 };
 
 const BOSS_PIT_BOSS = {
@@ -101,8 +109,11 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     this.transitionContext = data ?? {};
     this.isRestartingRun = false;
     this.returnTransitionActive = false;
+    this.victorySequenceActive = false;
+    this.hasProcessedBossPitVictory = false;
     this.enemyProjectiles = [];
     this.enemyProjectilesPaused = false;
+    this.integrityRewardTracker = new Set();
   }
 
   create() {
@@ -209,6 +220,15 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
       this.setEnemyProjectilesPaused(true);
       return;
     }
+    if (this.victorySequenceActive) {
+      this.mobileControls.setMode('dialogue');
+      this.player.body.setVelocity(0, 0);
+      this.boss?.body?.setVelocity?.(0, 0);
+      this.setEnemyProjectilesPaused(true);
+      this.refreshBossBar(time);
+      this.hud.update(this.player.health, this.player.maxHealth);
+      return;
+    }
 
     this.restartText.setVisible(false);
     this.mobileControls.setMode('gameplay');
@@ -229,9 +249,6 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     this.enemyProjectiles.forEach((projectile) => projectile.update(time, this.game.loop.delta));
     this.refreshBossBar(time);
     this.hud.update(this.player.health, this.player.maxHealth);
-    if (this.boss.dead) {
-      this.beginReturnToMainChamber();
-    }
   }
 
   spawnEnemyProjectile(config) {
@@ -272,6 +289,25 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     this.boss.takeDamage(1, this.time.now);
     this.audioDirector?.playPlayerHit();
     if (this.boss.dead) {
+      this.handleBossPitVictory();
+    }
+  }
+
+  handleBossPitVictory() {
+    if (this.hasProcessedBossPitVictory) {
+      return;
+    }
+
+    this.hasProcessedBossPitVictory = true;
+    this.victorySequenceActive = true;
+    this.player.body.setVelocity(0, 0);
+    this.player.body.setEnable(false);
+    this.player.attackHitbox?.body?.setEnable(false);
+    this.setEnemyProjectilesPaused(true);
+    bossPitRunState.markSector02Chamber02BossPitCompleted();
+    this.cameras.main.shake(BOSS_PIT_VICTORY.preExplosionShakeMs, BOSS_PIT_VICTORY.preExplosionShakeIntensity, true);
+
+    this.time.delayedCall(BOSS_PIT_VICTORY.preExplosionShakeMs, () => {
       triggerSector02BlackOilBlowout(this, {
         source: this.boss.sprite,
         x: this.boss.sprite.x,
@@ -280,7 +316,14 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
         scale: 1.1
       });
       this.audioDirector?.playBanishmentSting();
-    }
+      if (!bossPitRunState.hasSector02Chamber02BossPitRewardGranted()) {
+        const rewarded = grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber02-bosspit-01-witness');
+        if (rewarded) {
+          bossPitRunState.markSector02Chamber02BossPitRewardGranted();
+        }
+      }
+      this.beginReturnToMainChamber();
+    });
   }
 
   handleBossContactPlayer() {
@@ -321,13 +364,15 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     }
 
     this.returnTransitionActive = true;
+    this.victorySequenceActive = false;
     this.mobileControls.setMode('init');
     this.player.body.setVelocity(0, 0);
     this.player.body.setEnable(false);
     this.player.attackHitbox?.body?.setEnable(false);
     this.audioDirector?.stopAmbientLoop({ fadeOut: false });
+    this.sound.play(ASSET_KEYS.loreExit, { volume: 0.78 });
 
-    this.time.delayedCall(760, () => {
+    this.time.delayedCall(BOSS_PIT_VICTORY.fadeOutDelayMs, () => {
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
         this.scene.start(BOSS_PIT_RETURN.returnSceneKey, {
           fromScene: this.scene.key,
@@ -338,7 +383,7 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
           returnPlayerY: (this.transitionContext.altarY ?? PLAYER.startY) + BOSS_PIT_RETURN.returnYOffset
         });
       });
-      this.cameras.main.fadeOut(360, 0, 0, 0);
+      this.cameras.main.fadeOut(BOSS_PIT_VICTORY.fadeOutDurationMs, 0, 0, 0);
     });
   }
 
