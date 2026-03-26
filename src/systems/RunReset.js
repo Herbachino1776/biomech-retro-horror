@@ -7,6 +7,7 @@ const CHAMBER03_SCENE_KEY = 'Chamber03Scene';
 const CHAMBER03_BOSS_ARENA_SCENE_KEY = 'Chamber03BossArenaScene';
 const SECTOR02_CHAMBER01_SCENE_KEY = 'Sector02Chamber01Scene';
 const SECTOR02_CHAMBER02_SCENE_KEY = 'Sector02Chamber02Scene';
+const SECTOR02_CHAMBER02_BOSS_PIT_SCENE_KEY = 'Sector02Chamber02BossPitScene';
 const SECTOR02_CHAMBER03_SCENE_KEY = 'Sector02Chamber03Scene';
 const SECTOR_COMPLETE_SCENE_KEY = 'SectorCompleteScene';
 const LORE_SCENE_KEYS = ['LoreScreenScene', 'LoreCutsceneScene'];
@@ -29,6 +30,7 @@ export function restartRunFromDeath(scene) {
   });
   scene.scene.stop(SECTOR_COMPLETE_SCENE_KEY);
   scene.scene.stop(SECTOR02_CHAMBER03_SCENE_KEY);
+  scene.scene.stop(SECTOR02_CHAMBER02_BOSS_PIT_SCENE_KEY);
   scene.scene.stop(SECTOR02_CHAMBER02_SCENE_KEY);
   scene.scene.stop(SECTOR02_CHAMBER01_SCENE_KEY);
   scene.scene.stop(CHAMBER03_BOSS_ARENA_SCENE_KEY);

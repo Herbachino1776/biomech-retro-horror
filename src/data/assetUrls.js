@@ -57,6 +57,9 @@ import sector02Chamber03BossSorrowEngineUrl from '../../art/raw/sector02/chamber
 import sector02Chamber03GateUrl from '../../art/raw/sector02/chamber03/sector02_chamber03_gate_01.png';
 import sector02Chamber03FloorUrl from '../../art/raw/sector02/chamber03/sector02_chamber03_floor_01.png';
 import sector02PressureShardProjectileUrl from '../../art/raw/sector02/chamber02/projectile_sector02_pressure_shard_01_alpha.png';
+import bossPit01BackgroundHornGateUrl from '../../art/raw/bosspit/boss_pit_01_bg_horn_gate_of_witness.png';
+import bossPit01TheHornGateWitnessUrl from '../../art/raw/bosspit/boss_pit_01_the_horn_gate_witness_alpha.png';
+import bossPit01AltarTrapUrl from '../../art/raw/bosspit/boss_pit_01_altar_bosspit.png';
 import playerConceptUrl from '../../assets/concepts/player-concept-03-right-alpha.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
@@ -149,6 +152,9 @@ export const ASSET_URLS = {
   [ASSET_KEYS.sector02Chamber03Gate]: sector02Chamber03GateUrl,
   [ASSET_KEYS.sector02Chamber03Floor]: sector02Chamber03FloorUrl,
   [ASSET_KEYS.sector02PressureShardProjectile]: sector02PressureShardProjectileUrl,
+  [ASSET_KEYS.bossPit01BackgroundHornGate]: bossPit01BackgroundHornGateUrl,
+  [ASSET_KEYS.bossPit01TheHornGateWitness]: bossPit01TheHornGateWitnessUrl,
+  [ASSET_KEYS.bossPit01AltarTrap]: bossPit01AltarTrapUrl,
   [ASSET_KEYS.player]: playerConceptUrl,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,
