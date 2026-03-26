@@ -19,7 +19,9 @@ const BOSS_PIT_BOOTSTRAP = {
   spawnX: 392,
   spawnY: PLAYER.startY,
   floorColliderHeight: 72,
-  cameraLerp: { x: 0.08, y: 0.08 }
+  cameraLerp: { x: 0.08, y: 0.08 },
+  portraitFollowOffsetX: -112,
+  desktopFollowOffsetX: -128
 };
 
 const BOSS_PIT_RETURN = {
@@ -30,6 +32,7 @@ const BOSS_PIT_RETURN = {
 const BOSS_PIT_VICTORY = {
   preExplosionShakeMs: 3000,
   preExplosionShakeIntensity: 0.0058,
+  goreFountainCadenceMs: 140,
   postExplosionDespawnDelayMs: 320,
   fadeOutDurationMs: 1300,
   fadeOutDelayMs: 780
@@ -38,9 +41,9 @@ const BOSS_PIT_VICTORY = {
 const BOSS_PIT_BOSS = {
   name: 'THE HORN GATE WITNESS',
   subtitle: 'Pitbound Litigator',
-  spawnX: 1430,
+  spawnX: 1610,
   spawnY: WORLD.floorY - 2,
-  activationX: 980,
+  activationX: 1140,
   textureKey: ASSET_KEYS.bossPit01TheHornGateWitness,
   health: 9,
   contactDamage: 2,
@@ -115,6 +118,8 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     this.enemyProjectiles = [];
     this.enemyProjectilesPaused = false;
     this.integrityRewardTracker = new Set();
+    this.returnFadeFallbackTimer = null;
+    this.victoryGoreFountainTimer = null;
   }
 
   create() {
@@ -190,6 +195,10 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
       this.audioDirector?.shutdown();
       this.enemyProjectiles.forEach((projectile) => projectile.destroy());
       this.boss?.destroyCombatTelegraphs?.();
+      this.victoryGoreFountainTimer?.remove(false);
+      this.victoryGoreFountainTimer = null;
+      this.returnFadeFallbackTimer?.remove(false);
+      this.returnFadeFallbackTimer = null;
     });
   }
 
@@ -308,8 +317,10 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     bossPitRunState.markSector02Chamber02BossPitCompleted();
     this.stabilizeBossCorpseForPayoff();
     this.cameras.main.shake(BOSS_PIT_VICTORY.preExplosionShakeMs, BOSS_PIT_VICTORY.preExplosionShakeIntensity, true);
+    this.startVictoryGoreFountain();
 
     this.time.delayedCall(BOSS_PIT_VICTORY.preExplosionShakeMs, () => {
+      this.stopVictoryGoreFountain();
       triggerSector02BlackOilBlowout(this, {
         source: this.boss.sprite,
         x: this.boss.sprite.x,
@@ -352,8 +363,60 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
       return;
     }
 
+    this.stopVictoryGoreFountain();
     this.boss.sprite.setVisible(false).setAlpha(0);
     this.boss.destroyCombatTelegraphs?.();
+  }
+
+  startVictoryGoreFountain() {
+    this.stopVictoryGoreFountain();
+    if (!this.boss?.sprite?.active) {
+      return;
+    }
+
+    const spawnFountainBurst = () => {
+      if (!this.victorySequenceActive || !this.boss?.sprite?.active) {
+        return;
+      }
+
+      triggerSector02BlackOilBlowout(this, {
+        source: this.boss.sprite,
+        x: this.boss.sprite.x + Phaser.Math.Between(-40, 40),
+        y: (this.boss.sprite.body?.bottom ?? this.boss.sprite.y) - Phaser.Math.Between(88, 118),
+        depth: this.boss.sprite.depth + 0.06,
+        scale: Phaser.Math.FloatBetween(0.46, 0.62),
+        durationMs: 520,
+        burstCount: 34,
+        sprayCount: 48,
+        mistCount: 8,
+        emberCount: 6,
+        burstRadiusX: 92,
+        burstRadiusY: 136,
+        dropletWidth: [5, 13],
+        dropletHeight: [12, 34],
+        sprayWidth: [3, 8],
+        sprayHeight: [14, 32],
+        splashColor: 0x71131d,
+        heavyColor: 0x4f1018,
+        highlightColor: 0x9a2a35,
+        redSpeckColor: 0xb33941,
+        mistColor: 0x251011,
+        alpha: 0.98,
+        persistPuddle: false
+      });
+    };
+
+    spawnFountainBurst();
+    this.victoryGoreFountainTimer = this.time.addEvent({
+      delay: BOSS_PIT_VICTORY.goreFountainCadenceMs,
+      repeat: Math.ceil(BOSS_PIT_VICTORY.preExplosionShakeMs / BOSS_PIT_VICTORY.goreFountainCadenceMs),
+      callback: spawnFountainBurst
+    });
+  }
+
+  stopVictoryGoreFountain() {
+    this.victoryGoreFountainTimer?.remove(false);
+    this.victoryGoreFountainTimer = null;
   }
 
   handleBossContactPlayer() {
@@ -403,7 +466,14 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     this.sound.play(ASSET_KEYS.loreExit, { volume: 0.78 });
 
     this.time.delayedCall(BOSS_PIT_VICTORY.fadeOutDelayMs, () => {
-      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      let hasStartedReturnScene = false;
+      const startReturnScene = () => {
+        if (hasStartedReturnScene) {
+          return;
+        }
+        hasStartedReturnScene = true;
+        this.returnFadeFallbackTimer?.remove(false);
+        this.returnFadeFallbackTimer = null;
         this.scene.start(BOSS_PIT_RETURN.returnSceneKey, {
           fromScene: this.scene.key,
           returnFromBossPit: true,
@@ -412,7 +482,12 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
           returnPlayerX: (this.transitionContext.altarX ?? 960) + BOSS_PIT_RETURN.returnXOffset,
           returnPlayerY: (this.transitionContext.altarY ?? PLAYER.startY) + BOSS_PIT_RETURN.returnYOffset
         });
+      };
+
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        startReturnScene();
       });
+      this.returnFadeFallbackTimer = this.time.delayedCall(BOSS_PIT_VICTORY.fadeOutDurationMs + 120, startReturnScene);
       this.cameras.main.fadeOut(BOSS_PIT_VICTORY.fadeOutDurationMs, 0, 0, 0);
     });
   }
@@ -481,12 +556,12 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
       const worldBandHeight = Phaser.Math.Clamp(Math.floor(height * PORTRAIT_LAYOUT.worldBandRatio), PORTRAIT_LAYOUT.worldBandMin, worldBandMax);
       const topLetterbox = Math.floor((height - worldBandHeight) / 2);
       camera.setViewport(0, topLetterbox, width, worldBandHeight);
-      camera.setZoom(PORTRAIT_LAYOUT.cameraZoom);
-      camera.setFollowOffset(PORTRAIT_LAYOUT.followOffsetX, PORTRAIT_LAYOUT.followOffsetY);
+      camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
+      camera.setFollowOffset(BOSS_PIT_BOOTSTRAP.portraitFollowOffsetX, PORTRAIT_LAYOUT.portraitFollowOffsetY);
     } else {
       camera.setViewport(0, 0, width, height);
-      camera.setZoom(1);
-      camera.setFollowOffset(-128, 0);
+      camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
+      camera.setFollowOffset(BOSS_PIT_BOOTSTRAP.desktopFollowOffsetX, PORTRAIT_LAYOUT.desktopFollowOffsetY);
     }
 
     this.restartText.setPosition(width / 2, Math.max(76, height * 0.2));
