@@ -423,7 +423,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.hasTriggeredTrapAltar = true;
       this.hasCompletedBossPitLoop = true;
       bossPitRunState.markSector02Chamber02BossPitCompleted();
-      this.playBossPitReturnRise();
+      this.stageBossPitReturnBeforeFadeIn();
     }
     this.cameras.main.fadeIn(this.transitionContext?.returnFromBossPit ? 1200 : 650, 0, 0, 0);
   }
@@ -1358,25 +1358,32 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.cameras.main.fadeOut(420, 0, 0, 0);
   }
 
-  playBossPitReturnRise() {
+  stageBossPitReturnBeforeFadeIn() {
     this.isBossPitReturnSequenceActive = true;
     this.mobileControls.setMode('dialogue');
-    this.player.body.setVelocity(0, 0);
     this.player.body.setEnable(false);
     this.player.attackHitbox?.body?.setEnable(false);
-    const settledY = this.player.sprite.y;
-    const riseStartY = WORLD.floorY + 44;
-    this.player.sprite.setY(riseStartY);
-    this.tweens.add({
-      targets: this.player.sprite,
-      y: settledY,
-      duration: 1250,
-      ease: 'Cubic.easeOut',
-      onComplete: () => {
-        this.player.body.setEnable(true);
-        this.player.attackHitbox?.body?.setEnable(false);
-        this.isBossPitReturnSequenceActive = false;
+
+    const settleEntity = (entity, groundedY) => {
+      if (!entity?.sprite || !entity?.body) {
+        return;
       }
+
+      entity.body.setEnable(false);
+      entity.sprite.setPosition(entity.sprite.x, groundedY);
+      entity.body.reset(entity.sprite.x, groundedY);
+      entity.body.setVelocity(0, 0);
+      entity.body.setEnable(true);
+    };
+
+    settleEntity(this.player, this.transitionContext.returnPlayerY ?? COMPRESSION_VAULTS_BOOTSTRAP.spawnY);
+    this.enemies.forEach((enemy) => settleEntity(enemy, WORLD.floorY - 2));
+    settleEntity(this.pressureDeacon, COMPRESSION_VAULTS_PRESSURE_DEACON.spawnY);
+
+    this.player.body.setVelocity(0, 0);
+    this.player.body.setEnable(true);
+    this.time.delayedCall(1050, () => {
+      this.isBossPitReturnSequenceActive = false;
     });
   }
 

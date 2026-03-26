@@ -30,6 +30,7 @@ const BOSS_PIT_RETURN = {
 const BOSS_PIT_VICTORY = {
   preExplosionShakeMs: 3000,
   preExplosionShakeIntensity: 0.0058,
+  postExplosionDespawnDelayMs: 320,
   fadeOutDurationMs: 1300,
   fadeOutDelayMs: 780
 };
@@ -305,6 +306,7 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     this.player.attackHitbox?.body?.setEnable(false);
     this.setEnemyProjectilesPaused(true);
     bossPitRunState.markSector02Chamber02BossPitCompleted();
+    this.stabilizeBossCorpseForPayoff();
     this.cameras.main.shake(BOSS_PIT_VICTORY.preExplosionShakeMs, BOSS_PIT_VICTORY.preExplosionShakeIntensity, true);
 
     this.time.delayedCall(BOSS_PIT_VICTORY.preExplosionShakeMs, () => {
@@ -322,8 +324,36 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
           bossPitRunState.markSector02Chamber02BossPitRewardGranted();
         }
       }
-      this.beginReturnToMainChamber();
+      this.time.delayedCall(BOSS_PIT_VICTORY.postExplosionDespawnDelayMs, () => {
+        this.despawnBossAfterPayoff();
+        this.beginReturnToMainChamber();
+      });
     });
+  }
+
+  stabilizeBossCorpseForPayoff() {
+    if (!this.boss?.sprite?.active) {
+      return;
+    }
+
+    this.tweens.killTweensOf(this.boss.sprite);
+    this.boss.sprite
+      .setAlpha(0.92)
+      .setVisible(true)
+      .setScale(
+        this.boss.baseScaleX * this.boss.config.presentation.scaleX,
+        this.boss.baseScaleY * this.boss.config.presentation.scaleY
+      )
+      .setAngle(0);
+  }
+
+  despawnBossAfterPayoff() {
+    if (!this.boss?.sprite) {
+      return;
+    }
+
+    this.boss.sprite.setVisible(false).setAlpha(0);
+    this.boss.destroyCombatTelegraphs?.();
   }
 
   handleBossContactPlayer() {
