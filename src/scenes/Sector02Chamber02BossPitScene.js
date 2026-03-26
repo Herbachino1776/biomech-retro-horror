@@ -57,7 +57,9 @@ const BOSS_PIT_BOSS = {
     display: { width: 352, height: 372 },
     origin: { x: 0.52, y: 0.986 },
     alpha: 0.99,
-    tint: 0xded8cb
+    tint: 0xded8cb,
+    scaleX: 1,
+    scaleY: 1
   },
   groundBurst: {
     enabled: true,
