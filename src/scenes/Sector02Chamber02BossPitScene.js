@@ -29,14 +29,29 @@ const BOSS_PIT_RETURN = {
   returnXOffset: 56,
   returnYOffset: 0
 };
+
+const BOSS_PIT_ALTARS = {
+  presentation: [
+    { id: 'west-watch-altar', x: 430, y: WORLD.floorY - 102, width: 174, height: 174, tint: 0x8a8378, alpha: 0.32 },
+    { id: 'east-watch-altar', x: 1110, y: WORLD.floorY - 102, width: 174, height: 174, tint: 0x8f8579, alpha: 0.34 },
+    { id: 'return-altar', x: 1530, y: WORLD.floorY - 102, width: 208, height: 208, tint: 0xb7ad9d, alpha: 0.44 }
+  ],
+  returnAltarId: 'return-altar',
+  interaction: {
+    zoneWidth: 196,
+    zoneHeight: 212,
+    promptOffsetY: -170,
+    inactivePrompt: 'PIT ALTAR DORMANT',
+    activePrompt: 'EXIT ALTAR OPEN\nPRESS RITE / [E] TO RETURN'
+  }
+};
+
 const BOSS_PIT_VICTORY = {
   preExplosionShakeMs: 3000,
   preExplosionShakeIntensity: 0.0058,
   goreFountainCadenceMs: 140,
   explosionFadeDurationMs: 320,
-  postExplosionDespawnDelayMs: 320,
-  fadeOutDurationMs: 1300,
-  fadeOutDelayMs: 780
+  postExplosionDespawnDelayMs: 320
 };
 
 const BOSS_PIT_BOSS = {
@@ -116,11 +131,14 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     this.returnTransitionActive = false;
     this.victorySequenceActive = false;
     this.hasProcessedBossPitVictory = false;
+    this.hasUnlockedExitAltar = false;
     this.enemyProjectiles = [];
     this.enemyProjectilesPaused = false;
     this.integrityRewardTracker = new Set();
-    this.returnFadeFallbackTimer = null;
     this.victoryGoreFountainTimer = null;
+    this.pitAltars = [];
+    this.exitAltar = null;
+    this.currentExitAltar = null;
   }
 
   create() {
@@ -157,6 +175,7 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     }
     this.add.rectangle(BOSS_PIT_BOOTSTRAP.worldWidth / 2, WORLD.floorY - 24, BOSS_PIT_BOOTSTRAP.worldWidth, 120, 0x101010, 0.96).setDepth(-6.2);
     this.add.ellipse(BOSS_PIT_BOOTSTRAP.worldWidth / 2, WORLD.floorY + 10, BOSS_PIT_BOOTSTRAP.worldWidth, 56, 0x010101, 0.36).setDepth(-5.9);
+    this.createPitAltars();
   }
 
   createPlayerAndCombat() {
@@ -198,8 +217,6 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
       this.boss?.destroyCombatTelegraphs?.();
       this.victoryGoreFountainTimer?.remove(false);
       this.victoryGoreFountainTimer = null;
-      this.returnFadeFallbackTimer?.remove(false);
-      this.returnFadeFallbackTimer = null;
     });
   }
 
@@ -257,6 +274,8 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
       this.boss.setActive(true);
     }
     this.boss.update(time, this.player.sprite);
+    this.refreshExitAltarPresence();
+    this.tryUseExitAltar(mobileInput);
     this.enemyProjectiles.forEach((projectile) => projectile.update(time, this.game.loop.delta));
     this.refreshBossBar(time);
     this.hud.update(this.player.health, this.player.maxHealth);
@@ -339,7 +358,7 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
       }
       this.time.delayedCall(BOSS_PIT_VICTORY.postExplosionDespawnDelayMs, () => {
         this.despawnBossAfterPayoff();
-        this.beginReturnToMainChamber();
+        this.completeBossPitVictoryState();
       });
     });
   }
@@ -382,6 +401,15 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     this.stopVictoryGoreFountain();
     this.boss.sprite.setVisible(false).setAlpha(0);
     this.boss.destroyCombatTelegraphs?.();
+  }
+
+  completeBossPitVictoryState() {
+    this.victorySequenceActive = false;
+    this.player.body.setEnable(true);
+    this.player.body.setVelocity(0, 0);
+    this.player.attackHitbox?.body?.setEnable(true);
+    this.mobileControls.setMode('gameplay');
+    this.unlockExitAltar();
   }
 
   startVictoryGoreFountain() {
@@ -473,7 +501,6 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     }
 
     this.returnTransitionActive = true;
-    this.victorySequenceActive = false;
     this.mobileControls.setMode('init');
     this.player.body.setVelocity(0, 0);
     this.player.body.setEnable(false);
@@ -481,33 +508,17 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     this.audioDirector?.stopAmbientLoop({ fadeOut: false });
     this.sound.play(ASSET_KEYS.loreExit, { volume: 0.78 });
 
-    this.time.delayedCall(BOSS_PIT_VICTORY.fadeOutDelayMs, () => {
-      let hasStartedReturnScene = false;
-      const startReturnScene = () => {
-        if (hasStartedReturnScene) {
-          return;
-        }
-        hasStartedReturnScene = true;
-        this.cameras.main.resetFX();
-        this.cameras.main.setAlpha(1);
-        this.returnFadeFallbackTimer?.remove(false);
-        this.returnFadeFallbackTimer = null;
-        this.scene.start(BOSS_PIT_RETURN.returnSceneKey, {
-          fromScene: this.scene.key,
-          returnFromBossPit: true,
-          bossPitCompleted: true,
-          skipEntryRestore: true,
-          returnPlayerX: (this.transitionContext.altarX ?? 960) + BOSS_PIT_RETURN.returnXOffset,
-          returnPlayerY: (this.transitionContext.altarY ?? PLAYER.startY) + BOSS_PIT_RETURN.returnYOffset
-        });
-      };
-
-      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-        startReturnScene();
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.start(BOSS_PIT_RETURN.returnSceneKey, {
+        fromScene: this.scene.key,
+        returnFromBossPit: true,
+        bossPitCompleted: true,
+        skipEntryRestore: true,
+        returnPlayerX: (this.transitionContext.altarX ?? 960) + BOSS_PIT_RETURN.returnXOffset,
+        returnPlayerY: (this.transitionContext.altarY ?? PLAYER.startY) + BOSS_PIT_RETURN.returnYOffset
       });
-      this.returnFadeFallbackTimer = this.time.delayedCall(BOSS_PIT_VICTORY.fadeOutDurationMs + 120, startReturnScene);
-      this.cameras.main.fadeOut(BOSS_PIT_VICTORY.fadeOutDurationMs, 0, 0, 0);
     });
+    this.cameras.main.fadeOut(480, 0, 0, 0);
   }
 
   refreshBossBar(time) {
@@ -534,6 +545,110 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
         projectile.resumeMotion();
       }
     });
+  }
+
+  createPitAltars() {
+    BOSS_PIT_ALTARS.presentation.forEach((altarConfig) => {
+      this.add.rectangle(altarConfig.x, WORLD.floorY - 8, altarConfig.width + 82, 18, 0x080707, 0.8).setDepth(-6.16);
+      this.add.ellipse(altarConfig.x, WORLD.floorY - 16, altarConfig.width + 42, 26, 0x1b1714, 0.24).setDepth(-6.12);
+      this.add.ellipse(altarConfig.x, WORLD.floorY + 10, altarConfig.width + 152, 36, 0x010101, 0.34).setDepth(-6.04);
+
+      const primaryKey = altarConfig.id === BOSS_PIT_ALTARS.returnAltarId
+        ? ASSET_KEYS.bossPit01AltarSuper
+        : ASSET_KEYS.bossPit01AltarTrap;
+      const fallbackKey = ASSET_KEYS.bossPit01AltarTrap;
+      const altarTextureKey = this.textures.exists(primaryKey)
+        ? primaryKey
+        : this.textures.exists(fallbackKey)
+          ? fallbackKey
+          : null;
+
+      const sprite = altarTextureKey
+        ? this.add.image(altarConfig.x, altarConfig.y, altarTextureKey)
+          .setDisplaySize(altarConfig.width, altarConfig.height)
+          .setTint(altarConfig.tint)
+          .setAlpha(altarConfig.alpha)
+          .setDepth(-6.08)
+        : this.add.ellipse(altarConfig.x, altarConfig.y + 4, altarConfig.width * 0.82, altarConfig.height * 0.86, 0x7b7164, altarConfig.alpha).setDepth(-6.08);
+
+      const aura = this.add.ellipse(altarConfig.x, altarConfig.y - 4, altarConfig.width * 0.78, altarConfig.height * 0.74, 0xb9ac98, altarConfig.id === BOSS_PIT_ALTARS.returnAltarId ? 0.04 : 0.02)
+        .setDepth(-6.06);
+
+      const altarEntry = { ...altarConfig, sprite, aura };
+      this.pitAltars.push(altarEntry);
+      if (altarConfig.id !== BOSS_PIT_ALTARS.returnAltarId) {
+        return;
+      }
+
+      const zone = this.add.zone(altarConfig.x, WORLD.floorY - 74, BOSS_PIT_ALTARS.interaction.zoneWidth, BOSS_PIT_ALTARS.interaction.zoneHeight).setOrigin(0.5);
+      this.physics.add.existing(zone, true);
+      const prompt = this.add.text(
+        altarConfig.x,
+        WORLD.floorY + BOSS_PIT_ALTARS.interaction.promptOffsetY,
+        BOSS_PIT_ALTARS.interaction.inactivePrompt,
+        { fontFamily: 'monospace', fontSize: '14px', color: '#a29788', align: 'center', stroke: '#0d0908', strokeThickness: 4 }
+      ).setOrigin(0.5).setDepth(-4.58).setVisible(false);
+      this.exitAltar = { ...altarEntry, zone, prompt };
+    });
+    this.updateExitAltarVisualState();
+  }
+
+  unlockExitAltar() {
+    if (this.hasUnlockedExitAltar) {
+      return;
+    }
+
+    this.hasUnlockedExitAltar = true;
+    this.updateExitAltarVisualState();
+    this.sound.play(ASSET_KEYS.gateUnlock, { volume: 0.6 });
+  }
+
+  updateExitAltarVisualState() {
+    if (!this.exitAltar) {
+      return;
+    }
+
+    if (this.hasUnlockedExitAltar) {
+      this.exitAltar.sprite?.setAlpha(0.94).setTint(0xd7cab2);
+      this.exitAltar.aura?.setAlpha(0.22).setFillStyle(0xc2b37f, 0.24);
+      return;
+    }
+
+    this.exitAltar.sprite?.setAlpha(0.44).setTint(0x8f8579);
+    this.exitAltar.aura?.setAlpha(0.04).setFillStyle(0x6f6559, 0.04);
+  }
+
+  refreshExitAltarPresence() {
+    this.currentExitAltar = null;
+    if (!this.exitAltar?.zone || this.returnTransitionActive || this.victorySequenceActive) {
+      this.exitAltar?.prompt?.setVisible(false);
+      return;
+    }
+
+    this.physics.overlap(this.player.sprite, this.exitAltar.zone, () => {
+      this.currentExitAltar = this.exitAltar;
+    });
+
+    const inside = Boolean(this.currentExitAltar);
+    this.exitAltar.prompt
+      ?.setVisible(inside)
+      .setText(this.hasUnlockedExitAltar ? BOSS_PIT_ALTARS.interaction.activePrompt : BOSS_PIT_ALTARS.interaction.inactivePrompt)
+      .setColor(this.hasUnlockedExitAltar ? '#d8ceb8' : '#a29788');
+  }
+
+  tryUseExitAltar(mobileInput) {
+    if (!this.hasUnlockedExitAltar || !this.currentExitAltar) {
+      return;
+    }
+
+    const interactPressed = Phaser.Input.Keyboard.JustDown(this.keyInteract)
+      || Phaser.Input.Keyboard.JustDown(this.keyEnter)
+      || mobileInput.interactPressed;
+    if (!interactPressed) {
+      return;
+    }
+
+    this.beginReturnToMainChamber();
   }
 
   createInvisiblePlatform(x, y, width, height) {
