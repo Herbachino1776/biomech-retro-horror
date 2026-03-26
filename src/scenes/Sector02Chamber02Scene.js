@@ -12,6 +12,7 @@ import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
 import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
+import { bossPitRunState } from '../systems/BossPitRunState.js';
 
 const COMPRESSION_VAULTS_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber02Scene',
@@ -385,9 +386,10 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.transitionContext = data ?? {};
     this.isRestartingRun = false;
     this.isLoreTransitionActive = false;
+    this.isBossPitReturnSequenceActive = false;
     this.hasCompletedLoreBeat = false;
     this.hasTriggeredTrapAltar = false;
-    this.hasCompletedBossPitLoop = Boolean(this.transitionContext?.bossPitCompleted);
+    this.hasCompletedBossPitLoop = Boolean(this.transitionContext?.bossPitCompleted || this.transitionContext?.returnFromBossPit) || bossPitRunState.hasSector02Chamber02BossPitCompleted();
     this.hasUnlockedForwardPath = false;
     this.hasTriggeredForwardContract = false;
     this.currentForwardThreshold = null;
@@ -419,8 +421,11 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     if (this.transitionContext?.returnFromBossPit) {
       this.hasCompletedLoreBeat = true;
       this.hasTriggeredTrapAltar = true;
+      this.hasCompletedBossPitLoop = true;
+      bossPitRunState.markSector02Chamber02BossPitCompleted();
+      this.playBossPitReturnRise();
     }
-    this.cameras.main.fadeIn(650, 0, 0, 0);
+    this.cameras.main.fadeIn(this.transitionContext?.returnFromBossPit ? 1200 : 650, 0, 0, 0);
   }
 
   createWorldBounds() {
@@ -774,6 +779,17 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(-4.6).setAlpha(0.9).setVisible(false);
 
     this.loreAnchor = { ...anchorConfig, zone, prompt };
+    if (this.hasCompletedBossPitLoop) {
+      this.renderSpentTrapAltarState();
+    }
+  }
+
+  renderSpentTrapAltarState() {
+    const anchorConfig = COMPRESSION_VAULTS_LORE.anchor;
+    this.add.rectangle(anchorConfig.altarX, anchorConfig.altarY, anchorConfig.altarDisplayWidth + 24, anchorConfig.altarDisplayHeight + 16, 0x000000, 0.46)
+      .setDepth(-6.01);
+    this.add.ellipse(anchorConfig.altarX, anchorConfig.altarY + 8, anchorConfig.altarDisplayWidth * 0.74, anchorConfig.altarDisplayHeight * 0.4, 0x000000, 0.38)
+      .setDepth(-6);
   }
 
   createForwardThreshold() {
@@ -870,6 +886,15 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     }
 
     if (this.isLoreTransitionActive) {
+      this.riteFinisherPrompt?.setVisible(false);
+      this.mobileControls.setMode('dialogue');
+      this.player.body.setVelocity(0, 0);
+      this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+      this.pressureDeacon?.body?.setVelocity?.(0, 0);
+      this.setEnemyProjectilesPaused(true);
+      return;
+    }
+    if (this.isBossPitReturnSequenceActive) {
       this.riteFinisherPrompt?.setVisible(false);
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
@@ -1295,7 +1320,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
   }
 
   beginLoreSequence() {
-    if (this.isLoreTransitionActive) {
+    if (this.isLoreTransitionActive || this.hasCompletedBossPitLoop) {
       return;
     }
 
@@ -1331,6 +1356,28 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     });
     this.cameras.main.shake(240, 0.0038, true);
     this.cameras.main.fadeOut(420, 0, 0, 0);
+  }
+
+  playBossPitReturnRise() {
+    this.isBossPitReturnSequenceActive = true;
+    this.mobileControls.setMode('dialogue');
+    this.player.body.setVelocity(0, 0);
+    this.player.body.setEnable(false);
+    this.player.attackHitbox?.body?.setEnable(false);
+    const settledY = this.player.sprite.y;
+    const riseStartY = WORLD.floorY + 44;
+    this.player.sprite.setY(riseStartY);
+    this.tweens.add({
+      targets: this.player.sprite,
+      y: settledY,
+      duration: 1250,
+      ease: 'Cubic.easeOut',
+      onComplete: () => {
+        this.player.body.setEnable(true);
+        this.player.attackHitbox?.body?.setEnable(false);
+        this.isBossPitReturnSequenceActive = false;
+      }
+    });
   }
 
   setGameplaySceneVisibility(isVisible) {

@@ -1,5 +1,6 @@
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { vesselIntegrityState } from './VesselIntegrityState.js';
+import { bossPitRunState } from './BossPitRunState.js';
 
 const CHAMBER01_SCENE_KEY = 'Chamber01Scene';
 const CHAMBER02_SCENE_KEY = 'Chamber02Scene';
@@ -40,5 +41,6 @@ export function restartRunFromDeath(scene) {
     scene.scene.stop(CHAMBER01_SCENE_KEY);
   }
   vesselIntegrityState.resetForFreshRun();
+  bossPitRunState.resetForFreshRun();
   scene.scene.start(CHAMBER01_SCENE_KEY);
 }
