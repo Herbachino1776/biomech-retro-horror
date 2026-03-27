@@ -427,12 +427,18 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     if (this.transitionContext?.returnFromBossPit) {
       this.scene.setVisible(true, this.scene.key);
       this.cameras.main.resetFX();
+      this.restoreViewportLayoutAfterBossPitReturn();
       this.cameras.main.setAlpha(0);
       this.hasCompletedLoreBeat = true;
       this.hasTriggeredTrapAltar = true;
       this.hasCompletedBossPitLoop = true;
       bossPitRunState.markSector02Chamber02BossPitCompleted();
       this.stageBossPitReturnBeforeFadeIn(() => {
+        this.restoreViewportLayoutAfterBossPitReturn();
+        this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
+          this.restoreViewportLayoutAfterBossPitReturn();
+          this.cameras.main.setAlpha(1);
+        });
         this.cameras.main.fadeIn(BOSS_PIT_RETURN_STAGING.fadeInDurationMs, 0, 0, 0);
       });
       return;
@@ -1402,10 +1408,19 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.time.delayedCall(BOSS_PIT_RETURN_STAGING.blackoutSettleDelayMs, () => {
       settleAllEntities();
       this.time.delayedCall(BOSS_PIT_RETURN_STAGING.blackoutPostSettleHoldMs, () => {
+        this.restoreViewportLayoutAfterBossPitReturn();
         this.isBossPitReturnSequenceActive = false;
         onStaged?.();
       });
     });
+  }
+
+  restoreViewportLayoutAfterBossPitReturn() {
+    this.applyResponsiveLayout();
+    this.cameras.main.setVisible(true);
+    this.uiCamera?.setVisible(true);
+    this.hud?.setVisible(true);
+    this.hud?.layout();
   }
 
   setGameplaySceneVisibility(isVisible) {
