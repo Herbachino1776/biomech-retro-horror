@@ -49,9 +49,10 @@ const BOSS_PIT_ALTARS = {
 const BOSS_PIT_VICTORY = {
   preExplosionShakeMs: 3000,
   preExplosionShakeIntensity: 0.0058,
-  goreFountainCadenceMs: 140,
+  goreFountainCadenceMs: 86,
+  explosionFadeStartDelayMs: 100,
   explosionFadeDurationMs: 320,
-  postExplosionDespawnDelayMs: 320
+  postExplosionDespawnDelayMs: 560
 };
 
 const BOSS_PIT_BOSS = {
@@ -318,6 +319,7 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     this.boss.lastAttackHitId = this.player.attackId;
     this.boss.takeDamage(1, this.time.now);
     this.audioDirector?.playPlayerHit();
+    this.spawnBossHitGush();
     if (this.boss.dead) {
       this.handleBossPitVictory();
     }
@@ -341,13 +343,35 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
 
     this.time.delayedCall(BOSS_PIT_VICTORY.preExplosionShakeMs, () => {
       this.stopVictoryGoreFountain();
-      this.startBossExplosionFade();
       triggerSector02BlackOilBlowout(this, {
         source: this.boss.sprite,
         x: this.boss.sprite.x,
-        y: (this.boss.sprite.body?.bottom ?? this.boss.sprite.y) - 20,
-        depth: this.boss.sprite.depth,
-        scale: 1.1
+        y: (this.boss.sprite.body?.bottom ?? this.boss.sprite.y) - Phaser.Math.Between(90, 126),
+        depth: this.boss.sprite.depth + 0.46,
+        scale: 1.34,
+        durationMs: 760,
+        burstCount: 88,
+        sprayCount: 114,
+        mistCount: 16,
+        emberCount: 16,
+        burstRadiusX: 148,
+        burstRadiusY: 184,
+        dropletWidth: [10, 28],
+        dropletHeight: [20, 50],
+        sprayWidth: [5, 13],
+        sprayHeight: [16, 38],
+        splashColor: 0x8b111c,
+        heavyColor: 0x5e0a13,
+        highlightColor: 0xb43645,
+        redSpeckColor: 0xc84a55,
+        mistColor: 0x1d080b,
+        alpha: 0.98,
+        includeGroundPool: false,
+        persistPuddle: false,
+        fadeSource: false
+      });
+      this.time.delayedCall(BOSS_PIT_VICTORY.explosionFadeStartDelayMs, () => {
+        this.startBossExplosionFade();
       });
       this.audioDirector?.playBanishmentSting();
       if (!bossPitRunState.hasSector02Chamber02BossPitRewardGranted()) {
@@ -427,28 +451,30 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
 
       triggerSector02BlackOilBlowout(this, {
         source: this.boss.sprite,
-        x: this.boss.sprite.x + Phaser.Math.Between(-40, 40),
-        y: (this.boss.sprite.body?.bottom ?? this.boss.sprite.y) - Phaser.Math.Between(88, 118),
-        depth: this.boss.sprite.depth + 0.06,
-        scale: Phaser.Math.FloatBetween(0.46, 0.62),
-        durationMs: 520,
-        burstCount: 34,
-        sprayCount: 48,
-        mistCount: 8,
+        x: this.boss.sprite.x + Phaser.Math.Between(-58, 58),
+        y: (this.boss.sprite.body?.bottom ?? this.boss.sprite.y) - Phaser.Math.Between(104, 156),
+        depth: this.boss.sprite.depth + 0.38,
+        scale: Phaser.Math.FloatBetween(0.7, 0.92),
+        durationMs: 560,
+        burstCount: 52,
+        sprayCount: 76,
+        mistCount: 7,
         emberCount: 6,
-        burstRadiusX: 92,
-        burstRadiusY: 136,
-        dropletWidth: [5, 13],
-        dropletHeight: [12, 34],
-        sprayWidth: [3, 8],
-        sprayHeight: [14, 32],
-        splashColor: 0x71131d,
-        heavyColor: 0x4f1018,
-        highlightColor: 0x9a2a35,
-        redSpeckColor: 0xb33941,
-        mistColor: 0x251011,
+        burstRadiusX: 124,
+        burstRadiusY: 168,
+        dropletWidth: [8, 20],
+        dropletHeight: [18, 44],
+        sprayWidth: [4, 11],
+        sprayHeight: [14, 36],
+        splashColor: 0x86111b,
+        heavyColor: 0x560b13,
+        highlightColor: 0xa23340,
+        redSpeckColor: 0xc24753,
+        mistColor: 0x1e090d,
         alpha: 0.98,
-        persistPuddle: false
+        includeGroundPool: false,
+        persistPuddle: false,
+        fadeSource: false
       });
     };
 
@@ -457,6 +483,40 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
       delay: BOSS_PIT_VICTORY.goreFountainCadenceMs,
       repeat: Math.ceil(BOSS_PIT_VICTORY.preExplosionShakeMs / BOSS_PIT_VICTORY.goreFountainCadenceMs),
       callback: spawnFountainBurst
+    });
+  }
+
+  spawnBossHitGush() {
+    if (!this.boss?.sprite?.active) {
+      return;
+    }
+
+    triggerSector02BlackOilBlowout(this, {
+      source: this.boss.sprite,
+      x: this.boss.sprite.x + Phaser.Math.Between(-32, 32),
+      y: (this.boss.sprite.body?.bottom ?? this.boss.sprite.y) - Phaser.Math.Between(64, 104),
+      depth: this.boss.sprite.depth + 0.34,
+      scale: Phaser.Math.FloatBetween(0.62, 0.82),
+      durationMs: 460,
+      burstCount: 26,
+      sprayCount: 34,
+      mistCount: 4,
+      emberCount: 3,
+      burstRadiusX: 86,
+      burstRadiusY: 104,
+      dropletWidth: [6, 14],
+      dropletHeight: [14, 30],
+      sprayWidth: [3, 8],
+      sprayHeight: [12, 24],
+      splashColor: 0x7d1019,
+      heavyColor: 0x4a0a12,
+      highlightColor: 0x9f3340,
+      redSpeckColor: 0xba4350,
+      mistColor: 0x1a080b,
+      alpha: 0.97,
+      includeGroundPool: false,
+      persistPuddle: false,
+      fadeSource: false
     });
   }
 

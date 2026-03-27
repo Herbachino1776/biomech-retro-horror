@@ -27,6 +27,8 @@ const DEFAULT_CONFIG = {
   depthOffset: 0.18,
   lift: 42,
   alpha: 0.96,
+  fadeSource: true,
+  includeGroundPool: true,
   persistPuddle: true,
   puddleFadeMs: 2200,
   puddleAlpha: 0.34,
@@ -76,11 +78,15 @@ export function triggerSector02BlackOilBlowout(scene, {
   const centerY = y ?? source?.y ?? 0;
   const baseDepth = depth ?? source?.depth ?? 6;
   const created = [];
+  let craterShadow = null;
+  let puddle = null;
 
-  const craterShadow = scene.add
-    .ellipse(centerX, centerY + 14 * scale, config.puddleWidth * 1.28, config.puddleHeight * 1.7, config.shadowColor, 0.52)
-    .setDepth(baseDepth - 0.05);
-  created.push(craterShadow);
+  if (config.includeGroundPool) {
+    craterShadow = scene.add
+      .ellipse(centerX, centerY + 14 * scale, config.puddleWidth * 1.28, config.puddleHeight * 1.7, config.shadowColor, 0.52)
+      .setDepth(baseDepth - 0.05);
+    created.push(craterShadow);
+  }
 
   const releaseRing = scene.add
     .ellipse(centerX, centerY - 4 * scale, config.burstRadiusX * 0.52, config.burstRadiusY * 0.26, config.highlightColor, 0.16)
@@ -88,11 +94,13 @@ export function triggerSector02BlackOilBlowout(scene, {
     .setDepth(baseDepth + config.depthOffset);
   created.push(releaseRing);
 
-  const puddle = scene.add
-    .ellipse(centerX, centerY + 20 * scale, config.puddleWidth, config.puddleHeight, config.heavyColor, config.persistPuddle ? config.puddleAlpha : 0.32)
-    .setStrokeStyle(2, config.redSpeckColor, 0.14)
-    .setDepth(baseDepth - 0.02);
-  created.push(puddle);
+  if (config.includeGroundPool) {
+    puddle = scene.add
+      .ellipse(centerX, centerY + 20 * scale, config.puddleWidth, config.puddleHeight, config.heavyColor, config.persistPuddle ? config.puddleAlpha : 0.32)
+      .setStrokeStyle(2, config.redSpeckColor, 0.14)
+      .setDepth(baseDepth - 0.02);
+    created.push(puddle);
+  }
 
   const spawnDroplet = ({ widthRange, heightRange, color, alpha, depthStep, xMultiplier = 0.16, liftMin = 0.45, liftMax = 1.28, angleRange = 40, scaleXRange = [0.78, 1.24], scaleYRange = [0.76, 1.32], durationJitter = 140 }) => {
     const offsetX = Phaser.Math.Between(-config.burstRadiusX, config.burstRadiusX);
@@ -202,35 +210,39 @@ export function triggerSector02BlackOilBlowout(scene, {
     onComplete: () => releaseRing.destroy()
   });
 
-  scene.tweens.add({
-    targets: craterShadow,
-    scaleX: 1.08,
-    scaleY: 1.16,
-    alpha: 0.22,
-    duration: 640,
-    ease: 'Sine.easeOut'
-  });
-
-  if (config.persistPuddle) {
+  if (craterShadow?.active) {
     scene.tweens.add({
-      targets: puddle,
-      alpha: config.puddleAlpha,
-      scaleX: 1.18,
-      scaleY: 1.06,
-      duration: 580,
+      targets: craterShadow,
+      scaleX: 1.08,
+      scaleY: 1.16,
+      alpha: 0.22,
+      duration: 640,
       ease: 'Sine.easeOut'
-    });
-  } else {
-    scene.tweens.add({
-      targets: puddle,
-      alpha: 0,
-      duration: 780,
-      ease: 'Quad.easeOut',
-      onComplete: () => puddle.destroy()
     });
   }
 
-  if (source?.active) {
+  if (puddle?.active) {
+    if (config.persistPuddle) {
+      scene.tweens.add({
+        targets: puddle,
+        alpha: config.puddleAlpha,
+        scaleX: 1.18,
+        scaleY: 1.06,
+        duration: 580,
+        ease: 'Sine.easeOut'
+      });
+    } else {
+      scene.tweens.add({
+        targets: puddle,
+        alpha: 0,
+        duration: 780,
+        ease: 'Quad.easeOut',
+        onComplete: () => puddle.destroy()
+      });
+    }
+  }
+
+  if (source?.active && config.fadeSource) {
     scene.tweens.add({
       targets: source,
       y: source.y - 12 * scale,
@@ -245,7 +257,7 @@ export function triggerSector02BlackOilBlowout(scene, {
     });
   }
 
-  if (config.persistPuddle) {
+  if (config.persistPuddle && puddle?.active) {
     scene.time.delayedCall(config.puddleFadeMs, () => {
       if (!puddle.active) {
         return;

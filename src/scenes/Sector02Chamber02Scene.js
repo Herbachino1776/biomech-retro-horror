@@ -31,6 +31,12 @@ const COMPRESSION_VAULTS_BOOTSTRAP = {
   pressureBandHeight: 170
 };
 
+const BOSS_PIT_RETURN_STAGING = {
+  blackoutSettleDelayMs: 180,
+  blackoutPostSettleHoldMs: 220,
+  fadeInDurationMs: 980
+};
+
 const COMPRESSION_VAULTS_SEGMENTS = [
   { key: ASSET_KEYS.sector02Chamber02BackgroundEntryLockBasin, x: 430, y: 220, width: 920, height: 470, tint: 0xc1c3b6, alpha: 0.74, depth: -14.76 },
   { key: ASSET_KEYS.sector02Chamber02BackgroundWallModule, x: 1220, y: 216, width: 820, height: 450, tint: 0xabb0a3, alpha: 0.58, depth: -14.6 },
@@ -421,14 +427,17 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     if (this.transitionContext?.returnFromBossPit) {
       this.scene.setVisible(true, this.scene.key);
       this.cameras.main.resetFX();
-      this.cameras.main.setAlpha(1);
+      this.cameras.main.setAlpha(0);
       this.hasCompletedLoreBeat = true;
       this.hasTriggeredTrapAltar = true;
       this.hasCompletedBossPitLoop = true;
       bossPitRunState.markSector02Chamber02BossPitCompleted();
-      this.stageBossPitReturnBeforeFadeIn();
+      this.stageBossPitReturnBeforeFadeIn(() => {
+        this.cameras.main.fadeIn(BOSS_PIT_RETURN_STAGING.fadeInDurationMs, 0, 0, 0);
+      });
+      return;
     }
-    this.cameras.main.fadeIn(this.transitionContext?.returnFromBossPit ? 1200 : 650, 0, 0, 0);
+    this.cameras.main.fadeIn(650, 0, 0, 0);
   }
 
   createWorldBounds() {
@@ -1361,7 +1370,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.cameras.main.fadeOut(420, 0, 0, 0);
   }
 
-  stageBossPitReturnBeforeFadeIn() {
+  stageBossPitReturnBeforeFadeIn(onStaged = null) {
     this.isBossPitReturnSequenceActive = true;
     this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
@@ -1381,14 +1390,21 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       entity.body.setEnable(true);
     };
 
-    settleEntity(this.player, this.transitionContext.returnPlayerY ?? COMPRESSION_VAULTS_BOOTSTRAP.spawnY);
-    this.enemies.forEach((enemy) => settleEntity(enemy, WORLD.floorY - 2));
-    settleEntity(this.pressureDeacon, COMPRESSION_VAULTS_PRESSURE_DEACON.spawnY);
+    const settleAllEntities = () => {
+      settleEntity(this.player, this.transitionContext.returnPlayerY ?? COMPRESSION_VAULTS_BOOTSTRAP.spawnY);
+      this.enemies.forEach((enemy) => settleEntity(enemy, WORLD.floorY - 2));
+      settleEntity(this.pressureDeacon, COMPRESSION_VAULTS_PRESSURE_DEACON.spawnY);
 
-    this.player.body.setVelocity(0, 0);
-    this.player.body.setEnable(true);
-    this.time.delayedCall(1050, () => {
-      this.isBossPitReturnSequenceActive = false;
+      this.player.body.setVelocity(0, 0);
+      this.player.body.setEnable(true);
+    };
+
+    this.time.delayedCall(BOSS_PIT_RETURN_STAGING.blackoutSettleDelayMs, () => {
+      settleAllEntities();
+      this.time.delayedCall(BOSS_PIT_RETURN_STAGING.blackoutPostSettleHoldMs, () => {
+        this.isBossPitReturnSequenceActive = false;
+        onStaged?.();
+      });
     });
   }
 
