@@ -34,7 +34,9 @@ const COMPRESSION_VAULTS_BOOTSTRAP = {
 const BOSS_PIT_RETURN_STAGING = {
   blackoutSettleDelayMs: 180,
   blackoutPostSettleHoldMs: 220,
-  fadeInDurationMs: 980
+  fadeInDurationMs: 980,
+  maskColor: 0x000000,
+  maskAlpha: 1
 };
 
 const COMPRESSION_VAULTS_SEGMENTS = [
@@ -410,6 +412,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.hasEnteredForwardThreshold = false;
     this.forwardThresholdAwaitingFreshInteract = false;
     this.integrityRewardTracker = new Set();
+    this.bossPitReturnStagingMask = null;
   }
 
   create() {
@@ -1381,6 +1384,15 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
     this.mobileControls.setMode('dialogue');
+    this.bossPitReturnStagingMask?.destroy();
+    this.bossPitReturnStagingMask = this.add.rectangle(
+      this.scale.width / 2,
+      this.scale.height / 2,
+      this.scale.width,
+      this.scale.height,
+      BOSS_PIT_RETURN_STAGING.maskColor,
+      BOSS_PIT_RETURN_STAGING.maskAlpha
+    ).setScrollFactor(0).setDepth(120);
     this.player.body.setEnable(false);
     this.player.attackHitbox?.body?.setEnable(false);
 
@@ -1408,6 +1420,8 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.time.delayedCall(BOSS_PIT_RETURN_STAGING.blackoutSettleDelayMs, () => {
       settleAllEntities();
       this.time.delayedCall(BOSS_PIT_RETURN_STAGING.blackoutPostSettleHoldMs, () => {
+        this.bossPitReturnStagingMask?.destroy();
+        this.bossPitReturnStagingMask = null;
         this.restoreViewportLayoutAfterBossPitReturn();
         this.isBossPitReturnSequenceActive = false;
         onStaged?.();
