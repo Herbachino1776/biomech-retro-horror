@@ -318,7 +318,11 @@ const KILN_SORROW_ENGINE = {
   deathPayoff: {
     shakeDurationMs: 3000,
     shakeIntensity: 0.017,
-    explosionDelayMs: 3000
+    flarePulseDelayMs: 980,
+    collapseCueDelayMs: 2120,
+    explosionDelayMs: 3000,
+    bossBarDropDelayMs: 3440,
+    unlockRevealDelayMs: 3760
   },
   blowout: {
     scale: 1.44,
@@ -1287,6 +1291,39 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       },
       stages: [
         {
+          atMs: KILN_SORROW_ENGINE.deathPayoff.flarePulseDelayMs,
+          run: () => {
+            if (!this.sorrowEngine?.sprite?.active) {
+              return;
+            }
+            this.tweens.add({
+              targets: this.sorrowEngine.sprite,
+              scaleX: this.sorrowEngine.sprite.scaleX * 1.08,
+              scaleY: this.sorrowEngine.sprite.scaleY * 1.05,
+              yoyo: true,
+              duration: 280,
+              ease: 'Sine.inOut'
+            });
+            this.hud.setBossBarState({
+              visible: true,
+              name: KILN_SORROW_ENGINE.name,
+              subtitle: 'CORE LITURGY COLLAPSING',
+              current: 0,
+              max: this.sorrowEngine.maxHealth,
+              telegraph: 1,
+              wounded: true
+            });
+          }
+        },
+        {
+          atMs: KILN_SORROW_ENGINE.deathPayoff.collapseCueDelayMs,
+          run: () => {
+            this.forwardPrompt?.setText('JUDGEMENT GATE STRAINING');
+            this.forwardPrompt?.setVisible(true);
+            this.cameras.main.shake(480, 0.012, true);
+          }
+        },
+        {
           atMs: KILN_SORROW_ENGINE.deathPayoff.explosionDelayMs,
           run: () => {
             if (!this.sorrowEngine?.sprite?.active) {
@@ -1297,11 +1334,22 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
             this.tweens.killTweensOf(this.sorrowEngine.sprite);
             this.sorrowEngine.sprite.setVisible(false);
             this.sorrowEngineDeathFinished = true;
+          }
+        },
+        {
+          atMs: KILN_SORROW_ENGINE.deathPayoff.bossBarDropDelayMs,
+          run: () => {
             this.hud.setBossBarState({ visible: false });
-            if (!this.hasUnlockedForwardPath) {
-              grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber03-sorrow-engine-true-boss');
-              this.unlockForwardPath();
+          }
+        },
+        {
+          atMs: KILN_SORROW_ENGINE.deathPayoff.unlockRevealDelayMs,
+          run: () => {
+            if (this.hasUnlockedForwardPath) {
+              return;
             }
+            grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber03-sorrow-engine-true-boss');
+            this.unlockForwardPath();
           }
         }
       ],
@@ -1342,12 +1390,22 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
 
   unlockForwardPath() {
     this.hasUnlockedForwardPath = true;
+    this.cameras.main.shake(360, 0.008, true);
+    this.cameras.main.flash(220, 22, 18, 14, false);
     this.forwardBarrier?.setAlpha(0.08);
     this.forwardBarrier?.setFillStyle(0xa3896a, 0.08);
     if (this.forwardBarrier?.body) {
       this.forwardBarrier.body.enable = false;
       this.forwardBarrier.body.updateFromGameObject?.();
     }
+    this.tweens.killTweensOf(this.forwardBarrier);
+    this.tweens.add({
+      targets: this.forwardBarrier,
+      alpha: 0.24,
+      duration: 220,
+      yoyo: true,
+      ease: 'Sine.inOut'
+    });
     this.forwardPrompt?.setText('SORROW ENGINE RUPTURED\nPRESS RITE / [E] TO DESCEND');
   }
 

@@ -110,9 +110,11 @@ const CHAMBER03_BOSS_COMBAT = {
 
 const CHAMBER03_FINALE = {
   bloodFlashMs: 860,
-  payoffRevealDelayMs: 760,
+  payoffRevealDelayMs: 880,
   payoffHoldMs: 2100,
-  progressionRevealDelayMs: 3140,
+  progressionRevealDelayMs: 3260,
+  bossBarDropDelayMs: 1180,
+  controlReleaseDelayMs: 3720,
   progressionInteractDelayMs: 360,
   progressionPromptText: 'DESCEND THROUGH THE RUPTURE',
   payoffTitle: 'THE PRECENTOR IS SILENCED',
@@ -134,6 +136,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossAttackHitId = -1;
     this.isSectorFinaleActive = false;
     this.resolutionLockActive = false;
+    this.bossDefeatCeremonyBossBarActive = false;
     this.currentProgressionThresholdZone = null;
     this.integrityRewardTracker = new Set();
   }
@@ -741,6 +744,19 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
   }
 
   updateBossHud(time) {
+    if (this.bossDefeatCeremonyBossBarActive) {
+      this.hud.setBossBarState({
+        visible: true,
+        name: CHAMBER03_BOSS_COMBAT.name,
+        subtitle: 'THRESHOLD VERDICT COLLAPSING',
+        current: 0,
+        max: this.bossCombat?.maxHealth ?? CHAMBER03_BOSS_COMBAT.maxHealth,
+        telegraph: 1,
+        wounded: true
+      });
+      return;
+    }
+
     this.hud.setBossBarState({
       visible: this.hasActivatedBoss && !this.bossCombat?.defeated,
       name: CHAMBER03_BOSS_COMBAT.name,
@@ -835,6 +851,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
     this.majorEncounterResolution?.begin({
       encounterId: 'chamber03-precentor',
+      freezePlayer: true,
       disablePlayerAttack: true,
       setResolutionLock: (locked) => {
         this.resolutionLockActive = locked;
@@ -849,6 +866,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         this.resetBossPresentationState();
         this.bossBody.enable = false;
         this.bossBody.setVelocity(0, 0);
+        this.bossDefeatCeremonyBossBarActive = true;
         this.audioDirector?.playEnemyDeath('miniboss');
         this.bossStatusPrompt
           ?.setText(CHAMBER03_FINALE.payoffTitle)
@@ -879,13 +897,42 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         });
       },
       stages: [
-        { atMs: CHAMBER03_FINALE.progressionRevealDelayMs, run: () => {} }
-      ]
+        {
+          atMs: CHAMBER03_FINALE.payoffRevealDelayMs,
+          run: () => {
+            this.showSectorPayoffText();
+          }
+        },
+        {
+          atMs: CHAMBER03_FINALE.bossBarDropDelayMs,
+          run: () => {
+            this.bossDefeatCeremonyBossBarActive = false;
+            this.hud.setBossBarState({ visible: false });
+          }
+        },
+        {
+          atMs: CHAMBER03_FINALE.progressionRevealDelayMs,
+          run: () => {
+            this.revealProgressionGate();
+          }
+        },
+        {
+          atMs: CHAMBER03_FINALE.controlReleaseDelayMs,
+          run: () => {
+            this.isSectorFinaleActive = true;
+            this.player.attackHitbox?.body?.setEnable(false);
+            this.progressionGatePrompt?.setText(`${CHAMBER03_FINALE.progressionPromptText}\nPRESS RITE / [E]`);
+          }
+        }
+      ],
+      onComplete: () => {
+        this.bossDefeatCeremonyBossBarActive = false;
+      }
     });
   }
 
   triggerSectorFinalePayoff() {
-    this.isSectorFinaleActive = true;
+    this.isSectorFinaleActive = false;
     this.currentProgressionThresholdZone = null;
     this.player.attackHitbox?.body?.setEnable(false);
     this.cameras.main.shake(920, 0.028, true);
@@ -896,12 +943,6 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     });
     this.time.delayedCall(220, () => {
       this.audioDirector?.playBanishmentSting();
-    });
-    this.time.delayedCall(CHAMBER03_FINALE.payoffRevealDelayMs, () => {
-      this.showSectorPayoffText();
-    });
-    this.time.delayedCall(CHAMBER03_FINALE.progressionRevealDelayMs, () => {
-      this.revealProgressionGate();
     });
   }
 
