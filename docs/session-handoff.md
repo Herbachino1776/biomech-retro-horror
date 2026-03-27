@@ -2,43 +2,46 @@
 
 Use this file to start a fresh planning/implementation session from real current state.
 
-## Where the Project Actually Is
-The game is beyond a small vertical-slice stub.
+## Big-Picture Doctrine (Read First)
+- The project is beyond an early vertical slice and now operates as a multi-sector prototype.
+- Boss pits are now core structure, not optional side garnish.
+- Sector 3 and boss-pit expansion are now coupled lanes in post-7 planning.
+- Dense lore should be balanced by violent combat payoff, trap-altar tension, and meaningful run-growth rewards.
 
-- **Sector 1 arc is functionally present:**
-  - Chamber 01
-  - Chamber 02
-  - Chamber 03
-  - separate boss arena finale
-  - real boss payoff and onward progression contract
-- **Sector 2 arc is functionally present in prototype form (Bucket 2: The Black Aqueduct / The Pressure Gospel):**
+## Where the Project Actually Is
+- **Sector 1 arc is functionally present:** Chamber 01 -> Chamber 02 -> Chamber 03 -> separate boss arena finale.
+- **Sector 2 arc is functionally present in prototype form:**
   - Chamber 1: Black Aqueduct Intake
   - Chamber 2: The Compression Vaults
   - Chamber 3: The Kiln of Judgement
   - Chamber 3 boss payoff: The Sorrow Engine
-  - lore beats integrated with progression flow
-  - projectile combat tech active in shipped encounters
-  - Black Oil / Tar-laced Blood payoff language active
+- **First boss pit template exists in Sector 2 Chamber 2** (trap altar descent, pit boss kill, exit altar return).
+
+## Milestone 7 Status
+### Done enough (implemented lanes)
+- 7A Vessel Run Economy
+- 7B Gore-Driven Combat Feedback
+- 7D Projectile + AOE Combat Kit
+- 7E Boss / Miniboss Readability pass (first-pass)
+- 7F Poise / Stagger / Rite Finisher pass (first-pass)
+- first 7G prototype (trap altar + boss pit)
+
+### Still open (active lanes)
+- 7C Enemy Pursuit + Encounter Chemistry
+- 7H Chamber-End Rituals + Cinematic Lore Motion
+- 7I Sponge vs Satisfaction Balance
+
+## Boss Pit Strategic Meaning (Current Doctrine)
+- Boss pits are one-time per run.
+- Boss pit state resets on death/fresh run.
+- Boss pits now matter strategically because they grow the run (Vessel progression impact).
+- Sector 3 is expected to heavily expand trap altars and boss pits.
 
 ## Current Build/Platform Baseline
-- Phaser 3 + Vite
-- GitHub Pages project-site base path: `/biomech-retro-horror/`
-- Mobile iPhone-sized browser playability is required
-- Desktop keyboard parity is required
-
-## Major Fixes That Were Hard-Won
-1. **Chamber 3 handoff/registration breakthrough**
-   - Chamber flow failures were solved by restoring scene registration + transition wiring contracts, not by chamber-internal guesswork.
-2. **Sector 2 Chamber 1 -> Chamber 2 threshold fresh-press fix**
-   - Progression now requires an intentional fresh interact after threshold entry.
-3. **Sector 2 Chamber 2 viewport/bootstrap fix**
-   - Chamber 2 was stabilized by mirroring the proven Chamber 3 viewport/bootstrap pattern.
-4. **Lore viewport blackout leak diagnosis/fix**
-   - Lore blackout artifact traced to chamber viewport/overlay leakage, not lore art composition failure.
-5. **Projectile bug root-cause lesson**
-   - “Looks right but doesn’t hurt” was a gameplay contract miss, not a presentation issue.
-6. **Enemy grounding regression lesson**
-   - Regression came from shared enemy presentation logic; chamber-local patching was the wrong repair strategy.
+- Phaser 3 + Vite.
+- GitHub Pages project-site base path: `/biomech-retro-horror/`.
+- Mobile iPhone-sized browser playability is required.
+- Desktop keyboard parity is required.
 
 ## What Must Not Be Broken
 - Base-path-safe deploy behavior.
@@ -48,19 +51,12 @@ The game is beyond a small vertical-slice stub.
 - Lore scene isolation from chamber viewport blackout/matte layers.
 - Shared enemy presentation consistency across chambers.
 - Projectile hit/damage lifecycle contract.
+- Boss pit completion/reward reset behavior across run restart.
 
-## Recent Hard-Won Lessons (Concise)
-- Bootstrap and scene contracts first; spectacle/content layering second.
-- If a chamber fails to load, verify registration/handoff before touching encounter content.
-- If lore blackout shape matches gameplay viewport, inspect camera overlays/layer leakage first.
-- If projectile visuals work but damage fails, audit overlap/damage contract first.
-- Fix shared presentation regressions at the shared layer, then validate all chambers.
+## Planned Later Pass (Do Not Forget)
+- Future boss refinement + cross-chamber uniformity is planned as a later polish milestone.
+- This is intentionally deferred, not dropped.
 
-## Combat Sidequest Roadmap Note
-- A defined combat-sidequest roadmap now exists in `docs/combat-sidequest-roadmap.md`.
-- This is approved future-lane planning, not a claim that those systems are already implemented.
-- First approved sidequest milestone for future implementation: **Milestone 7A — Vessel Run Economy**.
-
-## Most Likely Next Step
-**Primary next step:** Sector 2 stabilization/polish wrap + documentation parity hardening.  
-**Parallel planning step:** begin Sector 3 pre-production framing without introducing unneeded systems yet.
+## Most Likely Next Implementation Priority
+1. Close remaining Milestone 7 lanes (7C, 7H, 7I) without regressing current contracts.
+2. Begin Milestone 8 execution: Sector 3 buildout + boss-pit expansion together.

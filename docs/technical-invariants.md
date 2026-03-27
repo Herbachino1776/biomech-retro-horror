@@ -37,6 +37,11 @@ Do-not-break checklist for current stability.
 - Shared enemy presentation logic must remain stable across chambers.
 - Grounding regressions should be fixed in shared presentation paths when that is the root source, not chamber-by-chamber.
 
+## Boss Pit / Run-State Invariants
+- Boss pit completion state is run-scoped and must reset on death/fresh run.
+- Boss pit reward-granted state is run-scoped and must reset on death/fresh run.
+- Boss pit reward grants must be idempotent per run (no duplicate grants within a single run).
+
 ## Scene Flow Invariants
 - Sector 1 and Sector 2 chamber chains must remain playable end-to-end.
 - Scene registration + transition wiring are first checks for any chamber boot/handoff failure.

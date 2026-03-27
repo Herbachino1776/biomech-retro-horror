@@ -22,6 +22,7 @@ Concise record of technical/design decisions currently in force.
   - Chamber 3 = **The Kiln of Judgement**
 - Sector 2 Chamber 3 boss is **The Sorrow Engine**.
 - Sector 2 kill-payoff language is **Black Oil / Tar-laced Blood**.
+- Sector 3 identity is **The Cradle of Refusal**.
 
 ## Chamber Scale + Finale Doctrine
 - Chamber-03-level scale/consequence is the benchmark for future chambers.
@@ -32,6 +33,15 @@ Concise record of technical/design decisions currently in force.
 - Projectile tech is now a real reusable combat tool, not a chamber-only gimmick.
 - Projectile behavior must preserve the full gameplay contract: spawn, movement, collision, damage, cleanup.
 - Keep combat pacing deliberate/readable; avoid accidental drift into arcade-chaos tuning.
+- Dense/obscure lore framing must be balanced with violent combat payoff, memorable encounter personality, and satisfying repeat-run combat feel.
+
+## Boss Pit Doctrine (Canonical)
+- Boss pits are now part of core structural game identity, not detached optional flavor.
+- Boss pits are one-time per run.
+- Boss pit completion/reward state resets on death/fresh run.
+- Boss pits must grant meaningful Vessel growth rewards when cleared.
+- Boss pits should preserve clean entry/exit contracts and deterministic return behavior.
+- Sector 3 is expected to be boss-pit-heavy by design, with higher trap-altar density than earlier sectors.
 
 ## Lore Presentation Doctrine
 - Lore is a primary identity system.
@@ -46,7 +56,9 @@ Concise record of technical/design decisions currently in force.
 ## Milestone Flow Doctrine
 - Milestone 5 is closed.
 - Milestone 6 moved beyond foothold status and now represents a full Sector 2 prototype arc.
-- Near-term work prioritizes Sector 2 stabilization/polish + docs parity before major Sector 3 implementation.
+- Milestone 7 is advanced but still open in 7C/7H/7I.
+- Post-7 direction is coupled: Sector 3 buildout + boss-pit expansion.
+- Global boss refinement/uniformity is planned as a later polish milestone (not dropped).
 
 ## Workflow Constraints
 - Before gameplay/controls/deployment/asset-loading/UI/lore changes, read doctrine docs.
@@ -58,4 +70,4 @@ Concise record of technical/design decisions currently in force.
 - Vessel Integrity presentation is planned to evolve into a smooth draining bar (non-segmented HUD language).
 - Enemy aggression and encounter chemistry are prioritized over spongeiness-only difficulty tuning.
 - Rite remains a lore interaction pillar and is planned to later expand into a contextual combat finisher on staggered major enemies.
-- Surprise altar-to-boss-pit transitions are an approved future encounter structure.
+- Surprise altar-to-boss-pit transitions are an approved encounter structure.
