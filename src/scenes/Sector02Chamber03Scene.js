@@ -12,6 +12,7 @@ import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
 import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
+import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
 
 const KILN_OF_JUDGEMENT_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber03Scene',
@@ -370,6 +371,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.hasTriggeredBossReveal = false;
     this.integrityRewardTracker = new Set();
     this.currentRiteFinisherTarget = null;
+    this.resolutionLockActive = false;
   }
 
   create() {
@@ -382,6 +384,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.createClimaxEncounter();
     this.createLoreAnchor();
     this.createUiAndInput();
+    this.majorEncounterResolution = new MajorEncounterResolution(this);
     this.createForwardThreshold();
     this.configureCameraAndLayout();
     this.registerLoreEvents();
@@ -696,6 +699,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       this.enemyProjectiles.forEach((projectile) => projectile.destroy());
       this.enemies.forEach((enemy) => enemy.projectileTelegraph?.destroy?.());
       this.sorrowEngine?.destroyCombatTelegraphs?.();
+      this.majorEncounterResolution?.teardown();
     });
   }
 
@@ -727,7 +731,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       return;
     }
 
-    if (this.isLoreTransitionActive) {
+    if (this.isLoreTransitionActive || this.resolutionLockActive) {
       this.riteFinisherPrompt?.setVisible(false);
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
@@ -1244,48 +1248,65 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
   }
 
   beginSorrowEngineDeathSequence() {
-    if (!this.sorrowEngine || this.sorrowEngineDeathSequenceActive) {
+    if (!this.sorrowEngine || this.sorrowEngineDeathSequenceActive || this.majorEncounterResolution?.isResolutionActive('sector02-chamber03-sorrow-engine')) {
       return;
     }
 
-    this.sorrowEngineDeathSequenceActive = true;
-    this.sorrowEngineDeathFinished = false;
-    this.tweens.killTweensOf(this.sorrowEngine.sprite);
-    this.sorrowEngine.sprite.setAlpha(0.74).setTint(0x0c0c0d);
-    this.tweens.add({
-      targets: this.sorrowEngine.sprite,
-      alpha: 0.9,
-      yoyo: true,
-      repeat: -1,
-      duration: 120,
-      ease: 'Sine.inOut'
-    });
-    this.sorrowEngine.projectileTelegraph?.setVisible(false);
-    this.hud.setBossBarState({
-      visible: true,
-      name: KILN_SORROW_ENGINE.name,
-      subtitle: 'RUPTURE IMMINENT',
-      current: 0,
-      max: this.sorrowEngine.maxHealth,
-      telegraph: 1,
-      wounded: true
-    });
-
-    this.cameras.main.shake(KILN_SORROW_ENGINE.deathPayoff.shakeDurationMs, KILN_SORROW_ENGINE.deathPayoff.shakeIntensity, true);
-    this.time.delayedCall(KILN_SORROW_ENGINE.deathPayoff.explosionDelayMs, () => {
-      if (!this.sorrowEngine?.sprite?.active) {
-        return;
-      }
-
-      this.triggerSector02BlackOilPayoff(this.sorrowEngine, KILN_SORROW_ENGINE.blowout);
-      this.audioDirector?.playBanishmentSting();
-      this.tweens.killTweensOf(this.sorrowEngine.sprite);
-      this.sorrowEngine.sprite.setVisible(false);
-      this.sorrowEngineDeathFinished = true;
-      this.hud.setBossBarState({ visible: false });
-      if (!this.hasUnlockedForwardPath) {
-        grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber03-sorrow-engine-true-boss');
-        this.unlockForwardPath();
+    this.majorEncounterResolution?.begin({
+      encounterId: 'sector02-chamber03-sorrow-engine',
+      freezePlayer: true,
+      disablePlayerAttack: true,
+      pauseProjectiles: (paused) => this.setEnemyProjectilesPaused(paused),
+      setResolutionLock: (locked) => {
+        this.resolutionLockActive = locked;
+      },
+      onStart: () => {
+        this.sorrowEngineDeathSequenceActive = true;
+        this.sorrowEngineDeathFinished = false;
+        this.tweens.killTweensOf(this.sorrowEngine.sprite);
+        this.sorrowEngine.sprite.setAlpha(0.74).setTint(0x0c0c0d);
+        this.tweens.add({
+          targets: this.sorrowEngine.sprite,
+          alpha: 0.9,
+          yoyo: true,
+          repeat: -1,
+          duration: 120,
+          ease: 'Sine.inOut'
+        });
+        this.sorrowEngine.projectileTelegraph?.setVisible(false);
+        this.hud.setBossBarState({
+          visible: true,
+          name: KILN_SORROW_ENGINE.name,
+          subtitle: 'RUPTURE IMMINENT',
+          current: 0,
+          max: this.sorrowEngine.maxHealth,
+          telegraph: 1,
+          wounded: true
+        });
+        this.cameras.main.shake(KILN_SORROW_ENGINE.deathPayoff.shakeDurationMs, KILN_SORROW_ENGINE.deathPayoff.shakeIntensity, true);
+      },
+      stages: [
+        {
+          atMs: KILN_SORROW_ENGINE.deathPayoff.explosionDelayMs,
+          run: () => {
+            if (!this.sorrowEngine?.sprite?.active) {
+              return;
+            }
+            this.triggerSector02BlackOilPayoff(this.sorrowEngine, KILN_SORROW_ENGINE.blowout);
+            this.audioDirector?.playBanishmentSting();
+            this.tweens.killTweensOf(this.sorrowEngine.sprite);
+            this.sorrowEngine.sprite.setVisible(false);
+            this.sorrowEngineDeathFinished = true;
+            this.hud.setBossBarState({ visible: false });
+            if (!this.hasUnlockedForwardPath) {
+              grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber03-sorrow-engine-true-boss');
+              this.unlockForwardPath();
+            }
+          }
+        }
+      ],
+      onComplete: () => {
+        this.sorrowEngineDeathSequenceActive = false;
       }
     });
   }

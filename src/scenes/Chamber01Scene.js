@@ -19,6 +19,7 @@ import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
 import { grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
+import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
 
 const SHOW_CHAMBER01_DEBUG_LABELS = false;
 
@@ -81,6 +82,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.minibossDeathPulse = null;
     this.minibossRewardReleaseTimer = null;
     this.minibossBloodPool = null;
+    this.resolutionLockActive = false;
     this.minibossRewardText = this.add
       .text(this.scale.width / 2, this.scale.height * 0.28, 'Blasphemous Demon\nhas been Banished!', {
         fontFamily: 'Georgia, Times, serif',
@@ -117,6 +119,7 @@ export class Chamber01Scene extends Phaser.Scene {
       .setVisible(false);
 
     this.setupMobileUiCamera();
+    this.majorEncounterResolution = new MajorEncounterResolution(this);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
@@ -133,6 +136,7 @@ export class Chamber01Scene extends Phaser.Scene {
       this.game.events.off('lore-screen-complete', this.handleLoreScreenComplete, this);
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.audioDirector?.shutdown();
+      this.majorEncounterResolution?.teardown();
     });
 
     this.applyResponsiveLayout();
@@ -153,7 +157,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.restartText.setVisible(false);
 
-    if (this.isLoreTransitionActive || this.isGateTransitionActive || this.isMinibossRewardActive) {
+    if (this.isLoreTransitionActive || this.isGateTransitionActive || this.isMinibossRewardActive || this.resolutionLockActive) {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemy.body.setVelocity(0, 0);
@@ -673,17 +677,24 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   handleMinibossDefeated() {
-    this.minibossDefeated = true;
-    this.miniboss.setActive(false);
-    grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'chamber01-halfskull-miniboss');
-    this.isMinibossRewardActive = true;
-    this.minibossDeathFlashUntil = this.time.now + 520;
-    this.spawnMinibossBloodPool(this.miniboss.sprite.x, WORLD.floorY - 5);
-    this.minibossDeathPulse?.remove(false);
-    this.minibossDeathPulse = this.time.delayedCall(120, () => {
-      this.playMinibossRewardBeat();
+    this.majorEncounterResolution?.begin({
+      encounterId: 'chamber01-halfskull-miniboss',
+      freezePlayer: true,
+      disablePlayerAttack: true,
+      setResolutionLock: (locked) => {
+        this.resolutionLockActive = locked;
+      },
+      onStart: () => {
+        this.minibossDefeated = true;
+        this.miniboss.setActive(false);
+        grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'chamber01-halfskull-miniboss');
+        this.isMinibossRewardActive = true;
+        this.minibossDeathFlashUntil = this.time.now + 520;
+        this.spawnMinibossBloodPool(this.miniboss.sprite.x, WORLD.floorY - 5);
+        this.playMinibossRewardBeat();
+      },
+      stages: [{ atMs: 2060, run: () => this.updateGateActivationVisuals() }]
     });
-    this.updateGateActivationVisuals();
   }
 
   spawnMinibossBloodPool(x, y) {

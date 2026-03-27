@@ -12,6 +12,7 @@ import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
 import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
+import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
 
 const BLACK_AQUEDUCT_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber01Scene',
@@ -306,6 +307,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.enemyProjectiles = [];
     this.enemyProjectilesPaused = false;
     this.integrityRewardTracker = new Set();
+    this.resolutionLockActive = false;
   }
 
   create() {
@@ -318,6 +320,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.createClimaxEncounter();
     this.createLoreAnchors();
     this.createUiAndInput();
+    this.majorEncounterResolution = new MajorEncounterResolution(this);
     this.createForwardThreshold();
     this.configureCameraAndLayout();
     this.registerLoreEvents();
@@ -666,6 +669,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.audioDirector?.shutdown();
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.enemyProjectiles.forEach((projectile) => projectile.destroy());
+      this.majorEncounterResolution?.teardown();
     });
   }
 
@@ -698,7 +702,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    if (this.isLoreTransitionActive) {
+    if (this.isLoreTransitionActive || this.resolutionLockActive) {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
@@ -922,9 +926,22 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.audioDirector?.playPlayerHit();
 
     if (this.archon.dead && !this.hasUnlockedForwardPath) {
-      grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber01-archon-miniboss');
-      this.triggerSector02BlackOilPayoff(this.archon, { scale: 1.12, burstCount: 12, puddleWidth: 204, puddleHeight: 48 });
-      this.unlockForwardPath();
+      this.majorEncounterResolution?.begin({
+        encounterId: 'sector02-chamber01-archon',
+        freezePlayer: true,
+        disablePlayerAttack: true,
+        pauseProjectiles: (paused) => this.setEnemyProjectilesPaused(paused),
+        setResolutionLock: (locked) => {
+          this.resolutionLockActive = locked;
+        },
+        onStart: () => {
+          grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber01-archon-miniboss');
+          this.triggerSector02BlackOilPayoff(this.archon, { scale: 1.12, burstCount: 12, puddleWidth: 204, puddleHeight: 48 });
+          this.cameras.main.shake(620, 0.008, true);
+          this.audioDirector?.playBanishmentSting();
+        },
+        stages: [{ atMs: 420, run: () => this.unlockForwardPath() }]
+      });
     }
   }
 
