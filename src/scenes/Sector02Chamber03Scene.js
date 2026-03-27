@@ -233,12 +233,12 @@ const KILN_FORWARD_GATE = {
 const KILN_SORROW_ENGINE = {
   name: 'THE SORROW ENGINE',
   subtitle: 'Banisher Altar Rupture Core',
-  health: 12,
+  health: 10,
   contactDamage: 2,
-  contactDamageCooldownMs: 900,
-  attackCooldownMs: 3280,
-  attackTelegraphMs: 900,
-  attackRecoveryMs: 840,
+  contactDamageCooldownMs: 1100,
+  attackCooldownMs: 2960,
+  attackTelegraphMs: 760,
+  attackRecoveryMs: 760,
   attackRange: 208,
   approachRange: 370,
   approachSpeed: 44,
@@ -256,10 +256,10 @@ const KILN_SORROW_ENGINE = {
   body: { width: 102, height: 136, offsetX: 108, offsetY: 148 },
   audioProfile: 'miniboss',
   poise: {
-    max: 10,
+    max: 8,
     recoverDelayMs: 2200,
     recoverPerSecond: 1,
-    staggerDurationMs: 2800,
+    staggerDurationMs: 3000,
     finisherRange: 172
   },
   presentation: {
@@ -273,10 +273,10 @@ const KILN_SORROW_ENGINE = {
 
   lineSweep: {
     enabled: true,
-    cooldownMs: 8600,
-    windupMs: 1380,
+    cooldownMs: 7600,
+    windupMs: 1120,
     activeMs: 260,
-    recoveryMs: 1120,
+    recoveryMs: 900,
     minRange: 210,
     maxRange: 580,
     width: 152,
@@ -300,9 +300,9 @@ const KILN_SORROW_ENGINE = {
   },
   projectile: {
     textureKey: ASSET_KEYS.sector02PressureShardProjectile,
-    cooldownMs: 4920,
-    windupMs: 980,
-    recoveryMs: 1120,
+    cooldownMs: 5600,
+    windupMs: 820,
+    recoveryMs: 900,
     minRange: 280,
     maxRange: 620,
     verticalTolerance: 176,
