@@ -3,7 +3,7 @@
 A browser-playable retro horror action prototype built with Phaser 3 + Vite, developed in a GitHub + Codex workflow.
 
 ## Project State (March 2026)
-This is no longer a Chamber 01-only proof-of-concept.
+This is now a **multi-sector prototype**, not a Chamber 01-only vertical-slice stub.
 
 - **Sector 1 (Ossuary / dead-god palace arc)** is functionally in place:
   - Chamber 01
@@ -11,20 +11,25 @@ This is no longer a Chamber 01-only proof-of-concept.
   - Chamber 03
   - separate boss arena finale
   - real boss payoff + progression onward
-- **Sector 2 (Bucket 2: The Black Aqueduct / The Pressure Gospel arc)** is functionally in place in prototype form:
+- **Sector 2 (The Black Aqueduct / Pressure Gospel arc)** is functionally in place in prototype form:
   - Chamber 1: **Black Aqueduct Intake**
   - Chamber 2: **The Compression Vaults**
   - Chamber 3: **The Kiln of Judgement**
   - Sector 2 chamber boss payoff in Chamber 3 (**The Sorrow Engine**)
+  - first boss-pit template in Sector 2 Chamber 2
   - established kill-payoff language (**Black Oil / Tar-laced Blood**)
-  - working projectile tech used in live encounters
+  - working projectile + AOE readability combat tech in live encounters
 
-The game is still iterative and polish-heavy, but the current build is beyond a tiny vertical slice.
+## Milestone Direction Snapshot
+- Milestone 7 delivered major combat-sidequest progress (including Vessel run economy, gore payoff pass, projectile/AOE lanes, readability passes, and the first boss-pit prototype).
+- Milestone 7 is advanced but still open in specific lanes (7C, 7H, 7I).
+- Sector 3 doctrine is now explicitly defined as **The Cradle of Refusal** and planned as a major escalation point.
+- Boss pits are now treated as **core structural identity**, not optional distant flavor.
 
 ## Current Direction
-- Preserve Sector 1 and Sector 2 functionality while reducing regressions.
-- Stabilize and polish Sector 2 end-to-end behavior.
-- Keep forward planning grounded for Sector 3 without pretending the game is content-complete.
+- Preserve Sector 1 + Sector 2 functionality while reducing regressions.
+- Finish remaining Milestone 7 lanes before declaring closure.
+- Prepare Milestone 8 as coupled work: **Sector 3 buildout + boss-pit expansion**.
 
 ## Tech Stack
 - Engine: Phaser 3

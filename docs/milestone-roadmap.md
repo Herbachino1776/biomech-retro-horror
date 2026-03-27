@@ -28,34 +28,49 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 
 ## Milestone 6 — Bucket 2 Expansion (Sector 2: The Black Aqueduct / Pressure Gospel)
 **Purpose:** build and prove the next sector arc beyond Sector 1.  
-**Status:** substantially complete in prototype form (no longer foothold-only).
+**Status:** substantially complete in prototype form.
+
+## Milestone 7 — Combat Sidequest Integration + Sector 2 Hardening
+**Purpose:** integrate run-economy/combat lanes and lock Sector 2 behavior for clean handoff.
 
 **Implemented state now includes:**
-- Chamber 1: Black Aqueduct Intake
-- Chamber 2: The Compression Vaults
-- Chamber 3: The Kiln of Judgement
-- Sector 2 boss payoff in Chamber 3 (The Sorrow Engine)
-- Live lore cutscene flow through the arc
-- Live projectile encounter tech
-- Live Black Oil / Tar-laced Blood kill-payoff language
+- Vessel run economy baseline (entry restore + major encounter max reward)
+- gore payoff strengthening
+- projectile/AOE combat kit in live encounters
+- readability and stagger/finisher foundations
+- first trap-altar -> boss-pit prototype (Sector 2 Chamber 2)
 
-**Remaining for Milestone 6 closeout:**
-- stabilization/polish passes
-- regression hardening
-- docs parity with shipped behavior
+**Still open before closeout:**
+- 7C Enemy Pursuit + Encounter Chemistry
+- 7H Chamber-End Rituals + Cinematic Lore Motion
+- 7I Sponge vs Satisfaction Balance
 
-## Milestone 7 — Sector 2 Wrap + Sector 3 Planning Kickoff
-**Purpose:** finish Sector 2 as a stable handoff point and begin disciplined Sector 3 pre-production.
+**Status:** active and advanced, not yet closed.
+
+## Milestone 8 — Sector 3 Buildout + Boss-Pit Expansion (Coupled)
+**Purpose:** build Sector 3 (**The Cradle of Refusal**) as an escalation sector while expanding boss pits as a core structural rhythm.
 
 **Scope / Includes:**
-- sector-to-sector stability and regression-proofing
-- viewport/layout consistency hardening (mobile-first)
-- encounter/readability cleanup where needed
-- updated planning docs for Sector 3 with no premature system expansion
+- Sector 3 chamber and encounter buildout
+- increased trap-altar density
+- increased boss-pit density
+- boss-pit reward/reset consistency at run level
+- personality-forward boss encounter authoring
 
-**Acceptance Criteria:**
-- Sector 1 + Sector 2 arc remains fully playable end-to-end without reopening known regressions
-- documentation reflects actual scene/arc state
-- Sector 3 planning starts from proven constraints rather than replacing them
+## Milestone 9 — Sector 3 Pacing / Density / Readability Polish
+**Purpose:** tune Sector 3 for oppressive pacing clarity and combat readability under higher density.
 
-**Status:** active next step.
+**Scope / Includes:**
+- pacing and downtime/combat beat refinement
+- lore/combat cadence balancing
+- readability cleanup under dense altar + pit + encounter flows
+- mobile/desktop parity polish under full Sector 3 load
+
+## Milestone 10 — Global Boss/Chamber Refinement + Uniformity
+**Purpose:** bring boss/chamber quality, readability, and reward signaling to consistent cross-sector standards.
+
+**Scope / Includes:**
+- boss telegraph and fairness uniformity pass
+- chamber-end ritual consistency pass
+- reward messaging and run-growth clarity pass
+- retrofitted cleanup for earlier chambers where needed
