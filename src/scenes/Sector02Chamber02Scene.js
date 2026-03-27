@@ -13,6 +13,7 @@ import { restartRunFromDeath } from '../systems/RunReset.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
 import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 import { bossPitRunState } from '../systems/BossPitRunState.js';
+import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
 
 const COMPRESSION_VAULTS_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber02Scene',
@@ -417,6 +418,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.integrityRewardTracker = new Set();
     this.bossPitReturnStagingMask = null;
     this.isEntryStagingActive = false;
+    this.resolutionLockActive = false;
   }
 
   create() {
@@ -429,6 +431,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.createClimaxEncounter();
     this.createLoreAnchor();
     this.createUiAndInput();
+    this.majorEncounterResolution = new MajorEncounterResolution(this);
     this.createForwardThreshold();
     this.configureCameraAndLayout();
     this.cameras.main.resetFX();
@@ -878,6 +881,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.enemyProjectiles.forEach((projectile) => projectile.destroy());
       this.enemies.forEach((enemy) => enemy.projectileTelegraph?.destroy?.());
       this.pressureDeacon?.destroyCombatTelegraphs?.();
+      this.majorEncounterResolution?.teardown();
     });
   }
 
@@ -907,7 +911,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       return;
     }
 
-    if (this.isLoreTransitionActive) {
+    if (this.isLoreTransitionActive || this.resolutionLockActive) {
       this.riteFinisherPrompt?.setVisible(false);
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
@@ -1034,9 +1038,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     target.takeDamage(Math.max(1, target.health), this.time.now);
     this.audioDirector?.playBanishmentSting();
     if (!this.hasUnlockedForwardPath) {
-      grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber02-pressure-deacon-miniboss');
-      this.triggerSector02BlackOilPayoff(target, COMPRESSION_VAULTS_PRESSURE_DEACON.blowout);
-      this.unlockForwardPath();
+      this.resolvePressureDeaconVictory(target);
     }
   }
 
@@ -1280,10 +1282,26 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.audioDirector?.playPlayerHit();
 
     if (this.pressureDeacon.dead && !this.hasUnlockedForwardPath) {
-      grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber02-pressure-deacon-miniboss');
-      this.triggerSector02BlackOilPayoff(this.pressureDeacon, COMPRESSION_VAULTS_PRESSURE_DEACON.blowout);
-      this.unlockForwardPath();
+      this.resolvePressureDeaconVictory(this.pressureDeacon);
     }
+  }
+
+  resolvePressureDeaconVictory(target) {
+    this.majorEncounterResolution?.begin({
+      encounterId: 'sector02-chamber02-pressure-deacon',
+      freezePlayer: true,
+      disablePlayerAttack: true,
+      pauseProjectiles: (paused) => this.setEnemyProjectilesPaused(paused),
+      setResolutionLock: (locked) => {
+        this.resolutionLockActive = locked;
+      },
+      onStart: () => {
+        grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber02-pressure-deacon-miniboss');
+        this.triggerSector02BlackOilPayoff(target, COMPRESSION_VAULTS_PRESSURE_DEACON.blowout);
+        this.cameras.main.shake(560, 0.0078, true);
+      },
+      stages: [{ atMs: 420, run: () => this.unlockForwardPath() }]
+    });
   }
 
   handlePressureDeaconContactPlayer(enemySprite) {
