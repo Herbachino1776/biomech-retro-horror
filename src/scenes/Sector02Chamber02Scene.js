@@ -203,7 +203,7 @@ const COMPRESSION_VAULTS_ENCOUNTER_POCKETS = [
     promptOffsetY: -136,
     enemies: [
       { type: 'basic01', x: 1155, y: PLAYER.startY, patrolDistance: 80, wakeDelayMs: 0 },
-      { type: 'basic02', x: 1388, y: PLAYER.startY, patrolDistance: 104, wakeDelayMs: 140 }
+      { type: 'basic02', x: 1388, y: PLAYER.startY, patrolDistance: 114, wakeDelayMs: 80 }
     ]
   },
   {
@@ -219,8 +219,9 @@ const COMPRESSION_VAULTS_ENCOUNTER_POCKETS = [
     promptOffsetY: -146,
     enemies: [
       { type: 'basic01', x: 2430, y: PLAYER.startY, patrolDistance: 104, wakeDelayMs: 0 },
-      { type: 'basic02', x: 2720, y: PLAYER.startY, patrolDistance: 118, wakeDelayMs: 120 },
-      { type: 'basic01', x: 2995, y: PLAYER.startY, patrolDistance: 96, wakeDelayMs: 260 }
+      { type: 'basic02', x: 2720, y: PLAYER.startY, patrolDistance: 118, wakeDelayMs: 90 },
+      { type: 'basic01', x: 2910, y: PLAYER.startY, patrolDistance: 84, wakeDelayMs: 130 },
+      { type: 'basic01', x: 3055, y: PLAYER.startY, patrolDistance: 96, wakeDelayMs: 170 }
     ]
   },
   {
@@ -236,9 +237,10 @@ const COMPRESSION_VAULTS_ENCOUNTER_POCKETS = [
     promptOffsetY: -152,
     enemies: [
       { type: 'basic02', x: 4185, y: PLAYER.startY, patrolDistance: 114, wakeDelayMs: 0 },
-      { type: 'basic01', x: 4380, y: PLAYER.startY, patrolDistance: 102, wakeDelayMs: 90 },
-      { type: 'elite', x: 4540, y: PLAYER.startY, patrolDistance: 78, wakeDelayMs: 160, projectileCadence: 'measured' },
-      { type: 'basic01', x: 4865, y: PLAYER.startY, patrolDistance: 116, wakeDelayMs: 230 }
+      { type: 'basic01', x: 4380, y: PLAYER.startY, patrolDistance: 108, wakeDelayMs: 70 },
+      { type: 'elite', x: 4540, y: PLAYER.startY, patrolDistance: 86, wakeDelayMs: 120, projectileCadence: 'measured' },
+      { type: 'basic01', x: 4725, y: PLAYER.startY, patrolDistance: 84, wakeDelayMs: 150 },
+      { type: 'basic01', x: 4890, y: PLAYER.startY, patrolDistance: 120, wakeDelayMs: 200 }
     ]
   }
 ];
@@ -1069,7 +1071,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
           if (enemy.dead) {
             return;
           }
-          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 54;
+          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 34;
         });
       }
 

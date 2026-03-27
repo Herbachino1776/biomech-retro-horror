@@ -105,6 +105,8 @@ export class SkitterServitor {
     if (this.awakened && !this.wasAwakenedLastUpdate) {
       this.wakeRushUntil = time + (this.config.wakeRushMs ?? 420);
       this.nextAttackAllowedAt = Math.min(this.nextAttackAllowedAt, time + (this.config.wakeAttackLeadInMs ?? 160));
+      this.pursuitCommittedUntil = Math.max(this.pursuitCommittedUntil, time + (this.config.wakePursuitCommitMs ?? 1180));
+      this.direction = Math.sign(playerX - this.sprite.x) || this.direction;
       this.enterState('stalk', time);
     }
     this.wasAwakenedLastUpdate = this.awakened;
@@ -147,14 +149,20 @@ export class SkitterServitor {
   updateState(time, playerX) {
     const dx = playerX - this.sprite.x;
     const absDx = Math.abs(dx);
-    const closeEnoughToAggro = absDx < this.config.aggroRange;
-    const pursuitCommitMs = this.config.pursuitCommitMs ?? 980;
+    const wakeRushActive = time < this.wakeRushUntil;
+    const heatSeekRange = this.config.heatSeekRange ?? this.config.aggroRange * 1.22;
+    const closeEnoughToAggro = absDx < (wakeRushActive ? Math.max(this.config.aggroRange, heatSeekRange) : this.config.aggroRange);
+    const pressureTrackingRange = this.config.pressureTrackingRange ?? this.config.aggroRange * 1.5;
+    const pressureTracking = absDx < pressureTrackingRange;
+    const pursuitCommitMs = (this.config.pursuitCommitMs ?? 980) + (wakeRushActive ? (this.config.wakeCommitBonusMs ?? 220) : 0);
     const pursueAfterLosingAggro = time < this.pursuitCommittedUntil;
-    const shouldPursue = closeEnoughToAggro || pursueAfterLosingAggro;
+    const shouldPursue = closeEnoughToAggro || pursueAfterLosingAggro || pressureTracking;
 
     if (closeEnoughToAggro) {
       this.lastSeenPlayerAt = time;
       this.pursuitCommittedUntil = time + pursuitCommitMs;
+    } else if (pressureTracking && this.combatState === 'stalk') {
+      this.pursuitCommittedUntil = Math.max(this.pursuitCommittedUntil, time + (this.config.trailingCommitMs ?? 340));
     }
 
     if (shouldPursue && this.combatState !== 'hurt') {
@@ -197,7 +205,10 @@ export class SkitterServitor {
       default:
         if (shouldPursue) {
           this.runAggroStalk(absDx, time);
-          if (absDx <= this.config.attackTriggerRange && time >= this.nextAttackAllowedAt) {
+          const wakeAttackCommitRange = this.config.wakeAttackCommitRange ?? this.config.attackTriggerRange * 1.16;
+          const canStartAttack = absDx <= this.config.attackTriggerRange
+            || (wakeRushActive && absDx <= wakeAttackCommitRange);
+          if (canStartAttack && time >= this.nextAttackAllowedAt) {
             this.enterState('windup', time, this.config.windupMs);
           }
         } else {
@@ -214,33 +225,33 @@ export class SkitterServitor {
     const baseSpeed = this.config.speed * wakeRushFactor;
 
     if (absDx < lowerBound) {
-      this.body.setVelocityX(-this.direction * baseSpeed * 0.34);
+      this.body.setVelocityX(-this.direction * baseSpeed * 0.24);
       return;
     }
 
     if (absDx > upperBound) {
-      this.body.setVelocityX(this.direction * baseSpeed * 1.12);
+      this.body.setVelocityX(this.direction * baseSpeed * 1.24);
       return;
     }
 
-    this.body.setVelocityX(this.direction * baseSpeed * 0.44);
+    this.body.setVelocityX(this.direction * baseSpeed * 0.7);
   }
 
   runCooldownSpacing(absDx) {
-    const retreatRange = this.config.preferredRange * 0.74;
-    const reengageRange = this.config.preferredRange * 1.34;
+    const retreatRange = this.config.preferredRange * 0.66;
+    const reengageRange = this.config.preferredRange * 1.18;
 
     if (absDx < retreatRange) {
-      this.body.setVelocityX(-this.direction * this.config.speed * 0.46);
+      this.body.setVelocityX(-this.direction * this.config.speed * 0.38);
       return;
     }
 
     if (absDx > reengageRange) {
-      this.body.setVelocityX(this.direction * this.config.speed * 0.48);
+      this.body.setVelocityX(this.direction * this.config.speed * 0.74);
       return;
     }
 
-    this.body.setVelocityX(this.direction * this.config.speed * 0.08);
+    this.body.setVelocityX(this.direction * this.config.speed * 0.34);
   }
 
   runPatrol(absDx) {
@@ -315,6 +326,8 @@ export class SkitterServitor {
     this.lastDamageFlashTime = time;
     this.contactDamageWindowUntil = time;
     this.nextAttackAllowedAt = time + this.config.attackCooldownMs;
+    this.wakeRushUntil = Math.max(this.wakeRushUntil, time + (this.config.hurtReengageRushMs ?? 260));
+    this.pursuitCommittedUntil = Math.max(this.pursuitCommittedUntil, time + (this.config.hurtPursuitCommitMs ?? 1100));
     this.setVisualTint(0x6f8c59);
     triggerEnemyHitSplatterBurst(this.scene, {
       x: this.sprite.x + this.hurtPushDirection * 8,

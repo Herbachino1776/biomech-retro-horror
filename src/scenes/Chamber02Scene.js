@@ -73,13 +73,13 @@ const CHAMBER02_TOLL_KEEPER_CONFIG = {
 
 const CHAMBER02_TOLL_KEEPER_SPAWNS = [
   { x: 3005, y: 404, awakenPlayerX: 2820, wakeDelayMs: 0 },
-  { x: 3325, y: 404, awakenPlayerX: 3010, wakeDelayMs: 220 }
+  { x: 3325, y: 404, awakenPlayerX: 3010, wakeDelayMs: 120, patrolDistance: 90 }
 ];
 
 const CHAMBER02_ENEMY_SPAWNS = [
-  { x: 1600, y: 402, awakenPlayerX: 1360, patrolDistance: 210, wakeDelayMs: 220 },
-  { x: 2410, y: 402, awakenPlayerX: 2050, patrolDistance: 196, wakeDelayMs: 150 },
-  { x: 2795, y: 402, awakenPlayerX: 2440, patrolDistance: 188, wakeDelayMs: 260 }
+  { x: 1600, y: 402, awakenPlayerX: 1360, patrolDistance: 210, wakeDelayMs: 120 },
+  { x: 2410, y: 402, awakenPlayerX: 2050, patrolDistance: 204, wakeDelayMs: 90 },
+  { x: 2795, y: 402, awakenPlayerX: 2440, patrolDistance: 196, wakeDelayMs: 140 }
 ];
 
 const CHAMBER02_LORE_ENTRY = {
@@ -453,7 +453,8 @@ export class Chamber02Scene extends Phaser.Scene {
       const tollKeeper = this.createSkitterEnemy(spawn.x, spawn.y, {
         ...CHAMBER02_TOLL_KEEPER_CONFIG,
         awakenPlayerX: spawn.awakenPlayerX,
-        wakeDelayMs: spawn.wakeDelayMs
+        wakeDelayMs: spawn.wakeDelayMs,
+        patrolDistance: spawn.patrolDistance ?? CHAMBER02_TOLL_KEEPER_CONFIG.patrolDistance
       });
       tollKeeper.isTollKeeper = true;
       this.tollKeepers.push(tollKeeper);
