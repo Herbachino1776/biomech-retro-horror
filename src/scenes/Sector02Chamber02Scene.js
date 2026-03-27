@@ -31,10 +31,11 @@ const COMPRESSION_VAULTS_BOOTSTRAP = {
   pressureBandHeight: 170
 };
 
-const BOSS_PIT_RETURN_STAGING = {
-  blackoutSettleDelayMs: 180,
-  blackoutPostSettleHoldMs: 220,
-  fadeInDurationMs: 980,
+const CHAMBER_ENTRY_STAGING = {
+  settleDelayMs: 180,
+  postSettleHoldMs: 220,
+  defaultFadeInDurationMs: 650,
+  bossPitReturnFadeInDurationMs: 980,
   maskColor: 0x000000,
   maskAlpha: 1
 };
@@ -413,6 +414,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.forwardThresholdAwaitingFreshInteract = false;
     this.integrityRewardTracker = new Set();
     this.bossPitReturnStagingMask = null;
+    this.isEntryStagingActive = false;
   }
 
   create() {
@@ -427,26 +429,23 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.createUiAndInput();
     this.createForwardThreshold();
     this.configureCameraAndLayout();
+    this.cameras.main.resetFX();
+    this.cameras.main.setAlpha(0);
+    this.beginChamberEntryStaging({
+      fadeInDurationMs: this.transitionContext?.returnFromBossPit
+        ? CHAMBER_ENTRY_STAGING.bossPitReturnFadeInDurationMs
+        : CHAMBER_ENTRY_STAGING.defaultFadeInDurationMs
+    });
+
     if (this.transitionContext?.returnFromBossPit) {
       this.scene.setVisible(true, this.scene.key);
-      this.cameras.main.resetFX();
       this.restoreViewportLayoutAfterBossPitReturn();
-      this.cameras.main.setAlpha(0);
       this.hasCompletedLoreBeat = true;
       this.hasTriggeredTrapAltar = true;
       this.hasCompletedBossPitLoop = true;
       bossPitRunState.markSector02Chamber02BossPitCompleted();
-      this.stageBossPitReturnBeforeFadeIn(() => {
-        this.restoreViewportLayoutAfterBossPitReturn();
-        this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
-          this.restoreViewportLayoutAfterBossPitReturn();
-          this.cameras.main.setAlpha(1);
-        });
-        this.cameras.main.fadeIn(BOSS_PIT_RETURN_STAGING.fadeInDurationMs, 0, 0, 0);
-      });
       return;
     }
-    this.cameras.main.fadeIn(650, 0, 0, 0);
   }
 
   createWorldBounds() {
@@ -915,7 +914,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.setEnemyProjectilesPaused(true);
       return;
     }
-    if (this.isBossPitReturnSequenceActive) {
+    if (this.isBossPitReturnSequenceActive || this.isEntryStagingActive) {
       this.riteFinisherPrompt?.setVisible(false);
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
@@ -1379,8 +1378,9 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.cameras.main.fadeOut(420, 0, 0, 0);
   }
 
-  stageBossPitReturnBeforeFadeIn(onStaged = null) {
-    this.isBossPitReturnSequenceActive = true;
+  beginChamberEntryStaging({ fadeInDurationMs = CHAMBER_ENTRY_STAGING.defaultFadeInDurationMs } = {}) {
+    this.isEntryStagingActive = true;
+    this.isBossPitReturnSequenceActive = Boolean(this.transitionContext?.returnFromBossPit);
     this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
     this.mobileControls.setMode('dialogue');
@@ -1390,8 +1390,8 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.scale.height / 2,
       this.scale.width,
       this.scale.height,
-      BOSS_PIT_RETURN_STAGING.maskColor,
-      BOSS_PIT_RETURN_STAGING.maskAlpha
+      CHAMBER_ENTRY_STAGING.maskColor,
+      CHAMBER_ENTRY_STAGING.maskAlpha
     ).setScrollFactor(0).setDepth(120);
     this.player.body.setEnable(false);
     this.player.attackHitbox?.body?.setEnable(false);
@@ -1409,7 +1409,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     };
 
     const settleAllEntities = () => {
-      settleEntity(this.player, this.transitionContext.returnPlayerY ?? COMPRESSION_VAULTS_BOOTSTRAP.spawnY);
+      settleEntity(this.player, WORLD.floorY - 2);
       this.enemies.forEach((enemy) => settleEntity(enemy, WORLD.floorY - 2));
       settleEntity(this.pressureDeacon, COMPRESSION_VAULTS_PRESSURE_DEACON.spawnY);
 
@@ -1417,14 +1417,20 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.player.body.setEnable(true);
     };
 
-    this.time.delayedCall(BOSS_PIT_RETURN_STAGING.blackoutSettleDelayMs, () => {
+    this.time.delayedCall(CHAMBER_ENTRY_STAGING.settleDelayMs, () => {
       settleAllEntities();
-      this.time.delayedCall(BOSS_PIT_RETURN_STAGING.blackoutPostSettleHoldMs, () => {
-        this.bossPitReturnStagingMask?.destroy();
-        this.bossPitReturnStagingMask = null;
+      this.time.delayedCall(CHAMBER_ENTRY_STAGING.postSettleHoldMs, () => {
         this.restoreViewportLayoutAfterBossPitReturn();
-        this.isBossPitReturnSequenceActive = false;
-        onStaged?.();
+        this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
+          this.restoreViewportLayoutAfterBossPitReturn();
+          this.cameras.main.setAlpha(1);
+          this.bossPitReturnStagingMask?.destroy();
+          this.bossPitReturnStagingMask = null;
+          this.isBossPitReturnSequenceActive = false;
+          this.isEntryStagingActive = false;
+          this.mobileControls.setMode('gameplay');
+        });
+        this.cameras.main.fadeIn(fadeInDurationMs, 0, 0, 0);
       });
     });
   }
