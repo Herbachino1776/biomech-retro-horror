@@ -160,7 +160,7 @@ const KILN_ENCOUNTER_POCKETS = [
     markerWidth: 336, markerHeight: 74, markerAlpha: 0.08, promptOffsetY: -138,
     enemies: [
       { type: 'basic01', x: 1115, y: PLAYER.startY, patrolDistance: 86 },
-      { type: 'basic02', x: 1360, y: PLAYER.startY, patrolDistance: 112, wakeDelayMs: 160 }
+      { type: 'basic02', x: 1360, y: PLAYER.startY, patrolDistance: 118, wakeDelayMs: 90 }
     ]
   },
   {
@@ -168,9 +168,10 @@ const KILN_ENCOUNTER_POCKETS = [
     markerWidth: 438, markerHeight: 82, markerAlpha: 0.1, promptOffsetY: -148,
     enemies: [
       { type: 'basic02', x: 2485, y: PLAYER.startY, patrolDistance: 122 },
-      { type: 'basic01', x: 2760, y: PLAYER.startY, patrolDistance: 108, wakeDelayMs: 80 },
-      { type: 'basic01', x: 2920, y: PLAYER.startY, patrolDistance: 96, wakeDelayMs: 160 },
-      { type: 'elite', x: 3055, y: PLAYER.startY, patrolDistance: 78, wakeDelayMs: 250, projectileCadence: 'measured' }
+      { type: 'basic01', x: 2720, y: PLAYER.startY, patrolDistance: 84, wakeDelayMs: 60 },
+      { type: 'basic01', x: 2890, y: PLAYER.startY, patrolDistance: 96, wakeDelayMs: 110 },
+      { type: 'elite', x: 3055, y: PLAYER.startY, patrolDistance: 88, wakeDelayMs: 150, projectileCadence: 'measured' },
+      { type: 'basic02', x: 3205, y: PLAYER.startY, patrolDistance: 92, wakeDelayMs: 190 }
     ]
   },
   {
@@ -178,9 +179,10 @@ const KILN_ENCOUNTER_POCKETS = [
     markerWidth: 496, markerHeight: 84, markerAlpha: 0.12, promptOffsetY: -154,
     enemies: [
       { type: 'basic01', x: 4330, y: PLAYER.startY, patrolDistance: 102 },
-      { type: 'basic02', x: 4635, y: PLAYER.startY, patrolDistance: 118, wakeDelayMs: 140 },
-      { type: 'basic01', x: 4905, y: PLAYER.startY, patrolDistance: 104, wakeDelayMs: 240 },
-      { type: 'elite', x: 5200, y: PLAYER.startY, patrolDistance: 80, wakeDelayMs: 420, projectileCadence: 'measured' }
+      { type: 'basic02', x: 4635, y: PLAYER.startY, patrolDistance: 122, wakeDelayMs: 90 },
+      { type: 'basic01', x: 4870, y: PLAYER.startY, patrolDistance: 104, wakeDelayMs: 140 },
+      { type: 'elite', x: 5200, y: PLAYER.startY, patrolDistance: 92, wakeDelayMs: 220, projectileCadence: 'measured' },
+      { type: 'basic01', x: 5030, y: PLAYER.startY, patrolDistance: 96, wakeDelayMs: 180 }
     ]
   }
 ];
@@ -870,7 +872,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
           if (enemy.dead) {
             return;
           }
-          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 52;
+          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 32;
         });
       }
 

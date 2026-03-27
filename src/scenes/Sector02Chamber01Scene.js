@@ -190,7 +190,7 @@ const BLACK_AQUEDUCT_ENCOUNTER_POCKETS = [
     markerAlpha: 0.08,
     enemies: [
       { type: 'skitter', x: 1160, y: PLAYER.startY, patrolDistance: 84, wakeDelayMs: 0 },
-      { type: 'skitter', x: 1395, y: PLAYER.startY, patrolDistance: 104, wakeDelayMs: 120 }
+      { type: 'skitter', x: 1395, y: PLAYER.startY, patrolDistance: 114, wakeDelayMs: 80 }
     ]
   },
   {
@@ -206,8 +206,8 @@ const BLACK_AQUEDUCT_ENCOUNTER_POCKETS = [
     markerAlpha: 0.1,
     enemies: [
       { type: 'skitter', x: 2265, y: PLAYER.startY, patrolDistance: 126, wakeDelayMs: 0 },
-      { type: 'skitter', x: 2535, y: PLAYER.startY, patrolDistance: 112, wakeDelayMs: 70 },
-      { type: 'skitter', x: 2805, y: PLAYER.startY, patrolDistance: 142, wakeDelayMs: 170 }
+      { type: 'skitter', x: 2535, y: PLAYER.startY, patrolDistance: 112, wakeDelayMs: 60 },
+      { type: 'skitter', x: 2805, y: PLAYER.startY, patrolDistance: 142, wakeDelayMs: 120 }
     ]
   },
   {
@@ -223,8 +223,9 @@ const BLACK_AQUEDUCT_ENCOUNTER_POCKETS = [
     markerAlpha: 0.12,
     enemies: [
       { type: 'skitter', x: 4170, y: PLAYER.startY, patrolDistance: 114, wakeDelayMs: 0 },
-      { type: 'tollkeeper', x: 4480, y: PLAYER.startY, patrolDistance: 80, wakeDelayMs: 180 },
-      { type: 'skitter', x: 4810, y: PLAYER.startY, patrolDistance: 124, wakeDelayMs: 320 }
+      { type: 'tollkeeper', x: 4480, y: PLAYER.startY, patrolDistance: 92, wakeDelayMs: 120 },
+      { type: 'skitter', x: 4685, y: PLAYER.startY, patrolDistance: 96, wakeDelayMs: 170 },
+      { type: 'skitter', x: 4915, y: PLAYER.startY, patrolDistance: 128, wakeDelayMs: 220 }
     ]
   }
 ];
@@ -764,7 +765,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
           if (enemy.dead) {
             return;
           }
-          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 48;
+          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 32;
         });
       }
 

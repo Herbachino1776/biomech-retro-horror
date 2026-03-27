@@ -229,7 +229,7 @@ const CHAMBER03_ENCOUNTER_POCKETS = [
         y: PLAYER.startY,
         awakenPlayerX: undefined,
         patrolDistance: 96,
-        wakeDelayMs: 120
+        wakeDelayMs: 70
       }
     ]
   },
@@ -259,7 +259,15 @@ const CHAMBER03_ENCOUNTER_POCKETS = [
         y: PLAYER.startY,
         awakenPlayerX: undefined,
         patrolDistance: 84,
-        wakeDelayMs: 180
+        wakeDelayMs: 90
+      },
+      {
+        type: 'skitter',
+        x: 2660,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 82,
+        wakeDelayMs: 140
       },
       {
         type: 'skitter',
@@ -267,7 +275,7 @@ const CHAMBER03_ENCOUNTER_POCKETS = [
         y: PLAYER.startY,
         awakenPlayerX: undefined,
         patrolDistance: 132,
-        wakeDelayMs: 300
+        wakeDelayMs: 170
       }
     ]
   },
@@ -312,7 +320,8 @@ const CHAMBER03_ENCOUNTER_POCKETS = [
         x: 4160,
         y: PLAYER.startY,
         awakenPlayerX: undefined,
-        wakeDelayMs: 280
+        patrolDistance: 98,
+        wakeDelayMs: 170
       }
     ]
   }
@@ -905,7 +914,7 @@ export class Chamber03Scene extends Phaser.Scene {
         return;
       }
 
-      enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 42;
+      enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 28;
     });
   }
 
