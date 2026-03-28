@@ -190,5 +190,34 @@ export const LORE_CUTSCENES = {
         shakeDuration: 3600
       }
     }
+  },
+  'sector03-chamber01-gallery-refusal-shrine': {
+    id: 'sector03-chamber01-gallery-refusal-shrine',
+    imageKey: ASSET_KEYS.sector03Chamber01LoreApparitionRefused,
+    title: 'SECTOR 03 // GALLERY OF FAILED MEASURES',
+    body: [
+      'Each glass egg bears a vessel that reached for incarnation and was denied by the cradle.',
+      'The shrine names them as measures that almost held: saint, judge, child, choir, all returned unopened.',
+      'To pass this hall is to accept refusal as sacrament; the gate ahead tests whether your shape may continue.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xb6a58f,
+      titleColor: '#a8b78f',
+      bodyColor: '#d9cbb8',
+      promptColor: '#90a979',
+      imageTint: 0xdacdb7,
+      imageAlpha: 0.95,
+      backgroundColor: '#000000',
+      motion: {
+        panX: 12,
+        panY: -10,
+        zoom: 1.034,
+        duration: 9200,
+        shakeX: 2,
+        shakeY: 2,
+        shakeDuration: 3200
+      }
+    }
   }
 };
