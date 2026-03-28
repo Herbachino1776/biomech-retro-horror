@@ -467,11 +467,9 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     this.add.ellipse(altar.altarX, WORLD.floorY - 18, altar.shadowWidth, 30, 0x412d20, 0.18).setDepth(-6.12);
     this.add.ellipse(altar.altarX, WORLD.floorY + 10, altar.shadowWidth + 180, 38, 0x020202, 0.36).setDepth(-6.04);
 
-    const primaryKey = this.textures.exists(ASSET_KEYS.sector03Chamber01BossRefusalMass)
-      ? ASSET_KEYS.sector03Chamber01BossRefusalMass
-      : this.textures.exists(ASSET_KEYS.bossPit01AltarTrap)
-        ? ASSET_KEYS.bossPit01AltarTrap
-        : null;
+    const primaryKey = this.textures.exists(ASSET_KEYS.bossPit01AltarTrap)
+      ? ASSET_KEYS.bossPit01AltarTrap
+      : null;
 
     const sprite = primaryKey
       ? this.add.image(altar.altarX, altar.altarY, primaryKey)
