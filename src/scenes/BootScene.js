@@ -7,7 +7,8 @@ import { AudioDirector } from '../audio/AudioDirector.js';
 
 const TITLE_SCENE_AUDIO = {
   ambientVolume: 0.3276,
-  startConfirmDelayMs: 180
+  startConfirmDelayMs: 180,
+  startGameSfxVolume: 0.34
 };
 
 export class BootScene extends Phaser.Scene {
@@ -186,7 +187,8 @@ export class BootScene extends Phaser.Scene {
     }
 
     this.isStarting = true;
-    this.audioDirector?.playBanishmentSting();
+    this.audioDirector?.stopAmbientLoop({ fadeOut: false });
+    this.playStartGameSfx();
     this.disableMenuButtons();
     vesselIntegrityState.resetForFreshRun();
 
@@ -201,6 +203,20 @@ export class BootScene extends Phaser.Scene {
       const bootTargetScene = DEBUG_BOOT_OVERRIDES.startScene ?? 'Chamber01Scene';
       this.scene.start(bootTargetScene);
     });
+  }
+
+  playStartGameSfx() {
+    if (!this.sound || this.sound.mute || !this.cache.audio.exists(ASSET_KEYS.banishmentSting)) {
+      return;
+    }
+
+    const startGameSfx = this.sound.add(ASSET_KEYS.banishmentSting, {
+      volume: TITLE_SCENE_AUDIO.startGameSfxVolume
+    });
+    startGameSfx.once('complete', () => {
+      startGameSfx.destroy();
+    });
+    startGameSfx.play();
   }
 
   createTitleVisuals() {
