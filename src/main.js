@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { gameConfig } from './data/gameConfig.js';
 import { BootScene } from './scenes/BootScene.js';
+import { PreTitleScene } from './scenes/PreTitleScene.js';
 import { Chamber01Scene } from './scenes/Chamber01Scene.js';
 import { LoreScreenScene } from './scenes/LoreScreenScene.js';
 import { Chamber02Scene } from './scenes/Chamber02Scene.js';
@@ -17,6 +18,7 @@ const config = {
   ...gameConfig,
   scene: [
     BootScene,
+    PreTitleScene,
     Chamber01Scene,
     LoreScreenScene,
     Chamber02Scene,
