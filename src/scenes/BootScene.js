@@ -214,7 +214,8 @@ export class BootScene extends Phaser.Scene {
 
     this.time.delayedCall(TITLE_SCENE_AUDIO.startConfirmDelayMs, () => {
       this.hasStarted = true;
-      const bootTargetScene = DEBUG_BOOT_OVERRIDES.startScene ?? 'Chamber01Scene';
+      const bootTargetScene = DEBUG_BOOT_OVERRIDES.startScene
+        ?? (DEBUG_BOOT_OVERRIDES.skipTitleAndBootSceneDirect ? 'Sector03Chamber01Scene' : 'Chamber01Scene');
       this.scene.start(bootTargetScene);
     });
   }

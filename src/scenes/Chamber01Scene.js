@@ -431,10 +431,10 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    // Temporary Sector 2 Chamber 2 shortcut so the Chamber 01 mobile DEV button can jump straight to the current Pressure Deacon test room.
+    // Keep the Chamber 01 mobile DEV button aligned with the newest authored chamber.
     this.cleanupSceneUi?.();
     this.audioDirector?.shutdown();
-    this.scene.start('Sector02Chamber02Scene', {
+    this.scene.start('Sector03Chamber01Scene', {
       devWarp: true,
       source: this.scene.key
     });
