@@ -143,6 +143,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   create() {
+    const skipPreTitle = Boolean(this.scene.settings.data?.skipPreTitle);
     this.hasStarted = false;
     this.isStarting = false;
     this.cameras.main.setBackgroundColor('#110d0c');
@@ -150,6 +151,11 @@ export class BootScene extends Phaser.Scene {
 
     if (DEBUG_BOOT_OVERRIDES.skipTitleAndBootSceneDirect) {
       this.beginChamber();
+      return;
+    }
+
+    if (!skipPreTitle) {
+      this.scene.start('PreTitleScene');
       return;
     }
 
