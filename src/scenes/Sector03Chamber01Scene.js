@@ -119,25 +119,26 @@ const WITHHELD_VESSEL = {
 
 const CRADLE_POCKETS = [
   {
-    id: 'gallery-entry-refusal',
-    label: 'DENIED PROCESSION',
-    zoneX: 1320,
+    id: 'corridor-entry-denial',
+    label: 'ENTRY DENIAL',
+    zoneX: 1480,
     zoneY: WORLD.floorY - 72,
-    zoneWidth: 600,
+    zoneWidth: 660,
     zoneHeight: 226,
-    markerWidth: 348,
+    markerWidth: 376,
     markerHeight: 76,
     markerAlpha: 0.08,
     promptOffsetY: -136,
     enemies: [
-      { type: 'failed-saint', x: 1140, y: PLAYER.startY, patrolDistance: 92 },
-      { type: 'bird-judge', x: 1368, y: PLAYER.startY, patrolDistance: 126, wakeDelayMs: 80 }
+      { type: 'failed-saint', x: 1260, y: PLAYER.startY, patrolDistance: 96 },
+      { type: 'bird-judge', x: 1490, y: PLAYER.startY, patrolDistance: 128, wakeDelayMs: 80 },
+      { type: 'failed-saint', x: 1705, y: PLAYER.startY, patrolDistance: 92, wakeDelayMs: 120 }
     ]
   },
   {
-    id: 'gallery-mid-failed-measures',
-    label: 'FAILED MEASURES',
-    zoneX: 3020,
+    id: 'corridor-wall-measures',
+    label: 'WALL-MEASURE RUN',
+    zoneX: 2320,
     zoneY: WORLD.floorY - 74,
     zoneWidth: 760,
     zoneHeight: 236,
@@ -146,28 +147,28 @@ const CRADLE_POCKETS = [
     markerAlpha: 0.1,
     promptOffsetY: -148,
     enemies: [
-      { type: 'bird-judge', x: 2710, y: PLAYER.startY, patrolDistance: 128 },
-      { type: 'failed-saint', x: 2930, y: PLAYER.startY, patrolDistance: 100, wakeDelayMs: 60 },
-      { type: 'failed-saint', x: 3090, y: PLAYER.startY, patrolDistance: 98, wakeDelayMs: 120 },
-      { type: 'withheld-vessel', x: 3330, y: PLAYER.startY, patrolDistance: 90, wakeDelayMs: 180 }
+      { type: 'bird-judge', x: 2040, y: PLAYER.startY, patrolDistance: 126 },
+      { type: 'failed-saint', x: 2280, y: PLAYER.startY, patrolDistance: 102, wakeDelayMs: 60 },
+      { type: 'bird-judge', x: 2485, y: PLAYER.startY, patrolDistance: 132, wakeDelayMs: 120 },
+      { type: 'failed-saint', x: 2630, y: PLAYER.startY, patrolDistance: 94, wakeDelayMs: 170 }
     ]
   },
   {
-    id: 'gallery-threshold-disqualification',
-    label: 'DISQUALIFICATION THRESHOLD',
-    zoneX: 4920,
+    id: 'opened-room-withheld-domain',
+    label: 'WITHHELD DOMAIN',
+    zoneX: 3140,
     zoneY: WORLD.floorY - 76,
-    zoneWidth: 960,
+    zoneWidth: 1040,
     zoneHeight: 242,
-    markerWidth: 506,
+    markerWidth: 556,
     markerHeight: 84,
     markerAlpha: 0.12,
     promptOffsetY: -152,
     enemies: [
-      { type: 'failed-saint', x: 4560, y: PLAYER.startY, patrolDistance: 96 },
-      { type: 'bird-judge', x: 4780, y: PLAYER.startY, patrolDistance: 130, wakeDelayMs: 70 },
-      { type: 'withheld-vessel', x: 5070, y: PLAYER.startY, patrolDistance: 88, wakeDelayMs: 130 },
-      { type: 'failed-saint', x: 5260, y: PLAYER.startY, patrolDistance: 106, wakeDelayMs: 180 }
+      { type: 'failed-saint', x: 2790, y: PLAYER.startY, patrolDistance: 100 },
+      { type: 'bird-judge', x: 3010, y: PLAYER.startY, patrolDistance: 128, wakeDelayMs: 70 },
+      { type: 'withheld-vessel', x: 3260, y: PLAYER.startY, patrolDistance: 90, wakeDelayMs: 130 },
+      { type: 'bird-judge', x: 3460, y: PLAYER.startY, patrolDistance: 122, wakeDelayMs: 170 }
     ]
   }
 ];
@@ -177,12 +178,12 @@ const CRADLE_LORE = {
   anchor: {
     id: 'gallery-refusal-shrine',
     label: 'READ THE REFUSAL SHRINE',
-    zoneX: 4060,
+    zoneX: 650,
     zoneY: WORLD.floorY - 78,
     zoneWidth: 214,
     zoneHeight: 210,
     promptOffsetY: -176,
-    altarX: 4060,
+    altarX: 650,
     altarY: WORLD.floorY - 104,
     altarDisplayWidth: 194,
     altarDisplayHeight: 194,
@@ -193,7 +194,7 @@ const CRADLE_LORE = {
     wallPlateWidth: 622,
     wallPlateHeight: 358,
     wallPlateY: WORLD.floorY - 156,
-    muralX: 4060,
+    muralX: 650,
     muralY: 214,
     muralWidth: 472,
     muralHeight: 292,
