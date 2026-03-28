@@ -9,6 +9,7 @@ import { PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { applyChamberEntryRestore } from '../systems/VesselRunEconomy.js';
+import { bossPitRunState } from '../systems/BossPitRunState.js';
 
 const CRADLE_BOOTSTRAP = {
   sceneKey: 'Sector03Chamber01Scene',
@@ -203,6 +204,25 @@ const CRADLE_LORE = {
   }
 };
 
+const CRADLE_TRAP_ALTAR = {
+  id: 'gallery-withheld-descent-altar',
+  label: 'TRAP ALTAR BREATHES\nPRESS RITE / [E] TO DESCEND',
+  exhaustedLabel: 'TRAP ALTAR EXHAUSTED',
+  zoneX: 3240,
+  zoneY: WORLD.floorY - 78,
+  zoneWidth: 218,
+  zoneHeight: 214,
+  promptOffsetY: -174,
+  altarX: 3240,
+  altarY: WORLD.floorY - 106,
+  altarDisplayWidth: 208,
+  altarDisplayHeight: 208,
+  supportWidth: 294,
+  supportHeight: 136,
+  supportTopY: WORLD.floorY - 82,
+  shadowWidth: 360
+};
+
 const CRADLE_FORWARD_GATE = {
   barrierX: 5550,
   barrierY: WORLD.floorY - 70,
@@ -227,6 +247,9 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     this.isRestartingRun = false;
     this.isLoreTransitionActive = false;
     this.hasCompletedLoreBeat = false;
+    this.hasTriggeredTrapAltar = false;
+    this.hasCompletedBossPitLoop = Boolean(this.transitionContext?.bossPitCompleted || this.transitionContext?.returnFromBossPit)
+      || bossPitRunState.hasSector03Chamber01BossPitCompleted();
     this.hasUnlockedForwardPath = false;
     this.hasTriggeredForwardContract = false;
     this.currentForwardThreshold = null;
@@ -236,6 +259,8 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     this.enemies = [];
     this.encounterPockets = [];
     this.loreAnchor = null;
+    this.trapAltar = null;
+    this.currentTrapAltar = null;
   }
 
   create() {
@@ -245,10 +270,18 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     this.createPlayerAndColliders();
     this.createEncounterPockets();
     this.createLoreAnchor();
+    this.createTrapAltar();
     this.createUiAndInput();
     this.createForwardThreshold();
     this.configureCameraAndLayout();
     this.registerLoreEvents();
+    if (this.transitionContext?.returnFromBossPit) {
+      this.hasCompletedLoreBeat = true;
+      this.hasTriggeredTrapAltar = true;
+      this.hasCompletedBossPitLoop = true;
+      bossPitRunState.markSector03Chamber01BossPitCompleted();
+      this.updateTrapAltarVisualState();
+    }
     this.cameras.main.fadeIn(650, 0, 0, 0);
   }
 
@@ -313,7 +346,13 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
   }
 
   createPlayerAndColliders() {
-    this.player = new Player(this, CRADLE_BOOTSTRAP.spawnX, CRADLE_BOOTSTRAP.spawnY, PLAYER);
+    const spawnX = this.transitionContext?.returnFromBossPit
+      ? this.transitionContext.returnPlayerX ?? CRADLE_TRAP_ALTAR.altarX + 52
+      : CRADLE_BOOTSTRAP.spawnX;
+    const spawnY = this.transitionContext?.returnFromBossPit
+      ? this.transitionContext.returnPlayerY ?? CRADLE_BOOTSTRAP.spawnY
+      : CRADLE_BOOTSTRAP.spawnY;
+    this.player = new Player(this, spawnX, spawnY, PLAYER);
     const entryIntegrity = applyChamberEntryRestore(this.transitionContext);
     this.player.health = entryIntegrity.current;
     this.player.maxHealth = entryIntegrity.max;
@@ -419,6 +458,38 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(-4.58).setAlpha(0.9).setVisible(false);
 
     this.loreAnchor = { ...anchor, zone, prompt };
+  }
+
+  createTrapAltar() {
+    const altar = CRADLE_TRAP_ALTAR;
+    this.add.rectangle(altar.altarX, altar.supportTopY, altar.supportWidth, altar.supportHeight, 0x281a14, 0.94).setDepth(-6.24);
+    this.add.rectangle(altar.altarX, WORLD.floorY - 12, altar.supportWidth + 88, 18, 0x090605, 0.84).setDepth(-6.16);
+    this.add.ellipse(altar.altarX, WORLD.floorY - 18, altar.shadowWidth, 30, 0x412d20, 0.18).setDepth(-6.12);
+    this.add.ellipse(altar.altarX, WORLD.floorY + 10, altar.shadowWidth + 180, 38, 0x020202, 0.36).setDepth(-6.04);
+
+    const primaryKey = this.textures.exists(ASSET_KEYS.sector03Chamber01BossRefusalMass)
+      ? ASSET_KEYS.sector03Chamber01BossRefusalMass
+      : this.textures.exists(ASSET_KEYS.bossPit01AltarTrap)
+        ? ASSET_KEYS.bossPit01AltarTrap
+        : null;
+
+    const sprite = primaryKey
+      ? this.add.image(altar.altarX, altar.altarY, primaryKey)
+        .setDisplaySize(altar.altarDisplayWidth, altar.altarDisplayHeight)
+        .setTint(0xd6c4ae)
+        .setAlpha(0.86)
+        .setDepth(-6.08)
+      : this.add.ellipse(altar.altarX, altar.altarY + 6, altar.altarDisplayWidth * 0.78, altar.altarDisplayHeight * 0.82, 0x836d5f, 0.8).setDepth(-6.08);
+
+    const aura = this.add.ellipse(altar.altarX, altar.altarY - 2, altar.altarDisplayWidth * 0.72, altar.altarDisplayHeight * 0.66, 0xc5ad88, 0.08).setDepth(-6.06);
+    const zone = this.add.zone(altar.zoneX, altar.zoneY, altar.zoneWidth, altar.zoneHeight).setOrigin(0.5);
+    this.physics.add.existing(zone, true);
+    const prompt = this.add.text(altar.zoneX, altar.zoneY + altar.promptOffsetY, altar.label, {
+      fontFamily: 'monospace', fontSize: '14px', color: '#ddceb7', align: 'center', stroke: '#100c0a', strokeThickness: 4
+    }).setOrigin(0.5).setDepth(-4.56).setAlpha(0.92).setVisible(false);
+
+    this.trapAltar = { ...altar, sprite, aura, zone, prompt };
+    this.updateTrapAltarVisualState();
   }
 
   createForwardThreshold() {
@@ -538,6 +609,8 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
+    this.refreshTrapAltarPresence();
+    this.tryBeginTrapAltarDescent(mobileInput);
     this.refreshForwardThresholdPresence();
     this.tryAdvanceForwardThreshold(mobileInput);
     this.hud.update(this.player.health, this.player.maxHealth);
@@ -641,6 +714,74 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     }
 
     this.beginLoreSequence();
+  }
+
+  refreshTrapAltarPresence() {
+    this.currentTrapAltar = null;
+    if (!this.trapAltar?.zone || this.isLoreTransitionActive) {
+      this.trapAltar?.prompt?.setVisible(false);
+      return;
+    }
+
+    this.physics.overlap(this.player.sprite, this.trapAltar.zone, () => {
+      this.currentTrapAltar = this.trapAltar;
+    });
+
+    const inside = Boolean(this.currentTrapAltar);
+    this.trapAltar.prompt
+      ?.setVisible(inside)
+      .setText(this.hasCompletedBossPitLoop ? CRADLE_TRAP_ALTAR.exhaustedLabel : CRADLE_TRAP_ALTAR.label)
+      .setColor(this.hasCompletedBossPitLoop ? '#8f7f71' : '#ddceb7');
+  }
+
+  tryBeginTrapAltarDescent(mobileInput) {
+    if (!this.currentTrapAltar || this.hasCompletedBossPitLoop) {
+      return;
+    }
+
+    const interactPressed = Phaser.Input.Keyboard.JustDown(this.keyInteract)
+      || Phaser.Input.Keyboard.JustDown(this.keyEnter)
+      || mobileInput.interactPressed;
+    if (!interactPressed) {
+      return;
+    }
+
+    this.beginTrapAltarDescent();
+  }
+
+  beginTrapAltarDescent() {
+    if (this.isLoreTransitionActive || this.hasCompletedBossPitLoop) {
+      return;
+    }
+
+    this.hasTriggeredTrapAltar = true;
+    this.currentTrapAltar = null;
+    this.trapAltar?.prompt?.setVisible(false);
+    this.mobileControls.setMode('dialogue');
+    this.player.body.setVelocity(0, 0);
+    this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+    this.audioDirector?.stopAmbientLoop();
+    this.hud?.setVisible(false);
+    this.mobileControls.setMode('init');
+    this.uiCamera?.setVisible(false);
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.audioDirector?.shutdown();
+      this.scene.start('Sector03Chamber01BossPitScene', {
+        fromScene: this.scene.key,
+        altarX: CRADLE_TRAP_ALTAR.altarX,
+        altarY: CRADLE_BOOTSTRAP.spawnY
+      });
+    });
+
+    this.tweens.add({
+      targets: this.player.sprite,
+      y: this.player.sprite.y + 38,
+      duration: 260,
+      ease: 'Sine.easeIn'
+    });
+    this.cameras.main.shake(250, 0.004, true);
+    this.cameras.main.fadeOut(420, 0, 0, 0);
   }
 
   beginLoreSequence() {
@@ -857,6 +998,25 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     this.mobileControls.setReservedBottomPx(0);
     this.restartText?.setPosition(width / 2, 90);
     this.hud?.layout();
+  }
+
+  updateTrapAltarVisualState() {
+    if (!this.trapAltar) {
+      return;
+    }
+
+    if (this.hasCompletedBossPitLoop) {
+      this.trapAltar.sprite?.setAlpha(0.36).setTint(0x5b5148);
+      this.trapAltar.aura?.setAlpha(0.02).setFillStyle(0x3a3229, 0.02);
+      this.add.rectangle(CRADLE_TRAP_ALTAR.altarX, CRADLE_TRAP_ALTAR.altarY, CRADLE_TRAP_ALTAR.altarDisplayWidth + 20, CRADLE_TRAP_ALTAR.altarDisplayHeight + 14, 0x000000, 0.42)
+        .setDepth(-6.01);
+      this.add.ellipse(CRADLE_TRAP_ALTAR.altarX, CRADLE_TRAP_ALTAR.altarY + 8, CRADLE_TRAP_ALTAR.altarDisplayWidth * 0.7, CRADLE_TRAP_ALTAR.altarDisplayHeight * 0.36, 0x000000, 0.38)
+        .setDepth(-6);
+      return;
+    }
+
+    this.trapAltar.sprite?.setAlpha(0.86).setTint(0xd6c4ae);
+    this.trapAltar.aura?.setAlpha(0.08).setFillStyle(0xc5ad88, 0.08);
   }
 
   applyGameplayReadabilitySupport(target, { fill = 0xd2c2ac, alpha = 0.16, scale = 1.08 } = {}) {
