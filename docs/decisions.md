@@ -23,17 +23,32 @@ Concise record of technical/design decisions currently in force.
 - Sector 2 Chamber 3 boss is **The Sorrow Engine**.
 - Sector 2 kill-payoff language is **Black Oil / Tar-laced Blood**.
 - Sector 3 identity is **The Cradle of Refusal**.
+- Sector 3 Chamber 1 playable backbone scene is **Gallery of Failed Measures**.
 
 ## Chamber Scale + Finale Doctrine
 - Chamber-03-level scale/consequence is the benchmark for future chambers.
 - Sector-ending chambers may use separate boss arenas when that improves pacing/consequence framing.
 - Future chamber differentiation should come from theme bucket, encounter composition, art package, trigger placement, and lore framing — not by lowering stakes.
 
+## Chamber Authoring Doctrine (Canonical)
+New chambers should default to this authored rhythm:
+1. opening setpiece / lore altar segment
+2. corridor wall-module run with basic enemy pockets
+3. larger opened-up room background reveal
+4. elite / miniboss domain inside that opened-up room
+5. terminal threshold / seal / endcap
+
+This means:
+- basic enemy pockets are primarily authored in corridor wall-module segments
+- elites/minibosses/trap-altar reveals are primarily authored in larger room-style backgrounds
+- background segmentation and encounter-tiering must visibly reinforce each other
+
 ## Gameplay + Combat Systems Doctrine
 - Projectile tech is now a real reusable combat tool, not a chamber-only gimmick.
 - Projectile behavior must preserve the full gameplay contract: spawn, movement, collision, damage, cleanup.
 - Keep combat pacing deliberate/readable; avoid accidental drift into arcade-chaos tuning.
 - Dense/obscure lore framing must be balanced with violent combat payoff, memorable encounter personality, and satisfying repeat-run combat feel.
+- Shared major-encounter resolution flow is approved reusable infrastructure for chamber/boss endings.
 
 ## Boss Pit Doctrine (Canonical)
 - Boss pits are now part of core structural game identity, not detached optional flavor.
@@ -56,9 +71,17 @@ Concise record of technical/design decisions currently in force.
 ## Milestone Flow Doctrine
 - Milestone 5 is closed.
 - Milestone 6 moved beyond foothold status and now represents a full Sector 2 prototype arc.
-- Milestone 7 is advanced but still open in 7C/7H/7I.
-- Post-7 direction is coupled: Sector 3 buildout + boss-pit expansion.
+- Milestone 7 is largely established; remaining 7C/7H/7I are targeted follow-up lanes, not default primary sequencing.
+- Milestone 8 is now active in practice through Sector 3 Chamber 1 and early Sector 3 buildout.
+- Post-7 direction remains coupled: Sector 3 buildout + boss-pit expansion.
 - Global boss refinement/uniformity is planned as a later polish milestone (not dropped).
+
+## Future Character Animation Doctrine (Deferred Lane)
+- Animated characters are a real planned future production focus.
+- This lane begins with the **player sprite**.
+- Planned scope includes player locomotion improvements, weapon swing animation, Rite animation, and broader combat/performance animation language.
+- This lane is intentionally deferred for now; current static-sprite-heavy presentation is not permanent doctrine.
+- The user-defined production approach for animation should be preserved when this lane is activated.
 
 ## Workflow Constraints
 - Before gameplay/controls/deployment/asset-loading/UI/lore changes, read doctrine docs.

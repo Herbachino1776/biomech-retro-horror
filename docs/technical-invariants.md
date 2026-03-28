@@ -36,6 +36,13 @@ Do-not-break checklist for current stability.
 - Projectile tech preserves full gameplay contract: active body, overlap, damage, and cleanup.
 - Shared enemy presentation logic must remain stable across chambers.
 - Grounding regressions should be fixed in shared presentation paths when that is the root source, not chamber-by-chamber.
+- Shared major-encounter resolution flow must preserve freeze/unfreeze, lock, and completion semantics across chambers.
+
+## Chamber Authoring / Encounter Tier Invariants
+- New chambers should preserve authored structure: opening setpiece/lore -> corridor wall-module basic pockets -> opened-up room reveal -> elite/miniboss domain -> threshold/seal endcap.
+- Basic enemy density should primarily live in corridor wall-module segments.
+- Elite/miniboss/trap-altar reveal encounters should primarily live in opened-up room domains.
+- Background segmentation and encounter tiering should stay coupled for readability.
 
 ## Boss Pit / Run-State Invariants
 - Boss pit completion state is run-scoped and must reset on death/fresh run.
@@ -44,4 +51,9 @@ Do-not-break checklist for current stability.
 
 ## Scene Flow Invariants
 - Sector 1 and Sector 2 chamber chains must remain playable end-to-end.
+- Sector 3 Chamber 1 (`Sector03Chamber01Scene`) must remain registered/playable as current Milestone 8 backbone handoff.
 - Scene registration + transition wiring are first checks for any chamber boot/handoff failure.
+
+## Milestone Direction Invariant
+- Active build lane remains Milestone 8 (Sector 3 buildout + boss-pit expansion).
+- Do not casually derail active milestone direction with unrelated system expansion during routine passes.
