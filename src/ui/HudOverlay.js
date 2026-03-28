@@ -39,20 +39,20 @@ export class HudOverlay {
       .setDepth(30.75);
 
     this.integrityBarTrail = scene.add
-      .rectangle(0, 0, 0, 0, 0x6f4b42, 0.62)
+      .rectangle(0, 0, 0, 0, 0x7a2c36, 0.62)
       .setOrigin(0)
       .setScrollFactor(0)
       .setDepth(30.9);
 
     this.integrityBarFill = scene.add
-      .rectangle(0, 0, 0, 0, 0xa68868, 0.98)
+      .rectangle(0, 0, 0, 0, 0xba4a58, 0.98)
       .setOrigin(0)
       .setScrollFactor(0)
       .setDepth(31);
 
-    this.bossBarFrame = scene.add.rectangle(0, 0, 0, 0, 0x090807, 0.86).setScrollFactor(0).setDepth(66).setVisible(false);
-    this.bossBarFrame.setStrokeStyle(2, 0x6b5647, 0.9);
-    this.bossBarFill = scene.add.rectangle(0, 0, 0, 0, 0x7c1111, 0.96).setScrollFactor(0).setDepth(67).setVisible(false);
+    this.bossBarFrame = scene.add.rectangle(0, 0, 0, 0, 0x080607, 0.9).setScrollFactor(0).setDepth(66).setVisible(false);
+    this.bossBarFrame.setStrokeStyle(2, 0x54202a, 0.9);
+    this.bossBarFill = scene.add.rectangle(0, 0, 0, 0, 0x4f0815, 0.98).setScrollFactor(0).setDepth(67).setVisible(false);
     this.bossBarUnderlay = scene.add.rectangle(0, 0, 0, 0, 0x18110f, 0.92).setScrollFactor(0).setDepth(66).setVisible(false);
     this.bossTelegraph = scene.add.rectangle(0, 0, 0, 0, 0xc39146, 0.22).setScrollFactor(0).setDepth(67).setVisible(false);
     this.bossNamePlate = scene.add.rectangle(0, 0, 0, 0, 0x120d0c, 0.78).setScrollFactor(0).setDepth(66).setVisible(false);
@@ -139,33 +139,33 @@ export class HudOverlay {
     this.healthLabel.setPosition(labelX, labelY).setFontSize(isPortrait ? '10px' : '12px');
 
     const barX = frameX + (isPortrait ? 11 : 14);
-    const barY = frameY + (isPortrait ? 28 : 34);
+    const barY = frameY + (isPortrait ? 31 : 38);
     const barWidth = frameWidth - (isPortrait ? 22 : 28);
-    const barHeight = isPortrait ? 16 : 18;
+    const barHeight = isPortrait ? 11 : 13;
 
     this.integrityBarUnderlay.setPosition(barX - 1, barY - 1).setSize(barWidth + 2, barHeight + 2);
     this.integrityBarPlate.setPosition(barX, barY).setSize(barWidth, barHeight);
     this.integrityBarGeometry = { x: barX, y: barY, width: barWidth, height: barHeight };
     this.refreshIntegrityBarGeometry();
 
-    const frameWidthBoss = Math.min(width - (isPortrait ? 24 : 36), isPortrait ? 232 : 520);
-    const frameHeightBoss = isPortrait ? 26 : 52;
-    const underlayWidth = frameWidthBoss - (isPortrait ? 20 : 24);
-    const underlayHeight = isPortrait ? 6 : 12;
+    const frameWidthBoss = Math.min(width - (isPortrait ? 20 : 34), isPortrait ? 266 : 564);
+    const frameHeightBoss = isPortrait ? 34 : 62;
+    const underlayWidth = frameWidthBoss - (isPortrait ? 18 : 24);
+    const underlayHeight = isPortrait ? 10 : 16;
     const centerX = width / 2;
     const centerY = isPortrait
-      ? safeAreaTop + frameHeight + 20
+      ? safeAreaTop + frameHeight + 34
       : height - (safeAreaBottom + 18) - frameHeightBoss / 2;
 
     this.bossBarFrame.setPosition(centerX, centerY).setSize(frameWidthBoss, frameHeightBoss);
-    this.bossBarUnderlay.setPosition(centerX, centerY + (isPortrait ? 5 : 10)).setSize(underlayWidth, underlayHeight);
-    this.bossTelegraph.setPosition(centerX - underlayWidth / 2, centerY + (isPortrait ? 5 : 10)).setOrigin(0, 0.5).setSize(0, underlayHeight);
-    this.bossBarFill.setPosition(centerX - underlayWidth / 2, centerY + (isPortrait ? 5 : 10)).setOrigin(0, 0.5).setSize(underlayWidth, underlayHeight);
+    this.bossBarUnderlay.setPosition(centerX, centerY + (isPortrait ? 8 : 12)).setSize(underlayWidth, underlayHeight);
+    this.bossTelegraph.setPosition(centerX - underlayWidth / 2, centerY + (isPortrait ? 8 : 12)).setOrigin(0, 0.5).setSize(0, underlayHeight);
+    this.bossBarFill.setPosition(centerX - underlayWidth / 2, centerY + (isPortrait ? 8 : 12)).setOrigin(0, 0.5).setSize(underlayWidth, underlayHeight);
     this.bossNamePlate
-      .setPosition(centerX, centerY - (isPortrait ? 5 : 10))
-      .setSize(Math.min(frameWidthBoss - 18, isPortrait ? 186 : 300), isPortrait ? 12 : 24);
-    this.bossName.setPosition(centerX, centerY - (isPortrait ? 6 : 13)).setFontSize(isPortrait ? 10 : 16);
-    this.bossSubtitle.setPosition(centerX, centerY + (isPortrait ? 0 : 1)).setFontSize(isPortrait ? 8 : 10).setAlpha(isPortrait ? 0 : 1);
+      .setPosition(centerX, centerY - (isPortrait ? 8 : 12))
+      .setSize(Math.min(frameWidthBoss - 16, isPortrait ? 216 : 318), isPortrait ? 14 : 24);
+    this.bossName.setPosition(centerX, centerY - (isPortrait ? 9 : 15)).setFontSize(isPortrait ? 11 : 17);
+    this.bossSubtitle.setPosition(centerX, centerY - (isPortrait ? 1 : 1)).setFontSize(isPortrait ? 8 : 10).setAlpha(isPortrait ? 0 : 1);
   }
 
   layoutBossBar() {
@@ -212,8 +212,8 @@ export class HudOverlay {
     this.bossSubtitle.setText(subtitle);
     this.bossBarFill.displayWidth = Math.max(0, this.bossBarUnderlay.width * ratio);
     this.bossTelegraph.displayWidth = Math.max(0, this.bossBarUnderlay.width * telegraphRatio);
-    this.bossBarFill.setFillStyle(wounded ? 0xa46d48 : 0x7c1111, wounded ? 1 : 0.97);
-    this.bossBarFrame.setStrokeStyle(2, telegraphRatio > 0 ? 0xae8750 : wounded ? 0x8b6246 : 0x6b5647, 0.96);
+    this.bossBarFill.setFillStyle(wounded ? 0x7c2d3b : 0x4f0815, wounded ? 1 : 0.98);
+    this.bossBarFrame.setStrokeStyle(2, telegraphRatio > 0 ? 0xae8750 : wounded ? 0x7f3f4c : 0x54202a, 0.96);
     this.bossNamePlate.setFillStyle(telegraphRatio > 0 ? 0x1d140f : 0x120d0c, telegraphRatio > 0 ? 0.88 : 0.78);
     this.bossName.setColor(telegraphRatio > 0 ? '#f0d9a7' : '#dcccb5');
     this.bossSubtitle.setColor(telegraphRatio > 0 ? '#d4b57b' : wounded ? '#c9a282' : '#9a8779');

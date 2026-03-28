@@ -142,6 +142,7 @@ export class Sector03Chamber01BossPitScene extends Phaser.Scene {
     this.exitAltar = null;
     this.currentExitAltar = null;
     this.resolutionLockActive = false;
+    this.hasBossBarBeenRevealed = false;
   }
 
   create() {
@@ -605,8 +606,12 @@ export class Sector03Chamber01BossPitScene extends Phaser.Scene {
   }
 
   refreshBossBar(time) {
+    if (!this.hasBossBarBeenRevealed && this.isBossBarRevealEligible()) {
+      this.hasBossBarBeenRevealed = true;
+    }
+
     this.hud.setBossBarState({
-      visible: !this.boss.dead,
+      visible: this.hasBossBarBeenRevealed && !this.boss.dead,
       name: BOSS_PIT_BOSS.name,
       subtitle: BOSS_PIT_BOSS.subtitle,
       current: this.boss.health,
@@ -614,6 +619,24 @@ export class Sector03Chamber01BossPitScene extends Phaser.Scene {
       telegraph: this.boss.getTelegraphProgress(time),
       wounded: time < this.boss.hurtUntil
     });
+  }
+
+  isBossBarRevealEligible() {
+    if (!this.boss?.active || this.boss?.dead || !this.boss?.sprite?.active) {
+      return false;
+    }
+
+    const worldView = this.cameras.main.worldView;
+    const revealMargin = 84;
+    const revealRect = new Phaser.Geom.Rectangle(
+      worldView.x - revealMargin,
+      worldView.y - revealMargin,
+      worldView.width + revealMargin * 2,
+      worldView.height + revealMargin * 2
+    );
+    const bossX = this.boss.sprite.x;
+    const bossY = this.boss.sprite.body?.center?.y ?? this.boss.sprite.y;
+    return Phaser.Geom.Rectangle.Contains(revealRect, bossX, bossY);
   }
 
   setEnemyProjectilesPaused(paused) {
@@ -646,15 +669,17 @@ export class Sector03Chamber01BossPitScene extends Phaser.Scene {
           ? fallbackKey
           : null;
 
+      const isExitAltar = altarConfig.id === BOSS_PIT_ALTARS.returnAltarId;
+
       const sprite = altarTextureKey
         ? this.add.image(altarConfig.x, altarConfig.y, altarTextureKey)
           .setDisplaySize(altarConfig.width, altarConfig.height)
-          .setTint(altarConfig.tint)
-          .setAlpha(altarConfig.alpha)
+          .setTint(isExitAltar ? altarConfig.tint : 0xffffff)
+          .setAlpha(isExitAltar ? altarConfig.alpha : 0.96)
           .setDepth(-6.08)
-        : this.add.ellipse(altarConfig.x, altarConfig.y + 4, altarConfig.width * 0.82, altarConfig.height * 0.86, 0x7b7164, altarConfig.alpha).setDepth(-6.08);
+        : this.add.ellipse(altarConfig.x, altarConfig.y + 4, altarConfig.width * 0.82, altarConfig.height * 0.86, 0x7b7164, isExitAltar ? altarConfig.alpha : 0.92).setDepth(-6.08);
 
-      const aura = this.add.ellipse(altarConfig.x, altarConfig.y - 4, altarConfig.width * 0.78, altarConfig.height * 0.74, 0xb9ac98, altarConfig.id === BOSS_PIT_ALTARS.returnAltarId ? 0.04 : 0.02)
+      const aura = this.add.ellipse(altarConfig.x, altarConfig.y - 4, altarConfig.width * 0.78, altarConfig.height * 0.74, 0xb9ac98, isExitAltar ? 0.04 : 0.16)
         .setDepth(-6.06);
 
       const altarEntry = { ...altarConfig, sprite, aura };
@@ -692,12 +717,12 @@ export class Sector03Chamber01BossPitScene extends Phaser.Scene {
     }
 
     if (this.hasUnlockedExitAltar) {
-      this.exitAltar.sprite?.setAlpha(0.94).setTint(0xd7cab2);
+      this.exitAltar.sprite?.setAlpha(0.96).setTint(0xffffff);
       this.exitAltar.aura?.setAlpha(0.22).setFillStyle(0xc2b37f, 0.24);
       return;
     }
 
-    this.exitAltar.sprite?.setAlpha(0.44).setTint(0x8f8579);
+    this.exitAltar.sprite?.setAlpha(0.42).setTint(0x85796d);
     this.exitAltar.aura?.setAlpha(0.04).setFillStyle(0x6f6559, 0.04);
   }
 
