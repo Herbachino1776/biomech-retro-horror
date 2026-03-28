@@ -1,4 +1,6 @@
 import chamberBackgroundUrl from '../../assets/concepts/chamber01-background-01.png';
+import titleScreenBackground01Url from '../../art/raw/ui/title/title_screen_bg_01.png';
+import titleLogoOuterEngine01Url from '../../art/raw/ui/title/title_logo_outer_engine_01_alpha.png';
 import chamber01WallUrl from '../../art/raw/chamber01/chamber_wall_repeatable_01_source.png';
 import chamber01FloorStripUrl from '../../art/raw/chamber01/floor_strip_repeatable_01_source.png';
 import chamber01RibArchUrl from '../../art/raw/chamber01/foreground_rib_arch_alpha_01_source.png';
@@ -94,6 +96,8 @@ import { PROCEDURAL_AUDIO_URLS } from '../audio/proceduralAudio.js';
 import { ASSET_KEYS } from './assetKeys.js';
 
 export const ASSET_URLS = {
+  [ASSET_KEYS.titleScreenBackground01]: titleScreenBackground01Url,
+  [ASSET_KEYS.titleLogoOuterEngine01]: titleLogoOuterEngine01Url,
   [ASSET_KEYS.chamberBackground]: chamberBackgroundUrl,
   [ASSET_KEYS.chamber01Wall]: chamber01WallUrl,
   [ASSET_KEYS.chamber01FloorStrip]: chamber01FloorStripUrl,
