@@ -1430,8 +1430,8 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     const promptVisible = Boolean(this.currentForwardThreshold) || (this.hasUnlockedForwardPath && !this.hasTriggeredForwardContract);
     const promptText = this.hasUnlockedForwardPath
       ? this.hasTriggeredForwardContract
-        ? 'DESCENT MARKED\nSECTOR HOLDING THRESHOLD'
-        : 'SORROW ENGINE RUPTURED\nPRESS RITE / [E] TO DESCEND'
+        ? 'DESCENT MARKED\nENTERING THE CRADLE OF REFUSAL'
+        : 'SORROW ENGINE RUPTURED\nPRESS RITE / [E] TO DESCEND INTO SECTOR III'
       : this.hasTriggeredBossReveal
         ? 'SLAUGHTER THE SORROW ENGINE'
         : 'BANISHER GATE SEALED';
@@ -1457,11 +1457,11 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     }
 
     this.hasTriggeredForwardContract = true;
-    this.forwardPrompt?.setVisible(true).setText('DESCENT MARKED\nSECTOR HOLDING THRESHOLD');
+    this.forwardPrompt?.setVisible(true).setText('DESCENT MARKED\nENTERING THE CRADLE OF REFUSAL');
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.cleanupSceneUi?.();
       this.audioDirector?.shutdown();
-      this.scene.start('SectorCompleteScene', {
+      this.scene.start('Sector03Chamber01Scene', {
         fromScene: this.scene.key,
         fromGate: 'kiln-of-judgement-threshold'
       });

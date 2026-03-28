@@ -58,6 +58,20 @@ import sector02Chamber03LoreImageUrl from '../../art/raw/sector02/chamber03/sect
 import sector02Chamber03BossSorrowEngineUrl from '../../art/raw/sector02/chamber03/boss_sector02_chamber03_sorrow_engine_01_alpha.png';
 import sector02Chamber03GateUrl from '../../art/raw/sector02/chamber03/sector02_chamber03_gate_01.png';
 import sector02Chamber03FloorUrl from '../../art/raw/sector02/chamber03/sector02_chamber03_floor_01.png';
+import sector03Chamber01BackgroundEntryGalleryUrl from '../../art/raw/sector03/chamber01/sector03_chamber01_bg_entry_gallery_of_failed_measures_01.png';
+import sector03Chamber01BackgroundOpeningRecessUrl from '../../art/raw/sector03/chamber01/sector03_chamber01_bg_opening_refusal_recess_01.png';
+import sector03Chamber01BackgroundWallModule01Url from '../../art/raw/sector03/chamber01/sector03_chamber01_bg_wall_module_01.png';
+import sector03Chamber01BackgroundWallModule02Url from '../../art/raw/sector03/chamber01/sector03_chamber01_bg_wall_module_02.png';
+import sector03Chamber01BackgroundFeatureWall01Url from '../../art/raw/sector03/chamber01/sector03_chamber01_bg_feature_wall_01.png';
+import sector03Chamber01BackgroundFeatureWall02Url from '../../art/raw/sector03/chamber01/sector03_chamber01_bg_feature_wall_02.png';
+import sector03Chamber01BackgroundThresholdUrl from '../../art/raw/sector03/chamber01/sector03_chamber01_bg_threshold_of_disqualification_01.png';
+import sector03Chamber01BackgroundThresholdAltUrl from '../../art/raw/sector03/chamber01/sector03_chamber01_bg_threshold_alt_01.png';
+import sector03Chamber01EnemyBasicFailedSaintUrl from '../../art/raw/sector03/chamber01/sector03_chamber01_enemy_basic_failed_saint_01.png';
+import sector03Chamber01EnemyBasicBirdJudgeUrl from '../../art/raw/sector03/chamber01/sector03_chamber01_enemy_basic_bird_judge_01.png';
+import sector03Chamber01EnemyEliteWithheldVesselUrl from '../../art/raw/sector03/chamber01/sector03_chamber01_enemy_elite_withheld_vessel_01 Background Removed.png';
+import sector03Chamber01LoreApparitionRefusedUrl from '../../art/raw/sector03/chamber01/sector03_chamber01_lore_apparition_refused_01 Background Removed.png';
+import sector03Chamber01GateRefusalSealUrl from '../../art/raw/sector03/chamber01/sector03_chamber01_prop_gate_refusal_seal_01 Background Removed.png';
+import sector03Chamber01BossRefusalMassUrl from '../../art/raw/sector03/chamber01/sector03_chamber01_boss_refusal_mass_01 Background Removed.png';
 import sector02PressureShardProjectileUrl from '../../art/raw/sector02/chamber02/projectile_sector02_pressure_shard_01_alpha.png';
 import bossPit01BackgroundHornGateUrl from '../../art/raw/bosspit/boss_pit_01_bg_horn_gate_of_witness.png';
 import bossPit01TheHornGateWitnessUrl from '../../art/raw/bosspit/boss_pit_01_the_horn_gate_witness_alpha.png';
@@ -156,6 +170,20 @@ export const ASSET_URLS = {
   [ASSET_KEYS.sector02Chamber03BossSorrowEngine]: sector02Chamber03BossSorrowEngineUrl,
   [ASSET_KEYS.sector02Chamber03Gate]: sector02Chamber03GateUrl,
   [ASSET_KEYS.sector02Chamber03Floor]: sector02Chamber03FloorUrl,
+  [ASSET_KEYS.sector03Chamber01BackgroundEntryGallery]: sector03Chamber01BackgroundEntryGalleryUrl,
+  [ASSET_KEYS.sector03Chamber01BackgroundOpeningRecess]: sector03Chamber01BackgroundOpeningRecessUrl,
+  [ASSET_KEYS.sector03Chamber01BackgroundWallModule01]: sector03Chamber01BackgroundWallModule01Url,
+  [ASSET_KEYS.sector03Chamber01BackgroundWallModule02]: sector03Chamber01BackgroundWallModule02Url,
+  [ASSET_KEYS.sector03Chamber01BackgroundFeatureWall01]: sector03Chamber01BackgroundFeatureWall01Url,
+  [ASSET_KEYS.sector03Chamber01BackgroundFeatureWall02]: sector03Chamber01BackgroundFeatureWall02Url,
+  [ASSET_KEYS.sector03Chamber01BackgroundThreshold]: sector03Chamber01BackgroundThresholdUrl,
+  [ASSET_KEYS.sector03Chamber01BackgroundThresholdAlt]: sector03Chamber01BackgroundThresholdAltUrl,
+  [ASSET_KEYS.sector03Chamber01EnemyBasicFailedSaint]: sector03Chamber01EnemyBasicFailedSaintUrl,
+  [ASSET_KEYS.sector03Chamber01EnemyBasicBirdJudge]: sector03Chamber01EnemyBasicBirdJudgeUrl,
+  [ASSET_KEYS.sector03Chamber01EnemyEliteWithheldVessel]: sector03Chamber01EnemyEliteWithheldVesselUrl,
+  [ASSET_KEYS.sector03Chamber01LoreApparitionRefused]: sector03Chamber01LoreApparitionRefusedUrl,
+  [ASSET_KEYS.sector03Chamber01GateRefusalSeal]: sector03Chamber01GateRefusalSealUrl,
+  [ASSET_KEYS.sector03Chamber01BossRefusalMass]: sector03Chamber01BossRefusalMassUrl,
   [ASSET_KEYS.sector02PressureShardProjectile]: sector02PressureShardProjectileUrl,
   [ASSET_KEYS.bossPit01BackgroundHornGate]: bossPit01BackgroundHornGateUrl,
   [ASSET_KEYS.bossPit01TheHornGateWitness]: bossPit01TheHornGateWitnessUrl,
