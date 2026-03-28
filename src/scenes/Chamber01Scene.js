@@ -20,14 +20,17 @@ import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
 import { grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
+import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
 
 const SHOW_CHAMBER01_DEBUG_LABELS = false;
 const HALF_SKULL_RESOLUTION = {
   encounterId: 'chamber01-halfskull-miniboss',
-  ritualPulseDelayMs: 480,
-  detonationDelayMs: 1380,
-  gateUnlockDelayMs: 2060,
-  bossBarDropDelayMs: 2480
+  preExplosionShakeMs: 3000,
+  preExplosionShakeIntensity: 0.0058,
+  goreFountainCadenceMs: 86,
+  explosionFadeStartDelayMs: 100,
+  explosionFadeDurationMs: 320,
+  postExplosionDespawnDelayMs: 560
 };
 
 export class Chamber01Scene extends Phaser.Scene {
@@ -88,10 +91,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.minibossCeremonyBossBarActive = false;
     this.integrityRewardTracker = new Set();
     this.minibossDeathFlashUntil = -Infinity;
-    this.minibossDeathPulse = null;
-    this.minibossRewardReleaseTimer = null;
-    this.minibossGoreTimer = null;
-    this.minibossBloodPool = null;
+    this.minibossVictoryGoreFountainTimer = null;
     this.resolutionLockActive = false;
     this.minibossRewardText = this.add
       .text(this.scale.width / 2, this.scale.height * 0.28, 'Blasphemous Demon\nhas been Banished!', {
@@ -146,6 +146,7 @@ export class Chamber01Scene extends Phaser.Scene {
       this.game.events.off('lore-screen-complete', this.handleLoreScreenComplete, this);
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.audioDirector?.shutdown();
+      this.stopMinibossVictoryGoreFountain();
       this.majorEncounterResolution?.teardown();
     });
 
@@ -708,40 +709,45 @@ export class Chamber01Scene extends Phaser.Scene {
         this.minibossCeremonyBossBarActive = true;
         this.miniboss.setActive(false);
         this.isMinibossRewardActive = true;
-        this.minibossDeathFlashUntil = this.time.now + HALF_SKULL_RESOLUTION.gateUnlockDelayMs;
+        this.minibossDeathFlashUntil = this.time.now + HALF_SKULL_RESOLUTION.preExplosionShakeMs;
         this.playMinibossCeremonyStart();
       },
       stages: [
         {
-          atMs: HALF_SKULL_RESOLUTION.ritualPulseDelayMs,
+          atMs: HALF_SKULL_RESOLUTION.preExplosionShakeMs,
           run: () => {
-            this.minibossRewardText?.setText('RITE OF BANISHMENT\nENTERS THE VEIN');
-            this.spawnMinibossBloodPool(this.miniboss.sprite.x + Phaser.Math.Between(-14, 14), WORLD.floorY - 6, { scale: 0.76, alpha: 0.88 });
-            this.cameras.main.shake(420, 0.014, true);
-          }
-        },
-        {
-          atMs: HALF_SKULL_RESOLUTION.detonationDelayMs,
-          run: () => {
-            this.spawnMinibossBloodPool(this.miniboss.sprite.x, WORLD.floorY - 5, { scale: 1.12, alpha: 1 });
-            this.triggerMinibossGoreEscalation();
+            this.stopMinibossVictoryGoreFountain();
+            this.triggerHalfSkullDeathBurst({
+              x: this.miniboss.sprite.x,
+              y: (this.miniboss.sprite.body?.bottom ?? this.miniboss.sprite.y) - Phaser.Math.Between(90, 126),
+              depth: this.miniboss.sprite.depth + 0.46,
+              scale: 1.28,
+              durationMs: 760,
+              burstCount: 88,
+              sprayCount: 114,
+              mistCount: 16,
+              emberCount: 16,
+              burstRadiusX: 148,
+              burstRadiusY: 184,
+              dropletWidth: [10, 28],
+              dropletHeight: [20, 50],
+              sprayWidth: [5, 13],
+              sprayHeight: [16, 38]
+            });
+            this.majorEncounterResolution?.schedule(HALF_SKULL_RESOLUTION.explosionFadeStartDelayMs, () => {
+              this.startMinibossExplosionFade();
+            });
             this.audioDirector?.playBanishmentSting();
             this.minibossRewardText?.setText('HALF SKULL\nBANISHED');
-          }
-        },
-        {
-          atMs: HALF_SKULL_RESOLUTION.gateUnlockDelayMs,
-          run: () => {
             grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, HALF_SKULL_RESOLUTION.encounterId);
             this.audioDirector?.playGateUnlock();
             this.updateGateActivationVisuals();
           }
         },
         {
-          atMs: HALF_SKULL_RESOLUTION.bossBarDropDelayMs,
+          atMs: HALF_SKULL_RESOLUTION.preExplosionShakeMs + HALF_SKULL_RESOLUTION.postExplosionDespawnDelayMs,
           run: () => {
-            this.minibossCeremonyBossBarActive = false;
-            this.hud.setBossBarState({ visible: false });
+            this.despawnMinibossAfterPayoff();
           }
         }
       ],
@@ -751,44 +757,11 @@ export class Chamber01Scene extends Phaser.Scene {
     });
   }
 
-  spawnMinibossBloodPool(x, y, { scale = 1, alpha = 1 } = {}) {
-    this.minibossBloodPool?.destroy(true);
-
-    const pool = this.add.container(x, y).setDepth(1.2);
-    const outerShadow = this.add.ellipse(0, 8, 250, 58, 0x120707, 0.4);
-    const outerPool = this.add.ellipse(0, 0, 228, 48, 0x391012, 0.88).setStrokeStyle(4, 0x68403d, 0.22);
-    const midPool = this.add.ellipse(-10, -2, 180, 34, 0x5a1718, 0.72);
-    const glossPool = this.add.ellipse(22, -8, 96, 14, 0xb86d5e, 0.2);
-    const clotRidge = this.add.ellipse(-34, 4, 68, 16, 0x2a0b0c, 0.44);
-    pool.add([outerShadow, outerPool, midPool, glossPool, clotRidge]);
-    pool.setScale(0.2 * scale, 0.2 * scale).setAlpha(0);
-
-    this.tweens.add({
-      targets: pool,
-      scaleX: scale,
-      scaleY: scale,
-      alpha,
-      duration: 520,
-      ease: 'Cubic.easeOut'
-    });
-
-    this.minibossBloodPool = pool;
-  }
-
   playMinibossCeremonyStart() {
-    this.audioDirector?.playEnemyDeath('miniboss');
-    this.spawnMinibossBloodPool(this.miniboss.sprite.x, WORLD.floorY - 5, { scale: 0.94, alpha: 0.94 });
-    this.minibossRewardText?.setText('BANISHMENT RITE\nINITIATED');
-
-    const shakeDurations = [360, 340, 320, 300];
-    const shakeIntensities = [0.0115, 0.011, 0.0102, 0.0095];
-    let elapsed = 0;
-    shakeDurations.forEach((duration, index) => {
-      this.time.delayedCall(elapsed, () => {
-        this.cameras.main.shake(duration, shakeIntensities[index], true);
-      });
-      elapsed += duration - 20;
-    });
+    this.stabilizeMinibossCorpseForPayoff();
+    this.cameras.main.shake(HALF_SKULL_RESOLUTION.preExplosionShakeMs, HALF_SKULL_RESOLUTION.preExplosionShakeIntensity, true);
+    this.startMinibossVictoryGoreFountain();
+    this.minibossRewardText?.setText('BANISHMENT RITE\nACTIVE');
 
     if (this.minibossRewardText) {
       this.tweens.killTweensOf(this.minibossRewardText);
@@ -799,37 +772,120 @@ export class Chamber01Scene extends Phaser.Scene {
         scaleX: 1,
         scaleY: 1,
         duration: 320,
-        ease: 'Cubic.easeOut',
-        hold: HALF_SKULL_RESOLUTION.bossBarDropDelayMs - 600
+        ease: 'Cubic.easeOut'
       });
     }
   }
 
-  triggerMinibossGoreEscalation() {
-    this.minibossGoreTimer?.remove(false);
-    const iterations = 5;
-    let bursts = 0;
-    this.minibossGoreTimer = this.time.addEvent({
-      delay: 86,
-      repeat: iterations - 1,
-      callback: () => {
-        bursts += 1;
-        this.spawnMinibossBloodPool(
-          this.miniboss.sprite.x + Phaser.Math.Between(-48, 48),
-          WORLD.floorY - Phaser.Math.Between(2, 12),
-          { scale: Phaser.Math.FloatBetween(0.68, 1), alpha: Phaser.Math.FloatBetween(0.7, 0.96) }
-        );
-        this.cameras.main.shake(120, 0.006 + bursts * 0.0006, true);
+  stabilizeMinibossCorpseForPayoff() {
+    if (!this.miniboss?.sprite?.active) {
+      return;
+    }
+
+    this.tweens.killTweensOf(this.miniboss.sprite);
+    this.miniboss.sprite
+      .setAlpha(1)
+      .setVisible(true)
+      .setScale(
+        this.miniboss.baseScaleX * this.miniboss.config.presentation.scaleX,
+        this.miniboss.baseScaleY * this.miniboss.config.presentation.scaleY
+      )
+      .setAngle(0);
+  }
+
+  startMinibossExplosionFade() {
+    if (!this.miniboss?.sprite?.active) {
+      return;
+    }
+
+    this.tweens.killTweensOf(this.miniboss.sprite);
+    this.tweens.add({
+      targets: this.miniboss.sprite,
+      alpha: 0,
+      duration: HALF_SKULL_RESOLUTION.explosionFadeDurationMs,
+      ease: 'Sine.easeInOut'
+    });
+  }
+
+  despawnMinibossAfterPayoff() {
+    if (!this.miniboss?.sprite) {
+      return;
+    }
+
+    this.stopMinibossVictoryGoreFountain();
+    this.miniboss.sprite.setVisible(false).setAlpha(0);
+    this.miniboss.setActive(false);
+    this.miniboss.body?.setEnable(false);
+    this.miniboss.destroyCombatTelegraphs?.();
+  }
+
+  startMinibossVictoryGoreFountain() {
+    this.stopMinibossVictoryGoreFountain();
+    if (!this.miniboss?.sprite?.active) {
+      return;
+    }
+
+    const spawnFountainBurst = () => {
+      if (!this.isMinibossRewardActive || !this.miniboss?.sprite?.active) {
+        return;
       }
+
+      this.triggerHalfSkullDeathBurst({
+        x: this.miniboss.sprite.x + Phaser.Math.Between(-58, 58),
+        y: (this.miniboss.sprite.body?.bottom ?? this.miniboss.sprite.y) - Phaser.Math.Between(104, 156),
+        depth: this.miniboss.sprite.depth + 0.38,
+        scale: Phaser.Math.FloatBetween(0.7, 0.92),
+        durationMs: 560,
+        burstCount: 52,
+        sprayCount: 76,
+        mistCount: 7,
+        emberCount: 6,
+        burstRadiusX: 124,
+        burstRadiusY: 168,
+        dropletWidth: [8, 20],
+        dropletHeight: [18, 44],
+        sprayWidth: [4, 11],
+        sprayHeight: [14, 36]
+      });
+    };
+
+    spawnFountainBurst();
+    this.minibossVictoryGoreFountainTimer = this.time.addEvent({
+      delay: HALF_SKULL_RESOLUTION.goreFountainCadenceMs,
+      repeat: Math.ceil(HALF_SKULL_RESOLUTION.preExplosionShakeMs / HALF_SKULL_RESOLUTION.goreFountainCadenceMs),
+      callback: spawnFountainBurst
+    });
+  }
+
+  stopMinibossVictoryGoreFountain() {
+    this.minibossVictoryGoreFountainTimer?.remove(false);
+    this.minibossVictoryGoreFountainTimer = null;
+  }
+
+  triggerHalfSkullDeathBurst(config = {}) {
+    if (!this.miniboss?.sprite?.active) {
+      return;
+    }
+
+    triggerSector02BlackOilBlowout(this, {
+      source: this.miniboss.sprite,
+      splashColor: 0x8b111c,
+      heavyColor: 0x5e0a13,
+      highlightColor: 0xb43645,
+      redSpeckColor: 0xc84a55,
+      mistColor: 0x1d080b,
+      alpha: 0.98,
+      includeGroundPool: false,
+      persistPuddle: false,
+      fadeSource: false,
+      ...config
     });
   }
 
   finishMinibossCeremony() {
-    this.minibossGoreTimer?.remove(false);
-    this.minibossGoreTimer = null;
-    this.minibossRewardReleaseTimer?.remove(false);
-    this.minibossRewardReleaseTimer = null;
+    this.stopMinibossVictoryGoreFountain();
     this.minibossCeremonyBossBarActive = false;
+    this.hud.setBossBarState({ visible: false });
     this.isMinibossRewardActive = false;
     if (this.minibossRewardText) {
       this.tweens.killTweensOf(this.minibossRewardText);
