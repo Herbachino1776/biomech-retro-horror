@@ -659,7 +659,7 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     this.uiCamera?.setVisible(false);
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.setVisible(false, this.scene.key);
+      this.setGameplaySceneVisibility(false);
       this.scene.pause();
       this.scene.launch('LoreCutsceneScene', {
         cutsceneId: CRADLE_LORE.cutsceneId,
@@ -680,9 +680,12 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
   }
 
   resumeFromLore() {
-    this.scene.setVisible(true, this.scene.key);
-    this.scene.resume();
+    if (this.scene.isPaused(this.scene.key)) {
+      this.scene.resume(this.scene.key);
+    }
     this.isLoreTransitionActive = false;
+    this.setGameplaySceneVisibility(true);
+    this.applyResponsiveLayout();
     this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.11 });
     this.hud?.setVisible(true);
     this.mobileControls.setMode('gameplay');
@@ -690,6 +693,10 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     this.player.body.setEnable(true);
     this.player.sprite.setVelocity(0, 0);
     this.cameras.main.fadeIn(360, 0, 0, 0);
+  }
+
+  setGameplaySceneVisibility(isVisible) {
+    this.scene.setVisible(isVisible, this.scene.key);
   }
 
   refreshForwardThresholdPresence() {
