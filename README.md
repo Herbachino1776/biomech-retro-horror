@@ -2,8 +2,8 @@
 
 A browser-playable retro horror action prototype built with Phaser 3 + Vite, developed in a GitHub + Codex workflow.
 
-## Project State (March 2026)
-This is now a **multi-sector prototype**, not a Chamber 01-only vertical-slice stub.
+## Project State (March 28, 2026)
+This is a **multi-sector prototype** with active Sector 3 expansion underway.
 
 - **Sector 1 (Ossuary / dead-god palace arc)** is functionally in place:
   - Chamber 01
@@ -15,21 +15,36 @@ This is now a **multi-sector prototype**, not a Chamber 01-only vertical-slice s
   - Chamber 1: **Black Aqueduct Intake**
   - Chamber 2: **The Compression Vaults**
   - Chamber 3: **The Kiln of Judgement**
-  - Sector 2 chamber boss payoff in Chamber 3 (**The Sorrow Engine**)
-  - first boss-pit template in Sector 2 Chamber 2
+  - Chamber 3 chamber-end major encounter payoff (**The Sorrow Engine**)
+  - first trap-altar -> boss-pit loop in Sector 2 Chamber 2
   - established kill-payoff language (**Black Oil / Tar-laced Blood**)
-  - working projectile + AOE readability combat tech in live encounters
+  - live projectile + AOE readability combat tech in shipped encounters
+- **Sector 3 (The Cradle of Refusal)** has started in playable form:
+  - Chamber 1: **Gallery of Failed Measures** (`Sector03Chamber01Scene`)
+  - functional encounter pockets + lore altar + threshold/seal handoff scaffold
 
 ## Milestone Direction Snapshot
-- Milestone 7 delivered major combat-sidequest progress (including Vessel run economy, gore payoff pass, projectile/AOE lanes, readability passes, and the first boss-pit prototype).
-- Milestone 7 is advanced but still open in specific lanes (7C, 7H, 7I).
-- Sector 3 doctrine is now explicitly defined as **The Cradle of Refusal** and planned as a major escalation point.
-- Boss pits are now treated as **core structural identity**, not optional distant flavor.
+- **Milestone 7** was meaningfully advanced through shared major-encounter resolution flow, chamber-end ritual/cinematic motion groundwork, and boss-death doctrine hardening.
+- Milestone 7 is now **largely established** but can still receive targeted follow-up in remaining quality lanes.
+- **Boss pits are core structural identity** (not optional side flavor).
+- **Milestone 8 is now active in practice** through Sector 3 Chamber 1 and early Sector 3 buildout.
 
 ## Current Direction
-- Preserve Sector 1 + Sector 2 functionality while reducing regressions.
-- Finish remaining Milestone 7 lanes before declaring closure.
-- Prepare Milestone 8 as coupled work: **Sector 3 buildout + boss-pit expansion**.
+- Preserve Sector 1 + Sector 2 + early Sector 3 functionality while reducing regressions.
+- Continue Milestone 8 as coupled work: **Sector 3 buildout + boss-pit expansion**.
+- Author new chambers with explicit background/encounter tier synergy (corridor basics vs opened-room elite domains).
+- Keep the **future character animation lane** explicit but deferred (planned start point: player sprite).
+
+## Planned (Not Active Yet): Character Animation Lane
+Character animation is a real future production lane, but it is **not** the current implementation focus.
+
+Planned later scope includes:
+- player locomotion animation improvements
+- weapon swing animation
+- Rite animation
+- broader combat/performance animation language
+
+Current static-sprite-heavy gameplay presentation is an interim production state, not permanent doctrine.
 
 ## Tech Stack
 - Engine: Phaser 3
