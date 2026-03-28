@@ -1,4 +1,6 @@
 export const ASSET_KEYS = {
+  titleScreenBackground01: 'title-screen-bg-01',
+  titleLogoOuterEngine01: 'title-logo-outer-engine-01',
   chamberBackground: 'chamber01-background-01',
   chamber01Wall: 'chamber01-wall-repeatable-01',
   chamber01FloorStrip: 'chamber01-floor-strip-repeatable-01',
@@ -103,6 +105,8 @@ export const ASSET_KEYS = {
 };
 
 export const REQUIRED_TEXTURE_KEYS = [
+  ASSET_KEYS.titleScreenBackground01,
+  ASSET_KEYS.titleLogoOuterEngine01,
   ASSET_KEYS.chamberBackground,
   ASSET_KEYS.chamber01Wall,
   ASSET_KEYS.chamber01FloorStrip,
