@@ -681,19 +681,14 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
   }
 
   resumeFromLore() {
-    if (this.scene.isPaused(this.scene.key)) {
-      this.scene.resume(this.scene.key);
-    }
     this.isLoreTransitionActive = false;
     this.setGameplaySceneVisibility(true);
     this.applyResponsiveLayout();
-    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.11 });
-    this.hud?.setVisible(true);
     this.mobileControls.setMode('gameplay');
+    this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
-    this.player.body.setEnable(true);
-    this.player.sprite.setVelocity(0, 0);
-    this.cameras.main.fadeIn(360, 0, 0, 0);
+    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.11 });
+    this.cameras.main.fadeIn(500, 0, 0, 0);
   }
 
   setGameplaySceneVisibility(isVisible) {
