@@ -67,6 +67,7 @@ const REMAINS_PROFILES = {
 const REMAINS_CAP_PER_SCENE = 90;
 const REMAINS_FLOOR_PLANE_OFFSET_Y = 28;
 const REMAINS_SETTLE_LOWERING_PX = 6;
+const BLOOD_POOL_UNDERLAY_OFFSET_Y = 8;
 
 const BLOOD_POOL_PROFILES = {
   small: { width: 66, height: 20, growMs: 760 },
@@ -113,14 +114,14 @@ export function spawnEnemyCorpseRemains(scene, {
   const container = scene.add.container(x, groundedPlaneY).setDepth(depth - 0.1);
 
   const bloodShadow = scene.add
-    .ellipse(0, 0, bloodPoolProfile.width * 1.04, bloodPoolProfile.height * 1.18, 0x18080a, 0.34)
+    .ellipse(0, BLOOD_POOL_UNDERLAY_OFFSET_Y, bloodPoolProfile.width * 1.04, bloodPoolProfile.height * 1.18, 0x18080a, 0.34)
     .setScale(0.42, 0.4);
   const bloodPool = scene.add
-    .ellipse(0, -3, bloodPoolProfile.width, bloodPoolProfile.height, 0x64171d, 0.56)
+    .ellipse(0, BLOOD_POOL_UNDERLAY_OFFSET_Y + -3, bloodPoolProfile.width, bloodPoolProfile.height, 0x64171d, 0.56)
     .setStrokeStyle(1, 0x2b0b0e, 0.4)
     .setScale(0.36, 0.34);
   const bloodCore = scene.add
-    .ellipse(-2, -4, bloodPoolProfile.width * 0.58, bloodPoolProfile.height * 0.62, 0x7e2125, 0.3)
+    .ellipse(-2, BLOOD_POOL_UNDERLAY_OFFSET_Y + -4, bloodPoolProfile.width * 0.58, bloodPoolProfile.height * 0.62, 0x7e2125, 0.3)
     .setScale(0.32, 0.3);
   container.add([bloodShadow, bloodPool, bloodCore]);
 
