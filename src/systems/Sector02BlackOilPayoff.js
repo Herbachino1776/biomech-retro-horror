@@ -83,20 +83,20 @@ export function triggerSector02BlackOilBlowout(scene, {
 
   if (config.includeGroundPool) {
     craterShadow = scene.add
-      .ellipse(centerX, centerY + 14 * scale, config.puddleWidth * 1.28, config.puddleHeight * 1.7, config.shadowColor, 0.52)
+      .ellipse(centerX, centerY + 22 * scale, config.puddleWidth * 1.28, config.puddleHeight * 1.7, config.shadowColor, 0.52)
       .setDepth(baseDepth - 0.05);
     created.push(craterShadow);
   }
 
   const releaseRing = scene.add
-    .ellipse(centerX, centerY - 4 * scale, config.burstRadiusX * 0.52, config.burstRadiusY * 0.26, config.highlightColor, 0.16)
+    .ellipse(centerX, centerY + 4 * scale, config.burstRadiusX * 0.52, config.burstRadiusY * 0.26, config.highlightColor, 0.16)
     .setStrokeStyle(2, config.redSpeckColor, 0.18)
     .setDepth(baseDepth + config.depthOffset);
   created.push(releaseRing);
 
   if (config.includeGroundPool) {
     puddle = scene.add
-      .ellipse(centerX, centerY + 20 * scale, config.puddleWidth, config.puddleHeight, config.heavyColor, config.persistPuddle ? config.puddleAlpha : 0.32)
+      .ellipse(centerX, centerY + 30 * scale, config.puddleWidth, config.puddleHeight, config.heavyColor, config.persistPuddle ? config.puddleAlpha : 0.32)
       .setStrokeStyle(2, config.redSpeckColor, 0.14)
       .setDepth(baseDepth - 0.02);
     created.push(puddle);

@@ -937,10 +937,11 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
         },
         onStart: () => {
           grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber01-archon-miniboss');
+          this.archon.sprite.y = WORLD.floorY + 2 - this.archon.sprite.displayHeight * (1 - this.archon.sprite.originY);
           this.triggerSector02BlackOilPayoff(this.archon, { scale: 1.12, burstCount: 12, puddleWidth: 204, puddleHeight: 48 });
           spawnEnemyCorpseRemains(this, {
             x: this.archon.sprite.x,
-            y: (this.archon.sprite.body?.bottom ?? this.archon.sprite.y) - 2,
+            y: WORLD.floorY - 2,
             depth: this.archon.sprite.depth,
             size: 'large'
           });
@@ -1018,7 +1019,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     triggerSector02BlackOilBlowout(this, {
       source: sprite,
       x: sprite.x,
-      y: (sprite.body?.bottom ?? sprite.y) - 20,
+      y: (sprite.body?.bottom ?? sprite.y) - 14,
       depth: sprite.depth,
       scale: config.scale ?? 1,
       burstCount: config.burstCount,

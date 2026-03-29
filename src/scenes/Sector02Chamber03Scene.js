@@ -1330,12 +1330,13 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
             if (!this.sorrowEngine?.sprite?.active) {
               return;
             }
+            this.sorrowEngine.sprite.y = WORLD.floorY + 2 - this.sorrowEngine.sprite.displayHeight * (1 - this.sorrowEngine.sprite.originY);
             this.triggerSector02BlackOilPayoff(this.sorrowEngine, KILN_SORROW_ENGINE.blowout);
             this.audioDirector?.playBanishmentSting();
             this.tweens.killTweensOf(this.sorrowEngine.sprite);
             spawnEnemyCorpseRemains(this, {
               x: this.sorrowEngine.sprite.x,
-              y: (this.sorrowEngine.sprite.body?.bottom ?? this.sorrowEngine.sprite.y) - 2,
+              y: WORLD.floorY - 2,
               depth: this.sorrowEngine.sprite.depth,
               size: 'large'
             });
@@ -1380,7 +1381,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     triggerSector02BlackOilBlowout(this, {
       source: sprite,
       x: sprite.x,
-      y: (sprite.body?.bottom ?? sprite.y) - 20,
+      y: (sprite.body?.bottom ?? sprite.y) - 14,
       depth: sprite.depth,
       scale: config.scale ?? 1,
       burstCount: config.burstCount,

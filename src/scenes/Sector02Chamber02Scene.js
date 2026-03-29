@@ -1298,10 +1298,11 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       },
       onStart: () => {
         grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber02-pressure-deacon-miniboss');
+        target.sprite.y = WORLD.floorY + 2 - target.sprite.displayHeight * (1 - target.sprite.originY);
         this.triggerSector02BlackOilPayoff(target, COMPRESSION_VAULTS_PRESSURE_DEACON.blowout);
         spawnEnemyCorpseRemains(this, {
           x: target.sprite.x,
-          y: (target.sprite.body?.bottom ?? target.sprite.y) - 2,
+          y: WORLD.floorY - 2,
           depth: target.sprite.depth,
           size: 'large'
         });
@@ -1341,7 +1342,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     triggerSector02BlackOilBlowout(this, {
       source: sprite,
       x: sprite.x,
-      y: (sprite.body?.bottom ?? sprite.y) - 20,
+      y: (sprite.body?.bottom ?? sprite.y) - 14,
       depth: sprite.depth,
       scale: config.scale ?? 1,
       durationMs: config.durationMs,

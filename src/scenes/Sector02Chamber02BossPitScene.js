@@ -413,6 +413,8 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
       return;
     }
 
+    const floorBottomY = WORLD.floorY + 2;
+    const groundedY = floorBottomY - this.boss.sprite.displayHeight * (1 - this.boss.sprite.originY);
     this.tweens.killTweensOf(this.boss.sprite);
     this.boss.sprite
       .setAlpha(1)
@@ -421,7 +423,8 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
         this.boss.baseScaleX * this.boss.config.presentation.scaleX,
         this.boss.baseScaleY * this.boss.config.presentation.scaleY
       )
-      .setAngle(0);
+      .setAngle(0)
+      .setY(groundedY);
   }
 
   startBossExplosionFade() {
@@ -446,7 +449,7 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     this.stopVictoryGoreFountain();
     spawnEnemyCorpseRemains(this, {
       x: this.boss.sprite.x,
-      y: (this.boss.sprite.body?.bottom ?? this.boss.sprite.y) - 2,
+      y: WORLD.floorY - 2,
       depth: this.boss.sprite.depth,
       size: 'large'
     });
