@@ -357,9 +357,10 @@ export class SkitterServitor {
         duration: 380,
         onComplete: () => {
           this.sprite.setVisible(false);
+          const spriteBottomY = this.sprite.y + this.sprite.displayHeight * (1 - this.sprite.originY);
           spawnEnemyCorpseRemains(this.scene, {
             x: this.sprite.x,
-            y: (this.body?.bottom ?? this.sprite.y) - 2,
+            y: spriteBottomY - 2,
             depth: this.sprite.depth,
             size: this.isElite || this.isTollKeeper || this.config.isElite ? 'medium' : 'small'
           });
