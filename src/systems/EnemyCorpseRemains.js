@@ -7,17 +7,17 @@ const REMAINS_PROFILES = {
     maxDisplaySidePx: [14, 24],
     spawnRadiusX: 14,
     settleRadiusX: 24,
-    spawnDropY: [7, 13],
-    settleDropY: [7, 14],
+    spawnDropY: [16, 26],
+    settleDropY: [1, 6],
     settleDurationMs: [130, 210]
   },
   medium: {
-    pieceCountRange: [11, 18],
-    maxDisplaySidePx: [20, 34],
-    spawnRadiusX: 20,
-    settleRadiusX: 34,
-    spawnDropY: [8, 15],
-    settleDropY: [9, 18],
+    pieceCountRange: [12, 22],
+    maxDisplaySidePx: [22, 30],
+    spawnRadiusX: 22,
+    settleRadiusX: 38,
+    spawnDropY: [18, 30],
+    settleDropY: [2, 8],
     settleDurationMs: [150, 230]
   },
   large: {
@@ -25,8 +25,8 @@ const REMAINS_PROFILES = {
     maxDisplaySidePx: [26, 46],
     spawnRadiusX: 28,
     settleRadiusX: 56,
-    spawnDropY: [10, 18],
-    settleDropY: [12, 26],
+    spawnDropY: [20, 34],
+    settleDropY: [3, 10],
     settleDurationMs: [170, 290]
   }
 };
