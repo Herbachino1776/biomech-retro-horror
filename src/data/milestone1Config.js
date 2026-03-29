@@ -68,8 +68,8 @@ export const CONCEPT_PRESENTATION = {
     display: { width: 196, height: 322 },
     origin: { x: 0.5, y: 0.985 },
     normalization: {
-      targetDisplayHeight: 252,
-      origin: { x: 0.5, y: 0.965 },
+      targetDisplayHeight: 126,
+      origin: { x: 0.5, y: 0.995 },
       yOffset: -10
     },
     alpha: 0.94

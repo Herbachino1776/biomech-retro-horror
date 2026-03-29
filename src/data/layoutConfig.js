@@ -1,5 +1,5 @@
 export const PORTRAIT_LAYOUT = {
-  worldBandRatio: 0.89,
+  worldBandRatio: 0.87,
   worldBandMin: 400,
   worldBandMax: 660,
   minControlBand: 136,
