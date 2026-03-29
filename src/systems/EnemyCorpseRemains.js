@@ -45,6 +45,7 @@ const REMAINS_PROFILES = {
 };
 
 const REMAINS_CAP_PER_SCENE = 90;
+const REMAINS_FLOOR_PLANE_OFFSET_Y = 28;
 
 function ensureStore(scene) {
   if (!scene.__enemyCorpseRemainsEntries) {
@@ -77,7 +78,7 @@ export function spawnEnemyCorpseRemains(scene, {
 
   const profile = REMAINS_PROFILES[size] ?? REMAINS_PROFILES.small;
   const pieceCount = Phaser.Math.Between(profile.pieceCountRange[0], profile.pieceCountRange[1]);
-  const groundedPlaneY = (floorPlaneY ?? groundY ?? y) + 10;
+  const groundedPlaneY = (floorPlaneY ?? groundY ?? y) + REMAINS_FLOOR_PLANE_OFFSET_Y;
   const container = scene.add.container(x, groundedPlaneY).setDepth(depth - 0.1);
 
   for (let index = 0; index < pieceCount; index += 1) {
