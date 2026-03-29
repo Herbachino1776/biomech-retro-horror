@@ -1,0 +1,121 @@
+{
+  "package": "weapon_hammer_follow_05",
+  "player_strip_reference": "player_attack_strip_transparent.png",
+  "weapon_source": "weapon_hammer_source_clean.png",
+  "weapon_strip": "weapon_hammer_follow_strip_05.png",
+  "preview_gif": "weapon_hammer_follow_preview_05.gif",
+  "preview_sheet": "weapon_hammer_follow_preview_sheet_05.png",
+  "notes": [
+    "This version follows the actual player strip frame-by-frame instead of rotating around one fixed point.",
+    "Frames 1-2 render behind the player so the hammer reads as loaded overhead.",
+    "Frames 3-5 render in front of the player to sell the forward downswing.",
+    "Negative Y offsets are expected because the hammer sits above the player in the load frames."
+  ],
+  "frames": [
+    {
+      "frame": 1,
+      "player_bbox_in_strip": {
+        "x": 31,
+        "y": 0,
+        "w": 259,
+        "h": 445
+      },
+      "hand_point_relative_to_bbox": {
+        "x": 130,
+        "y": 24
+      },
+      "weapon_file": "weapon_hammer_follow_01.png",
+      "offset_relative_to_player_crop": {
+        "x": 99,
+        "y": -76
+      },
+      "rotation_deg": 0,
+      "scale": 0.24,
+      "render_order": "behind_player"
+    },
+    {
+      "frame": 2,
+      "player_bbox_in_strip": {
+        "x": 330,
+        "y": 8,
+        "w": 259,
+        "h": 436
+      },
+      "hand_point_relative_to_bbox": {
+        "x": 132,
+        "y": 28
+      },
+      "weapon_file": "weapon_hammer_follow_02.png",
+      "offset_relative_to_player_crop": {
+        "x": 79,
+        "y": -86
+      },
+      "rotation_deg": 15,
+      "scale": 0.24,
+      "render_order": "behind_player"
+    },
+    {
+      "frame": 3,
+      "player_bbox_in_strip": {
+        "x": 625,
+        "y": 31,
+        "w": 259,
+        "h": 413
+      },
+      "hand_point_relative_to_bbox": {
+        "x": 138,
+        "y": 38
+      },
+      "weapon_file": "weapon_hammer_follow_03.png",
+      "offset_relative_to_player_crop": {
+        "x": 66,
+        "y": -78
+      },
+      "rotation_deg": 35,
+      "scale": 0.24,
+      "render_order": "front_of_player"
+    },
+    {
+      "frame": 4,
+      "player_bbox_in_strip": {
+        "x": 921,
+        "y": 74,
+        "w": 285,
+        "h": 382
+      },
+      "hand_point_relative_to_bbox": {
+        "x": 150,
+        "y": 50
+      },
+      "weapon_file": "weapon_hammer_follow_04.png",
+      "offset_relative_to_player_crop": {
+        "x": 75,
+        "y": -35
+      },
+      "rotation_deg": 65,
+      "scale": 0.24,
+      "render_order": "front_of_player"
+    },
+    {
+      "frame": 5,
+      "player_bbox_in_strip": {
+        "x": 1247,
+        "y": 24,
+        "w": 258,
+        "h": 421
+      },
+      "hand_point_relative_to_bbox": {
+        "x": 138,
+        "y": 30
+      },
+      "weapon_file": "weapon_hammer_follow_05.png",
+      "offset_relative_to_player_crop": {
+        "x": 74,
+        "y": -88
+      },
+      "rotation_deg": 25,
+      "scale": 0.24,
+      "render_order": "front_of_player"
+    }
+  ]
+}
