@@ -1,9 +1,6 @@
 import Phaser from 'phaser';
 
 const REGULAR_PROFILE = {
-  ringWidth: 84,
-  ringHeight: 28,
-  ringAlpha: 0.28,
   bloodCount: 42,
   heavyBloodCount: 6,
   tarCount: 20,
@@ -29,9 +26,6 @@ const REGULAR_PROFILE = {
 
 const ELITE_PROFILE = {
   ...REGULAR_PROFILE,
-  ringWidth: 92,
-  ringHeight: 30,
-  ringAlpha: 0.32,
   bloodCount: 60,
   heavyBloodCount: 10,
   tarCount: 30,
@@ -108,21 +102,6 @@ export function triggerEnemyDeathRuptureBurst(scene, { x, y, depth = 6, isElite 
   const profile = isElite ? ELITE_PROFILE : REGULAR_PROFILE;
   const centerX = x ?? 0;
   const centerY = y ?? 0;
-
-  const releaseRing = scene.add
-    .ellipse(centerX, centerY + 2, profile.ringWidth, profile.ringHeight, COLORS.bloodA, profile.ringAlpha)
-    .setStrokeStyle(1, COLORS.tarA, 0.3)
-    .setDepth(depth + profile.depthOffset - 0.01);
-
-  scene.tweens.add({
-    targets: releaseRing,
-    scaleX: 2.05,
-    scaleY: 1.36,
-    alpha: 0,
-    duration: profile.durationMs + 120,
-    ease: 'Quad.easeOut',
-    onComplete: () => releaseRing.destroy()
-  });
 
   for (let index = 0; index < profile.bloodCount; index += 1) {
     spawnBurstParticle(scene, centerX, centerY, depth, profile, {

@@ -46,6 +46,14 @@ const REMAINS_PROFILES = {
 
 const REMAINS_CAP_PER_SCENE = 90;
 const REMAINS_FLOOR_PLANE_OFFSET_Y = 28;
+const REMAINS_SETTLE_LOWERING_PX = 6;
+
+const BLOOD_POOL_PROFILES = {
+  small: { width: 66, height: 20, growMs: 760 },
+  medium: { width: 88, height: 24, growMs: 840 },
+  large: { width: 116, height: 30, growMs: 920 },
+  elite: { width: 122, height: 34, growMs: 980 }
+};
 
 function ensureStore(scene) {
   if (!scene.__enemyCorpseRemainsEntries) {
@@ -77,9 +85,47 @@ export function spawnEnemyCorpseRemains(scene, {
   }
 
   const profile = REMAINS_PROFILES[size] ?? REMAINS_PROFILES.small;
+  const bloodPoolProfile = BLOOD_POOL_PROFILES[size] ?? BLOOD_POOL_PROFILES.small;
   const pieceCount = Phaser.Math.Between(profile.pieceCountRange[0], profile.pieceCountRange[1]);
   const groundedPlaneY = (floorPlaneY ?? groundY ?? y) + REMAINS_FLOOR_PLANE_OFFSET_Y;
   const container = scene.add.container(x, groundedPlaneY).setDepth(depth - 0.1);
+
+  const bloodShadow = scene.add
+    .ellipse(0, -2, bloodPoolProfile.width * 1.04, bloodPoolProfile.height * 1.18, 0x18080a, 0.34)
+    .setScale(0.42, 0.4);
+  const bloodPool = scene.add
+    .ellipse(0, -5, bloodPoolProfile.width, bloodPoolProfile.height, 0x64171d, 0.56)
+    .setStrokeStyle(1, 0x2b0b0e, 0.4)
+    .setScale(0.36, 0.34);
+  const bloodCore = scene.add
+    .ellipse(-2, -6, bloodPoolProfile.width * 0.58, bloodPoolProfile.height * 0.62, 0x7e2125, 0.3)
+    .setScale(0.32, 0.3);
+  container.add([bloodShadow, bloodPool, bloodCore]);
+
+  scene.tweens.add({
+    targets: bloodShadow,
+    scaleX: 1,
+    scaleY: 1,
+    alpha: 0.34,
+    duration: bloodPoolProfile.growMs,
+    ease: 'Sine.easeOut'
+  });
+  scene.tweens.add({
+    targets: bloodPool,
+    scaleX: 1,
+    scaleY: 1,
+    alpha: 0.56,
+    duration: bloodPoolProfile.growMs + 60,
+    ease: 'Sine.easeOut'
+  });
+  scene.tweens.add({
+    targets: bloodCore,
+    scaleX: 1,
+    scaleY: 1,
+    alpha: 0.3,
+    duration: bloodPoolProfile.growMs + 120,
+    ease: 'Sine.easeOut'
+  });
 
   for (let index = 0; index < pieceCount; index += 1) {
     const spawnOffsetX = Phaser.Math.Between(-profile.spawnRadiusX, profile.spawnRadiusX);
@@ -102,7 +148,7 @@ export function spawnEnemyCorpseRemains(scene, {
     piece.setScale(targetMaxSidePx / sourceMaxSide);
     const halfDisplayHeight = Math.max(1, piece.displayHeight * 0.5);
     const liftAboveFloor = Math.max(0, settleDrop);
-    const settledGroundedY = -halfDisplayHeight - liftAboveFloor + settleSinkIntoFloor;
+    const settledGroundedY = -halfDisplayHeight - liftAboveFloor + settleSinkIntoFloor + REMAINS_SETTLE_LOWERING_PX;
     piece.y = settledGroundedY - spawnDrop;
 
     container.add(piece);
