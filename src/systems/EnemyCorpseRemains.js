@@ -3,31 +3,31 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 
 const REMAINS_PROFILES = {
   small: {
-    pieces: 4,
-    scaleRange: [0.11, 0.17],
-    spawnRadiusX: 6,
-    settleRadiusX: 8,
-    spawnDropY: [7, 12],
-    settleDropY: [4, 8],
-    settleDurationMs: [130, 190]
+    pieceCountRange: [2, 4],
+    maxDisplaySidePx: [8, 13],
+    spawnRadiusX: 10,
+    settleRadiusX: 16,
+    spawnDropY: [6, 11],
+    settleDropY: [5, 12],
+    settleDurationMs: [120, 180]
   },
   medium: {
-    pieces: 5,
-    scaleRange: [0.16, 0.24],
-    spawnRadiusX: 10,
-    settleRadiusX: 12,
-    spawnDropY: [8, 14],
-    settleDropY: [6, 11],
-    settleDurationMs: [160, 240]
+    pieceCountRange: [3, 5],
+    maxDisplaySidePx: [11, 18],
+    spawnRadiusX: 16,
+    settleRadiusX: 28,
+    spawnDropY: [7, 13],
+    settleDropY: [8, 16],
+    settleDurationMs: [140, 220]
   },
   large: {
-    pieces: 7,
-    scaleRange: [0.22, 0.34],
-    spawnRadiusX: 16,
-    settleRadiusX: 20,
-    spawnDropY: [10, 18],
-    settleDropY: [8, 14],
-    settleDurationMs: [190, 300]
+    pieceCountRange: [5, 7],
+    maxDisplaySidePx: [15, 26],
+    spawnRadiusX: 26,
+    settleRadiusX: 50,
+    spawnDropY: [9, 17],
+    settleDropY: [11, 24],
+    settleDurationMs: [170, 280]
   }
 };
 
@@ -61,21 +61,24 @@ export function spawnEnemyCorpseRemains(scene, {
   }
 
   const profile = REMAINS_PROFILES[size] ?? REMAINS_PROFILES.small;
+  const pieceCount = Phaser.Math.Between(profile.pieceCountRange[0], profile.pieceCountRange[1]);
   const container = scene.add.container(x, y).setDepth(depth + 0.2);
 
-  for (let index = 0; index < profile.pieces; index += 1) {
+  for (let index = 0; index < pieceCount; index += 1) {
     const spawnOffsetX = Phaser.Math.Between(-profile.spawnRadiusX, profile.spawnRadiusX);
     const settleOffsetX = Phaser.Math.Between(-profile.settleRadiusX, profile.settleRadiusX);
     const spawnDrop = Phaser.Math.Between(profile.spawnDropY[0], profile.spawnDropY[1]);
     const settleDrop = Phaser.Math.Between(profile.settleDropY[0], profile.settleDropY[1]);
     const settleDuration = Phaser.Math.Between(profile.settleDurationMs[0], profile.settleDurationMs[1]);
-    const scale = Phaser.Math.FloatBetween(profile.scaleRange[0], profile.scaleRange[1]);
+    const targetMaxSidePx = Phaser.Math.Between(profile.maxDisplaySidePx[0], profile.maxDisplaySidePx[1]);
 
     const piece = scene.add.image(spawnOffsetX, -spawnDrop, textureKey)
       .setAlpha(0.9)
       .setRotation(Phaser.Math.FloatBetween(-0.4, 0.4))
-      .setScale(scale)
       .setDepth(container.depth + index * 0.0001);
+
+    const sourceMaxSide = Math.max(piece.width || 1, piece.height || 1);
+    piece.setScale(targetMaxSidePx / sourceMaxSide);
 
     container.add(piece);
 
