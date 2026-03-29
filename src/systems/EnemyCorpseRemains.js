@@ -8,7 +8,7 @@ const REMAINS_PROFILES = {
     spawnRadiusX: 14,
     settleRadiusX: 24,
     spawnDropY: [16, 26],
-    settleDropY: [1, 6],
+    settleDropY: [-1, 4],
     settleDurationMs: [130, 210]
   },
   medium: {
@@ -17,7 +17,7 @@ const REMAINS_PROFILES = {
     spawnRadiusX: 22,
     settleRadiusX: 38,
     spawnDropY: [18, 30],
-    settleDropY: [2, 8],
+    settleDropY: [0, 6],
     settleDurationMs: [150, 230]
   },
   large: {
@@ -26,7 +26,7 @@ const REMAINS_PROFILES = {
     spawnRadiusX: 28,
     settleRadiusX: 56,
     spawnDropY: [20, 34],
-    settleDropY: [3, 10],
+    settleDropY: [1, 8],
     settleDurationMs: [170, 290]
   }
 };
@@ -62,7 +62,7 @@ export function spawnEnemyCorpseRemains(scene, {
 
   const profile = REMAINS_PROFILES[size] ?? REMAINS_PROFILES.small;
   const pieceCount = Phaser.Math.Between(profile.pieceCountRange[0], profile.pieceCountRange[1]);
-  const container = scene.add.container(x, y).setDepth(depth + 0.2);
+  const container = scene.add.container(x, y).setDepth(depth - 0.1);
 
   for (let index = 0; index < pieceCount; index += 1) {
     const spawnOffsetX = Phaser.Math.Between(-profile.spawnRadiusX, profile.spawnRadiusX);
