@@ -412,19 +412,34 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
       return;
     }
 
+    this.beginLoreSequence();
+  }
+
+  beginLoreSequence() {
+    if (this.isLoreTransitionActive) {
+      return;
+    }
+
     this.isLoreTransitionActive = true;
+    this.currentLoreZone = null;
     this.loreAnchor?.prompt?.setVisible(false);
+    this.mobileControls.setMode('dialogue');
+    this.player.body.setVelocity(0, 0);
+    this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
     this.audioDirector?.stopAmbientLoop();
     this.hud?.setVisible(false);
     this.mobileControls.setMode('init');
     this.uiCamera?.setVisible(false);
+
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.setGameplaySceneVisibility(false);
       this.scene.pause();
       this.scene.launch('LoreCutsceneScene', {
         cutsceneId: 'sector03-chamber02-house-of-borrowed-faces',
         returnSceneKey: this.scene.key
       });
     });
+
     this.cameras.main.fadeOut(420, 0, 0, 0);
   }
 
@@ -432,15 +447,24 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     if (cutsceneId !== 'sector03-chamber02-house-of-borrowed-faces') {
       return;
     }
+
     this.hasCompletedLoreBeat = true;
+    this.resumeFromLore();
+  }
+
+  resumeFromLore() {
     this.isLoreTransitionActive = false;
-    this.scene.setVisible(true, this.scene.key);
+    this.setGameplaySceneVisibility(true);
     this.applyResponsiveLayout();
+    this.mobileControls.setMode('gameplay');
     this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
-    this.mobileControls.setMode('gameplay');
     this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.11 });
     this.cameras.main.fadeIn(500, 0, 0, 0);
+  }
+
+  setGameplaySceneVisibility(isVisible) {
+    this.scene.setVisible(isVisible, this.scene.key);
   }
 
   refreshPitAltars() {
