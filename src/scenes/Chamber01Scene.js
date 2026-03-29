@@ -21,6 +21,7 @@ import { AudioDirector } from '../audio/AudioDirector.js';
 import { grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
+import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
 
 const SHOW_CHAMBER01_DEBUG_LABELS = false;
 const HALF_SKULL_RESOLUTION = {
@@ -813,6 +814,12 @@ export class Chamber01Scene extends Phaser.Scene {
     }
 
     this.stopMinibossVictoryGoreFountain();
+    spawnEnemyCorpseRemains(this, {
+      x: this.miniboss.sprite.x,
+      y: (this.miniboss.sprite.body?.bottom ?? this.miniboss.sprite.y) - 2,
+      depth: this.miniboss.sprite.depth,
+      size: 'large'
+    });
     this.miniboss.sprite.setVisible(false).setAlpha(0);
     this.miniboss.setActive(false);
     this.miniboss.body?.setEnable(false);

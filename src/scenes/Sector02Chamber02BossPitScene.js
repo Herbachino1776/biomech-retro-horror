@@ -10,6 +10,7 @@ import { PLAYER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
+import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
 import { grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 import { bossPitRunState } from '../systems/BossPitRunState.js';
 import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
@@ -443,6 +444,12 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     }
 
     this.stopVictoryGoreFountain();
+    spawnEnemyCorpseRemains(this, {
+      x: this.boss.sprite.x,
+      y: (this.boss.sprite.body?.bottom ?? this.boss.sprite.y) - 2,
+      depth: this.boss.sprite.depth,
+      size: 'large'
+    });
     this.boss.sprite.setVisible(false).setAlpha(0);
     this.boss.setActive(false);
     this.boss.body?.setEnable(false);

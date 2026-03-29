@@ -11,6 +11,7 @@ import { PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
+import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
 import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
 
@@ -1332,6 +1333,12 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
             this.triggerSector02BlackOilPayoff(this.sorrowEngine, KILN_SORROW_ENGINE.blowout);
             this.audioDirector?.playBanishmentSting();
             this.tweens.killTweensOf(this.sorrowEngine.sprite);
+            spawnEnemyCorpseRemains(this, {
+              x: this.sorrowEngine.sprite.x,
+              y: (this.sorrowEngine.sprite.body?.bottom ?? this.sorrowEngine.sprite.y) - 2,
+              depth: this.sorrowEngine.sprite.depth,
+              size: 'large'
+            });
             this.sorrowEngine.sprite.setVisible(false);
             this.sorrowEngineDeathFinished = true;
           }

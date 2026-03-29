@@ -9,6 +9,7 @@ import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
 import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
+import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
 
 const CHAMBER03_BOSS_ARENA = {
   worldWidth: 1920,
@@ -881,6 +882,19 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
           y: '-=42',
           duration: 1180,
           ease: 'Cubic.easeOut'
+        });
+        this.time.delayedCall(1180, () => {
+          if (!this.bossSprite?.active) {
+            return;
+          }
+          spawnEnemyCorpseRemains(this, {
+            x: this.bossSprite.x,
+            y: WORLD.floorY - 2,
+            depth: this.bossSprite.depth,
+            size: 'large'
+          });
+          this.bossSprite.setVisible(false).setAlpha(0);
+          this.bossFallbackLabel?.setVisible(false).setAlpha(0);
         });
         this.tweens.add({
           targets: this.bossArrivalAura,
