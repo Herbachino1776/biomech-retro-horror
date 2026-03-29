@@ -3,6 +3,7 @@ import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { triggerEnemyDeathRuptureBurst } from '../systems/EnemyDeathRuptureBurst.js';
 import { triggerEnemyHitSplatterBurst } from '../systems/EnemyHitSplatterBurst.js';
+import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
 
 export class SkitterServitor {
   constructor(scene, x, y, config) {
@@ -352,8 +353,17 @@ export class SkitterServitor {
       });
       this.scene.tweens.add({
         targets: this.sprite,
-        alpha: this.getStateAlpha('dead', 0.4),
-        duration: 380
+        alpha: 0,
+        duration: 380,
+        onComplete: () => {
+          this.sprite.setVisible(false);
+          spawnEnemyCorpseRemains(this.scene, {
+            x: this.sprite.x,
+            y: (this.body?.bottom ?? this.sprite.y) - 2,
+            depth: this.sprite.depth,
+            size: this.isElite || this.isTollKeeper || this.config.isElite ? 'medium' : 'small'
+          });
+        }
       });
       this.scene.tweens.add({
         targets: [this.eyeGlow],

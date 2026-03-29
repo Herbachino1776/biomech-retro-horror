@@ -13,6 +13,7 @@ import { restartRunFromDeath } from '../systems/RunReset.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
 import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
+import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
 
 const BLACK_AQUEDUCT_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber01Scene',
@@ -937,6 +938,15 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
         onStart: () => {
           grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber01-archon-miniboss');
           this.triggerSector02BlackOilPayoff(this.archon, { scale: 1.12, burstCount: 12, puddleWidth: 204, puddleHeight: 48 });
+          spawnEnemyCorpseRemains(this, {
+            x: this.archon.sprite.x,
+            y: (this.archon.sprite.body?.bottom ?? this.archon.sprite.y) - 2,
+            depth: this.archon.sprite.depth,
+            size: 'large'
+          });
+          this.archon.sprite.setVisible(false).setAlpha(0);
+          this.archon.body?.setEnable(false);
+          this.archon.setActive(false);
           this.cameras.main.shake(620, 0.008, true);
           this.audioDirector?.playBanishmentSting();
         },

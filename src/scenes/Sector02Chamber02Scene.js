@@ -14,6 +14,7 @@ import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayof
 import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 import { bossPitRunState } from '../systems/BossPitRunState.js';
 import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
+import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
 
 const COMPRESSION_VAULTS_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber02Scene',
@@ -1298,6 +1299,15 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       onStart: () => {
         grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber02-pressure-deacon-miniboss');
         this.triggerSector02BlackOilPayoff(target, COMPRESSION_VAULTS_PRESSURE_DEACON.blowout);
+        spawnEnemyCorpseRemains(this, {
+          x: target.sprite.x,
+          y: (target.sprite.body?.bottom ?? target.sprite.y) - 2,
+          depth: target.sprite.depth,
+          size: 'large'
+        });
+        target.sprite.setVisible(false).setAlpha(0);
+        target.body?.setEnable(false);
+        target.setActive(false);
         this.cameras.main.shake(560, 0.0078, true);
       },
       stages: [{ atMs: 420, run: () => this.unlockForwardPath() }]

@@ -100,6 +100,7 @@ import bossPit02AltarTrapUrl from '../../art/raw/bosspit/boss_pit_02_altar_bossp
 import bossPit02AltarSuperUrl from '../../art/raw/bosspit/boss_pit_02_altar_super.png';
 import bossPit03BackgroundHollowSkyTheatreUrl from '../../art/raw/bosspit/boss_pit_03_bg_hollow_sky_theatre.png';
 import bossPit03RedMaskHollowSkyUrl from '../../art/raw/bosspit/boss_pit_03_red_mask_hollow_sky_alpha.png';
+import enemyGoreClusterMeatBone01Url from '../../art/raw/shared/fx/enemy_gore_cluster_meat_bone_01.png';
 import playerConceptUrl from '../../assets/concepts/player-concept-03-right-alpha.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
@@ -235,6 +236,7 @@ export const ASSET_URLS = {
   [ASSET_KEYS.bossPit02AltarSuper]: bossPit02AltarSuperUrl,
   [ASSET_KEYS.bossPit03BackgroundHollowSkyTheatre]: bossPit03BackgroundHollowSkyTheatreUrl,
   [ASSET_KEYS.bossPit03RedMaskHollowSky]: bossPit03RedMaskHollowSkyUrl,
+  [ASSET_KEYS.enemyGoreClusterMeatBone01]: enemyGoreClusterMeatBone01Url,
   [ASSET_KEYS.player]: playerConceptUrl,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,
