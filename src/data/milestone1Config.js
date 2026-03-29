@@ -64,7 +64,7 @@ export const CONCEPT_PRESENTATION = {
   // Conservative grounding tuning: presentation-only origins; collision bodies remain authoritative.
   // `normalization` provides reusable target-height grounding rules for future sprite swaps.
   player: {
-    crop: { x: 60, y: 14, width: 888, height: 1460 },
+    crop: { x: 0, y: 0, width: 658, height: 1300 },
     display: { width: 196, height: 322 },
     origin: { x: 0.5, y: 0.985 },
     normalization: {
