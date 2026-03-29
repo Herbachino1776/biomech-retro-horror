@@ -124,6 +124,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
       }
       this.hasCompletedLoreBeat = true;
       this.updatePitAltarState();
+      this.restoreEncounterStateFromRunCache();
     }
 
     this.cameras.main.fadeIn(600, 0, 0, 0);
@@ -197,6 +198,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
         const baseConfig = ENEMIES[enemyConfig.type];
         const enemy = new SkitterServitor(this, enemyConfig.x, PLAYER.startY, baseConfig);
         enemy.encounterPocketId = pocketConfig.id;
+        enemy.encounterEnemyStateKey = `${pocketConfig.id}::${enemyConfig.type}::${enemyConfig.x}`;
         enemy.awakened = false;
         enemy.pocketWakeAtTime = null;
 
@@ -288,6 +290,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
       this.audioDirector?.shutdown();
       this.hud?.setBossBarState({ visible: false });
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+      this.saveEncounterStateToRunCache();
     });
     this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
   }
@@ -499,6 +502,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     }
 
     this.audioDirector?.stopAmbientLoop();
+    this.saveEncounterStateToRunCache();
     this.hud?.setVisible(false);
     this.mobileControls.setMode('init');
     this.uiCamera?.setVisible(false);
@@ -515,6 +519,60 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     });
     this.cameras.main.shake(260, 0.004, true);
     this.cameras.main.fadeOut(420, 0, 0, 0);
+  }
+
+  restoreEncounterStateFromRunCache() {
+    const snapshot = bossPitRunState.getSector03Chamber02EncounterState();
+    if (!snapshot) {
+      return;
+    }
+
+    const deadEnemyKeys = new Set(snapshot.deadEnemyKeys ?? []);
+    this.encounterPockets.forEach((pocket) => {
+      if (snapshot.resolvedPocketIds?.includes(pocket.id)) {
+        pocket.activated = true;
+        pocket.resolved = true;
+        pocket.promptText?.setText(`${pocket.label}\nDOMAIN SILENCED`).setVisible(false);
+        pocket.markerShadow?.setAlpha(0.03);
+      }
+
+      pocket.enemies.forEach((enemy) => {
+        if (!deadEnemyKeys.has(enemy.encounterEnemyStateKey)) {
+          return;
+        }
+        enemy.dead = true;
+        enemy.awakened = false;
+        enemy.pocketWakeAtTime = null;
+        enemy.body?.stop?.();
+        if (enemy.body) {
+          enemy.body.enable = false;
+          enemy.body.setAllowGravity?.(false);
+        }
+        enemy.sprite?.setVisible(false).setAlpha(0);
+        enemy.eyeGlow?.setVisible(false).setAlpha(0);
+      });
+    });
+  }
+
+  saveEncounterStateToRunCache() {
+    if (!this.encounterPockets?.length) {
+      return;
+    }
+
+    const resolvedPocketIds = [];
+    const deadEnemyKeys = [];
+    this.encounterPockets.forEach((pocket) => {
+      if (pocket.resolved || pocket.enemies.every((enemy) => enemy.dead)) {
+        resolvedPocketIds.push(pocket.id);
+      }
+      pocket.enemies.forEach((enemy) => {
+        if (enemy.dead) {
+          deadEnemyKeys.push(enemy.encounterEnemyStateKey);
+        }
+      });
+    });
+
+    bossPitRunState.setSector03Chamber02EncounterState({ resolvedPocketIds, deadEnemyKeys });
   }
 
   updatePitAltarState() {
