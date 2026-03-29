@@ -403,28 +403,12 @@ export class Chamber01Scene extends Phaser.Scene {
       .setShadow(0, isPortrait ? 4 : 6, '#090404', isPortrait ? 8 : 10, true, true);
   }
 
-  applyGameplayReadabilitySupport(target, { fill = 0xd2c2ac, alpha = 0.16, scale = 1.08 } = {}) {
+  applyGameplayReadabilitySupport(target) {
     if (!target) {
       return null;
     }
 
-    const halo = this.add
-      .ellipse(target.x, target.y - 6, 86 * scale, 120 * scale, fill, alpha)
-      .setDepth(target.depth - 0.4);
-
-    target.__gameplayHalo = halo;
-
-    return this.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      if (!target.active) {
-        halo.setVisible(false);
-        return;
-      }
-
-      halo
-        .setVisible(target.visible)
-        .setPosition(target.x, target.y - 8)
-        .setAlpha(target.visible ? alpha : 0);
-    });
+    return null;
   }
 
   handleDevWarp() {
