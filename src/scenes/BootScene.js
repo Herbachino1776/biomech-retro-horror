@@ -132,7 +132,11 @@ export class BootScene extends Phaser.Scene {
     this.load.image(ASSET_KEYS.bossPit03BackgroundHollowSkyTheatre, ASSET_URLS[ASSET_KEYS.bossPit03BackgroundHollowSkyTheatre]);
     this.load.image(ASSET_KEYS.bossPit03RedMaskHollowSky, ASSET_URLS[ASSET_KEYS.bossPit03RedMaskHollowSky]);
     this.load.image(ASSET_KEYS.enemyGoreClusterMeatBone01, ASSET_URLS[ASSET_KEYS.enemyGoreClusterMeatBone01]);
-    this.load.image(ASSET_KEYS.player, ASSET_URLS[ASSET_KEYS.player]);
+    this.load.spritesheet(ASSET_KEYS.player, ASSET_URLS[ASSET_KEYS.player], {
+      frameWidth: 658,
+      frameHeight: 1300,
+      endFrame: 5
+    });
     this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
     this.load.image(ASSET_KEYS.laughingEngine, ASSET_URLS[ASSET_KEYS.laughingEngine]);
