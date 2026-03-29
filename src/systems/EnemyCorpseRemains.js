@@ -3,28 +3,31 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 
 const REMAINS_PROFILES = {
   small: {
-    pieces: 3,
-    scaleRange: [0.2, 0.3],
-    spawnRadiusX: 14,
-    settleRadiusX: 18,
-    settleDropY: [10, 16],
-    settleDurationMs: [170, 250]
+    pieces: 4,
+    scaleRange: [0.11, 0.17],
+    spawnRadiusX: 6,
+    settleRadiusX: 8,
+    spawnDropY: [7, 12],
+    settleDropY: [4, 8],
+    settleDurationMs: [130, 190]
   },
   medium: {
     pieces: 5,
-    scaleRange: [0.28, 0.42],
-    spawnRadiusX: 20,
-    settleRadiusX: 24,
-    settleDropY: [14, 22],
-    settleDurationMs: [220, 320]
+    scaleRange: [0.16, 0.24],
+    spawnRadiusX: 10,
+    settleRadiusX: 12,
+    spawnDropY: [8, 14],
+    settleDropY: [6, 11],
+    settleDurationMs: [160, 240]
   },
   large: {
-    pieces: 8,
-    scaleRange: [0.42, 0.62],
-    spawnRadiusX: 30,
-    settleRadiusX: 36,
-    settleDropY: [18, 30],
-    settleDurationMs: [280, 420]
+    pieces: 7,
+    scaleRange: [0.22, 0.34],
+    spawnRadiusX: 16,
+    settleRadiusX: 20,
+    spawnDropY: [10, 18],
+    settleDropY: [8, 14],
+    settleDurationMs: [190, 300]
   }
 };
 
@@ -63,7 +66,7 @@ export function spawnEnemyCorpseRemains(scene, {
   for (let index = 0; index < profile.pieces; index += 1) {
     const spawnOffsetX = Phaser.Math.Between(-profile.spawnRadiusX, profile.spawnRadiusX);
     const settleOffsetX = Phaser.Math.Between(-profile.settleRadiusX, profile.settleRadiusX);
-    const spawnDrop = Phaser.Math.Between(12, 24);
+    const spawnDrop = Phaser.Math.Between(profile.spawnDropY[0], profile.spawnDropY[1]);
     const settleDrop = Phaser.Math.Between(profile.settleDropY[0], profile.settleDropY[1]);
     const settleDuration = Phaser.Math.Between(profile.settleDurationMs[0], profile.settleDurationMs[1]);
     const scale = Phaser.Math.FloatBetween(profile.scaleRange[0], profile.scaleRange[1]);
