@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
+import { CONCEPT_PRESENTATION, WORLD } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { triggerEnemyDeathRuptureBurst } from '../systems/EnemyDeathRuptureBurst.js';
 import { triggerEnemyHitSplatterBurst } from '../systems/EnemyHitSplatterBurst.js';
@@ -357,10 +357,10 @@ export class SkitterServitor {
         duration: 380,
         onComplete: () => {
           this.sprite.setVisible(false);
-          const spriteBottomY = this.sprite.y + this.sprite.displayHeight * (1 - this.sprite.originY);
+          const floorPlaneY = this.scene?.player?.sprite?.body?.bottom ?? WORLD.floorY + 2;
           spawnEnemyCorpseRemains(this.scene, {
             x: this.sprite.x,
-            y: spriteBottomY - 2,
+            groundY: floorPlaneY,
             depth: this.sprite.depth,
             size: this.isElite || this.isTollKeeper || this.config.isElite ? 'medium' : 'small'
           });

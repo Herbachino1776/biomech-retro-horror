@@ -511,7 +511,7 @@ export class Sector03Chamber02BossPitScene extends Phaser.Scene {
     this.stopVictoryGoreFountain();
     spawnEnemyCorpseRemains(this, {
       x: this.boss.sprite.x,
-      y: WORLD.floorY - 2,
+      groundY: WORLD.floorY + 2,
       depth: this.boss.sprite.depth,
       size: 'large'
     });
