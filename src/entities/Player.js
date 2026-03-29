@@ -5,8 +5,11 @@ import { getNormalizedDisplaySize, getNormalizedOrigin, getNormalizedYOffset } f
 import { vesselIntegrityState } from '../systems/VesselIntegrityState.js';
 
 const PLAYER_WALK_ANIMATION_KEY = 'player-walk';
+const PLAYER_IDLE_ANIMATION_KEY = 'player-idle';
 const PLAYER_WALK_FPS = 8;
 const PLAYER_WALK_MIN_SPEED = 36;
+const PLAYER_IDLE_FPS = 5;
+const PLAYER_IDLE_MAX_SPEED = 20;
 
 export class Player {
   constructor(scene, x, y, config) {
@@ -40,6 +43,7 @@ export class Player {
       : scene.add.rectangle(x, y, 48, 60, 0xb8aa92).setOrigin(0.5).setDepth(6);
     if (this.usingConceptSprite) {
       this.registerWalkAnimation();
+      this.registerIdleAnimation();
     }
     scene.physics.add.existing(this.sprite);
 
@@ -238,13 +242,24 @@ export class Player {
 
   updateSpriteAnimationState() {
     const isGrounded = this.body.blocked.down;
-    const isMovingHorizontally = Math.abs(this.body.velocity.x) >= PLAYER_WALK_MIN_SPEED;
+    const horizontalSpeed = Math.abs(this.body.velocity.x);
+    const isMovingHorizontally = horizontalSpeed >= PLAYER_WALK_MIN_SPEED;
+    const isNearlyStationary = horizontalSpeed <= PLAYER_IDLE_MAX_SPEED;
     const inAttackCommit = this.attackPhase === 'startup' || this.attackPhase === 'active' || this.attackPhase === 'recovery';
-    const canPlayWalk = !this.isDead && !inAttackCommit && isGrounded && isMovingHorizontally;
+    const canAnimate = !this.isDead && !inAttackCommit && isGrounded;
+    const canPlayWalk = canAnimate && isMovingHorizontally;
+    const canPlayIdle = canAnimate && isNearlyStationary;
 
     if (canPlayWalk) {
       if (this.sprite.anims.currentAnim?.key !== PLAYER_WALK_ANIMATION_KEY || !this.sprite.anims.isPlaying) {
         this.sprite.play(PLAYER_WALK_ANIMATION_KEY, true);
+      }
+      return;
+    }
+
+    if (canPlayIdle) {
+      if (this.sprite.anims.currentAnim?.key !== PLAYER_IDLE_ANIMATION_KEY || !this.sprite.anims.isPlaying) {
+        this.sprite.play(PLAYER_IDLE_ANIMATION_KEY, true);
       }
       return;
     }
@@ -261,6 +276,19 @@ export class Player {
       key: PLAYER_WALK_ANIMATION_KEY,
       frames: this.scene.anims.generateFrameNumbers(ASSET_KEYS.player, { start: 0, end: 5 }),
       frameRate: PLAYER_WALK_FPS,
+      repeat: -1
+    });
+  }
+
+  registerIdleAnimation() {
+    if (this.scene.anims.exists(PLAYER_IDLE_ANIMATION_KEY)) {
+      return;
+    }
+
+    this.scene.anims.create({
+      key: PLAYER_IDLE_ANIMATION_KEY,
+      frames: this.scene.anims.generateFrameNumbers(ASSET_KEYS.playerIdle, { start: 0, end: 4 }),
+      frameRate: PLAYER_IDLE_FPS,
       repeat: -1
     });
   }
