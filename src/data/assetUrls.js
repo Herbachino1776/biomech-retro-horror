@@ -103,6 +103,7 @@ import bossPit03RedMaskHollowSkyUrl from '../../art/raw/bosspit/boss_pit_03_red_
 import enemyGoreClusterMeatBone01Url from '../../art/raw/shared/fx/enemy_gore_cluster_meat_bone_01.png';
 import playerWalkPuppetStrip06Url from '../../art/raw/player/player_walk_puppet_strip_06.png';
 import playerIdleBreatheStrip05Url from '../../art/raw/player/player_idle_breathe_strip_05.png';
+import playerAttackDownwardForwardStripAligned01Url from '../../art/raw/player/player_attack_downward_forward_strip_aligned_01.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
 import laughingEngineConceptUrl from '../../assets/concepts/laughing-engine-concept-01.png';
@@ -240,6 +241,7 @@ export const ASSET_URLS = {
   [ASSET_KEYS.enemyGoreClusterMeatBone01]: enemyGoreClusterMeatBone01Url,
   [ASSET_KEYS.player]: playerWalkPuppetStrip06Url,
   [ASSET_KEYS.playerIdle]: playerIdleBreatheStrip05Url,
+  [ASSET_KEYS.playerAttackBodySource]: playerAttackDownwardForwardStripAligned01Url,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,
   [ASSET_KEYS.laughingEngine]: laughingEngineConceptUrl,

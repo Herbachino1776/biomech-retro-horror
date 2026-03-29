@@ -142,6 +142,7 @@ export class BootScene extends Phaser.Scene {
       frameHeight: 1335,
       endFrame: 4
     });
+    this.load.image(ASSET_KEYS.playerAttackBodySource, ASSET_URLS[ASSET_KEYS.playerAttackBodySource]);
     this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
     this.load.image(ASSET_KEYS.laughingEngine, ASSET_URLS[ASSET_KEYS.laughingEngine]);
@@ -191,6 +192,8 @@ export class BootScene extends Phaser.Scene {
   }
 
   create() {
+    this.registerPlayerAttackBodySpritesheet();
+
     const skipPreTitle = Boolean(this.scene.settings.data?.skipPreTitle);
     this.hasStarted = false;
     this.isStarting = false;
@@ -225,6 +228,28 @@ export class BootScene extends Phaser.Scene {
       this.keySpace?.off('down');
       this.audioDirector?.shutdown();
       this.audioDirector = null;
+    });
+  }
+
+  registerPlayerAttackBodySpritesheet() {
+    if (!this.textures.exists(ASSET_KEYS.playerAttackBodySource) || this.textures.exists(ASSET_KEYS.playerAttackBody)) {
+      return;
+    }
+
+    const attackStripTexture = this.textures.get(ASSET_KEYS.playerAttackBodySource);
+    const attackStripImage = attackStripTexture?.getSourceImage();
+    const frameCount = 5;
+    const frameWidth = Math.floor((attackStripImage?.width ?? 0) / frameCount);
+    const frameHeight = attackStripImage?.height ?? 0;
+
+    if (!frameWidth || !frameHeight) {
+      return;
+    }
+
+    this.textures.addSpriteSheet(ASSET_KEYS.playerAttackBody, attackStripImage, {
+      frameWidth,
+      frameHeight,
+      endFrame: frameCount - 1
     });
   }
 
