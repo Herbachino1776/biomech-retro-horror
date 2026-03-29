@@ -1085,24 +1085,11 @@ export class Chamber03Scene extends Phaser.Scene {
     this.restartText.setPosition(width / 2, 90);
   }
 
-  applyGameplayReadabilitySupport(target, { fill = 0xd2c2ac, alpha = 0.16, scale = 1.08 } = {}) {
+  applyGameplayReadabilitySupport(target) {
     if (!target) {
       return null;
     }
 
-    const halo = this.add
-      .ellipse(target.x, target.y - 6, 84 * scale, 118 * scale, fill, alpha)
-      .setDepth(target.depth - 0.4);
-
-    this.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      if (!target.active) {
-        halo.setVisible(false);
-        return;
-      }
-
-      halo.setVisible(target.visible).setPosition(target.x, target.y - 8).setAlpha(target.visible ? alpha : 0);
-    });
-
-    return { halo };
+    return null;
   }
 }

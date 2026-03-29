@@ -1553,23 +1553,11 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.hud?.layout();
   }
 
-  applyGameplayReadabilitySupport(target, { fill = 0xd2c2ac, alpha = 0.12, scale = 1.04 } = {}) {
+  applyGameplayReadabilitySupport(target) {
     if (!target) {
-      return;
+      return null;
     }
 
-    const halo = this.add.ellipse(target.x, target.y + 6, target.displayWidth * scale, target.displayHeight * scale, fill, alpha).setDepth(target.depth - 0.1);
-    halo.setBlendMode(Phaser.BlendModes.SCREEN);
-
-    this.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      if (!halo.active || !target.active) {
-        return;
-      }
-      halo.setPosition(target.x, target.y + 6);
-      halo.setScale(target.scaleX, target.scaleY);
-      halo.setVisible(target.visible);
-    });
-
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => halo.destroy());
+    return null;
   }
 }
