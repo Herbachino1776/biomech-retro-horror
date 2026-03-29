@@ -485,8 +485,8 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    if (this.textures.exists(ASSET_KEYS.chamber01Shrine)) {
-      this.add.image(entry.x, baseY - 20, ASSET_KEYS.chamber01Shrine).setDisplaySize(140, 116).setCrop(420, 90, 700, 620).setTint(0xcabb9e).setAlpha(hasBackdropConcept ? 0.6 : 0.88).setDepth(0);
+    if (this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)) {
+      this.add.image(entry.x, baseY - 20, ASSET_KEYS.sector03Chamber02LoreAltar).setDisplaySize(140, 116).setCrop(420, 90, 700, 620).setTint(0xcabb9e).setAlpha(hasBackdropConcept ? 0.6 : 0.88).setDepth(0);
     }
   }
 

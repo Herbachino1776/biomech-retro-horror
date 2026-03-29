@@ -780,19 +780,12 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.add.ellipse(anchorConfig.altarX, WORLD.floorY - 18, anchorConfig.shadowWidth, 28, 0x263130, 0.18).setDepth(-6.12);
     this.add.ellipse(anchorConfig.altarX, WORLD.floorY + 10, anchorConfig.shadowWidth + 176, 38, 0x020404, 0.34).setDepth(-6.04);
 
-    if (this.textures.exists(ASSET_KEYS.sector02Chamber02LoreAltar)) {
-      this.add.image(anchorConfig.altarX, anchorConfig.altarY, ASSET_KEYS.sector02Chamber02LoreAltar)
+    if (this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)) {
+      this.add.image(anchorConfig.altarX, anchorConfig.altarY, ASSET_KEYS.sector03Chamber02LoreAltar)
         .setDisplaySize(anchorConfig.altarDisplayWidth, anchorConfig.altarDisplayHeight)
         .setTint(0xc5d0c1)
         .setAlpha(0.88)
         .setDepth(-6.08);
-      if (this.textures.exists(ASSET_KEYS.bossPit01AltarTrap)) {
-        this.add.image(anchorConfig.altarX, anchorConfig.altarY + 2, ASSET_KEYS.bossPit01AltarTrap)
-          .setDisplaySize(anchorConfig.altarDisplayWidth, anchorConfig.altarDisplayHeight)
-          .setTint(0xb7c0b4)
-          .setAlpha(0.16)
-          .setDepth(-6.06);
-      }
     } else {
       this.add.ellipse(anchorConfig.altarX, anchorConfig.altarY + 6, 128, 132, 0x66706b, 0.76).setDepth(-6.08);
     }
