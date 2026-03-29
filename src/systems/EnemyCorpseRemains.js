@@ -3,31 +3,31 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 
 const REMAINS_PROFILES = {
   small: {
-    pieceCountRange: [2, 4],
-    maxDisplaySidePx: [8, 13],
-    spawnRadiusX: 10,
-    settleRadiusX: 16,
-    spawnDropY: [6, 11],
-    settleDropY: [5, 12],
-    settleDurationMs: [120, 180]
+    pieceCountRange: [6, 12],
+    maxDisplaySidePx: [14, 24],
+    spawnRadiusX: 14,
+    settleRadiusX: 24,
+    spawnDropY: [7, 13],
+    settleDropY: [7, 14],
+    settleDurationMs: [130, 210]
   },
   medium: {
-    pieceCountRange: [3, 5],
-    maxDisplaySidePx: [11, 18],
-    spawnRadiusX: 16,
-    settleRadiusX: 28,
-    spawnDropY: [7, 13],
-    settleDropY: [8, 16],
-    settleDurationMs: [140, 220]
+    pieceCountRange: [11, 18],
+    maxDisplaySidePx: [20, 34],
+    spawnRadiusX: 20,
+    settleRadiusX: 34,
+    spawnDropY: [8, 15],
+    settleDropY: [9, 18],
+    settleDurationMs: [150, 230]
   },
   large: {
-    pieceCountRange: [5, 7],
-    maxDisplaySidePx: [15, 26],
-    spawnRadiusX: 26,
-    settleRadiusX: 50,
-    spawnDropY: [9, 17],
-    settleDropY: [11, 24],
-    settleDurationMs: [170, 280]
+    pieceCountRange: [18, 28],
+    maxDisplaySidePx: [26, 46],
+    spawnRadiusX: 28,
+    settleRadiusX: 56,
+    spawnDropY: [10, 18],
+    settleDropY: [12, 26],
+    settleDurationMs: [170, 290]
   }
 };
 

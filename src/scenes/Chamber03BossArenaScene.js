@@ -868,6 +868,10 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         this.bossBody.setVelocity(0, 0);
         this.bossDefeatCeremonyBossBarActive = true;
         this.audioDirector?.playEnemyDeath('miniboss');
+        const bossRemainsX = this.bossSprite.x;
+        const bossGroundedY = WORLD.floorY + 2 - this.bossSprite.displayHeight * (1 - this.bossSprite.originY);
+        this.bossSprite.setY(bossGroundedY);
+        this.bossBody?.setVelocity?.(0, 0);
         this.bossStatusPrompt
           ?.setText(CHAMBER03_FINALE.payoffTitle)
           .setPosition(this.scale.width / 2, this.getBossPromptY())
@@ -884,11 +888,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
           ease: 'Cubic.easeOut'
         });
         this.time.delayedCall(1180, () => {
-          if (!this.bossSprite?.active) {
-            return;
-          }
           spawnEnemyCorpseRemains(this, {
-            x: this.bossSprite.x,
+            x: bossRemainsX,
             y: WORLD.floorY - 2,
             depth: this.bossSprite.depth,
             size: 'large'

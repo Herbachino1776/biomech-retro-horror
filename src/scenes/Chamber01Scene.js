@@ -783,6 +783,8 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
+    const floorBottomY = WORLD.floorY + 2;
+    const groundedY = floorBottomY - this.miniboss.sprite.displayHeight * (1 - this.miniboss.sprite.originY);
     this.tweens.killTweensOf(this.miniboss.sprite);
     this.miniboss.sprite
       .setAlpha(1)
@@ -791,7 +793,8 @@ export class Chamber01Scene extends Phaser.Scene {
         this.miniboss.baseScaleX * this.miniboss.config.presentation.scaleX,
         this.miniboss.baseScaleY * this.miniboss.config.presentation.scaleY
       )
-      .setAngle(0);
+      .setAngle(0)
+      .setY(groundedY);
   }
 
   startMinibossExplosionFade() {
@@ -816,7 +819,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.stopMinibossVictoryGoreFountain();
     spawnEnemyCorpseRemains(this, {
       x: this.miniboss.sprite.x,
-      y: (this.miniboss.sprite.body?.bottom ?? this.miniboss.sprite.y) - 2,
+      y: WORLD.floorY - 2,
       depth: this.miniboss.sprite.depth,
       size: 'large'
     });
