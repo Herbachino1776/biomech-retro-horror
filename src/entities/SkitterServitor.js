@@ -358,11 +358,13 @@ export class SkitterServitor {
         onComplete: () => {
           this.sprite.setVisible(false);
           const floorPlaneY = this.scene?.player?.sprite?.body?.bottom ?? WORLD.floorY + 2;
+          const remainsSize = this.config.corpseRemainsProfile
+            ?? (this.isElite || this.isTollKeeper || this.config.isElite ? 'elite' : 'small');
           spawnEnemyCorpseRemains(this.scene, {
             x: this.sprite.x,
             groundY: floorPlaneY,
             depth: this.sprite.depth,
-            size: this.isElite || this.isTollKeeper || this.config.isElite ? 'elite' : 'small'
+            size: remainsSize
           });
         }
       });

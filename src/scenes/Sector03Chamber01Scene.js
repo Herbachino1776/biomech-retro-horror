@@ -65,7 +65,8 @@ const FAILED_SAINT = {
   eyeGlowYOffset: 10,
   eyeGlowAlphaBase: 0.28,
   eyeGlowWindupAlphaGain: 0.24,
-  body: { width: 54, height: 30, offsetX: 10, offsetY: 18 }
+  body: { width: 54, height: 30, offsetX: 10, offsetY: 18 },
+  corpseRemainsProfile: 'sector3Basic'
 };
 
 const BIRD_JUDGE = {
@@ -77,7 +78,8 @@ const BIRD_JUDGE = {
     ...FAILED_SAINT.presentation,
     display: { width: 188, height: 154 }
   },
-  eyeGlowColor: 0xe7dfc6
+  eyeGlowColor: 0xe7dfc6,
+  corpseRemainsProfile: 'sector3Basic'
 };
 
 const WITHHELD_VESSEL = {
@@ -115,7 +117,8 @@ const WITHHELD_VESSEL = {
   eyeGlowYOffset: 18,
   eyeGlowAlphaBase: 0.4,
   eyeGlowWindupAlphaGain: 0.42,
-  audioProfile: 'tollkeeper'
+  audioProfile: 'tollkeeper',
+  corpseRemainsProfile: 'sector3Elite'
 };
 
 const CRADLE_POCKETS = [

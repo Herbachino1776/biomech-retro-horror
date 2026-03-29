@@ -41,6 +41,26 @@ const REMAINS_PROFILES = {
     settleDropY: [0, 5],
     settleSinkIntoFloorPx: [5, 9],
     settleDurationMs: [170, 290]
+  },
+  sector3Basic: {
+    pieceCountRange: [8, 13],
+    maxDisplaySidePx: [18, 28],
+    spawnRadiusX: 16,
+    settleRadiusX: 28,
+    spawnDropY: [16, 28],
+    settleDropY: [0, 3],
+    settleSinkIntoFloorPx: [4, 7],
+    settleDurationMs: [140, 220]
+  },
+  sector3Elite: {
+    pieceCountRange: [18, 28],
+    maxDisplaySidePx: [42, 64],
+    spawnRadiusX: 34,
+    settleRadiusX: 68,
+    spawnDropY: [24, 38],
+    settleDropY: [0, 6],
+    settleSinkIntoFloorPx: [5, 10],
+    settleDurationMs: [180, 310]
   }
 };
 
@@ -52,7 +72,9 @@ const BLOOD_POOL_PROFILES = {
   small: { width: 66, height: 20, growMs: 760 },
   medium: { width: 88, height: 24, growMs: 840 },
   large: { width: 116, height: 30, growMs: 920 },
-  elite: { width: 122, height: 34, growMs: 980 }
+  elite: { width: 122, height: 34, growMs: 980 },
+  sector3Basic: { width: 78, height: 24, growMs: 820 },
+  sector3Elite: { width: 152, height: 46, growMs: 1040 }
 };
 
 function ensureStore(scene) {
@@ -91,14 +113,14 @@ export function spawnEnemyCorpseRemains(scene, {
   const container = scene.add.container(x, groundedPlaneY).setDepth(depth - 0.1);
 
   const bloodShadow = scene.add
-    .ellipse(0, -2, bloodPoolProfile.width * 1.04, bloodPoolProfile.height * 1.18, 0x18080a, 0.34)
+    .ellipse(0, 0, bloodPoolProfile.width * 1.04, bloodPoolProfile.height * 1.18, 0x18080a, 0.34)
     .setScale(0.42, 0.4);
   const bloodPool = scene.add
-    .ellipse(0, -5, bloodPoolProfile.width, bloodPoolProfile.height, 0x64171d, 0.56)
+    .ellipse(0, -3, bloodPoolProfile.width, bloodPoolProfile.height, 0x64171d, 0.56)
     .setStrokeStyle(1, 0x2b0b0e, 0.4)
     .setScale(0.36, 0.34);
   const bloodCore = scene.add
-    .ellipse(-2, -6, bloodPoolProfile.width * 0.58, bloodPoolProfile.height * 0.62, 0x7e2125, 0.3)
+    .ellipse(-2, -4, bloodPoolProfile.width * 0.58, bloodPoolProfile.height * 0.62, 0x7e2125, 0.3)
     .setScale(0.32, 0.3);
   container.add([bloodShadow, bloodPool, bloodCore]);
 
