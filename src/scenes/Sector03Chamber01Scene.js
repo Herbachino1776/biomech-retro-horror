@@ -228,9 +228,9 @@ const CRADLE_FORWARD_GATE = {
   barrierY: WORLD.floorY - 70,
   barrierWidth: 98,
   barrierHeight: 238,
-  thresholdX: 5698,
+  thresholdX: 5636,
   thresholdY: WORLD.floorY - 76,
-  thresholdWidth: 212,
+  thresholdWidth: 188,
   thresholdHeight: 224,
   promptOffsetY: -166
 };
@@ -501,7 +501,7 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     ).setDepth(-4.86);
 
     this.physics.add.existing(this.forwardBarrier, true);
-    this.physics.add.collider(this.player.sprite, this.forwardBarrier);
+    this.forwardBarrierCollider = this.physics.add.collider(this.player.sprite, this.forwardBarrier);
 
     this.forwardThresholdZone = this.add.zone(
       CRADLE_FORWARD_GATE.thresholdX,
@@ -675,12 +675,13 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
 
   unlockForwardPath() {
     this.hasUnlockedForwardPath = true;
-    this.forwardBarrier?.setAlpha(0.08);
-    this.forwardBarrier?.setFillStyle(0xab9278, 0.08);
+    this.forwardBarrier?.setVisible(false);
     if (this.forwardBarrier?.body) {
       this.forwardBarrier.body.enable = false;
       this.forwardBarrier.body.updateFromGameObject?.();
     }
+    this.forwardBarrierCollider?.destroy();
+    this.forwardBarrierCollider = null;
     this.forwardPrompt?.setText('REFUSAL SEAL YIELDED\nPRESS RITE / [E] TO MARK CHAMBER II THRESHOLD');
   }
 
