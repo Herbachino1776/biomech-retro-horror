@@ -158,7 +158,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     const props = [
       { key: ASSET_KEYS.sector03Chamber02PropMaskRack, x: 1860, w: 170, h: 170 },
       { key: ASSET_KEYS.sector03Chamber02PropBlindMirror, x: 3360, w: 184, h: 194 },
-      { key: ASSET_KEYS.sector03Chamber02PropBonusAltar, x: 5250, w: 212, h: 212 }
+      { key: ASSET_KEYS.sector03Chamber02LoreAltar, x: 5250, w: 212, h: 212 }
     ];
     props.forEach((prop) => {
       if (!this.textures.exists(prop.key)) {
@@ -195,9 +195,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
       const zone = this.add.zone(pocketConfig.zoneX, pocketConfig.zoneY, pocketConfig.zoneWidth, pocketConfig.zoneHeight).setOrigin(0.5);
       this.physics.add.existing(zone, true);
       const markerShadow = this.add.ellipse(pocketConfig.zoneX, WORLD.floorY - 4, pocketConfig.zoneWidth * 0.62, 78, 0x040302, 0.09).setDepth(-5.84);
-      const promptText = this.add.text(pocketConfig.zoneX, pocketConfig.zoneY - 150, pocketConfig.label, {
-        fontFamily: 'monospace', fontSize: '13px', color: '#d8cab8', align: 'center', stroke: '#110d0b', strokeThickness: 4
-      }).setOrigin(0.5).setDepth(-4.82).setAlpha(0.84).setVisible(false);
+      const promptText = null;
 
       const enemies = pocketConfig.enemies.map((enemyConfig) => {
         const baseConfig = ENEMIES[enemyConfig.type];
@@ -260,8 +258,8 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
       { id: 'bosspit02', x: 3360, y: WORLD.floorY - 106, label: 'DESCEND TO ASH PIT\nPRESS RITE / [E]' },
       { id: 'bosspit03', x: 5380, y: WORLD.floorY - 106, label: 'DESCEND TO HOLLOW SKY PIT\nPRESS RITE / [E]' }
     ].map((pit) => {
-      const sprite = this.textures.exists(ASSET_KEYS.bossPit02AltarTrap)
-        ? this.add.image(pit.x, pit.y, ASSET_KEYS.bossPit02AltarTrap).setDisplaySize(208, 208).setTint(0xd6c4ae).setAlpha(0.86).setDepth(-6.08)
+      const sprite = this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)
+        ? this.add.image(pit.x, pit.y, ASSET_KEYS.sector03Chamber02LoreAltar).setDisplaySize(208, 208).setTint(0xd6c4ae).setAlpha(0.86).setDepth(-6.08)
         : this.add.ellipse(pit.x, pit.y + 6, 160, 160, 0x836d5f, 0.8).setDepth(-6.08);
       const aura = this.add.ellipse(pit.x, pit.y + 4, 156, 146, 0xc5ad88, 0.08).setDepth(-6.06);
       const zone = this.add.zone(pit.x, WORLD.floorY - 78, 218, 214).setOrigin(0.5);
@@ -621,8 +619,8 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     const promptVisible = Boolean(this.currentForwardThreshold) || (this.hasUnlockedForwardPath && !this.hasTriggeredForwardContract);
     const promptText = this.hasUnlockedForwardPath
       ? this.hasTriggeredForwardContract
-        ? 'THRESHOLD MARKED\nCHAMBER III HOLDING STATE'
-        : 'BORROWED THRESHOLD YIELDED\nPRESS RITE / [E] TO MARK CHAMBER III THRESHOLD'
+        ? 'THRESHOLD MARKED\nRITE SEALED'
+        : 'BORROWED THRESHOLD YIELDED\nPRESS RITE / [E] TO SEAL THE THRESHOLD'
       : this.hasCompletedPit03
         ? 'CLEAR THE HOUSE TO UNSEAL THRESHOLD'
         : 'THRESHOLD SEALED';
@@ -649,7 +647,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     }
 
     this.hasTriggeredForwardContract = true;
-    this.forwardPrompt?.setVisible(true).setText('THRESHOLD MARKED\nCHAMBER III HOLDING STATE');
+    this.forwardPrompt?.setVisible(true).setText('THRESHOLD MARKED\nRITE SEALED');
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.audioDirector?.shutdown();
       this.scene.start('SectorCompleteScene', {
@@ -657,7 +655,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
         fromGate: 'house-of-borrowed-faces-threshold',
         sectorLabel: 'SECTOR III',
         title: 'SECTOR III CHAMBER II COMPLETE',
-        body: 'The House of Borrowed Faces is complete. Chamber III remains withheld in this build.'
+        body: 'The House of Borrowed Faces stands sealed beneath the rite.'
       });
     });
     this.cameras.main.fadeOut(320, 0, 0, 0);

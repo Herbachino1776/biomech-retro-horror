@@ -491,8 +491,8 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.add.ellipse(anchor.altarX, WORLD.floorY - 18, anchor.shadowWidth, 30, 0x3a2418, 0.18).setDepth(-6.12);
     this.add.ellipse(anchor.altarX, WORLD.floorY + 10, anchor.shadowWidth + 170, 38, 0x020202, 0.36).setDepth(-6.04);
 
-    if (this.textures.exists(ASSET_KEYS.sector02Chamber03LoreAltar)) {
-      this.add.image(anchor.altarX, anchor.altarY, ASSET_KEYS.sector02Chamber03LoreAltar)
+    if (this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)) {
+      this.add.image(anchor.altarX, anchor.altarY, ASSET_KEYS.sector03Chamber02LoreAltar)
         .setDisplaySize(anchor.altarDisplayWidth, anchor.altarDisplayHeight)
         .setTint(0xd8cdb7)
         .setAlpha(0.9)
