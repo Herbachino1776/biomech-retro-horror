@@ -51,15 +51,15 @@ export class Player {
     this.hasWeaponFollowStrip = scene.textures.exists(ASSET_KEYS.playerWeaponHammerFollowStrip);
     this.weaponFollowOffsetPackage = scene.cache.json.get(ASSET_KEYS.playerWeaponHammerFollowOffsets) ?? null;
     const playerPresentation = CONCEPT_PRESENTATION.player;
-    const displaySize = getNormalizedDisplaySize(playerPresentation);
-    const origin = getNormalizedOrigin(playerPresentation);
+    this.normalizedDisplaySize = getNormalizedDisplaySize(playerPresentation);
+    this.normalizedOrigin = getNormalizedOrigin(playerPresentation);
     const visualYOffset = getNormalizedYOffset(playerPresentation);
 
     this.sprite = this.usingConceptSprite
       ? scene.add
           .sprite(x, y + visualYOffset, ASSET_KEYS.player, 0)
-          .setOrigin(origin.x, origin.y)
-          .setDisplaySize(displaySize.width, displaySize.height)
+          .setOrigin(this.normalizedOrigin.x, this.normalizedOrigin.y)
+          .setDisplaySize(this.normalizedDisplaySize.width, this.normalizedDisplaySize.height)
           .setAlpha(playerPresentation.alpha ?? 1)
           .setDepth(6)
       : scene.add.rectangle(x, y, 48, 60, 0xb8aa92).setOrigin(0.5).setDepth(6);
@@ -293,6 +293,7 @@ export class Player {
       this.updateWeaponFollowTransform();
       return;
     }
+    this.applyDefaultPresentationFootprint();
 
     const canAnimate = !this.isDead && !inAttackCommit && isGrounded;
     const canPlayWalk = canAnimate && isMovingHorizontally;
@@ -401,6 +402,7 @@ export class Player {
       return;
     }
 
+    this.applyAttackPresentationFootprint();
     if (this.sprite.anims.currentAnim?.key !== PLAYER_ATTACK_ANIMATION_KEY) {
       this.sprite.play(PLAYER_ATTACK_ANIMATION_KEY, true);
     }
@@ -419,7 +421,35 @@ export class Player {
 
     this.currentAttackFrameIndex = frameIndex;
     this.currentAttackFrameData = this.attackFrameDataByIndex.get(frameIndex) ?? null;
+    this.applyAttackPresentationFootprint();
     this.updateWeaponFollowTransform();
+  }
+
+  applyAttackPresentationFootprint() {
+    if (!this.usingConceptSprite) {
+      return;
+    }
+
+    const targetHeight = this.normalizedDisplaySize?.height;
+    const frameWidth = this.sprite.frame?.realWidth;
+    const frameHeight = this.sprite.frame?.realHeight;
+    if (!targetHeight || !frameWidth || !frameHeight) {
+      return;
+    }
+
+    this.sprite
+      .setOrigin(this.normalizedOrigin.x, this.normalizedOrigin.y)
+      .setDisplaySize(Math.round(targetHeight * (frameWidth / frameHeight)), targetHeight);
+  }
+
+  applyDefaultPresentationFootprint() {
+    if (!this.usingConceptSprite || !this.normalizedDisplaySize || !this.normalizedOrigin) {
+      return;
+    }
+
+    this.sprite
+      .setOrigin(this.normalizedOrigin.x, this.normalizedOrigin.y)
+      .setDisplaySize(this.normalizedDisplaySize.width, this.normalizedDisplaySize.height);
   }
 
   computeAttackTimingWindowMs() {
