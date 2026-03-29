@@ -219,5 +219,34 @@ export const LORE_CUTSCENES = {
         shakeDuration: 3200
       }
     }
+  },
+  'sector03-chamber02-house-of-borrowed-faces': {
+    id: 'sector03-chamber02-house-of-borrowed-faces',
+    imageKey: ASSET_KEYS.sector03Chamber02LoreImage,
+    title: 'SECTOR 03 // HOUSE OF BORROWED FACES',
+    body: [
+      'The narthex keeps a face for every vow the cradle refused to keep.',
+      'Blind mirrors carve identity from whoever kneels first, then hang the remainder in patient rows.',
+      'The sanctum waits for a final borrowing; descent begins when your own mask stops fitting.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xb7a48f,
+      titleColor: '#a9b98f',
+      bodyColor: '#d9ccb9',
+      promptColor: '#8fa778',
+      imageTint: 0xd8c9b6,
+      imageAlpha: 0.95,
+      backgroundColor: '#000000',
+      motion: {
+        panX: 12,
+        panY: -10,
+        zoom: 1.034,
+        duration: 9200,
+        shakeX: 2,
+        shakeY: 2,
+        shakeDuration: 3200
+      }
+    }
   }
 };

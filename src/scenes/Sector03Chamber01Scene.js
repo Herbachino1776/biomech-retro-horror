@@ -857,8 +857,8 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     const promptVisible = Boolean(this.currentForwardThreshold) || (this.hasUnlockedForwardPath && !this.hasTriggeredForwardContract);
     const promptText = this.hasUnlockedForwardPath
       ? this.hasTriggeredForwardContract
-        ? 'THRESHOLD MARKED\nCHAMBER II HOLDING STATE'
-        : 'REFUSAL SEAL YIELDED\nPRESS RITE / [E] TO MARK CHAMBER II THRESHOLD'
+        ? 'THRESHOLD MARKED\nENTERING HOUSE OF BORROWED FACES'
+        : 'REFUSAL SEAL YIELDED\nPRESS RITE / [E] TO ENTER CHAMBER II'
       : 'REFUSAL SEAL CLOSED';
 
     this.forwardPrompt?.setVisible(promptVisible).setText(promptText);
@@ -883,15 +883,12 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     }
 
     this.hasTriggeredForwardContract = true;
-    this.forwardPrompt?.setVisible(true).setText('THRESHOLD MARKED\nCHAMBER II HOLDING STATE');
+    this.forwardPrompt?.setVisible(true).setText('THRESHOLD MARKED\nENTERING HOUSE OF BORROWED FACES');
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.audioDirector?.shutdown();
-      this.scene.start('SectorCompleteScene', {
+      this.scene.start('Sector03Chamber02Scene', {
         fromScene: this.scene.key,
-        fromGate: 'gallery-of-failed-measures-threshold',
-        sectorLabel: 'SECTOR III',
-        title: 'SECTOR III THRESHOLD MARKED',
-        body: 'The Gallery of Failed Measures opens, but Chamber II remains withheld in this build.'
+        fromGate: 'gallery-of-failed-measures-threshold'
       });
     });
     this.cameras.main.fadeOut(320, 0, 0, 0);

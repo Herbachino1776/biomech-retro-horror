@@ -72,11 +72,34 @@ import sector03Chamber01EnemyEliteWithheldVesselUrl from '../../art/raw/sector03
 import sector03Chamber01LoreApparitionRefusedUrl from '../../art/raw/sector03/chamber01/sector03_chamber01_lore_apparition_refused_01 Background Removed.png';
 import sector03Chamber01GateRefusalSealUrl from '../../art/raw/sector03/chamber01/sector03_chamber01_prop_gate_refusal_seal_01 Background Removed.png';
 import sector03Chamber01BossRefusalMassUrl from '../../art/raw/sector03/chamber01/sector03_chamber01_boss_refusal_mass_01 Background Removed.png';
+import sector03Chamber02BackgroundEntryNarthexUrl from '../../art/raw/sector03/chamber02/chamber02_bg_entry_narthex_01.png';
+import sector03Chamber02BackgroundWallModule01Url from '../../art/raw/sector03/chamber02/chamber02_bg_wall_module_01.png';
+import sector03Chamber02BackgroundWallModule02Url from '../../art/raw/sector03/chamber02/chamber02_bg_wall_module_02.png';
+import sector03Chamber02BackgroundMaskGalleryOpeningUrl from '../../art/raw/sector03/chamber02/chamber02_bg_mask_gallery_opening_01.png';
+import sector03Chamber02BackgroundThresholdUrl from '../../art/raw/sector03/chamber02/chamber02_bg_threshold_01.png';
+import sector03Chamber02BackgroundClimaxSanctumUrl from '../../art/raw/sector03/chamber02/chamber02_bg_climax_sanctum_01.png';
+import sector03Chamber02LoreAltarUrl from '../../art/raw/sector03/chamber02/chamber02_altar_lore_shrine_01.png';
+import sector03Chamber02LoreImageUrl from '../../art/raw/sector03/chamber02/chamber02_lore_01.png';
+import sector03Chamber02EnemyBasicVeilStripperUrl from '../../art/raw/sector03/chamber02/enemy_chamber02_veil_stripper_basic_01.png';
+import sector03Chamber02EnemyBasicMaskHuskUrl from '../../art/raw/sector03/chamber02/enemy_chamber02_mask_husk_basic_01.png';
+import sector03Chamber02EnemyBasicBlindCantorUrl from '../../art/raw/sector03/chamber02/enemy_chamber02_blind_cantor_basic_01.png';
+import sector03Chamber02EnemyBasicFaceCollectorUrl from '../../art/raw/sector03/chamber02/enemy_chamber02_face_collector_basic_01.png';
+import sector03Chamber02EnemyEliteDoubleFacedNullUrl from '../../art/raw/sector03/chamber02/elite_chamber02_double_faced_null_01.png';
+import sector03Chamber02BossMisassignedSeraphUrl from '../../art/raw/sector03/chamber02/boss_chamber02_misassigned_seraph_main_01.png';
+import sector03Chamber02PropMaskRackUrl from '../../art/raw/sector03/chamber02/prop_chamber02_mask_rack_01.png';
+import sector03Chamber02PropBlindMirrorUrl from '../../art/raw/sector03/chamber02/prop_chamber02_blind_mirror_01.png';
+import sector03Chamber02PropBonusAltarUrl from '../../art/raw/sector03/chamber02/prop_chamber02_bonus_altar_01.png';
 import sector02PressureShardProjectileUrl from '../../art/raw/sector02/chamber02/projectile_sector02_pressure_shard_01_alpha.png';
 import bossPit01BackgroundHornGateUrl from '../../art/raw/bosspit/boss_pit_01_bg_horn_gate_of_witness.png';
 import bossPit01TheHornGateWitnessUrl from '../../art/raw/bosspit/boss_pit_01_the_horn_gate_witness_alpha.png';
 import bossPit01AltarTrapUrl from '../../art/raw/bosspit/boss_pit_01_altar_bosspit.png';
 import bossPit01AltarSuperUrl from '../../art/raw/bosspit/boss_pit_01_altar_super.png';
+import bossPit02BackgroundAshProphecyHallUrl from '../../art/raw/bosspit/boss_pit_02_bg_ash_prophecy_hall.png';
+import bossPit02StarvedProphetOfAshUrl from '../../art/raw/bosspit/boss_pit_02_starved_prophet_of_ash_alpha.png';
+import bossPit02AltarTrapUrl from '../../art/raw/bosspit/boss_pit_02_altar_bosspit.png';
+import bossPit02AltarSuperUrl from '../../art/raw/bosspit/boss_pit_02_altar_super.png';
+import bossPit03BackgroundHollowSkyTheatreUrl from '../../art/raw/bosspit/boss_pit_03_bg_hollow_sky_theatre.png';
+import bossPit03RedMaskHollowSkyUrl from '../../art/raw/bosspit/boss_pit_03_red_mask_hollow_sky_alpha.png';
 import playerConceptUrl from '../../assets/concepts/player-concept-03-right-alpha.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
@@ -184,11 +207,34 @@ export const ASSET_URLS = {
   [ASSET_KEYS.sector03Chamber01LoreApparitionRefused]: sector03Chamber01LoreApparitionRefusedUrl,
   [ASSET_KEYS.sector03Chamber01GateRefusalSeal]: sector03Chamber01GateRefusalSealUrl,
   [ASSET_KEYS.sector03Chamber01BossRefusalMass]: sector03Chamber01BossRefusalMassUrl,
+  [ASSET_KEYS.sector03Chamber02BackgroundEntryNarthex]: sector03Chamber02BackgroundEntryNarthexUrl,
+  [ASSET_KEYS.sector03Chamber02BackgroundWallModule01]: sector03Chamber02BackgroundWallModule01Url,
+  [ASSET_KEYS.sector03Chamber02BackgroundWallModule02]: sector03Chamber02BackgroundWallModule02Url,
+  [ASSET_KEYS.sector03Chamber02BackgroundMaskGalleryOpening]: sector03Chamber02BackgroundMaskGalleryOpeningUrl,
+  [ASSET_KEYS.sector03Chamber02BackgroundThreshold]: sector03Chamber02BackgroundThresholdUrl,
+  [ASSET_KEYS.sector03Chamber02BackgroundClimaxSanctum]: sector03Chamber02BackgroundClimaxSanctumUrl,
+  [ASSET_KEYS.sector03Chamber02LoreAltar]: sector03Chamber02LoreAltarUrl,
+  [ASSET_KEYS.sector03Chamber02LoreImage]: sector03Chamber02LoreImageUrl,
+  [ASSET_KEYS.sector03Chamber02EnemyBasicVeilStripper]: sector03Chamber02EnemyBasicVeilStripperUrl,
+  [ASSET_KEYS.sector03Chamber02EnemyBasicMaskHusk]: sector03Chamber02EnemyBasicMaskHuskUrl,
+  [ASSET_KEYS.sector03Chamber02EnemyBasicBlindCantor]: sector03Chamber02EnemyBasicBlindCantorUrl,
+  [ASSET_KEYS.sector03Chamber02EnemyBasicFaceCollector]: sector03Chamber02EnemyBasicFaceCollectorUrl,
+  [ASSET_KEYS.sector03Chamber02EnemyEliteDoubleFacedNull]: sector03Chamber02EnemyEliteDoubleFacedNullUrl,
+  [ASSET_KEYS.sector03Chamber02BossMisassignedSeraph]: sector03Chamber02BossMisassignedSeraphUrl,
+  [ASSET_KEYS.sector03Chamber02PropMaskRack]: sector03Chamber02PropMaskRackUrl,
+  [ASSET_KEYS.sector03Chamber02PropBlindMirror]: sector03Chamber02PropBlindMirrorUrl,
+  [ASSET_KEYS.sector03Chamber02PropBonusAltar]: sector03Chamber02PropBonusAltarUrl,
   [ASSET_KEYS.sector02PressureShardProjectile]: sector02PressureShardProjectileUrl,
   [ASSET_KEYS.bossPit01BackgroundHornGate]: bossPit01BackgroundHornGateUrl,
   [ASSET_KEYS.bossPit01TheHornGateWitness]: bossPit01TheHornGateWitnessUrl,
   [ASSET_KEYS.bossPit01AltarTrap]: bossPit01AltarTrapUrl,
   [ASSET_KEYS.bossPit01AltarSuper]: bossPit01AltarSuperUrl,
+  [ASSET_KEYS.bossPit02BackgroundAshProphecyHall]: bossPit02BackgroundAshProphecyHallUrl,
+  [ASSET_KEYS.bossPit02StarvedProphetOfAsh]: bossPit02StarvedProphetOfAshUrl,
+  [ASSET_KEYS.bossPit02AltarTrap]: bossPit02AltarTrapUrl,
+  [ASSET_KEYS.bossPit02AltarSuper]: bossPit02AltarSuperUrl,
+  [ASSET_KEYS.bossPit03BackgroundHollowSkyTheatre]: bossPit03BackgroundHollowSkyTheatreUrl,
+  [ASSET_KEYS.bossPit03RedMaskHollowSky]: bossPit03RedMaskHollowSkyUrl,
   [ASSET_KEYS.player]: playerConceptUrl,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,

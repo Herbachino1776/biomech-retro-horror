@@ -6,11 +6,15 @@ class BossPitRunState {
   resetForFreshRun() {
     this.completed = {
       sector02Chamber02: false,
-      sector03Chamber01: false
+      sector03Chamber01: false,
+      sector03Chamber02Pit02: false,
+      sector03Chamber02Pit03: false
     };
     this.rewardGranted = {
       sector02Chamber02: false,
-      sector03Chamber01: false
+      sector03Chamber01: false,
+      sector03Chamber02Pit02: false,
+      sector03Chamber02Pit03: false
     };
   }
 
@@ -45,6 +49,39 @@ class BossPitRunState {
   markSector03Chamber01BossPitRewardGranted() {
     this.rewardGranted.sector03Chamber01 = true;
   }
+
+  hasSector03Chamber02Pit02BossPitCompleted() {
+    return this.completed.sector03Chamber02Pit02;
+  }
+
+  hasSector03Chamber02Pit02BossPitRewardGranted() {
+    return this.rewardGranted.sector03Chamber02Pit02;
+  }
+
+  markSector03Chamber02Pit02BossPitCompleted() {
+    this.completed.sector03Chamber02Pit02 = true;
+  }
+
+  markSector03Chamber02Pit02BossPitRewardGranted() {
+    this.rewardGranted.sector03Chamber02Pit02 = true;
+  }
+
+  hasSector03Chamber02Pit03BossPitCompleted() {
+    return this.completed.sector03Chamber02Pit03;
+  }
+
+  hasSector03Chamber02Pit03BossPitRewardGranted() {
+    return this.rewardGranted.sector03Chamber02Pit03;
+  }
+
+  markSector03Chamber02Pit03BossPitCompleted() {
+    this.completed.sector03Chamber02Pit03 = true;
+  }
+
+  markSector03Chamber02Pit03BossPitRewardGranted() {
+    this.rewardGranted.sector03Chamber02Pit03 = true;
+  }
+
 }
 
 export const bossPitRunState = new BossPitRunState();
