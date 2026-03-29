@@ -432,10 +432,10 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    // Keep the Chamber 01 mobile DEV button aligned with the newest authored chamber.
+    // Keep the Chamber 01 mobile DEV button aligned with the latest Sector 3 chamber pass.
     this.cleanupSceneUi?.();
     this.audioDirector?.shutdown();
-    this.scene.start('Sector03Chamber01Scene', {
+    this.scene.start('Sector03Chamber02Scene', {
       devWarp: true,
       source: this.scene.key
     });

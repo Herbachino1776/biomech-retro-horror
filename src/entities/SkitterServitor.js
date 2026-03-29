@@ -362,7 +362,7 @@ export class SkitterServitor {
             x: this.sprite.x,
             groundY: floorPlaneY,
             depth: this.sprite.depth,
-            size: this.isElite || this.isTollKeeper || this.config.isElite ? 'medium' : 'small'
+            size: this.isElite || this.isTollKeeper || this.config.isElite ? 'elite' : 'small'
           });
         }
       });
