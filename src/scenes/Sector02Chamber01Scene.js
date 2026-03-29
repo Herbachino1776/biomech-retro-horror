@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Player } from '../entities/Player.js';
 import { SkitterServitor } from '../entities/SkitterServitor.js';
 import { AbyssalArchon } from '../entities/AbyssalArchon.js';
+import { EnemyProjectile } from '../entities/EnemyProjectile.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
@@ -9,6 +10,10 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
+import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
+import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
+import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
+import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
 
 const BLACK_AQUEDUCT_BOOTSTRAP = {
   sceneKey: 'Sector02Chamber01Scene',
@@ -52,7 +57,7 @@ const BLACK_AQUEDUCT_SKITTER_CONFIG = {
   textureKey: ASSET_KEYS.sector02Chamber01EnemyBasic,
   aggroRange: 244,
   speed: 52,
-  patrolDistance: 110,
+  patrolDistance: 124,
   awakenPlayerX: undefined,
   wakeDelayMs: 0,
   presentation: {
@@ -76,7 +81,7 @@ const BLACK_AQUEDUCT_TOLL_KEEPER_CONFIG = {
   textureKey: ASSET_KEYS.sector02Chamber01EnemyElite,
   variantName: 'AQUEDUCT TOLL-KEEPER',
   health: 7,
-  speed: 44,
+  speed: 46,
   aggroRange: 280,
   attackCooldownMs: 3000,
   windupMs: 820,
@@ -91,7 +96,7 @@ const BLACK_AQUEDUCT_TOLL_KEEPER_CONFIG = {
   lungeJumpVelocity: -92,
   recoilVelocityX: 144,
   recoilVelocityY: -84,
-  patrolDistance: 84,
+  patrolDistance: 96,
   awakenPlayerX: undefined,
   wakeDelayMs: 0,
   body: { width: 72, height: 42, offsetX: 28, offsetY: 94 },
@@ -114,12 +119,12 @@ const BLACK_AQUEDUCT_TOLL_KEEPER_CONFIG = {
 const BLACK_AQUEDUCT_ARCHON_CONFIG = {
   name: 'ABYSSAL ARCHON',
   subtitle: 'Canal Threshold Adjudicator',
-  health: 10,
+  health: 8,
   contactDamage: 2,
-  contactDamageCooldownMs: 1050,
-  attackCooldownMs: 3100,
-  attackTelegraphMs: 660,
-  attackRecoveryMs: 480,
+  contactDamageCooldownMs: 1200,
+  attackCooldownMs: 2800,
+  attackTelegraphMs: 620,
+  attackRecoveryMs: 560,
   attackRange: 188,
   approachRange: 320,
   approachSpeed: 38,
@@ -143,6 +148,21 @@ const BLACK_AQUEDUCT_ARCHON_CONFIG = {
     tint: 0xcbd2c1,
     scaleX: 1,
     scaleY: 1
+  },
+  projectile: {
+    textureKey: ASSET_KEYS.sector02PressureShardProjectile,
+    cooldownMs: 3600,
+    windupMs: 540,
+    recoveryMs: 580,
+    minRange: 250,
+    maxRange: 620,
+    verticalTolerance: 180,
+    spawnOffsetX: 74,
+    spawnOffsetY: -104,
+    speed: 260,
+    damage: 2,
+    lifetimeMs: 2200,
+    rotationSpeed: 420
   }
 };
 
@@ -172,7 +192,7 @@ const BLACK_AQUEDUCT_ENCOUNTER_POCKETS = [
     markerAlpha: 0.08,
     enemies: [
       { type: 'skitter', x: 1160, y: PLAYER.startY, patrolDistance: 84, wakeDelayMs: 0 },
-      { type: 'skitter', x: 1395, y: PLAYER.startY, patrolDistance: 104, wakeDelayMs: 120 }
+      { type: 'skitter', x: 1395, y: PLAYER.startY, patrolDistance: 114, wakeDelayMs: 80 }
     ]
   },
   {
@@ -187,9 +207,9 @@ const BLACK_AQUEDUCT_ENCOUNTER_POCKETS = [
     markerHeight: 74,
     markerAlpha: 0.1,
     enemies: [
-      { type: 'skitter', x: 2300, y: PLAYER.startY, patrolDistance: 120, wakeDelayMs: 0 },
-      { type: 'skitter', x: 2570, y: PLAYER.startY, patrolDistance: 100, wakeDelayMs: 110 },
-      { type: 'skitter', x: 2825, y: PLAYER.startY, patrolDistance: 136, wakeDelayMs: 240 }
+      { type: 'skitter', x: 2265, y: PLAYER.startY, patrolDistance: 126, wakeDelayMs: 0 },
+      { type: 'skitter', x: 2535, y: PLAYER.startY, patrolDistance: 112, wakeDelayMs: 60 },
+      { type: 'skitter', x: 2805, y: PLAYER.startY, patrolDistance: 142, wakeDelayMs: 120 }
     ]
   },
   {
@@ -205,25 +225,65 @@ const BLACK_AQUEDUCT_ENCOUNTER_POCKETS = [
     markerAlpha: 0.12,
     enemies: [
       { type: 'skitter', x: 4170, y: PLAYER.startY, patrolDistance: 114, wakeDelayMs: 0 },
-      { type: 'tollkeeper', x: 4480, y: PLAYER.startY, patrolDistance: 80, wakeDelayMs: 180 },
-      { type: 'skitter', x: 4810, y: PLAYER.startY, patrolDistance: 124, wakeDelayMs: 320 }
+      { type: 'tollkeeper', x: 4480, y: PLAYER.startY, patrolDistance: 92, wakeDelayMs: 120 },
+      { type: 'skitter', x: 4685, y: PLAYER.startY, patrolDistance: 96, wakeDelayMs: 170 },
+      { type: 'skitter', x: 4915, y: PLAYER.startY, patrolDistance: 128, wakeDelayMs: 220 }
     ]
   }
 ];
 
+const SHOW_SECTOR02_DEBUG_LABELS = false;
+
 const BLACK_AQUEDUCT_LORE = {
   cutsceneId: 'sector02-chamber01-basin-reliquary',
-  zoneX: 3660,
-  zoneY: WORLD.floorY - 74,
-  zoneWidth: 180,
-  zoneHeight: 208,
-  promptOffsetY: -176,
-  muralX: 3660,
-  muralY: 220,
-  muralWidth: 472,
-  muralHeight: 290,
-  backingWidth: 548,
-  backingHeight: 346
+  anchors: [
+    {
+      id: 'entry-basin-altar',
+      label: 'READ THE ENTRY RELIQUARY',
+      zoneX: 860,
+      zoneY: WORLD.floorY - 74,
+      zoneWidth: 172,
+      zoneHeight: 190,
+      promptOffsetY: -156,
+      altarX: 860,
+      altarY: WORLD.floorY - 92,
+      altarDisplayWidth: 164,
+      altarDisplayHeight: 164,
+      supportWidth: 228,
+      supportHeight: 122,
+      supportTopY: WORLD.floorY - 76,
+      shadowWidth: 262,
+      wallPlateWidth: 286,
+      wallPlateHeight: 202,
+      wallPlateY: WORLD.floorY - 150
+    },
+    {
+      id: 'basin-reliquary',
+      label: 'READ THE BASIN RELIQUARY',
+      zoneX: 3660,
+      zoneY: WORLD.floorY - 74,
+      zoneWidth: 180,
+      zoneHeight: 208,
+      promptOffsetY: -176,
+      altarX: 3660,
+      altarY: WORLD.floorY - 88,
+      altarDisplayWidth: 188,
+      altarDisplayHeight: 188,
+      supportWidth: 228,
+      supportHeight: 116,
+      supportTopY: WORLD.floorY - 72,
+      shadowWidth: 278,
+      wallPlateWidth: 548,
+      wallPlateHeight: 346,
+      wallPlateY: WORLD.floorY - 132,
+      muralX: 3660,
+      muralY: 220,
+      muralWidth: 472,
+      muralHeight: 290,
+      muralBackingWidth: 548,
+      muralBackingHeight: 346
+    }
+  ]
 };
 
 export class Sector02Chamber01Scene extends Phaser.Scene {
@@ -239,8 +299,16 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.hasCompletedLoreBeat = false;
     this.hasUnlockedForwardPath = false;
     this.hasTriggeredForwardContract = false;
+    this.currentForwardThreshold = null;
+    this.hasEnteredForwardThreshold = false;
+    this.forwardThresholdAwaitingFreshInteract = false;
     this.enemies = [];
     this.encounterPockets = [];
+    this.loreAnchors = [];
+    this.enemyProjectiles = [];
+    this.enemyProjectilesPaused = false;
+    this.integrityRewardTracker = new Set();
+    this.resolutionLockActive = false;
   }
 
   create() {
@@ -248,10 +316,12 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.createAudio();
     this.createBackdrop();
     this.createPlayerAndColliders();
+    this.createEnemyProjectiles();
     this.createEncounterPockets();
     this.createClimaxEncounter();
-    this.createLoreAnchor();
+    this.createLoreAnchors();
     this.createUiAndInput();
+    this.majorEncounterResolution = new MajorEncounterResolution(this);
     this.createForwardThreshold();
     this.configureCameraAndLayout();
     this.registerLoreEvents();
@@ -346,15 +416,70 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.add.ellipse(gateX, gateY, 260, 312, 0x364240, 0.82).setStrokeStyle(3, 0xd7d5c8, 0.52).setDepth(-4.92);
     }
 
-    this.processionalLabel = this.add.text(gateX - 22, WORLD.floorY - 270, 'BLACK AQUEDUCT\nPROCESSION THRESHOLD', {
-      fontFamily: 'monospace', fontSize: '17px', color: '#cfd7cc', align: 'center', stroke: '#0c0f10', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.8);
+    if (SHOW_SECTOR02_DEBUG_LABELS) {
+      this.processionalLabel = this.add.text(gateX - 22, WORLD.floorY - 270, 'BLACK AQUEDUCT\nPROCESSION THRESHOLD', {
+        fontFamily: 'monospace', fontSize: '17px', color: '#cfd7cc', align: 'center', stroke: '#0c0f10', strokeThickness: 4
+      }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.8);
+    }
   }
 
   createPlayerAndColliders() {
     this.player = new Player(this, BLACK_AQUEDUCT_BOOTSTRAP.spawnX, BLACK_AQUEDUCT_BOOTSTRAP.spawnY, PLAYER);
+    const entryIntegrity = applyChamberEntryRestore(this.transitionContext);
+    this.player.health = entryIntegrity.current;
+    this.player.maxHealth = entryIntegrity.max;
     this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xc2c9bf, alpha: 0.16, scale: 1.08 });
     this.physics.add.collider(this.player.sprite, this.platforms);
+  }
+
+  createEnemyProjectiles() {
+    this.enemyProjectiles = [];
+    this.enemyProjectileGroup = this.physics.add.group({
+      allowGravity: false,
+      immovable: true
+    });
+    this.physics.add.overlap(this.player.sprite, this.enemyProjectileGroup, (_playerSprite, projectileSprite) => {
+      this.handleEnemyProjectileHit(projectileSprite);
+    });
+  }
+
+  spawnEnemyProjectile(config) {
+    let projectile = this.enemyProjectiles.find((entry) => !entry.active);
+    if (!projectile) {
+      projectile = new EnemyProjectile(this, {
+        speed: config.speed ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.speed,
+        damage: config.damage ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.damage,
+        lifetimeMs: config.lifetimeMs ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.lifetimeMs,
+        rotationSpeed: config.rotationSpeed ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.rotationSpeed,
+        bodySize: { width: 28, height: 28 },
+        depth: config.depth ?? 6.32,
+        presentation: {
+          displayWidth: 44,
+          displayHeight: 44,
+          alpha: 0.98,
+          fallbackFill: 0xc7d4c0,
+          fallbackStroke: 0x67807a
+        },
+        impact: {
+          durationMs: 130,
+          alpha: 0.88,
+          scaleMultiplier: 1.2,
+          tint: 0xe0ead2
+        }
+      });
+
+      this.enemyProjectiles.push(projectile);
+    }
+
+    projectile.owner = config.owner ?? null;
+    projectile.fire(config);
+    if (projectile.sprite && !this.enemyProjectileGroup.contains(projectile.sprite)) {
+      this.enemyProjectileGroup.add(projectile.sprite);
+    }
+    if (this.enemyProjectilesPaused) {
+      projectile.pauseMotion();
+    }
+    return projectile;
   }
 
   createEncounterPockets() {
@@ -366,9 +491,11 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.physics.add.existing(zone, true);
 
     const markerShadow = this.add.ellipse(pocketConfig.zoneX, WORLD.floorY - 4, pocketConfig.markerWidth, pocketConfig.markerHeight, 0x030404, pocketConfig.markerAlpha).setDepth(-5.84);
-    const promptText = this.add.text(pocketConfig.zoneX, pocketConfig.zoneY + pocketConfig.promptOffsetY, pocketConfig.label, {
-      fontFamily: 'monospace', fontSize: '13px', color: '#d3cbc0', align: 'center', stroke: '#111515', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.82).setAlpha(0.82).setVisible(false);
+    const promptText = SHOW_SECTOR02_DEBUG_LABELS
+      ? this.add.text(pocketConfig.zoneX, pocketConfig.zoneY + pocketConfig.promptOffsetY, pocketConfig.label, {
+        fontFamily: 'monospace', fontSize: '13px', color: '#d3cbc0', align: 'center', stroke: '#111515', strokeThickness: 4
+      }).setOrigin(0.5).setDepth(-4.82).setAlpha(0.82).setVisible(false)
+      : null;
 
     const enemies = pocketConfig.enemies.map((enemyConfig) => this.createEncounterEnemy(enemyConfig, pocketConfig));
     return { ...pocketConfig, zone, markerShadow, promptText, enemies, activated: false, resolved: false };
@@ -408,9 +535,11 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
   }
 
   createClimaxEncounter() {
-    this.archonWakeLabel = this.add.text(BLACK_AQUEDUCT_ARCHON_CONFIG.spawnX, WORLD.floorY - 250, 'ABYSSAL ARCHON\nBOUND IN SUMP', {
-      fontFamily: 'monospace', fontSize: '16px', color: '#d5ddd1', align: 'center', stroke: '#0c0f10', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.76).setAlpha(0.82);
+    if (SHOW_SECTOR02_DEBUG_LABELS) {
+      this.archonWakeLabel = this.add.text(BLACK_AQUEDUCT_ARCHON_CONFIG.spawnX, WORLD.floorY - 250, 'ABYSSAL ARCHON\nBOUND IN SUMP', {
+        fontFamily: 'monospace', fontSize: '16px', color: '#d5ddd1', align: 'center', stroke: '#0c0f10', strokeThickness: 4
+      }).setOrigin(0.5).setDepth(-4.76).setAlpha(0.82);
+    }
 
     this.archon = new AbyssalArchon(this, BLACK_AQUEDUCT_ARCHON_CONFIG.spawnX, BLACK_AQUEDUCT_ARCHON_CONFIG.spawnY, BLACK_AQUEDUCT_ARCHON_CONFIG);
     this.archon.setActive(false);
@@ -427,44 +556,64 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.applyGameplayReadabilitySupport(this.archon.sprite, { fill: 0xd8ddcf, alpha: 0.18, scale: 1.28 });
   }
 
-  createLoreAnchor() {
-    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 146, BLACK_AQUEDUCT_LORE.backingWidth + 28, 286, 0x091011, 0.88).setDepth(-13.94);
-    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 94, BLACK_AQUEDUCT_LORE.backingWidth - 30, 188, 0x1b2425, 0.96).setDepth(-13.88);
-    this.add.ellipse(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY + 10, 446, 38, 0x020404, 0.34).setDepth(-6.04);
+  createLoreAnchors() {
+    BLACK_AQUEDUCT_LORE.anchors.forEach((anchorConfig) => {
+      this.loreAnchors.push(this.createLoreAnchor(anchorConfig));
+    });
+    if (SHOW_SECTOR02_DEBUG_LABELS) {
+      this.footholdLabel = this.add.text(4380, WORLD.floorY - 224, 'BLACK AQUEDUCT\nCHAMBER 01', {
+        fontFamily: 'monospace', fontSize: '18px', color: '#cfd7cc', align: 'center', stroke: '#0c0f10', strokeThickness: 4
+      }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.82);
+    }
+  }
 
-    if (this.textures.exists(ASSET_KEYS.sector02Chamber01BackgroundWallModule)) {
-      this.add.image(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 132, ASSET_KEYS.sector02Chamber01BackgroundWallModule).setDisplaySize(BLACK_AQUEDUCT_LORE.backingWidth + 34, BLACK_AQUEDUCT_LORE.backingHeight + 20).setTint(0x7f8b87).setAlpha(0.22).setDepth(-13.84);
+  createLoreAnchor(anchorConfig) {
+    if (anchorConfig.wallPlateWidth && anchorConfig.wallPlateHeight) {
+      this.add.rectangle(anchorConfig.altarX, anchorConfig.wallPlateY, anchorConfig.wallPlateWidth, anchorConfig.wallPlateHeight, 0x091011, 0.88).setDepth(-13.94);
+      if (this.textures.exists(ASSET_KEYS.sector02Chamber01BackgroundWallModule)) {
+        this.add.image(anchorConfig.altarX, anchorConfig.wallPlateY, ASSET_KEYS.sector02Chamber01BackgroundWallModule)
+          .setDisplaySize(anchorConfig.wallPlateWidth + 24, anchorConfig.wallPlateHeight + 18)
+          .setTint(0x7f8b87)
+          .setAlpha(0.2)
+          .setDepth(-13.84);
+      }
     }
 
-    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 72, 228, 116, 0x111718, 0.94).setDepth(-6.22);
-    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 12, 312, 18, 0x090b0c, 0.82).setDepth(-6.14);
-    this.add.ellipse(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 18, 278, 28, 0x263130, 0.18).setDepth(-6.12);
+    if (anchorConfig.muralX && anchorConfig.muralY) {
+      this.add.rectangle(anchorConfig.muralX, WORLD.floorY - 94, anchorConfig.muralBackingWidth - 30, 188, 0x1b2425, 0.96).setDepth(-13.88);
+      this.add.rectangle(anchorConfig.muralX, anchorConfig.muralY, anchorConfig.muralWidth + 22, anchorConfig.muralHeight + 18, 0x182120, 0.94).setDepth(-13.7);
+      if (this.textures.exists(ASSET_KEYS.sector02Chamber01LoreImage)) {
+        this.add.image(anchorConfig.muralX, anchorConfig.muralY, ASSET_KEYS.sector02Chamber01LoreImage)
+          .setDisplaySize(anchorConfig.muralWidth, anchorConfig.muralHeight)
+          .setTint(0xd8e0d0)
+          .setAlpha(0.98)
+          .setDepth(-13.65);
+      } else if (SHOW_SECTOR02_DEBUG_LABELS) {
+        this.add.text(anchorConfig.muralX, anchorConfig.muralY, 'BLACK AQUEDUCT\nLORE IMAGE FALLBACK', {
+          fontFamily: 'monospace', fontSize: '22px', color: '#d5dacd', align: 'center'
+        }).setOrigin(0.5).setDepth(-13.64);
+      }
+    }
 
-    if (this.textures.exists(ASSET_KEYS.sector02Chamber01LoreAltar)) {
-      this.add.image(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 88, ASSET_KEYS.sector02Chamber01LoreAltar).setDisplaySize(188, 188).setTint(0xc1ccbd).setAlpha(0.84).setDepth(-6.08);
+    this.add.rectangle(anchorConfig.altarX, anchorConfig.supportTopY, anchorConfig.supportWidth, anchorConfig.supportHeight, 0x111718, 0.94).setDepth(-6.22);
+    this.add.rectangle(anchorConfig.altarX, WORLD.floorY - 12, anchorConfig.supportWidth + 84, 18, 0x090b0c, 0.82).setDepth(-6.14);
+    this.add.ellipse(anchorConfig.altarX, WORLD.floorY - 18, anchorConfig.shadowWidth, 28, 0x263130, 0.18).setDepth(-6.12);
+    this.add.ellipse(anchorConfig.altarX, WORLD.floorY + 10, anchorConfig.shadowWidth + 168, 38, 0x020404, 0.34).setDepth(-6.04);
+
+    if (this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)) {
+      this.add.image(anchorConfig.altarX, anchorConfig.altarY, ASSET_KEYS.sector03Chamber02LoreAltar)
+        .setDisplaySize(anchorConfig.altarDisplayWidth, anchorConfig.altarDisplayHeight)
+        .setTint(0xc1ccbd)
+        .setAlpha(0.84)
+        .setDepth(-6.08);
     } else {
-      this.add.ellipse(BLACK_AQUEDUCT_LORE.muralX, WORLD.floorY - 82, 128, 132, 0x66706b, 0.76).setDepth(-6.08);
+      this.add.ellipse(anchorConfig.altarX, anchorConfig.altarY + 6, 128, 132, 0x66706b, 0.76).setDepth(-6.08);
     }
 
-    this.add.rectangle(BLACK_AQUEDUCT_LORE.muralX, BLACK_AQUEDUCT_LORE.muralY, BLACK_AQUEDUCT_LORE.muralWidth + 22, BLACK_AQUEDUCT_LORE.muralHeight + 18, 0x182120, 0.94).setDepth(-13.7);
-    if (this.textures.exists(ASSET_KEYS.sector02Chamber01LoreImage)) {
-      this.add.image(BLACK_AQUEDUCT_LORE.muralX, BLACK_AQUEDUCT_LORE.muralY, ASSET_KEYS.sector02Chamber01LoreImage).setDisplaySize(BLACK_AQUEDUCT_LORE.muralWidth, BLACK_AQUEDUCT_LORE.muralHeight).setTint(0xd8e0d0).setAlpha(0.98).setDepth(-13.65);
-    } else {
-      this.add.text(BLACK_AQUEDUCT_LORE.muralX, BLACK_AQUEDUCT_LORE.muralY, 'BLACK AQUEDUCT\nLORE IMAGE FALLBACK', {
-        fontFamily: 'monospace', fontSize: '22px', color: '#d5dacd', align: 'center'
-      }).setOrigin(0.5).setDepth(-13.64);
-    }
+    const zone = this.add.zone(anchorConfig.zoneX, anchorConfig.zoneY, anchorConfig.zoneWidth, anchorConfig.zoneHeight).setOrigin(0.5);
+    this.physics.add.existing(zone, true);
 
-    this.loreZone = this.add.zone(BLACK_AQUEDUCT_LORE.zoneX, BLACK_AQUEDUCT_LORE.zoneY, BLACK_AQUEDUCT_LORE.zoneWidth, BLACK_AQUEDUCT_LORE.zoneHeight).setOrigin(0.5);
-    this.physics.add.existing(this.loreZone, true);
-
-    this.lorePrompt = this.add.text(BLACK_AQUEDUCT_LORE.zoneX, BLACK_AQUEDUCT_LORE.zoneY + BLACK_AQUEDUCT_LORE.promptOffsetY, 'READ THE BASIN RELIQUARY', {
-      fontFamily: 'monospace', fontSize: '14px', color: '#cfdbc9', align: 'center', stroke: '#0d1010', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.6).setAlpha(0.9).setVisible(false);
-
-    this.footholdLabel = this.add.text(4380, WORLD.floorY - 224, 'BLACK AQUEDUCT\nCHAMBER 01', {
-      fontFamily: 'monospace', fontSize: '18px', color: '#cfd7cc', align: 'center', stroke: '#0c0f10', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.74).setAlpha(0.82);
+    return { ...anchorConfig, zone, prompt: null };
   }
 
   createForwardThreshold() {
@@ -487,12 +636,14 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     ).setOrigin(0.5);
     this.physics.add.existing(this.forwardThresholdZone, true);
 
-    this.forwardPrompt = this.add.text(
-      BLACK_AQUEDUCT_CLIMAX_GATE.thresholdX,
-      BLACK_AQUEDUCT_CLIMAX_GATE.thresholdY + BLACK_AQUEDUCT_CLIMAX_GATE.promptOffsetY,
-      'CLIMAX LOCKED',
-      { fontFamily: 'monospace', fontSize: '14px', color: '#d7ddd2', align: 'center', stroke: '#0c0f10', strokeThickness: 4 }
-    ).setOrigin(0.5).setDepth(-4.58).setAlpha(0.92).setVisible(false);
+    this.forwardPrompt = SHOW_SECTOR02_DEBUG_LABELS
+      ? this.add.text(
+        BLACK_AQUEDUCT_CLIMAX_GATE.thresholdX,
+        BLACK_AQUEDUCT_CLIMAX_GATE.thresholdY + BLACK_AQUEDUCT_CLIMAX_GATE.promptOffsetY,
+        'CLIMAX LOCKED',
+        { fontFamily: 'monospace', fontSize: '14px', color: '#d7ddd2', align: 'center', stroke: '#0c0f10', strokeThickness: 4 }
+      ).setOrigin(0.5).setDepth(-4.58).setAlpha(0.92).setVisible(false)
+      : null;
   }
 
   createUiAndInput() {
@@ -514,6 +665,8 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.scale.off('resize', this.applyResponsiveLayout, this);
       this.audioDirector?.shutdown();
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+      this.enemyProjectiles.forEach((projectile) => projectile.destroy());
+      this.majorEncounterResolution?.teardown();
     });
   }
 
@@ -522,7 +675,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.scale.on('resize', this.applyResponsiveLayout, this);
     this.applyResponsiveLayout();
     this.mobileControls.setMode('gameplay');
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   registerLoreEvents() {
@@ -537,6 +690,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
       this.archon?.body?.setVelocity?.(0, 0);
+      this.setEnemyProjectilesPaused(true);
 
       if ((Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) && !this.isRestartingRun) {
         this.isRestartingRun = true;
@@ -545,16 +699,18 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    if (this.isLoreTransitionActive) {
+    if (this.isLoreTransitionActive || this.resolutionLockActive) {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
       this.archon?.body?.setVelocity?.(0, 0);
+      this.setEnemyProjectilesPaused(true);
       return;
     }
 
     this.restartText.setVisible(false);
     this.mobileControls.setMode('gameplay');
+    this.setEnemyProjectilesPaused(false);
 
     const input = {
       left: this.cursors.left.isDown || mobileInput.left,
@@ -569,13 +725,14 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.updateEncounterPockets(time);
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
     this.archon?.update(time, this.player.sprite);
+    this.enemyProjectiles.forEach((projectile) => projectile.update(time, this.game.loop.delta));
     this.refreshArchonBossBar(time);
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
     this.refreshForwardThresholdPresence();
     this.tryAdvanceForwardThreshold(mobileInput);
     this.updateFootholdLabel(time);
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   refreshEncounterPocketPresence() {
@@ -584,14 +741,14 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.physics.overlap(this.player.sprite, pocket.zone, () => {
         playerInsidePocket = true;
       });
-      pocket.promptText.setVisible(playerInsidePocket && !pocket.activated && !pocket.resolved);
+      pocket.promptText?.setVisible(playerInsidePocket && !pocket.activated && !pocket.resolved);
     });
   }
 
   updateEncounterPockets(time) {
     this.encounterPockets.forEach((pocket) => {
       if (pocket.resolved) {
-        pocket.promptText.setVisible(false);
+        pocket.promptText?.setVisible(false);
         pocket.markerShadow.setAlpha(0.03);
         return;
       }
@@ -603,13 +760,13 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
 
       if (playerInsidePocket && !pocket.activated) {
         pocket.activated = true;
-        pocket.promptText.setText(`${pocket.label}\nRITUAL PRESSURE`).setVisible(true);
+        pocket.promptText?.setText(`${pocket.label}\nRITUAL PRESSURE`).setVisible(true);
         pocket.markerShadow.setAlpha(pocket.markerAlpha + 0.06);
         pocket.enemies.forEach((enemy, index) => {
           if (enemy.dead) {
             return;
           }
-          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 70;
+          enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 32;
         });
       }
 
@@ -624,7 +781,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       const remainingEnemies = pocket.enemies.filter((enemy) => !enemy.dead);
       if (pocket.activated && remainingEnemies.length === 0) {
         pocket.resolved = true;
-        pocket.promptText.setText(`${pocket.label}\nCHANNEL CLEARED`).setVisible(playerInsidePocket);
+        pocket.promptText?.setText(`${pocket.label}\nCHANNEL CLEARED`).setVisible(playerInsidePocket);
         pocket.markerShadow.setAlpha(0.04);
       }
     });
@@ -633,16 +790,19 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
   refreshLoreZonePresence() {
     this.currentLoreZone = null;
 
-    if (!this.loreZone || this.isLoreTransitionActive) {
-      this.lorePrompt?.setVisible(false);
+    if (!this.loreAnchors.length || this.isLoreTransitionActive || this.hasCompletedLoreBeat) {
+      this.loreAnchors.forEach((anchor) => anchor.prompt?.setVisible(false));
       return;
     }
 
-    this.physics.overlap(this.player.sprite, this.loreZone, () => {
-      this.currentLoreZone = this.loreZone;
+    this.loreAnchors.forEach((anchor) => {
+      let isInside = false;
+      this.physics.overlap(this.player.sprite, anchor.zone, () => {
+        isInside = true;
+        this.currentLoreZone = anchor;
+      });
+      anchor.prompt?.setVisible(isInside);
     });
-
-    this.lorePrompt?.setVisible(Boolean(this.currentLoreZone));
   }
 
   tryBeginLoreSequence(mobileInput) {
@@ -665,17 +825,19 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
 
     this.isLoreTransitionActive = true;
     this.currentLoreZone = null;
-    this.lorePrompt?.setVisible(false);
+    this.loreAnchors.forEach((anchor) => anchor.prompt?.setVisible(false));
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
     this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
     this.archon?.body?.setVelocity?.(0, 0);
+    this.setEnemyProjectilesPaused(true);
     this.audioDirector?.stopAmbientLoop();
     this.hud?.setVisible(false);
     this.mobileControls.setMode('init');
     this.uiCamera?.setVisible(false);
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.setGameplaySceneVisibility(false);
       this.scene.pause();
       this.scene.launch('LoreCutsceneScene', {
         cutsceneId: BLACK_AQUEDUCT_LORE.cutsceneId,
@@ -697,11 +859,53 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
 
   resumeFromLore() {
     this.isLoreTransitionActive = false;
+    this.setGameplaySceneVisibility(true);
+    this.applyResponsiveLayout();
     this.mobileControls.setMode('gameplay');
     this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
+    this.setEnemyProjectilesPaused(false);
     this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.1 });
     this.cameras.main.fadeIn(500, 0, 0, 0);
+  }
+
+  setGameplaySceneVisibility(isVisible) {
+    this.scene.setVisible(isVisible, this.scene.key);
+  }
+
+  setEnemyProjectilesPaused(paused) {
+    this.enemyProjectilesPaused = paused;
+    this.enemyProjectiles.forEach((projectile) => {
+      if (!projectile.active) {
+        return;
+      }
+
+      if (paused) {
+        projectile.pauseMotion();
+      } else {
+        projectile.resumeMotion();
+      }
+    });
+  }
+
+  handleEnemyProjectileHit(projectileSprite) {
+    const projectile = this.enemyProjectiles.find((entry) => entry.sprite === projectileSprite || projectileSprite?.gameObject === entry.sprite);
+    if (!projectile?.active || projectile.inImpact || !this.player?.sprite?.body?.enable) {
+      return;
+    }
+
+    const impactX = Phaser.Math.Clamp(this.player.body.center.x, this.player.body.left + 8, this.player.body.right - 8);
+    const impactY = this.player.body.center.y - this.player.body.height * 0.1;
+    const damage = projectile.damage ?? BLACK_AQUEDUCT_ARCHON_CONFIG.projectile.damage;
+    const tookDamage = this.player.receiveDamage(damage, this.time.now);
+    projectile.playImpact(impactX, impactY);
+    if (!tookDamage) {
+      return;
+    }
+
+    const knockDirection = Math.sign(this.player.sprite.x - projectile.sprite.x) || 1;
+    this.player.body.setVelocityX(knockDirection * 210);
+    this.player.body.setVelocityY(-196);
   }
 
   handlePlayerHitArchon(enemySprite) {
@@ -719,7 +923,32 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.audioDirector?.playPlayerHit();
 
     if (this.archon.dead && !this.hasUnlockedForwardPath) {
-      this.unlockForwardPath();
+      this.majorEncounterResolution?.begin({
+        encounterId: 'sector02-chamber01-archon',
+        freezePlayer: true,
+        disablePlayerAttack: true,
+        pauseProjectiles: (paused) => this.setEnemyProjectilesPaused(paused),
+        setResolutionLock: (locked) => {
+          this.resolutionLockActive = locked;
+        },
+        onStart: () => {
+          grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber01-archon-miniboss');
+          this.archon.sprite.y = WORLD.floorY + 2 - this.archon.sprite.displayHeight * (1 - this.archon.sprite.originY);
+          this.triggerSector02BlackOilPayoff(this.archon, { scale: 1.12, burstCount: 12, puddleWidth: 204, puddleHeight: 48 });
+          spawnEnemyCorpseRemains(this, {
+            x: this.archon.sprite.x,
+            groundY: WORLD.floorY + 2,
+            depth: this.archon.sprite.depth,
+            size: 'large'
+          });
+          this.archon.sprite.setVisible(false).setAlpha(0);
+          this.archon.body?.setEnable(false);
+          this.archon.setActive(false);
+          this.cameras.main.shake(620, 0.008, true);
+          this.audioDirector?.playBanishmentSting();
+        },
+        stages: [{ atMs: 420, run: () => this.unlockForwardPath() }]
+      });
     }
   }
 
@@ -776,6 +1005,26 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     return target === enemy.sprite || target?.gameObject === enemy.sprite;
   }
 
+  triggerSector02BlackOilPayoff(targetEnemy, config = {}) {
+    const sprite = targetEnemy?.sprite;
+    if (!sprite || targetEnemy.blackOilPayoffTriggered) {
+      return;
+    }
+
+    targetEnemy.blackOilPayoffTriggered = true;
+    const floorPlaneY = this.player?.sprite?.body?.bottom ?? WORLD.floorY + 2;
+    triggerSector02BlackOilBlowout(this, {
+      source: sprite,
+      x: sprite.x,
+      y: floorPlaneY - 14,
+      depth: sprite.depth,
+      scale: config.scale ?? 1,
+      burstCount: config.burstCount,
+      puddleWidth: config.puddleWidth,
+      puddleHeight: config.puddleHeight
+    });
+  }
+
   updateArchonState(time) {
     if (!this.archon || this.archon.dead) {
       return;
@@ -810,20 +1059,24 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
 
   unlockForwardPath() {
     this.hasUnlockedForwardPath = true;
+    this.enemyProjectiles.forEach((projectile) => projectile.destroyProjectile());
     this.forwardBarrier?.setAlpha(0.08);
     this.forwardBarrier?.setFillStyle(0x8ca284, 0.08);
     if (this.forwardBarrier?.body) {
       this.forwardBarrier.body.enable = false;
       this.forwardBarrier.body.updateFromGameObject?.();
     }
-    this.forwardPrompt?.setText('PATH FORWARD STABILIZED\nENTER THE PROCESSION THRESHOLD');
+    this.forwardPrompt?.setVisible(false);
     this.processionalLabel?.setText('BLACK AQUEDUCT\nTHRESHOLD UNSEALED');
     this.archonWakeLabel?.setText('ABYSSAL ARCHON\nNULLIFIED').setAlpha(0.84);
   }
 
   refreshForwardThresholdPresence() {
+    const wasInsideThreshold = this.hasEnteredForwardThreshold;
     this.currentForwardThreshold = null;
     if (!this.forwardThresholdZone) {
+      this.hasEnteredForwardThreshold = false;
+      this.forwardThresholdAwaitingFreshInteract = false;
       return;
     }
 
@@ -831,11 +1084,19 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.currentForwardThreshold = this.forwardThresholdZone;
     });
 
+    this.hasEnteredForwardThreshold = Boolean(this.currentForwardThreshold);
+
+    if (!this.hasEnteredForwardThreshold) {
+      this.forwardThresholdAwaitingFreshInteract = false;
+    } else if (!wasInsideThreshold) {
+      this.forwardThresholdAwaitingFreshInteract = true;
+    }
+
     const promptVisible = Boolean(this.currentForwardThreshold) || (this.hasUnlockedForwardPath && !this.hasTriggeredForwardContract);
     const promptText = this.hasUnlockedForwardPath
       ? this.hasTriggeredForwardContract
-        ? 'FORWARD CONTRACT MARKED\nSECTOR 2 CHAMBER 2 NOT IN THIS PASS'
-        : 'PATH FORWARD STABILIZED\nPRESS RITE / [E] TO MARK DESCENT'
+        ? 'FORWARD PATH SEALED\nENTER THE COMPRESSION VAULTS'
+        : 'PATH FORWARD STABILIZED\nPRESS RITE / [E] TO DESCEND'
       : 'CLIMAX LOCKED';
     this.forwardPrompt?.setVisible(promptVisible).setText(promptText);
   }
@@ -845,14 +1106,34 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       return;
     }
 
+    const interactHeld = this.keyInteract?.isDown || this.keyEnter?.isDown || mobileInput.interactHeld;
+    if (this.forwardThresholdAwaitingFreshInteract) {
+      if (interactHeld) {
+        return;
+      }
+
+      this.forwardThresholdAwaitingFreshInteract = false;
+    }
+
     const interactPressed = Phaser.Input.Keyboard.JustDown(this.keyInteract) || Phaser.Input.Keyboard.JustDown(this.keyEnter) || mobileInput.interactPressed;
     if (!interactPressed) {
       return;
     }
 
     this.hasTriggeredForwardContract = true;
-    this.forwardPrompt?.setVisible(true).setText('FORWARD CONTRACT MARKED\nSECTOR 2 CHAMBER 2 PENDING');
-    this.processionalLabel?.setText('DESCENT MARKED\nFURTHER CHAMBER PENDING');
+    this.forwardPrompt?.setVisible(false);
+    this.processionalLabel?.setText('DESCENT MARKED\nCOMPRESSION VAULTS');
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.cleanupSceneUi?.();
+      this.audioDirector?.shutdown();
+      this.scene.start('Sector02Chamber02Scene', {
+        fromScene: this.scene.key,
+        fromGate: 'black-aqueduct-threshold'
+      });
+    });
+
+    this.cameras.main.fadeOut(320, 0, 0, 0);
   }
 
   updateFootholdLabel(time) {
@@ -883,6 +1164,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.hud?.setBossBarState({ visible: false });
     this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
+    this.enemyProjectiles.forEach((projectile) => projectile.destroyProjectile());
   }
 
   setupMobileUiCamera() {
@@ -930,25 +1212,11 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.restartText.setPosition(width / 2, 90);
   }
 
-  applyGameplayReadabilitySupport(target, { fill = 0xd2c2ac, alpha = 0.16, scale = 1.08 } = {}) {
+  applyGameplayReadabilitySupport(target) {
     if (!target) {
       return null;
     }
 
-    const shadow = this.add.ellipse(target.x, WORLD.floorY + 6, 104 * scale, 22 * scale, 0x050404, alpha * 1.05).setDepth(target.depth - 0.6);
-    const halo = this.add.ellipse(target.x, target.y - 6, 84 * scale, 118 * scale, fill, alpha).setDepth(target.depth - 0.4);
-
-    this.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      if (!target.active) {
-        halo.setVisible(false);
-        shadow.setVisible(false);
-        return;
-      }
-
-      halo.setVisible(target.visible).setPosition(target.x, target.y - 8).setAlpha(target.visible ? alpha : 0);
-      shadow.setVisible(target.visible).setPosition(target.x, WORLD.floorY + 6).setAlpha(target.visible ? alpha * 1.05 : 0);
-    });
-
-    return { halo, shadow };
+    return null;
   }
 }

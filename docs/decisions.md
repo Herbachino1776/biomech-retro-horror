@@ -3,97 +3,94 @@
 Concise record of technical/design decisions currently in force.
 
 ## Engine + Runtime
-- Phaser 3 + ES modules is the game runtime baseline.
-- Vite is the dev/build toolchain.
-- Browser play is the primary target (mobile-first without dropping desktop keyboard).
+- Phaser 3 + ES modules remains the runtime baseline.
+- Vite remains the dev/build toolchain.
+- Browser play remains primary: mobile-first without dropping desktop keyboard parity.
 
 ## Deployment
-- Deploy as GitHub Pages **project site**.
-- Vite production base path stays `/biomech-retro-horror/`.
-- Local dev base path stays `/`.
-- Scene/asset paths must remain base-path-safe (no ad-hoc absolute URL regressions).
+- GitHub Pages project-site deployment stays in force.
+- Production base path remains `/biomech-retro-horror/`.
+- Local dev base path remains `/`.
+- Scene/asset loading must remain base-path-safe.
 
-## Controls + Input
-- Maintain dual input: mobile touch + desktop keyboard.
-- Mobile controls are always fixed to screen space (`scrollFactor(0)`), never world-space.
-- Mobile controls layout must remain reliable in both portrait and landscape, with controls/hit areas aligned.
-- Portrait layout may reserve a lower control band to keep touch UI visible/reliable.
-- Mobile interact button can context-switch for lore/restart confirm flows.
+## Sector Identity + Naming Doctrine
+- Bucket 2 is **The Black Aqueduct**.
+- Sector 2 arc is **The Pressure Gospel**.
+- Sector 2 chamber naming is locked:
+  - Chamber 1 = **Black Aqueduct Intake**
+  - Chamber 2 = **The Compression Vaults**
+  - Chamber 3 = **The Kiln of Judgement**
+- Sector 2 Chamber 3 boss is **The Sorrow Engine**.
+- Sector 2 kill-payoff language is **Black Oil / Tar-laced Blood**.
+- Sector 3 identity is **The Cradle of Refusal**.
+- Sector 3 Chamber 1 playable backbone scene is **Gallery of Failed Measures**.
 
-## Asset Loading + Fallback
-- Use centralized asset keys and URL mapping.
-- Loaded textures/concept assets are the primary visual path.
-- Fallback primitives are resilience-only when textures fail/miss.
-- Do not let fallback presentation silently become the default art path.
+## Chamber Scale + Finale Doctrine
+- Chamber-03-level scale/consequence is the benchmark for future chambers.
+- Sector-ending chambers may use separate boss arenas when that improves pacing/consequence framing.
+- Future chamber differentiation should come from theme bucket, encounter composition, art package, trigger placement, and lore framing — not by lowering stakes.
 
-## Combat Feel Direction (Near-Term)
-- Combat direction is **slower, heavier, and more deliberate**, closer to a simplified Souls-like rhythm than a fast arcade brawler.
-- Future tuning should prioritize weighty attack commitment windows and readable recovery.
-- Future expansion should introduce stamina + evade timing carefully (without overcomplicated systems).
-- Target loop direction: attack → spend stamina → reposition/avoid enemy attack → regain stamina → attack again.
+## Chamber Authoring Doctrine (Canonical)
+New chambers should default to this authored rhythm:
+1. opening setpiece / lore altar segment
+2. corridor wall-module run with basic enemy pockets
+3. larger opened-up room background reveal
+4. elite / miniboss domain inside that opened-up room
+5. terminal threshold / seal / endcap
 
-## Environment Scale Direction
-- Chamber presentation should preserve a **massive, ancient, alien, ritual monument** feeling.
-- Do not casually compress camera/layout into cramped small-room framing during readability tweaks.
+This means:
+- basic enemy pockets are primarily authored in corridor wall-module segments
+- elites/minibosses/trap-altar reveals are primarily authored in larger room-style backgrounds
+- background segmentation and encounter-tiering must visibly reinforce each other
 
-## Gameplay Scope + Milestone Flow
-- Vertical-slice-first development is mandatory.
-- Milestone 1 is complete and remains the current shipped baseline.
-- Chamber 01 remains the current playable foundation; do not destabilize this loop while expanding.
-- Prefer small reliable fixes over architecture expansion.
-- Regressions must be diagnosed/fixed at root cause, not “reimplemented differently” without reason.
-- Milestone 2 is complete and established the current Chamber 01 + Chamber 02 progression/lore baseline.
-- Milestone 3 was defined as **Encounter Expansion + Combat Readability** and is now complete for the shipped Chamber 01 + Chamber 02 slice.
-- Milestone 3 implementation landed in the intended order: regular enemy encounter depth pass first, miniboss refinement second, limited combat presentation support third.
-- Milestone 4 (**Audio Identity**) is complete for the shipped Chamber 01 + Chamber 02 slice.
-- Milestone 5 (**Content Expansion**) is complete enough to close once forward progress is unlocked, even if some polish debt remains.
-- Milestone 6 (**Bucket 2 Foothold / The Black Aqueduct Start**) is now the active milestone.
-- Major chamber expansion should be implemented in milestone slices rather than one oversized pass.
-- Bootstrap before spectacle: get scene registration, handoff wiring, and stable boot flow working before layering chamber spectacle.
+## Gameplay + Combat Systems Doctrine
+- Projectile tech is now a real reusable combat tool, not a chamber-only gimmick.
+- Projectile behavior must preserve the full gameplay contract: spawn, movement, collision, damage, cleanup.
+- Keep combat pacing deliberate/readable; avoid accidental drift into arcade-chaos tuning.
+- Dense/obscure lore framing must be balanced with violent combat payoff, memorable encounter personality, and satisfying repeat-run combat feel.
+- Shared major-encounter resolution flow is approved reusable infrastructure for chamber/boss endings.
 
-## Bucket 2 Direction Doctrine
-- Bucket 2 is **The Black Aqueduct**, not Cosmic Garden.
-- The Black Aqueduct is the **transit infrastructure of recurrence**: channels, sluices, gates, basins, conveyance, and soul-transit rather than a nature/garden biome.
-- The project is moving from palace/judgment interior into canal/transit/system infrastructure for the next major area.
-- Chamber 03's asset package is the blueprint for future chamber production, with each new chamber getting its own themed asset set per chamber/sector.
-- Sector 2 Chamber 1 requires chamber-specific backgrounds, enemies, lore altar/trigger art, lore image, lore text, and gate/progression art.
+## Boss Pit Doctrine (Canonical)
+- Boss pits are now part of core structural game identity, not detached optional flavor.
+- Boss pits are one-time per run.
+- Boss pit completion/reward state resets on death/fresh run.
+- Boss pits must grant meaningful Vessel growth rewards when cleared.
+- Boss pits should preserve clean entry/exit contracts and deterministic return behavior.
+- Sector 3 is expected to be boss-pit-heavy by design, with higher trap-altar density than earlier sectors.
 
-## Chamber Progression Doctrine
-- Chamber 03 is the planned **Ossuary Choir Hall** and Bucket 01 sector finale.
-- Chamber 03 contains the first true boss and closes the opening dead-god palace / laughing-engine / subterranean biomech necropolis thread.
-- All future chambers should aim for **Chamber-03-level consequence, length, and complexity** even when their implementation is chunked.
-- Every future chamber should include substantial encounter design plus a climax entity: miniboss, elite/high-level enemy, or true boss.
-- Chambers should differentiate through art/theme, trigger placement, pacing, enemy placement, and climax tier rather than by lowering stakes.
-- Chamber 02's old exit-gate placeholder lore-screen payoff must stay removed; the real progression contract is a stable in-world handoff into `Chamber03Scene`.
-- Chamber 3's breakthrough came from fixing the scene handoff contract—register `Chamber03Scene`, wire Chamber 02's unlocked exit gate to start it, and do not keep patching Chamber 3 internals first when boot flow is broken.
-- Chamber 03 now sets the scale/consequence benchmark for future chambers.
-- Separate boss arenas are appropriate for sector-ending chambers when they improve finale framing, pacing, or consequence.
-- Future chambers should still vary through theme bucket, art/background set, terrain treatment, trigger placement, enemy placement, pacing, climax tier, and lore framing rather than by shrinking stakes.
+## Lore Presentation Doctrine
+- Lore is a primary identity system.
+- Preferred delivery remains discrete cinematic ritual transitions (`LoreScreenScene` / `LoreCutsceneScene`) instead of generic always-on dialogue UI.
+- Lore-scene failures that match chamber viewport shape should be diagnosed as scene-layer leakage before changing lore art/layout.
 
-## Lore Presentation Direction
-- Lore is a core identity system, not optional garnish.
-- Preferred pattern is now established: **discrete cinematic ritual lore-screen transitions** from gameplay.
-- Chamber 01 first lore beat uses the Laughing Engine/furnace art as the first lore-screen prototype.
-- Chamber 02 lore now runs through the reusable `LoreCutsceneScene` + `LORE_CUTSCENES` configuration path.
-- Future chamber lore beats should plug into that same cutscene path by swapping art/text/style config only, not by adding new lore-scene architecture.
-- Avoid generic always-on in-world overlay/dialogue as the long-term primary lore format.
-- Lore writing remains cryptic, symbolic, and area-specific.
-- Lore screens must preserve source image aspect ratio; fit/crop in frame rather than stretching.
-- Per-screen layout overrides are allowed when one global composition harms portrait readability.
-- Chamber 02 post-lore doctrine is conservative state reaction: visible environmental shift + at least one threat activation, with no broad new system.
+## Shared Logic Stability Doctrine
+- Shared enemy presentation logic must be treated as shared infrastructure.
+- Do not “fix grounding” chamber-by-chamber when the regression source is shared presentation logic.
+- Diagnose root cause first; avoid parallel local patches that fragment behavior.
 
-## Lore Trigger Presentation Direction
-- Preferred lore trigger affordance is an **in-world ritual shrine / ossuary-style interactable**.
-- Avoid debug-style floating “LORE” marker boxes as the visible player-facing pattern.
+## Milestone Flow Doctrine
+- Milestone 5 is closed.
+- Milestone 6 moved beyond foothold status and now represents a full Sector 2 prototype arc.
+- Milestone 7 is largely established; remaining 7C/7H/7I are targeted follow-up lanes, not default primary sequencing.
+- Milestone 8 is now active in practice through Sector 3 Chamber 1 and early Sector 3 buildout.
+- Post-7 direction remains coupled: Sector 3 buildout + boss-pit expansion.
+- Global boss refinement/uniformity is planned as a later polish milestone (not dropped).
 
-## Lore Planning Input Rule
-- When the user provides new lore/worldbuilding direction in planning chats, incorporate relevant points into doctrine docs before major implementation passes.
-- This is a continuity rule, not permission for random scope expansion.
-
-## Merged main + branch baseline
-- When branch/main guidance differs, preserve accepted deployment/mobile-control fixes from main and accepted milestone-polish tuning from the active branch.
+## Future Character Animation Doctrine (Deferred Lane)
+- Animated characters are a real planned future production focus.
+- This lane begins with the **player sprite**.
+- Planned scope includes player locomotion improvements, weapon swing animation, Rite animation, and broader combat/performance animation language.
+- This lane is intentionally deferred for now; current static-sprite-heavy presentation is not permanent doctrine.
+- The user-defined production approach for animation should be preserved when this lane is activated.
 
 ## Workflow Constraints
-- Before touching gameplay/controls/deployment/asset loading/UI/art/lore, read the doctrine docs.
-- Prefer text/code changes unless binary edits are explicitly required.
-- End meaningful tasks with build verification (`npm run build`).
+- Before gameplay/controls/deployment/asset-loading/UI/lore changes, read doctrine docs.
+- Prefer text/code edits unless binary edits are explicitly required.
+- End meaningful code tasks with `npm run build` verification.
+
+## Combat Sidequest Doctrine (Planned Lane)
+- Combat economy direction should be intentional run-level tuning, not chamber-reset-driven recovery loops.
+- Vessel Integrity presentation is planned to evolve into a smooth draining bar (non-segmented HUD language).
+- Enemy aggression and encounter chemistry are prioritized over spongeiness-only difficulty tuning.
+- Rite remains a lore interaction pillar and is planned to later expand into a contextual combat finisher on staggered major enemies.
+- Surprise altar-to-boss-pit transitions are an approved encounter structure.

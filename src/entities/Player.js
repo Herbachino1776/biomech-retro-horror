@@ -2,12 +2,22 @@ import Phaser from 'phaser';
 import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { getNormalizedDisplaySize, getNormalizedOrigin, getNormalizedYOffset } from '../systems/conceptSpriteNormalizer.js';
+import { vesselIntegrityState } from '../systems/VesselIntegrityState.js';
+
+const PLAYER_WALK_ANIMATION_KEY = 'player-walk';
+const PLAYER_IDLE_ANIMATION_KEY = 'player-idle';
+const PLAYER_WALK_FPS = 8;
+const PLAYER_WALK_MIN_SPEED = 36;
+const PLAYER_IDLE_FPS = 5;
+const PLAYER_IDLE_MAX_SPEED = 20;
 
 export class Player {
   constructor(scene, x, y, config) {
     this.scene = scene;
     this.config = config;
-    this.health = config.maxHealth;
+    const integritySnapshot = vesselIntegrityState.getIntegritySnapshot();
+    this.maxHealth = integritySnapshot.max;
+    this.health = integritySnapshot.current;
     this.facing = 1;
     this.attackActive = false;
     this.attackPhase = 'idle';
@@ -25,18 +35,16 @@ export class Player {
 
     this.sprite = this.usingConceptSprite
       ? scene.add
-          .image(x, y + visualYOffset, ASSET_KEYS.player)
+          .sprite(x, y + visualYOffset, ASSET_KEYS.player, 0)
           .setOrigin(origin.x, origin.y)
           .setDisplaySize(displaySize.width, displaySize.height)
-          .setCrop(
-            playerPresentation.crop.x,
-            playerPresentation.crop.y,
-            playerPresentation.crop.width,
-            playerPresentation.crop.height
-          )
           .setAlpha(playerPresentation.alpha ?? 1)
           .setDepth(6)
       : scene.add.rectangle(x, y, 48, 60, 0xb8aa92).setOrigin(0.5).setDepth(6);
+    if (this.usingConceptSprite) {
+      this.registerWalkAnimation();
+      this.registerIdleAnimation();
+    }
     scene.physics.add.existing(this.sprite);
 
     this.body = this.sprite.body;
@@ -149,7 +157,7 @@ export class Player {
       return false;
     }
 
-    this.health -= amount;
+    this.damage(amount);
     this.lastHitTime = time;
 
     this.scene.audioDirector?.playPlayerHurt();
@@ -159,6 +167,45 @@ export class Player {
     }
 
     return true;
+  }
+
+  damage(amount = 1) {
+    const next = vesselIntegrityState.damage(amount);
+    this.health = next.current;
+    this.maxHealth = next.max;
+    return this.health;
+  }
+
+  heal(amount = 1) {
+    const next = vesselIntegrityState.heal(amount);
+    this.health = next.current;
+    this.maxHealth = next.max;
+    return this.health;
+  }
+
+  partialRestore(amount = 1) {
+    return this.heal(amount);
+  }
+
+  fullRestore() {
+    const next = vesselIntegrityState.fullRestore();
+    this.health = next.current;
+    this.maxHealth = next.max;
+    return this.health;
+  }
+
+  setMaxIntegrity(amount) {
+    const next = vesselIntegrityState.setMaxIntegrity(amount);
+    this.health = next.current;
+    this.maxHealth = next.max;
+    return this.maxHealth;
+  }
+
+  increaseMaxIntegrity(amount = 1) {
+    const next = vesselIntegrityState.increaseMaxIntegrity(amount, { restoreCurrent: true });
+    this.health = next.current;
+    this.maxHealth = next.max;
+    return this.maxHealth;
   }
 
   die() {
@@ -171,6 +218,10 @@ export class Player {
   }
 
   updateVisuals(time) {
+    if (this.usingConceptSprite) {
+      this.updateSpriteAnimationState();
+    }
+
     if (this.isDead) {
       this.setVisualTint(0x392926);
       return;
@@ -187,6 +238,70 @@ export class Player {
     }
 
     this.setVisualTint(0xb8aa92);
+  }
+
+  updateSpriteAnimationState() {
+    const isGrounded = this.body.blocked.down;
+    const horizontalSpeed = Math.abs(this.body.velocity.x);
+    const isMovingHorizontally = horizontalSpeed >= PLAYER_WALK_MIN_SPEED;
+    const isNearlyStationary = horizontalSpeed <= PLAYER_IDLE_MAX_SPEED;
+    const inAttackCommit = this.attackPhase === 'startup' || this.attackPhase === 'active' || this.attackPhase === 'recovery';
+    const canAnimate = !this.isDead && !inAttackCommit && isGrounded;
+    const canPlayWalk = canAnimate && isMovingHorizontally;
+    const canPlayIdle = canAnimate && isNearlyStationary;
+
+    if (canPlayWalk) {
+      if (this.sprite.anims.currentAnim?.key !== PLAYER_WALK_ANIMATION_KEY || !this.sprite.anims.isPlaying) {
+        this.sprite.play(PLAYER_WALK_ANIMATION_KEY, true);
+      }
+      return;
+    }
+
+    if (canPlayIdle) {
+      if (this.sprite.anims.currentAnim?.key !== PLAYER_IDLE_ANIMATION_KEY || !this.sprite.anims.isPlaying) {
+        this.sprite.play(PLAYER_IDLE_ANIMATION_KEY, true);
+      }
+      return;
+    }
+
+    this.setStaticFrame(0);
+  }
+
+  registerWalkAnimation() {
+    if (this.scene.anims.exists(PLAYER_WALK_ANIMATION_KEY)) {
+      return;
+    }
+
+    this.scene.anims.create({
+      key: PLAYER_WALK_ANIMATION_KEY,
+      frames: this.scene.anims.generateFrameNumbers(ASSET_KEYS.player, { start: 0, end: 5 }),
+      frameRate: PLAYER_WALK_FPS,
+      repeat: -1
+    });
+  }
+
+  registerIdleAnimation() {
+    if (this.scene.anims.exists(PLAYER_IDLE_ANIMATION_KEY)) {
+      return;
+    }
+
+    this.scene.anims.create({
+      key: PLAYER_IDLE_ANIMATION_KEY,
+      frames: this.scene.anims.generateFrameNumbers(ASSET_KEYS.playerIdle, { start: 0, end: 4 }),
+      frameRate: PLAYER_IDLE_FPS,
+      repeat: -1
+    });
+  }
+
+  setStaticFrame(frameIndex = 0) {
+    if (!this.usingConceptSprite) {
+      return;
+    }
+
+    if (this.sprite.anims.isPlaying) {
+      this.sprite.anims.stop();
+    }
+    this.sprite.setFrame(frameIndex);
   }
 
 

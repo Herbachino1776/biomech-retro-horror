@@ -8,6 +8,7 @@ import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
+import { applyChamberEntryRestore } from '../systems/VesselRunEconomy.js';
 
 const CHAMBER02_WORLD_WIDTH = 4300;
 
@@ -72,12 +73,13 @@ const CHAMBER02_TOLL_KEEPER_CONFIG = {
 
 const CHAMBER02_TOLL_KEEPER_SPAWNS = [
   { x: 3005, y: 404, awakenPlayerX: 2820, wakeDelayMs: 0 },
-  { x: 3325, y: 404, awakenPlayerX: 3010, wakeDelayMs: 220 }
+  { x: 3325, y: 404, awakenPlayerX: 3010, wakeDelayMs: 120, patrolDistance: 90 }
 ];
 
 const CHAMBER02_ENEMY_SPAWNS = [
-  { x: 1600, y: 402, awakenPlayerX: 1360 },
-  { x: 2410, y: 402, awakenPlayerX: 2050 }
+  { x: 1600, y: 402, awakenPlayerX: 1360, patrolDistance: 210, wakeDelayMs: 120 },
+  { x: 2410, y: 402, awakenPlayerX: 2050, patrolDistance: 204, wakeDelayMs: 90 },
+  { x: 2795, y: 402, awakenPlayerX: 2440, patrolDistance: 196, wakeDelayMs: 140 }
 ];
 
 const CHAMBER02_LORE_ENTRY = {
@@ -156,6 +158,9 @@ export class Chamber02Scene extends Phaser.Scene {
     this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01);
 
     this.player = new Player(this, 150, 360, PLAYER);
+    const entryIntegrity = applyChamberEntryRestore(this.transitionContext);
+    this.player.health = entryIntegrity.current;
+    this.player.maxHealth = entryIntegrity.max;
     this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
     this.physics.add.collider(this.player.sprite, this.platforms);
 
@@ -200,7 +205,7 @@ export class Chamber02Scene extends Phaser.Scene {
     });
 
     this.applyResponsiveLayout();
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   renderProcessionalBackdrop() {
@@ -316,18 +321,7 @@ export class Chamber02Scene extends Phaser.Scene {
       .setDepth(-5.25)
       .setVisible(false);
 
-    this.exitGatePromptText = this.add
-      .text(CHAMBER02_EXIT_GATE.x + CHAMBER02_EXIT_GATE.zoneOffsetX, CHAMBER02_EXIT_GATE.zoneY + CHAMBER02_EXIT_GATE.interactPromptOffsetY, 'GATE SEALED', {
-        fontFamily: 'monospace',
-        fontSize: '14px',
-        color: '#d6c9b8',
-        align: 'center',
-        stroke: '#140f0e',
-        strokeThickness: 4
-      })
-      .setOrigin(0.5)
-      .setDepth(-5.1)
-      .setVisible(false);
+    this.exitGatePromptText = null;
 
     this.exitGateZone = this.add
       .zone(
@@ -448,7 +442,8 @@ export class Chamber02Scene extends Phaser.Scene {
       const tollKeeper = this.createSkitterEnemy(spawn.x, spawn.y, {
         ...CHAMBER02_TOLL_KEEPER_CONFIG,
         awakenPlayerX: spawn.awakenPlayerX,
-        wakeDelayMs: spawn.wakeDelayMs
+        wakeDelayMs: spawn.wakeDelayMs,
+        patrolDistance: spawn.patrolDistance ?? CHAMBER02_TOLL_KEEPER_CONFIG.patrolDistance
       });
       tollKeeper.isTollKeeper = true;
       this.tollKeepers.push(tollKeeper);
@@ -538,7 +533,7 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
 
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   handlePlayerHitEnemy(_attackZone, enemySprite, enemy) {
@@ -646,15 +641,23 @@ export class Chamber02Scene extends Phaser.Scene {
   createLoreShrineProp(entry) {
     const baseY = entry.y + 14;
     this.add.ellipse(entry.x, baseY + 4, 188, 44, COLORS.oil, 0.3).setDepth(-5.1);
-    this.add.ellipse(entry.x, baseY + 2, 142, 30, COLORS.sickly, 0.14).setDepth(-5.05);
-    this.add.ellipse(entry.x, baseY - 2, 134, 24, COLORS.bloodMetal, 0.72).setDepth(-5);
-    this.add.ellipse(entry.x, baseY - 8, 88, 16, COLORS.foreground, 0.86).setDepth(-4.95);
-    this.add.ellipse(entry.x, baseY - 26, 84, 40, COLORS.bone, 0.86).setDepth(-4.9);
-    this.add.ellipse(entry.x, baseY - 24, 44, 16, COLORS.oil, 0.84).setDepth(-4.85);
-    this.add.ellipse(entry.x - 28, baseY - 30, 28, 64, COLORS.bone, 0.7).setAngle(-18).setDepth(-4.84);
-    this.add.ellipse(entry.x + 28, baseY - 30, 28, 64, COLORS.bone, 0.7).setAngle(18).setDepth(-4.84);
-    this.add.rectangle(entry.x, baseY - 34, 10, 54, COLORS.rust, 0.78).setAngle(4).setDepth(-4.83);
-    this.add.ellipse(entry.x, baseY - 42, 16, 10, COLORS.sickly, 0.36).setDepth(-4.8);
+    if (this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)) {
+      this.add.image(entry.x, baseY - 20, ASSET_KEYS.sector03Chamber02LoreAltar)
+        .setDisplaySize(164, 164)
+        .setTint(0xc8baa4)
+        .setAlpha(0.86)
+        .setDepth(-4.9);
+    } else {
+      this.add.ellipse(entry.x, baseY + 2, 142, 30, COLORS.sickly, 0.14).setDepth(-5.05);
+      this.add.ellipse(entry.x, baseY - 2, 134, 24, COLORS.bloodMetal, 0.72).setDepth(-5);
+      this.add.ellipse(entry.x, baseY - 8, 88, 16, COLORS.foreground, 0.86).setDepth(-4.95);
+      this.add.ellipse(entry.x, baseY - 26, 84, 40, COLORS.bone, 0.86).setDepth(-4.9);
+      this.add.ellipse(entry.x, baseY - 24, 44, 16, COLORS.oil, 0.84).setDepth(-4.85);
+      this.add.ellipse(entry.x - 28, baseY - 30, 28, 64, COLORS.bone, 0.7).setAngle(-18).setDepth(-4.84);
+      this.add.ellipse(entry.x + 28, baseY - 30, 28, 64, COLORS.bone, 0.7).setAngle(18).setDepth(-4.84);
+      this.add.rectangle(entry.x, baseY - 34, 10, 54, COLORS.rust, 0.78).setAngle(4).setDepth(-4.83);
+      this.add.ellipse(entry.x, baseY - 42, 16, 10, COLORS.sickly, 0.36).setDepth(-4.8);
+    }
   }
 
   refreshLoreZonePresence() {
@@ -704,9 +707,7 @@ export class Chamber02Scene extends Phaser.Scene {
       this.currentExitGateZone = this.exitGateZone;
     });
 
-    const promptVisible = Boolean(this.currentExitGateZone) && !this.exitGateUnlocked;
-    this.exitGatePromptText?.setVisible(promptVisible);
-    this.exitGatePromptText?.setText(this.exitGateUnlocked ? 'PATH OPEN' : 'GATE SEALED');
+    this.exitGatePromptText?.setVisible(false);
   }
 
   refreshExitThresholdZonePresence() {
@@ -871,30 +872,12 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
 
-  applyGameplayReadabilitySupport(target, { fill = 0xd2c2ac, alpha = 0.16, scale = 1.08 } = {}) {
+  applyGameplayReadabilitySupport(target) {
     if (!target) {
       return null;
     }
 
-    const shadow = this.add
-      .ellipse(target.x, WORLD.floorY + 6, 104 * scale, 22 * scale, 0x050404, alpha * 1.05)
-      .setDepth(target.depth - 0.6);
-    const halo = this.add
-      .ellipse(target.x, target.y - 6, 84 * scale, 118 * scale, fill, alpha)
-      .setDepth(target.depth - 0.4);
-
-    this.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      if (!target.active) {
-        halo.setVisible(false);
-        shadow.setVisible(false);
-        return;
-      }
-
-      halo.setVisible(target.visible).setPosition(target.x, target.y - 8).setAlpha(target.visible ? alpha : 0);
-      shadow.setVisible(target.visible).setPosition(target.x, WORLD.floorY + 6).setAlpha(target.visible ? alpha * 1.05 : 0);
-    });
-
-    return { halo, shadow };
+    return null;
   }
 
   cleanupSceneUi() {

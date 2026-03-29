@@ -18,6 +18,21 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
+import { grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
+import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
+import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
+import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
+
+const SHOW_CHAMBER01_DEBUG_LABELS = false;
+const HALF_SKULL_RESOLUTION = {
+  encounterId: 'chamber01-halfskull-miniboss',
+  preExplosionShakeMs: 3000,
+  preExplosionShakeIntensity: 0.0058,
+  goreFountainCadenceMs: 86,
+  explosionFadeStartDelayMs: 100,
+  explosionFadeDurationMs: 320,
+  postExplosionDespawnDelayMs: 560
+};
 
 export class Chamber01Scene extends Phaser.Scene {
   constructor() {
@@ -73,10 +88,12 @@ export class Chamber01Scene extends Phaser.Scene {
     this.isMinibossRewardActive = false;
     this.minibossEncounterStarted = false;
     this.minibossDefeated = false;
+    this.hasProcessedMinibossVictory = false;
+    this.minibossCeremonyBossBarActive = false;
+    this.integrityRewardTracker = new Set();
     this.minibossDeathFlashUntil = -Infinity;
-    this.minibossDeathPulse = null;
-    this.minibossRewardReleaseTimer = null;
-    this.minibossBloodPool = null;
+    this.minibossVictoryGoreFountainTimer = null;
+    this.resolutionLockActive = false;
     this.minibossRewardText = this.add
       .text(this.scale.width / 2, this.scale.height * 0.28, 'Blasphemous Demon\nhas been Banished!', {
         fontFamily: 'Georgia, Times, serif',
@@ -113,6 +130,7 @@ export class Chamber01Scene extends Phaser.Scene {
       .setVisible(false);
 
     this.setupMobileUiCamera();
+    this.majorEncounterResolution = new MajorEncounterResolution(this);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
@@ -129,10 +147,12 @@ export class Chamber01Scene extends Phaser.Scene {
       this.game.events.off('lore-screen-complete', this.handleLoreScreenComplete, this);
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.audioDirector?.shutdown();
+      this.stopMinibossVictoryGoreFountain();
+      this.majorEncounterResolution?.teardown();
     });
 
     this.applyResponsiveLayout();
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   update(time) {
@@ -149,7 +169,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.restartText.setVisible(false);
 
-    if (this.isLoreTransitionActive || this.isGateTransitionActive || this.isMinibossRewardActive) {
+    if (this.isLoreTransitionActive || this.isGateTransitionActive || this.isMinibossRewardActive || this.resolutionLockActive) {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemy.body.setVelocity(0, 0);
@@ -168,15 +188,15 @@ export class Chamber01Scene extends Phaser.Scene {
     this.enemy.update(time, this.player.sprite.x);
     this.miniboss.update(time, this.player.sprite);
     this.updateMinibossArenaFeedback(time);
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
     this.hud.setBossBarState({
-      visible: this.minibossEncounterStarted && !this.minibossDefeated,
+      visible: this.minibossEncounterStarted && (!this.minibossDefeated || this.minibossCeremonyBossBarActive),
       name: CHAMBER01_MINIBOSS.name,
-      subtitle: CHAMBER01_MINIBOSS.subtitle,
-      current: this.miniboss.health,
+      subtitle: this.minibossCeremonyBossBarActive ? 'BANISHMENT RITE ENGAGED' : CHAMBER01_MINIBOSS.subtitle,
+      current: this.minibossCeremonyBossBarActive ? 0 : this.miniboss.health,
       max: this.miniboss.maxHealth,
-      telegraph: this.miniboss.getTelegraphProgress(time),
-      wounded: time < this.miniboss.lastDamageFlashTime + 220
+      telegraph: this.minibossCeremonyBossBarActive ? 1 : this.miniboss.getTelegraphProgress(time),
+      wounded: this.minibossCeremonyBossBarActive || time < this.miniboss.lastDamageFlashTime + 220
     });
   }
 
@@ -313,7 +333,7 @@ export class Chamber01Scene extends Phaser.Scene {
       this.add.image(1435, 202, ASSET_KEYS.chamber01RibArch).setDisplaySize(760, 360).setTint(0xd4c5af).setAlpha(0.5).setDepth(-6);
     }
 
-    if (!hasBackdropConcept) {
+    if (!hasBackdropConcept && SHOW_CHAMBER01_DEBUG_LABELS) {
       this.add.text(1032, 355, 'ALTAR ENGINE // FALLBACK SAFETY', {
         fontFamily: 'monospace',
         fontSize: '12px',
@@ -383,37 +403,12 @@ export class Chamber01Scene extends Phaser.Scene {
       .setShadow(0, isPortrait ? 4 : 6, '#090404', isPortrait ? 8 : 10, true, true);
   }
 
-  applyGameplayReadabilitySupport(target, { fill = 0xd2c2ac, alpha = 0.16, scale = 1.08 } = {}) {
+  applyGameplayReadabilitySupport(target) {
     if (!target) {
       return null;
     }
 
-    const shadow = this.add
-      .ellipse(target.x, WORLD.floorY + 6, 104 * scale, 22 * scale, 0x050404, alpha * 1.1)
-      .setDepth(target.depth - 0.6);
-    const halo = this.add
-      .ellipse(target.x, target.y - 6, 86 * scale, 120 * scale, fill, alpha)
-      .setDepth(target.depth - 0.4);
-
-    target.__gameplayShadow = shadow;
-    target.__gameplayHalo = halo;
-
-    return this.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      if (!target.active) {
-        halo.setVisible(false);
-        shadow.setVisible(false);
-        return;
-      }
-
-      halo
-        .setVisible(target.visible)
-        .setPosition(target.x, target.y - 8)
-        .setAlpha(target.visible ? alpha : 0);
-      shadow
-        .setVisible(target.visible)
-        .setPosition(target.x, WORLD.floorY + 6)
-        .setAlpha(target.visible ? alpha * 1.1 : 0);
-    });
+    return null;
   }
 
   handleDevWarp() {
@@ -421,10 +416,10 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    // Temporary Sector 2 Chamber 1 shortcut so the Chamber 01 mobile DEV button can jump straight to the Black Aqueduct.
+    // Keep the Chamber 01 mobile DEV button aligned with the latest Sector 3 chamber pass.
     this.cleanupSceneUi?.();
     this.audioDirector?.shutdown();
-    this.scene.start('Sector02Chamber01Scene', {
+    this.scene.start('Sector03Chamber02Scene', {
       devWarp: true,
       source: this.scene.key
     });
@@ -474,8 +469,8 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    if (this.textures.exists(ASSET_KEYS.chamber01Shrine)) {
-      this.add.image(entry.x, baseY - 20, ASSET_KEYS.chamber01Shrine).setDisplaySize(140, 116).setCrop(420, 90, 700, 620).setTint(0xcabb9e).setAlpha(hasBackdropConcept ? 0.6 : 0.88).setDepth(0);
+    if (this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)) {
+      this.add.image(entry.x, baseY - 20, ASSET_KEYS.sector03Chamber02LoreAltar).setDisplaySize(140, 116).setCrop(420, 90, 700, 620).setTint(0xcabb9e).setAlpha(hasBackdropConcept ? 0.6 : 0.88).setDepth(0);
     }
   }
 
@@ -678,53 +673,80 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   handleMinibossDefeated() {
-    this.minibossDefeated = true;
-    this.miniboss.setActive(false);
-    this.isMinibossRewardActive = true;
-    this.minibossDeathFlashUntil = this.time.now + 520;
-    this.spawnMinibossBloodPool(this.miniboss.sprite.x, WORLD.floorY - 5);
-    this.minibossDeathPulse?.remove(false);
-    this.minibossDeathPulse = this.time.delayedCall(120, () => {
-      this.playMinibossRewardBeat();
+    if (
+      this.hasProcessedMinibossVictory
+      || this.majorEncounterResolution?.isResolutionActive(HALF_SKULL_RESOLUTION.encounterId)
+      || this.majorEncounterResolution?.hasResolved(HALF_SKULL_RESOLUTION.encounterId)
+    ) {
+      return;
+    }
+
+    this.majorEncounterResolution?.begin({
+      encounterId: HALF_SKULL_RESOLUTION.encounterId,
+      freezePlayer: true,
+      disablePlayerAttack: true,
+      setResolutionLock: (locked) => {
+        this.resolutionLockActive = locked;
+      },
+      onStart: () => {
+        this.hasProcessedMinibossVictory = true;
+        this.minibossDefeated = true;
+        this.minibossCeremonyBossBarActive = true;
+        this.miniboss.setActive(false);
+        this.isMinibossRewardActive = true;
+        this.minibossDeathFlashUntil = this.time.now + HALF_SKULL_RESOLUTION.preExplosionShakeMs;
+        this.playMinibossCeremonyStart();
+      },
+      stages: [
+        {
+          atMs: HALF_SKULL_RESOLUTION.preExplosionShakeMs,
+          run: () => {
+            this.stopMinibossVictoryGoreFountain();
+            this.triggerHalfSkullDeathBurst({
+              x: this.miniboss.sprite.x,
+              y: (this.miniboss.sprite.body?.bottom ?? this.miniboss.sprite.y) - Phaser.Math.Between(90, 126),
+              depth: this.miniboss.sprite.depth + 0.46,
+              scale: 1.28,
+              durationMs: 760,
+              burstCount: 88,
+              sprayCount: 114,
+              mistCount: 16,
+              emberCount: 16,
+              burstRadiusX: 148,
+              burstRadiusY: 184,
+              dropletWidth: [10, 28],
+              dropletHeight: [20, 50],
+              sprayWidth: [5, 13],
+              sprayHeight: [16, 38]
+            });
+            this.majorEncounterResolution?.schedule(HALF_SKULL_RESOLUTION.explosionFadeStartDelayMs, () => {
+              this.startMinibossExplosionFade();
+            });
+            this.audioDirector?.playBanishmentSting();
+            this.minibossRewardText?.setText('HALF SKULL\nBANISHED');
+            grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, HALF_SKULL_RESOLUTION.encounterId);
+            this.audioDirector?.playGateUnlock();
+            this.updateGateActivationVisuals();
+          }
+        },
+        {
+          atMs: HALF_SKULL_RESOLUTION.preExplosionShakeMs + HALF_SKULL_RESOLUTION.postExplosionDespawnDelayMs,
+          run: () => {
+            this.despawnMinibossAfterPayoff();
+          }
+        }
+      ],
+      onComplete: () => {
+        this.finishMinibossCeremony();
+      }
     });
-    this.updateGateActivationVisuals();
   }
 
-  spawnMinibossBloodPool(x, y) {
-    this.minibossBloodPool?.destroy(true);
-
-    const pool = this.add.container(x, y).setDepth(1.2);
-    const outerShadow = this.add.ellipse(0, 8, 250, 58, 0x120707, 0.4);
-    const outerPool = this.add.ellipse(0, 0, 228, 48, 0x391012, 0.88).setStrokeStyle(4, 0x68403d, 0.22);
-    const midPool = this.add.ellipse(-10, -2, 180, 34, 0x5a1718, 0.72);
-    const glossPool = this.add.ellipse(22, -8, 96, 14, 0xb86d5e, 0.2);
-    const clotRidge = this.add.ellipse(-34, 4, 68, 16, 0x2a0b0c, 0.44);
-    pool.add([outerShadow, outerPool, midPool, glossPool, clotRidge]);
-    pool.setScale(0.2, 0.2).setAlpha(0);
-
-    this.tweens.add({
-      targets: pool,
-      scaleX: 1,
-      scaleY: 1,
-      alpha: 1,
-      duration: 520,
-      ease: 'Cubic.easeOut'
-    });
-
-    this.minibossBloodPool = pool;
-  }
-
-  playMinibossRewardBeat() {
-    this.audioDirector?.playBanishmentSting();
-    const shakeDurations = [420, 420, 380, 380, 320];
-    const shakeIntensities = [0.012, 0.011, 0.01, 0.009, 0.0075];
-    let elapsed = 0;
-    shakeDurations.forEach((duration, index) => {
-      this.time.delayedCall(elapsed, () => {
-        this.cameras.main.shake(duration, shakeIntensities[index], true);
-      });
-      elapsed += duration - 30;
-    });
+  playMinibossCeremonyStart() {
+    this.stabilizeMinibossCorpseForPayoff();
+    this.cameras.main.shake(HALF_SKULL_RESOLUTION.preExplosionShakeMs, HALF_SKULL_RESOLUTION.preExplosionShakeIntensity, true);
+    this.startMinibossVictoryGoreFountain();
+    this.minibossRewardText?.setText('BANISHMENT RITE\nACTIVE');
 
     if (this.minibossRewardText) {
       this.tweens.killTweensOf(this.minibossRewardText);
@@ -735,26 +757,140 @@ export class Chamber01Scene extends Phaser.Scene {
         scaleX: 1,
         scaleY: 1,
         duration: 320,
-        ease: 'Cubic.easeOut',
-        hold: 1000,
-        yoyo: false,
-        onComplete: () => {
-          this.tweens.add({
-            targets: this.minibossRewardText,
-            alpha: 0,
-            duration: 420,
-            ease: 'Cubic.easeIn',
-            onComplete: () => this.minibossRewardText.setVisible(false)
-          });
-        }
+        ease: 'Cubic.easeOut'
       });
     }
+  }
 
-    this.minibossRewardReleaseTimer?.remove(false);
-    this.minibossRewardReleaseTimer = this.time.delayedCall(2060, () => {
-      this.audioDirector?.playGateUnlock();
-      this.isMinibossRewardActive = false;
+  stabilizeMinibossCorpseForPayoff() {
+    if (!this.miniboss?.sprite?.active) {
+      return;
+    }
+
+    const floorBottomY = WORLD.floorY + 2;
+    const groundedY = floorBottomY - this.miniboss.sprite.displayHeight * (1 - this.miniboss.sprite.originY);
+    this.tweens.killTweensOf(this.miniboss.sprite);
+    this.miniboss.sprite
+      .setAlpha(1)
+      .setVisible(true)
+      .setScale(
+        this.miniboss.baseScaleX * this.miniboss.config.presentation.scaleX,
+        this.miniboss.baseScaleY * this.miniboss.config.presentation.scaleY
+      )
+      .setAngle(0)
+      .setY(groundedY);
+  }
+
+  startMinibossExplosionFade() {
+    if (!this.miniboss?.sprite?.active) {
+      return;
+    }
+
+    this.tweens.killTweensOf(this.miniboss.sprite);
+    this.tweens.add({
+      targets: this.miniboss.sprite,
+      alpha: 0,
+      duration: HALF_SKULL_RESOLUTION.explosionFadeDurationMs,
+      ease: 'Sine.easeInOut'
     });
+  }
+
+  despawnMinibossAfterPayoff() {
+    if (!this.miniboss?.sprite) {
+      return;
+    }
+
+    this.stopMinibossVictoryGoreFountain();
+    spawnEnemyCorpseRemains(this, {
+      x: this.miniboss.sprite.x,
+      groundY: WORLD.floorY + 2,
+      depth: this.miniboss.sprite.depth,
+      size: 'large'
+    });
+    this.miniboss.sprite.setVisible(false).setAlpha(0);
+    this.miniboss.setActive(false);
+    this.miniboss.body?.setEnable(false);
+    this.miniboss.destroyCombatTelegraphs?.();
+  }
+
+  startMinibossVictoryGoreFountain() {
+    this.stopMinibossVictoryGoreFountain();
+    if (!this.miniboss?.sprite?.active) {
+      return;
+    }
+
+    const spawnFountainBurst = () => {
+      if (!this.isMinibossRewardActive || !this.miniboss?.sprite?.active) {
+        return;
+      }
+
+      this.triggerHalfSkullDeathBurst({
+        x: this.miniboss.sprite.x + Phaser.Math.Between(-58, 58),
+        y: (this.miniboss.sprite.body?.bottom ?? this.miniboss.sprite.y) - Phaser.Math.Between(104, 156),
+        depth: this.miniboss.sprite.depth + 0.38,
+        scale: Phaser.Math.FloatBetween(0.7, 0.92),
+        durationMs: 560,
+        burstCount: 52,
+        sprayCount: 76,
+        mistCount: 7,
+        emberCount: 6,
+        burstRadiusX: 124,
+        burstRadiusY: 168,
+        dropletWidth: [8, 20],
+        dropletHeight: [18, 44],
+        sprayWidth: [4, 11],
+        sprayHeight: [14, 36]
+      });
+    };
+
+    spawnFountainBurst();
+    this.minibossVictoryGoreFountainTimer = this.time.addEvent({
+      delay: HALF_SKULL_RESOLUTION.goreFountainCadenceMs,
+      repeat: Math.ceil(HALF_SKULL_RESOLUTION.preExplosionShakeMs / HALF_SKULL_RESOLUTION.goreFountainCadenceMs),
+      callback: spawnFountainBurst
+    });
+  }
+
+  stopMinibossVictoryGoreFountain() {
+    this.minibossVictoryGoreFountainTimer?.remove(false);
+    this.minibossVictoryGoreFountainTimer = null;
+  }
+
+  triggerHalfSkullDeathBurst(config = {}) {
+    if (!this.miniboss?.sprite?.active) {
+      return;
+    }
+
+    triggerSector02BlackOilBlowout(this, {
+      source: this.miniboss.sprite,
+      splashColor: 0x8b111c,
+      heavyColor: 0x5e0a13,
+      highlightColor: 0xb43645,
+      redSpeckColor: 0xc84a55,
+      mistColor: 0x1d080b,
+      alpha: 0.98,
+      includeGroundPool: false,
+      persistPuddle: false,
+      fadeSource: false,
+      ...config
+    });
+  }
+
+  finishMinibossCeremony() {
+    this.stopMinibossVictoryGoreFountain();
+    this.minibossCeremonyBossBarActive = false;
+    this.hud.setBossBarState({ visible: false });
+    this.isMinibossRewardActive = false;
+    if (this.minibossRewardText) {
+      this.tweens.killTweensOf(this.minibossRewardText);
+      this.tweens.add({
+        targets: this.minibossRewardText,
+        alpha: 0,
+        duration: 280,
+        ease: 'Cubic.easeIn',
+        onComplete: () => this.minibossRewardText.setVisible(false)
+      });
+    }
   }
 
   updateMinibossArenaFeedback(time) {
