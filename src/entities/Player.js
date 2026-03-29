@@ -6,10 +6,24 @@ import { vesselIntegrityState } from '../systems/VesselIntegrityState.js';
 
 const PLAYER_WALK_ANIMATION_KEY = 'player-walk';
 const PLAYER_IDLE_ANIMATION_KEY = 'player-idle';
+const PLAYER_ATTACK_ANIMATION_KEY = 'player-attack-strip-05';
 const PLAYER_WALK_FPS = 8;
 const PLAYER_WALK_MIN_SPEED = 36;
 const PLAYER_IDLE_FPS = 5;
 const PLAYER_IDLE_MAX_SPEED = 20;
+const PLAYER_ATTACK_FPS = 12;
+const PLAYER_ATTACK_FRAME_PREFIX = 'attack-frame-';
+const PLAYER_ATTACK_FRAME_SEQUENCE = [1, 2, 3, 4, 5];
+const PLAYER_WEAPON_FRONT_DEPTH_OFFSET = 0.35;
+const PLAYER_WEAPON_BACK_DEPTH_OFFSET = -0.35;
+const PLAYER_ATTACK_IMPACT_FRAME = 4;
+const PLAYER_ATTACK_FRAME_BOXES = [
+  { frame: 1, x: 31, y: 0, w: 259, h: 445 },
+  { frame: 2, x: 330, y: 8, w: 259, h: 436 },
+  { frame: 3, x: 625, y: 31, w: 259, h: 413 },
+  { frame: 4, x: 921, y: 74, w: 285, h: 382 },
+  { frame: 5, x: 1247, y: 24, w: 258, h: 421 }
+];
 
 export class Player {
   constructor(scene, x, y, config) {
@@ -26,8 +40,16 @@ export class Player {
     this.lastHitTime = -Infinity;
     this.lastFootstepAt = -Infinity;
     this.isDead = false;
+    this.weaponSprite = null;
+    this.attackFrameDataByIndex = new Map();
+    this.currentAttackFrameIndex = PLAYER_ATTACK_FRAME_SEQUENCE[0];
+    this.currentAttackFrameData = null;
+    this.attackTimingWindowMs = null;
 
     this.usingConceptSprite = scene.textures.exists(ASSET_KEYS.player);
+    this.hasAttackStrip = scene.textures.exists(ASSET_KEYS.playerAttackStrip);
+    this.hasWeaponFollowStrip = scene.textures.exists(ASSET_KEYS.playerWeaponHammerFollowStrip);
+    this.weaponFollowOffsetPackage = scene.cache.json.get(ASSET_KEYS.playerWeaponHammerFollowOffsets) ?? null;
     const playerPresentation = CONCEPT_PRESENTATION.player;
     const displaySize = getNormalizedDisplaySize(playerPresentation);
     const origin = getNormalizedOrigin(playerPresentation);
@@ -44,6 +66,8 @@ export class Player {
     if (this.usingConceptSprite) {
       this.registerWalkAnimation();
       this.registerIdleAnimation();
+      this.registerAttackFrameData();
+      this.registerAttackAnimation();
     }
     scene.physics.add.existing(this.sprite);
 
@@ -61,6 +85,11 @@ export class Player {
     this.attackHitbox.body.allowGravity = false;
     this.attackHitbox.body.moves = false;
     this.attackHitbox.body.enable = false;
+
+    if (this.usingConceptSprite) {
+      this.sprite.on('animationupdate', this.handleSpriteAnimationUpdate, this);
+    }
+    this.createWeaponFollowSpriteIfAvailable();
   }
 
   update(time, input) {
@@ -114,7 +143,12 @@ export class Player {
     this.lastAttackTime = time;
     this.attackActive = false;
     this.attackPhase = 'startup';
+    this.currentAttackFrameIndex = PLAYER_ATTACK_FRAME_SEQUENCE[0];
+    this.currentAttackFrameData = this.attackFrameDataByIndex.get(this.currentAttackFrameIndex) ?? null;
+    this.attackTimingWindowMs = this.computeAttackTimingWindowMs();
     this.attackHitbox.body.enable = false;
+    this.playAttackAnimation();
+    this.updateWeaponFollowTransform();
     this.setVisualTint(0x6f8c59);
     this.scene.audioDirector?.playPlayerAttack();
   }
@@ -125,8 +159,12 @@ export class Player {
     }
 
     const attackElapsed = time - this.lastAttackTime;
+    const activeStartMs = this.attackTimingWindowMs?.activeStartMs ?? this.config.attackStartupMs;
+    const activeEndMs = this.attackTimingWindowMs?.activeEndMs ?? (this.config.attackStartupMs + this.config.attackActiveMs);
+    const totalDurationMs = this.attackTimingWindowMs?.totalDurationMs
+      ?? (this.config.attackStartupMs + this.config.attackActiveMs + this.config.attackRecoveryMs);
 
-    if (this.attackPhase === 'startup' && attackElapsed >= this.config.attackStartupMs) {
+    if (this.attackPhase === 'startup' && attackElapsed >= activeStartMs) {
       this.attackPhase = 'active';
       this.attackActive = true;
       this.attackId += 1;
@@ -134,14 +172,14 @@ export class Player {
       return;
     }
 
-    if (this.attackPhase === 'active' && attackElapsed >= this.config.attackStartupMs + this.config.attackActiveMs) {
+    if (this.attackPhase === 'active' && attackElapsed >= activeEndMs) {
       this.attackPhase = 'recovery';
       this.attackActive = false;
       this.attackHitbox.body.enable = false;
       return;
     }
 
-    if (this.attackPhase === 'recovery' && attackElapsed >= this.config.attackStartupMs + this.config.attackActiveMs + this.config.attackRecoveryMs) {
+    if (this.attackPhase === 'recovery' && attackElapsed >= totalDurationMs) {
       this.endAttack();
     }
   }
@@ -150,6 +188,10 @@ export class Player {
     this.attackPhase = 'idle';
     this.attackActive = false;
     this.attackHitbox.body.enable = false;
+    this.currentAttackFrameIndex = PLAYER_ATTACK_FRAME_SEQUENCE[0];
+    this.currentAttackFrameData = null;
+    this.attackTimingWindowMs = null;
+    this.hideWeaponFollow();
   }
 
   receiveDamage(amount, time) {
@@ -246,6 +288,12 @@ export class Player {
     const isMovingHorizontally = horizontalSpeed >= PLAYER_WALK_MIN_SPEED;
     const isNearlyStationary = horizontalSpeed <= PLAYER_IDLE_MAX_SPEED;
     const inAttackCommit = this.attackPhase === 'startup' || this.attackPhase === 'active' || this.attackPhase === 'recovery';
+    if (!this.isDead && inAttackCommit && this.hasAttackStrip) {
+      this.playAttackAnimation();
+      this.updateWeaponFollowTransform();
+      return;
+    }
+
     const canAnimate = !this.isDead && !inAttackCommit && isGrounded;
     const canPlayWalk = canAnimate && isMovingHorizontally;
     const canPlayIdle = canAnimate && isNearlyStationary;
@@ -264,6 +312,7 @@ export class Player {
       return;
     }
 
+    this.hideWeaponFollow();
     this.setStaticFrame(0);
   }
 
@@ -293,6 +342,136 @@ export class Player {
     });
   }
 
+  registerAttackFrameData() {
+    if (!this.hasAttackStrip) {
+      return;
+    }
+
+    const attackTexture = this.scene.textures.get(ASSET_KEYS.playerAttackStrip);
+    if (!attackTexture) {
+      return;
+    }
+
+    const packageFrames = this.weaponFollowOffsetPackage?.frames;
+    PLAYER_ATTACK_FRAME_BOXES.forEach((frameBox) => {
+      const frameName = `${PLAYER_ATTACK_FRAME_PREFIX}${frameBox.frame}`;
+      if (!attackTexture.has(frameName)) {
+        attackTexture.add(frameName, 0, frameBox.x, frameBox.y, frameBox.w, frameBox.h);
+      }
+      const packageFrame = packageFrames?.find((entry) => entry.frame === frameBox.frame) ?? null;
+      this.attackFrameDataByIndex.set(frameBox.frame, {
+        ...frameBox,
+        frameName,
+        weapon: packageFrame
+      });
+    });
+  }
+
+  registerAttackAnimation() {
+    if (!this.hasAttackStrip || this.scene.anims.exists(PLAYER_ATTACK_ANIMATION_KEY)) {
+      return;
+    }
+
+    this.scene.anims.create({
+      key: PLAYER_ATTACK_ANIMATION_KEY,
+      frames: PLAYER_ATTACK_FRAME_SEQUENCE.map((frameIndex) => ({
+        key: ASSET_KEYS.playerAttackStrip,
+        frame: `${PLAYER_ATTACK_FRAME_PREFIX}${frameIndex}`
+      })),
+      frameRate: PLAYER_ATTACK_FPS,
+      repeat: 0
+    });
+  }
+
+  createWeaponFollowSpriteIfAvailable() {
+    if (!this.usingConceptSprite || !this.hasWeaponFollowStrip) {
+      return;
+    }
+
+    this.weaponSprite = this.scene.add
+      .sprite(this.sprite.x, this.sprite.y, ASSET_KEYS.playerWeaponHammerFollowStrip, 0)
+      .setOrigin(0, 0)
+      .setVisible(false)
+      .setAlpha(this.sprite.alpha)
+      .setDepth((this.sprite.depth ?? 6) + PLAYER_WEAPON_BACK_DEPTH_OFFSET);
+  }
+
+  playAttackAnimation() {
+    if (!this.usingConceptSprite || !this.hasAttackStrip) {
+      return;
+    }
+
+    if (this.sprite.anims.currentAnim?.key !== PLAYER_ATTACK_ANIMATION_KEY) {
+      this.sprite.play(PLAYER_ATTACK_ANIMATION_KEY, true);
+    }
+  }
+
+  handleSpriteAnimationUpdate(_animation, frame) {
+    if (this.sprite.anims.currentAnim?.key !== PLAYER_ATTACK_ANIMATION_KEY) {
+      return;
+    }
+
+    const textureFrame = String(frame.textureFrame ?? '');
+    const frameIndex = Number.parseInt(textureFrame.replace(PLAYER_ATTACK_FRAME_PREFIX, ''), 10);
+    if (!Number.isInteger(frameIndex)) {
+      return;
+    }
+
+    this.currentAttackFrameIndex = frameIndex;
+    this.currentAttackFrameData = this.attackFrameDataByIndex.get(frameIndex) ?? null;
+    this.updateWeaponFollowTransform();
+  }
+
+  computeAttackTimingWindowMs() {
+    const totalDurationMs = this.config.attackStartupMs + this.config.attackActiveMs + this.config.attackRecoveryMs;
+    const frameDurationMs = totalDurationMs / PLAYER_ATTACK_FRAME_SEQUENCE.length;
+    const impactFrameStartMs = frameDurationMs * (PLAYER_ATTACK_IMPACT_FRAME - 1);
+    const activeStartMs = Math.max(0, impactFrameStartMs - frameDurationMs * 0.3);
+    const activeEndMs = Math.min(totalDurationMs, impactFrameStartMs + frameDurationMs * 0.8);
+
+    return {
+      activeStartMs,
+      activeEndMs,
+      totalDurationMs
+    };
+  }
+
+  updateWeaponFollowTransform() {
+    if (!this.weaponSprite || this.attackPhase === 'idle') {
+      this.hideWeaponFollow();
+      return;
+    }
+
+    const frameData = this.currentAttackFrameData ?? this.attackFrameDataByIndex.get(PLAYER_ATTACK_FRAME_SEQUENCE[0]) ?? null;
+    const weaponFrame = frameData?.weapon;
+    if (!frameData || !weaponFrame) {
+      this.hideWeaponFollow();
+      return;
+    }
+
+    const sourceToWorldScale = this.sprite.displayHeight / frameData.h;
+    const spriteTopLeftX = this.sprite.x - this.sprite.displayWidth * this.sprite.originX;
+    const spriteTopLeftY = this.sprite.y - this.sprite.displayHeight * this.sprite.originY;
+    const offset = weaponFrame.offset_relative_to_player_crop;
+    const weaponX = spriteTopLeftX + offset.x * sourceToWorldScale;
+    const weaponY = spriteTopLeftY + offset.y * sourceToWorldScale;
+    const renderInFront = weaponFrame.render_order === 'front_of_player';
+    const depthOffset = renderInFront ? PLAYER_WEAPON_FRONT_DEPTH_OFFSET : PLAYER_WEAPON_BACK_DEPTH_OFFSET;
+
+    this.weaponSprite
+      .setVisible(true)
+      .setPosition(weaponX, weaponY)
+      .setFrame(frameData.frame - 1)
+      .setRotation(Phaser.Math.DegToRad(weaponFrame.rotation_deg ?? 0))
+      .setScale((weaponFrame.scale ?? 1) * sourceToWorldScale)
+      .setDepth((this.sprite.depth ?? 6) + depthOffset)
+      .setAlpha(this.sprite.alpha);
+  }
+
+  hideWeaponFollow() {
+    this.weaponSprite?.setVisible(false);
+  }
+
   setStaticFrame(frameIndex = 0) {
     if (!this.usingConceptSprite) {
       return;
@@ -300,6 +479,9 @@ export class Player {
 
     if (this.sprite.anims.isPlaying) {
       this.sprite.anims.stop();
+    }
+    if (this.sprite.texture?.key !== ASSET_KEYS.player) {
+      this.sprite.setTexture(ASSET_KEYS.player);
     }
     this.sprite.setFrame(frameIndex);
   }

@@ -142,6 +142,13 @@ export class BootScene extends Phaser.Scene {
       frameHeight: 1335,
       endFrame: 4
     });
+    this.load.image(ASSET_KEYS.playerAttackStrip, ASSET_URLS[ASSET_KEYS.playerAttackStrip]);
+    this.load.spritesheet(ASSET_KEYS.playerWeaponHammerFollowStrip, ASSET_URLS[ASSET_KEYS.playerWeaponHammerFollowStrip], {
+      frameWidth: 365,
+      frameHeight: 525,
+      endFrame: 4
+    });
+    this.load.json(ASSET_KEYS.playerWeaponHammerFollowOffsets, ASSET_URLS[ASSET_KEYS.playerWeaponHammerFollowOffsets]);
     this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
     this.load.image(ASSET_KEYS.laughingEngine, ASSET_URLS[ASSET_KEYS.laughingEngine]);
