@@ -890,7 +890,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         this.time.delayedCall(1180, () => {
           spawnEnemyCorpseRemains(this, {
             x: bossRemainsX,
-            y: WORLD.floorY - 2,
+            groundY: WORLD.floorY + 2,
             depth: this.bossSprite.depth,
             size: 'large'
           });

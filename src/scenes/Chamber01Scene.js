@@ -819,7 +819,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.stopMinibossVictoryGoreFountain();
     spawnEnemyCorpseRemains(this, {
       x: this.miniboss.sprite.x,
-      y: WORLD.floorY - 2,
+      groundY: WORLD.floorY + 2,
       depth: this.miniboss.sprite.depth,
       size: 'large'
     });

@@ -1302,7 +1302,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
         this.triggerSector02BlackOilPayoff(target, COMPRESSION_VAULTS_PRESSURE_DEACON.blowout);
         spawnEnemyCorpseRemains(this, {
           x: target.sprite.x,
-          y: WORLD.floorY - 2,
+          groundY: WORLD.floorY + 2,
           depth: target.sprite.depth,
           size: 'large'
         });
@@ -1339,10 +1339,11 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     }
 
     targetEnemy.blackOilPayoffTriggered = true;
+    const floorPlaneY = this.player?.sprite?.body?.bottom ?? WORLD.floorY + 2;
     triggerSector02BlackOilBlowout(this, {
       source: sprite,
       x: sprite.x,
-      y: (sprite.body?.bottom ?? sprite.y) - 14,
+      y: floorPlaneY - 14,
       depth: sprite.depth,
       scale: config.scale ?? 1,
       durationMs: config.durationMs,

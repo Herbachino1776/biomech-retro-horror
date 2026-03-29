@@ -51,6 +51,8 @@ function capSceneRemains(scene, cap = REMAINS_CAP_PER_SCENE) {
 export function spawnEnemyCorpseRemains(scene, {
   x = 0,
   y = 0,
+  groundY = null,
+  floorPlaneY = null,
   depth = 6,
   size = 'small',
   textureKey = ASSET_KEYS.enemyGoreClusterMeatBone01,
@@ -62,7 +64,8 @@ export function spawnEnemyCorpseRemains(scene, {
 
   const profile = REMAINS_PROFILES[size] ?? REMAINS_PROFILES.small;
   const pieceCount = Phaser.Math.Between(profile.pieceCountRange[0], profile.pieceCountRange[1]);
-  const container = scene.add.container(x, y).setDepth(depth - 0.1);
+  const groundedPlaneY = floorPlaneY ?? groundY ?? y;
+  const container = scene.add.container(x, groundedPlaneY).setDepth(depth - 0.1);
 
   for (let index = 0; index < pieceCount; index += 1) {
     const spawnOffsetX = Phaser.Math.Between(-profile.spawnRadiusX, profile.spawnRadiusX);
@@ -79,13 +82,17 @@ export function spawnEnemyCorpseRemains(scene, {
 
     const sourceMaxSide = Math.max(piece.width || 1, piece.height || 1);
     piece.setScale(targetMaxSidePx / sourceMaxSide);
+    const halfDisplayHeight = Math.max(1, piece.displayHeight * 0.5);
+    const liftAboveFloor = Math.max(0, settleDrop);
+    const settledGroundedY = -halfDisplayHeight - liftAboveFloor;
+    piece.y = settledGroundedY - spawnDrop;
 
     container.add(piece);
 
     scene.tweens.add({
       targets: piece,
       x: settleOffsetX,
-      y: settleDrop,
+      y: settledGroundedY,
       angle: Phaser.Math.Between(-16, 16),
       alpha: 1,
       duration: settleDuration,
