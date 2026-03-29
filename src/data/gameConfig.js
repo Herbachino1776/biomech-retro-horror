@@ -8,7 +8,9 @@ export const gameConfig = {
   parent: 'game-root',
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
-  backgroundColor: '#1a1412',
+  // Portrait mobile reserves a bottom controls band via camera viewport.
+  // Keep renderer clear color neutral-dark so no brown strip appears behind controls.
+  backgroundColor: '#070505',
   pixelArt: true,
   input: {
     activePointers: 3,
