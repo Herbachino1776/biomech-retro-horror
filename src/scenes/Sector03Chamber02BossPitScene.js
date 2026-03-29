@@ -114,8 +114,8 @@ const PIT_ALTARS = {
     zoneWidth: 196,
     zoneHeight: 212,
     promptOffsetY: -170,
-    inactivePrompt: 'ALTAR SEALED',
-    activePrompt: 'EXIT ALTAR OPEN\nPRESS RITE / [E] TO RETURN'
+    inactivePrompt: '',
+    activePrompt: ''
   }
 };
 
@@ -651,13 +651,7 @@ export class Sector03Chamber02BossPitScene extends Phaser.Scene {
       }
       const zone = this.add.zone(altarConfig.x, WORLD.floorY - 74, PIT_ALTARS.interaction.zoneWidth, PIT_ALTARS.interaction.zoneHeight).setOrigin(0.5);
       this.physics.add.existing(zone, true);
-      const prompt = this.add.text(
-        altarConfig.x,
-        WORLD.floorY + PIT_ALTARS.interaction.promptOffsetY,
-        PIT_ALTARS.interaction.inactivePrompt,
-        { fontFamily: 'monospace', fontSize: '14px', color: '#a29788', align: 'center', stroke: '#0d0908', strokeThickness: 4 }
-      ).setOrigin(0.5).setDepth(-4.58).setVisible(false);
-      this.exitAltar = { sprite, aura, zone, prompt };
+      this.exitAltar = { sprite, aura, zone, prompt: null };
     });
     this.updateExitAltarVisualState();
   }
@@ -697,11 +691,7 @@ export class Sector03Chamber02BossPitScene extends Phaser.Scene {
       this.currentExitAltar = this.exitAltar;
     });
 
-    const inside = Boolean(this.currentExitAltar);
-    this.exitAltar.prompt
-      ?.setVisible(inside)
-      .setText(this.hasUnlockedExitAltar ? PIT_ALTARS.interaction.activePrompt : PIT_ALTARS.interaction.inactivePrompt)
-      .setColor(this.hasUnlockedExitAltar ? '#d8ceb8' : '#a29788');
+    this.exitAltar?.prompt?.setVisible(false);
   }
 
   tryUseExitAltar(mobileInput) {

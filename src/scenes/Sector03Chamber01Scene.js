@@ -181,7 +181,7 @@ const CRADLE_LORE = {
   cutsceneId: 'sector03-chamber01-gallery-refusal-shrine',
   anchor: {
     id: 'gallery-refusal-shrine',
-    label: 'READ THE REFUSAL SHRINE',
+    label: '',
     zoneX: 650,
     zoneY: WORLD.floorY - 78,
     zoneWidth: 214,
@@ -209,8 +209,8 @@ const CRADLE_LORE = {
 
 const CRADLE_TRAP_ALTAR = {
   id: 'gallery-withheld-descent-altar',
-  label: 'TRAP ALTAR BREATHES\nPRESS RITE / [E] TO DESCEND',
-  exhaustedLabel: 'TRAP ALTAR EXHAUSTED',
+  label: '',
+  exhaustedLabel: '',
   zoneX: 3240,
   zoneY: WORLD.floorY - 78,
   zoneWidth: 218,
@@ -456,11 +456,7 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     const zone = this.add.zone(anchor.zoneX, anchor.zoneY, anchor.zoneWidth, anchor.zoneHeight).setOrigin(0.5);
     this.physics.add.existing(zone, true);
 
-    const prompt = this.add.text(anchor.zoneX, anchor.zoneY + anchor.promptOffsetY, anchor.label, {
-      fontFamily: 'monospace', fontSize: '14px', color: '#d7c8b6', align: 'center', stroke: '#100c0a', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.58).setAlpha(0.9).setVisible(false);
-
-    this.loreAnchor = { ...anchor, zone, prompt };
+    this.loreAnchor = { ...anchor, zone, prompt: null };
   }
 
   createTrapAltar() {
@@ -485,11 +481,7 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     const aura = this.add.ellipse(altar.altarX, altar.altarY - 2, altar.altarDisplayWidth * 0.72, altar.altarDisplayHeight * 0.66, 0xc5ad88, 0.08).setDepth(-6.06);
     const zone = this.add.zone(altar.zoneX, altar.zoneY, altar.zoneWidth, altar.zoneHeight).setOrigin(0.5);
     this.physics.add.existing(zone, true);
-    const prompt = this.add.text(altar.zoneX, altar.zoneY + altar.promptOffsetY, altar.label, {
-      fontFamily: 'monospace', fontSize: '14px', color: '#ddceb7', align: 'center', stroke: '#100c0a', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.56).setAlpha(0.92).setVisible(false);
-
-    this.trapAltar = { ...altar, sprite, aura, zone, prompt };
+    this.trapAltar = { ...altar, sprite, aura, zone, prompt: null };
     this.updateTrapAltarVisualState();
   }
 
@@ -522,19 +514,7 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
         .setDepth(-4.92);
     }
 
-    this.forwardPrompt = this.add.text(
-      CRADLE_FORWARD_GATE.thresholdX,
-      CRADLE_FORWARD_GATE.thresholdY + CRADLE_FORWARD_GATE.promptOffsetY,
-      'REFUSAL SEAL CLOSED',
-      {
-        fontFamily: 'monospace',
-        fontSize: '14px',
-        color: '#d9cab8',
-        align: 'center',
-        stroke: '#100b09',
-        strokeThickness: 4
-      }
-    ).setOrigin(0.5).setDepth(-4.58).setAlpha(0.9).setVisible(false);
+    this.forwardPrompt = null;
   }
 
   createUiAndInput() {
@@ -685,7 +665,7 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     }
     this.forwardBarrierCollider?.destroy();
     this.forwardBarrierCollider = null;
-    this.forwardPrompt?.setText('REFUSAL SEAL YIELDED\nPRESS RITE / [E] TO MARK CHAMBER II THRESHOLD');
+    this.forwardPrompt?.setVisible(false);
   }
 
   refreshLoreZonePresence() {
@@ -729,11 +709,7 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
       this.currentTrapAltar = this.trapAltar;
     });
 
-    const inside = Boolean(this.currentTrapAltar);
-    this.trapAltar.prompt
-      ?.setVisible(inside)
-      .setText(this.hasCompletedBossPitLoop ? CRADLE_TRAP_ALTAR.exhaustedLabel : CRADLE_TRAP_ALTAR.label)
-      .setColor(this.hasCompletedBossPitLoop ? '#8f7f71' : '#ddceb7');
+    this.trapAltar?.prompt?.setVisible(false);
   }
 
   tryBeginTrapAltarDescent(mobileInput) {

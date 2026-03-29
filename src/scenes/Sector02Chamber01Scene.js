@@ -613,11 +613,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     const zone = this.add.zone(anchorConfig.zoneX, anchorConfig.zoneY, anchorConfig.zoneWidth, anchorConfig.zoneHeight).setOrigin(0.5);
     this.physics.add.existing(zone, true);
 
-    const prompt = this.add.text(anchorConfig.zoneX, anchorConfig.zoneY + anchorConfig.promptOffsetY, anchorConfig.label, {
-      fontFamily: 'monospace', fontSize: '14px', color: '#cfdbc9', align: 'center', stroke: '#0d1010', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.6).setAlpha(0.9).setVisible(false);
-
-    return { ...anchorConfig, zone, prompt };
+    return { ...anchorConfig, zone, prompt: null };
   }
 
   createForwardThreshold() {
@@ -1070,7 +1066,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.forwardBarrier.body.enable = false;
       this.forwardBarrier.body.updateFromGameObject?.();
     }
-    this.forwardPrompt?.setText('PATH FORWARD STABILIZED\nENTER THE PROCESSION THRESHOLD');
+    this.forwardPrompt?.setVisible(false);
     this.processionalLabel?.setText('BLACK AQUEDUCT\nTHRESHOLD UNSEALED');
     this.archonWakeLabel?.setText('ABYSSAL ARCHON\nNULLIFIED').setAlpha(0.84);
   }
@@ -1125,7 +1121,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     }
 
     this.hasTriggeredForwardContract = true;
-    this.forwardPrompt?.setVisible(true).setText('DESCENT MARKED\nENTERING THE COMPRESSION VAULTS');
+    this.forwardPrompt?.setVisible(false);
     this.processionalLabel?.setText('DESCENT MARKED\nCOMPRESSION VAULTS');
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {

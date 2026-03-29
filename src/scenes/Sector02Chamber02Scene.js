@@ -793,11 +793,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     const zone = this.add.zone(anchorConfig.zoneX, anchorConfig.zoneY, anchorConfig.zoneWidth, anchorConfig.zoneHeight).setOrigin(0.5);
     this.physics.add.existing(zone, true);
 
-    const prompt = this.add.text(anchorConfig.zoneX, anchorConfig.zoneY + anchorConfig.promptOffsetY, anchorConfig.label, {
-      fontFamily: 'monospace', fontSize: '14px', color: '#cfdbc9', align: 'center', stroke: '#0d1010', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.6).setAlpha(0.9).setVisible(false);
-
-    this.loreAnchor = { ...anchorConfig, zone, prompt };
+    this.loreAnchor = { ...anchorConfig, zone, prompt: null };
     if (this.hasCompletedBossPitLoop) {
       this.renderSpentTrapAltarState();
     }
@@ -1557,7 +1553,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.forwardBarrier.body.enable = false;
       this.forwardBarrier.body.updateFromGameObject?.();
     }
-    this.forwardPrompt?.setText('CRUCIBLE GATE UNSEALED\nPRESS RITE / [E] TO MARK DESCENT');
+    this.forwardPrompt?.setVisible(false);
     this.processionalLabel?.setText('PRESSURE DEACON NULLIFIED\nCHAMBER 3 DESCENT MARKED');
   }
 
@@ -1610,7 +1606,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     }
 
     this.hasTriggeredForwardContract = true;
-    this.forwardPrompt?.setVisible(true).setText('DESCENT MARKED\nENTERING THE KILN OF JUDGEMENT');
+    this.forwardPrompt?.setVisible(false);
     this.processionalLabel?.setText('CRUCIBLE GATE OPEN\nKILN OF JUDGEMENT AWAITS');
     this.forwardBarrier?.setAlpha(0.04);
 

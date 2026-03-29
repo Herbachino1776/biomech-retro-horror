@@ -116,7 +116,7 @@ const CHAMBER03_FINALE = {
   bossBarDropDelayMs: 1180,
   controlReleaseDelayMs: 3720,
   progressionInteractDelayMs: 360,
-  progressionPromptText: 'DESCEND THROUGH THE RUPTURE',
+  progressionPromptText: '',
   payoffTitle: 'THE PRECENTOR IS SILENCED',
   payoffBody: 'Sector I stands complete.\nThe marrow route below has opened.',
   holdingStateReason: 'sector-i-complete-holding-threshold'
@@ -554,18 +554,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       this.progressionGate.add(thresholdShell);
     }
 
-    this.progressionGatePrompt = this.add
-      .text(gateX, gateY - 196, CHAMBER03_FINALE.progressionPromptText, {
-        fontFamily: 'monospace',
-        fontSize: '15px',
-        color: '#d8cfba',
-        align: 'center',
-        stroke: '#100c0b',
-        strokeThickness: 4
-      })
-      .setOrigin(0.5)
-      .setDepth(35)
-      .setVisible(false);
+    this.progressionGatePrompt = null;
 
     this.progressionThresholdZone = this.add.zone(gateX, WORLD.floorY - 42, 180, 212).setOrigin(0.5);
     this.physics.add.existing(this.progressionThresholdZone, true);
@@ -935,7 +924,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
           run: () => {
             this.isSectorFinaleActive = true;
             this.player.attackHitbox?.body?.setEnable(false);
-            this.progressionGatePrompt?.setText(`${CHAMBER03_FINALE.progressionPromptText}\nPRESS RITE / [E]`);
+
           }
         }
       ],

@@ -247,16 +247,13 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     }
     const zone = this.add.zone(altarX, WORLD.floorY - 78, 214, 210).setOrigin(0.5);
     this.physics.add.existing(zone, true);
-    const prompt = this.add.text(altarX, WORLD.floorY - 256, 'READ THE BORROWED FACES SHRINE', {
-      fontFamily: 'monospace', fontSize: '14px', color: '#d7c8b6', align: 'center', stroke: '#100c0a', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.58).setAlpha(0.9).setVisible(false);
-    this.loreAnchor = { zone, prompt };
+    this.loreAnchor = { zone, prompt: null };
   }
 
   createBossPitAltars() {
     this.pitAltars = [
-      { id: 'bosspit02', x: 3360, y: WORLD.floorY - 106, label: 'DESCEND TO ASH PIT\nPRESS RITE / [E]' },
-      { id: 'bosspit03', x: 5380, y: WORLD.floorY - 106, label: 'DESCEND TO HOLLOW SKY PIT\nPRESS RITE / [E]' }
+      { id: 'bosspit02', x: 3360, y: WORLD.floorY - 106, label: '' },
+      { id: 'bosspit03', x: 5380, y: WORLD.floorY - 106, label: '' }
     ].map((pit) => {
       const sprite = this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)
         ? this.add.image(pit.x, pit.y, ASSET_KEYS.sector03Chamber02LoreAltar).setDisplaySize(208, 208).setTint(0xd6c4ae).setAlpha(0.86).setDepth(-6.08)
@@ -264,10 +261,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
       const aura = this.add.ellipse(pit.x, pit.y + 4, 156, 146, 0xc5ad88, 0.08).setDepth(-6.06);
       const zone = this.add.zone(pit.x, WORLD.floorY - 78, 218, 214).setOrigin(0.5);
       this.physics.add.existing(zone, true);
-      const prompt = this.add.text(pit.x, WORLD.floorY - 252, pit.label, {
-        fontFamily: 'monospace', fontSize: '14px', color: '#ddceb7', align: 'center', stroke: '#100c0a', strokeThickness: 4
-      }).setOrigin(0.5).setDepth(-4.56).setAlpha(0.92).setVisible(false);
-      return { ...pit, sprite, aura, zone, prompt };
+      return { ...pit, sprite, aura, zone, prompt: null };
     });
 
     this.updatePitAltarState();
@@ -306,9 +300,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     this.forwardThresholdZone = this.add.zone(6170, WORLD.floorY - 76, 212, 224).setOrigin(0.5);
     this.physics.add.existing(this.forwardThresholdZone, true);
 
-    this.forwardPrompt = this.add.text(6170, WORLD.floorY - 242, 'THRESHOLD SEALED', {
-      fontFamily: 'monospace', fontSize: '14px', color: '#d9cab8', align: 'center', stroke: '#100b09', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.58).setAlpha(0.9).setVisible(false);
+    this.forwardPrompt = null;
   }
 
   configureLayout() {
@@ -482,11 +474,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
         this.currentPitAltar = altar;
       });
 
-      const completed = altar.id === 'bosspit02' ? this.hasCompletedPit02 : this.hasCompletedPit03;
-      altar.prompt
-        .setVisible(inside)
-        .setText(completed ? 'TRAP ALTAR EXHAUSTED' : altar.label)
-        .setColor(completed ? '#8f7f71' : '#ddceb7');
+      altar.prompt?.setVisible(false);
     });
   }
 
@@ -599,7 +587,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
       this.forwardBarrier.body.enable = false;
       this.forwardBarrier.body.updateFromGameObject?.();
     }
-    this.forwardPrompt?.setText('BORROWED THRESHOLD YIELDED\nPRESS RITE / [E] TO MARK CHAMBER III THRESHOLD');
+    this.forwardPrompt?.setVisible(false);
   }
 
   refreshForwardThresholdPresence() {

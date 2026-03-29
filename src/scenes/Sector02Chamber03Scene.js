@@ -636,10 +636,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     const anchor = KILN_LORE.anchor;
     const zone = this.add.zone(anchor.zoneX, anchor.zoneY, anchor.zoneWidth, anchor.zoneHeight).setOrigin(0.5);
     this.physics.add.existing(zone, true);
-    const prompt = this.add.text(anchor.zoneX, anchor.zoneY + anchor.promptOffsetY, anchor.label, {
-      fontFamily: 'monospace', fontSize: '14px', color: '#e0d2bc', align: 'center', stroke: '#120c0a', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(-4.6).setAlpha(0.9).setVisible(false);
-    this.loreAnchor = { ...anchor, zone, prompt };
+    this.loreAnchor = { ...anchor, zone, prompt: null };
   }
 
   createClimaxEncounter() {
@@ -1415,7 +1412,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       yoyo: true,
       ease: 'Sine.inOut'
     });
-    this.forwardPrompt?.setText('SORROW ENGINE RUPTURED\nPRESS RITE / [E] TO DESCEND');
+    this.forwardPrompt?.setVisible(false);
   }
 
   refreshForwardThresholdPresence() {
@@ -1466,7 +1463,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     }
 
     this.hasTriggeredForwardContract = true;
-    this.forwardPrompt?.setVisible(true).setText('DESCENT MARKED\nENTERING THE CRADLE OF REFUSAL');
+    this.forwardPrompt?.setVisible(false);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.cleanupSceneUi?.();
       this.audioDirector?.shutdown();
