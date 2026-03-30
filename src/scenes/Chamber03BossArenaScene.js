@@ -92,7 +92,7 @@ const CHAMBER03_BOSS_COMBAT = {
     contactDamage: 1,
     contactDamageCooldownMs: 1200
   },
-  body: { width: 112, height: 230, offsetX: 126, offsetY: 150 },
+  body: { width: 96, height: 230, offsetX: 134, offsetY: 150 },
   hurtFlashMs: 220,
   hitPulseMs: 260,
   hurtRecoverMs: 260,
