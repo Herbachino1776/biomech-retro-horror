@@ -292,7 +292,9 @@ export class SkitterServitor {
     this.nextAttackAllowedAt = time + this.config.attackRecoveryMs + this.config.attackCooldownMs;
     this.enterState('attack', time, this.config.attackActiveMs);
     this.body.setVelocityX(this.direction * (this.config.speed + this.config.lungeSpeedBonus));
-    this.body.setVelocityY(this.config.lungeJumpVelocity);
+    const attackRiseClamp = this.config.maxAttackRiseVelocity ?? -24;
+    const attackFallClamp = this.config.maxAttackFallVelocity ?? 200;
+    this.body.setVelocityY(Phaser.Math.Clamp(this.config.lungeJumpVelocity, attackRiseClamp, attackFallClamp));
 
     if (!this.attackAudioLocked) {
       this.attackAudioLocked = true;
@@ -386,7 +388,7 @@ export class SkitterServitor {
     this.scene.audioDirector?.playEnemyHurt(this.config.audioProfile ?? 'enemy');
     this.enterState('hurt', time, this.config.hurtLockMs);
     this.body.setVelocityX(this.hurtPushDirection * this.config.recoilVelocityX);
-    const hurtRiseClamp = this.config.maxHurtRiseVelocity ?? -44;
+    const hurtRiseClamp = this.config.maxHurtRiseVelocity ?? -22;
     const hurtFallClamp = this.config.maxHurtFallVelocity ?? 220;
     this.body.setVelocityY(Phaser.Math.Clamp(this.config.recoilVelocityY, hurtRiseClamp, hurtFallClamp));
   }

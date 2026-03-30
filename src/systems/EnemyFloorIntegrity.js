@@ -2,6 +2,7 @@ import { WORLD } from '../data/milestone1Config.js';
 
 const DEFAULT_FLOOR_BOTTOM_Y = WORLD.floorY + 2;
 const FLOOR_PENETRATION_EPSILON = 0.75;
+const UPWARD_CORRECTION_GUARD_VELOCITY = -8;
 
 function syncSpriteToBodyY(sprite, body) {
   if (!sprite || !body) {
@@ -22,9 +23,13 @@ export function enforceEnemyFloorIntegrity(sprite, body, floorBottomY = DEFAULT_
     return false;
   }
 
+  if (body.velocity.y < UPWARD_CORRECTION_GUARD_VELOCITY) {
+    return false;
+  }
+
   body.y -= penetration;
   body.prev.y = body.y;
-  body.velocity.y = Math.min(0, body.velocity.y);
+  body.velocity.y = 0;
   body.blocked.down = true;
   body.touching.down = true;
   body.wasTouching.down = true;
