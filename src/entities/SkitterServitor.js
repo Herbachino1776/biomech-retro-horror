@@ -4,6 +4,7 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { triggerEnemyDeathRuptureBurst } from '../systems/EnemyDeathRuptureBurst.js';
 import { triggerEnemyHitSplatterBurst } from '../systems/EnemyHitSplatterBurst.js';
 import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
+import { applyEnemyFloorClamp } from '../systems/enemyGrounding.js';
 
 export class SkitterServitor {
   constructor(scene, x, y, config) {
@@ -98,6 +99,7 @@ export class SkitterServitor {
   update(time, playerX) {
     this.updatePoiseState(time);
     this.updateVisuals(time);
+    applyEnemyFloorClamp(this);
 
     if (this.dead) {
       this.body.setVelocity(0, 0);
