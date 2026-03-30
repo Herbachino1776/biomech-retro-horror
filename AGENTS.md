@@ -33,6 +33,9 @@ Before changing gameplay, controls, deployment, asset loading, UI presentation, 
 17. Treat regressions as failures to diagnose and fix, not as features to reimplement blindly.
 18. Future art generation and integration must respect the locked palette and readability doctrine in `docs/art-direction-lock.md`.
 19. Lore presentation is a major identity feature and should evolve toward discrete cinematic ritual presentation, not generic dialogue UI.
+20. Prefer simple, surgical passes first; avoid speculative over-engineering.
+21. Treat Sector 3 Chamber 1 as rebuilt/current authored content (not an old prototype assumption).
+22. Do not modify binaries/assets during routine passes unless explicitly requested and scoped.
 
 ## Aesthetic Rules
 - The world is biomechanical, ritualized, oppressive, and alien.
@@ -55,6 +58,7 @@ When working on a task:
 - list files you will touch
 - implement only the scoped work
 - note any blockers clearly
+- keep changes reviewable and minimal when a surgical pass will solve the task
 
 ## Definition of Done
 A task is done when:

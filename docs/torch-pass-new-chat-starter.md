@@ -12,7 +12,12 @@
 ## Current Project State (Short)
 The project is a multi-sector prototype, not a single-room slice. Sector 1 is playable end-to-end with its boss arena finale. Sector 2 is also playable as a three-chamber arc with its own chamber boss payoff. Sector 2 Chamber 2 includes the first working trap-altar -> boss-pit -> return loop.
 
-Sector 3 has started in practice: Chamber 1 (**Gallery of Failed Measures**) exists as a playable backbone scene (`Sector03Chamber01Scene`) with functional encounter pockets, lore altar, and threshold/seal scaffold.
+Sector 3 is beyond bootstrap and in later-stage build/polish-consistency shaping.
+- Chamber 1 (**Gallery of Failed Measures**) has been rebuilt toward the newer authored-chamber standard.
+- Half-Skull was removed from Chamber 1.
+- Chamber 1 now uses a provisional replacement boss based on `art/raw/sector03/chamber02/enemy_chamber02_blind_cantor_basic_01.png`.
+- Chamber 1 boss sequence uses modern full treatment: zoom + shake + elongated ceremonial finish + stronger gore payoff + escalated remains.
+- Chamber 3 has already been substantially built out from its uploaded art pack.
 
 ## Milestone Reality
 - Milestone 7 is advanced/largely established (major systems landed, follow-up lanes remain).
@@ -57,14 +62,19 @@ Boss pits are now core structure and strategy, not detached side content.
 - meaningful reward-bearing encounters
 - clean entry/exit behavior
 - personality-forward fights
+- locked modern payoff family for bosses/minibosses/pit bosses: zoom + shake + elongated ceremonial finish + stronger gore + escalated remains
 
 Target rhythm: oppressive exploration -> suspicion -> ritual trigger -> descent -> violent boss payoff -> stronger vessel.
 
 ## Future Animation Lane (Planned, Deferred)
 Character animation is a real future lane, but **not active focus right now**.
-- starts with player sprite animation work
-- later includes locomotion, weapon swing, Rite, and broader combat/performance animation language
+- conservative current baseline: player has working idle + walk + functional visible hammer attack
+- deferred next lane: player weapon/attack polish
+- later includes broader weapon-set expansion, alternate attack families (smash / thrust / swipe / upswing), Rite, and broader combat/performance animation language
 - current static-sprite-heavy presentation is interim, not permanent doctrine
+
+## Later Milestone Reminder
+- Add **Polish Chamber 1** as a later polish item, not as current mainline focus.
 
 ## Likely Next Implementation Priority
 Continue Milestone 8 through Sector 3 gameplay buildout: first stronger trap-altar/boss-pit expansion and/or stronger elite-domain authoring in opened-room segments, without regressing current scene-flow/run-state contracts.

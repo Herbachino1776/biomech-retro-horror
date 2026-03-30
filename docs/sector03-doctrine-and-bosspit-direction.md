@@ -4,6 +4,8 @@
 - **Sector 3 title:** **The Cradle of Refusal**.
 - Sector 3 is where the game stops merely proving systems and starts **weaponizing** them.
 - The build direction for Sector 3 is not a soft content extension; it is a deliberate escalation pass using what Sectors 1 and 2 already proved.
+- Sector 3 is now in later-stage build/polish-consistency shaping, not early bootstrap.
+- Chamber 1 has already been rebuilt toward newer authored-chamber quality and Chamber 3 is substantially built from uploaded art.
 
 ## Core Structural Shift: Boss Pits
 Boss pits are no longer treated as side gimmicks.
@@ -17,6 +19,17 @@ They are now part of the game’s core structural rhythm and run strategy.
 - Boss pit rewards must contribute to run growth through Vessel economy progression (current integrity continuity + max Vessel growth where intended).
 - Boss pit flows must support **clean entry and clean exit** with reliable state handoff.
 - Boss pit fights should have **strong encounter personality**, not generic stat bumps.
+- Boss/miniboss/pit-boss payoff treatment is locked to the modern stronger family:
+  - zoom
+  - shake
+  - elongated ceremonial finish
+  - stronger gore payoff
+  - escalated boss remains
+
+### Chamber 1 Current-Reality Addendum
+- Half-Skull is removed from Sector 3 Chamber 1.
+- Chamber 1 uses a provisional replacement boss based on `art/raw/sector03/chamber02/enemy_chamber02_blind_cantor_basic_01.png`.
+- Chamber 1 should be treated as an authored chamber aligned to newer standards, not an old prototype placeholder.
 
 ## Why This Matters
 The project’s lore is intentionally dense, vague, and cosmological. That remains core identity.

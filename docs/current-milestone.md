@@ -4,7 +4,7 @@
 - **Milestone 5 (Sector 1 Content Expansion) is closed** in first-pass terms.
 - **Milestone 6 (Sector 2 / The Black Aqueduct) is functionally established** as a full prototype arc.
 - **Milestone 7 (Combat Sidequest + wrap quality lanes) is largely established and meaningfully advanced.**
-- **Milestone 8 (Sector 3 Buildout + Boss-Pit Expansion) is now active in practice.**
+- **Milestone 8 (Sector 3 Buildout + Boss-Pit Expansion) is active in later-stage execution.**
 
 ## What Is Working in the Current Build
 - Sector 1 progression is live: Chamber 01 -> Chamber 02 -> Chamber 03 -> separate boss arena finale.
@@ -14,7 +14,11 @@
 - Shared major-encounter resolution flow is active and reusable.
 - Vessel run economy foundations are active: chamber-entry partial restore + major-encounter max-cap reward behavior.
 - Projectile/AOE/boss readability systems are active in live Sector 2 encounters.
-- Sector 3 Chamber 1 (**Gallery of Failed Measures**) exists as a playable backbone scene (`Sector03Chamber01Scene`).
+- Sector 3 Chamber 1 (**Gallery of Failed Measures**) has been rebuilt toward the later authored-chamber standard.
+- Half-Skull was removed from Sector 3 Chamber 1.
+- Chamber 1 now uses a provisional replacement boss based on `art/raw/sector03/chamber02/enemy_chamber02_blind_cantor_basic_01.png`.
+- Chamber 1 boss flow now follows modern full treatment: zoom + shake + elongated ceremonial finish + stronger gore payoff + escalated boss remains.
+- Sector 3 Chamber 3 has already been substantially built out from its uploaded art pack.
 
 ## Milestone 7 Status (Truthful Snapshot)
 Milestone 7 is **advanced/largely established** and no longer the main active build lane.
@@ -35,8 +39,8 @@ Milestone 7 is **advanced/largely established** and no longer the main active bu
 - 7I Sponge vs Satisfaction Balance
 
 ## Active Build Lane Now
-- Milestone 8 execution has begun through Sector 3 Chamber 1 and early Sector 3 authoring.
-- Practical priority is Sector 3 buildout + boss-pit expansion, while preserving existing Sector 1/2 contracts.
+- Milestone 8 is in a later-stage build/polish-consistency phase rather than early bootstrap.
+- Practical priority is Sector 3 consistency, chamber quality alignment, and boss-pit expansion while preserving existing Sector 1/2 contracts.
 - Milestone 7 follow-up remains available as targeted polish/support work, not primary sequencing.
 
 ## Authoring Doctrine to Follow During Milestone 8
@@ -52,10 +56,15 @@ Meaning:
 - elites/minibosses/trap-altar reveals belong primarily in larger room-style backgrounds
 - background segmentation and encounter tiering should visibly reinforce each other
 
+## Planned Later Milestone Items (Deferred)
+- **Polish Chamber 1** is a later polish item, not current mainline milestone focus.
+- Sector 3 chamber-to-chamber consistency polish remains a later-stage shaping lane.
+
 ## Planned Future Lane (Deferred)
 Character animation is an intentional future production lane, but it is **not active focus now**.
-- planned start point: player sprite
-- planned later scope: locomotion improvements, weapon swing animation, Rite animation, broader combat/performance animation language
+- current conservative baseline: player idle + walk + functional visible hammer attack are working
+- planned start point for deeper polish: player weapon/attack refinement pass
+- planned later scope: broader weapon-set expansion, alternate attack families (smash / thrust / swipe / upswing), Rite animation, broader combat/performance animation language
 - the production approach is already user-directed and should be preserved when this lane starts
 
 ## Do Not Change Casually

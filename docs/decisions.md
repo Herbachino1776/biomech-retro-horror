@@ -24,6 +24,10 @@ Concise record of technical/design decisions currently in force.
 - Sector 2 kill-payoff language is **Black Oil / Tar-laced Blood**.
 - Sector 3 identity is **The Cradle of Refusal**.
 - Sector 3 Chamber 1 playable backbone scene is **Gallery of Failed Measures**.
+- Sector 3 Chamber 1 was rebuilt toward newer authored-chamber standards.
+- Half-Skull is removed from Chamber 1.
+- Chamber 1 provisional replacement boss uses `art/raw/sector03/chamber02/enemy_chamber02_blind_cantor_basic_01.png` as the source asset.
+- Sector 3 Chamber 3 is substantially built from its uploaded art pack.
 
 ## Chamber Scale + Finale Doctrine
 - Chamber-03-level scale/consequence is the benchmark for future chambers.
@@ -57,6 +61,12 @@ This means:
 - Boss pits must grant meaningful Vessel growth rewards when cleared.
 - Boss pits should preserve clean entry/exit contracts and deterministic return behavior.
 - Sector 3 is expected to be boss-pit-heavy by design, with higher trap-altar density than earlier sectors.
+- Boss/miniboss/pit-boss death/payoff treatment is locked to the modern stronger family:
+  - camera zoom
+  - camera shake
+  - elongated ceremonial finish
+  - stronger gore payoff
+  - escalated boss remains
 
 ## Lore Presentation Doctrine
 - Lore is a primary identity system.
@@ -72,14 +82,16 @@ This means:
 - Milestone 5 is closed.
 - Milestone 6 moved beyond foothold status and now represents a full Sector 2 prototype arc.
 - Milestone 7 is largely established; remaining 7C/7H/7I are targeted follow-up lanes, not default primary sequencing.
-- Milestone 8 is now active in practice through Sector 3 Chamber 1 and early Sector 3 buildout.
+- Milestone 8 is active in later-stage execution (Sector 3 consistency/polish shaping, not early bootstrap).
 - Post-7 direction remains coupled: Sector 3 buildout + boss-pit expansion.
 - Global boss refinement/uniformity is planned as a later polish milestone (not dropped).
+- Chamber 1 polish is a later polish milestone item (not active mainline).
 
 ## Future Character Animation Doctrine (Deferred Lane)
 - Animated characters are a real planned future production focus.
-- This lane begins with the **player sprite**.
-- Planned scope includes player locomotion improvements, weapon swing animation, Rite animation, and broader combat/performance animation language.
+- Current conservative baseline already present: player idle + walk + functional visible hammer attack.
+- Deferred polish lane begins with player weapon/attack refinement.
+- Planned later scope includes broader weapon-set expansion, alternate attack families (smash/thrust/swipe/upswing), Rite animation, and broader combat/performance animation language.
 - This lane is intentionally deferred for now; current static-sprite-heavy presentation is not permanent doctrine.
 - The user-defined production approach for animation should be preserved when this lane is activated.
 

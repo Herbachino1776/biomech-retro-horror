@@ -43,17 +43,27 @@ Do-not-break checklist for current stability.
 - Basic enemy density should primarily live in corridor wall-module segments.
 - Elite/miniboss/trap-altar reveal encounters should primarily live in opened-up room domains.
 - Background segmentation and encounter tiering should stay coupled for readability.
+- Do not regress authored chambers back toward early prototype layout assumptions (notably Sector 3 Chamber 1).
 
 ## Boss Pit / Run-State Invariants
 - Boss pit completion state is run-scoped and must reset on death/fresh run.
 - Boss pit reward-granted state is run-scoped and must reset on death/fresh run.
 - Boss pit reward grants must be idempotent per run (no duplicate grants within a single run).
+- Boss/miniboss/pit-boss death/payoff treatment must preserve modern full doctrine:
+  - zoom
+  - shake
+  - elongated ceremonial finish
+  - stronger gore payoff
+  - escalated remains
 
 ## Scene Flow Invariants
 - Sector 1 and Sector 2 chamber chains must remain playable end-to-end.
-- Sector 3 Chamber 1 (`Sector03Chamber01Scene`) must remain registered/playable as current Milestone 8 backbone handoff.
+- Sector 3 Chamber 1 (`Sector03Chamber01Scene`) must remain registered/playable and aligned with later authored-chamber quality baseline.
+- Sector 3 Chamber 3 built content must remain stable while consistency/polish work proceeds.
 - Scene registration + transition wiring are first checks for any chamber boot/handoff failure.
 
 ## Milestone Direction Invariant
 - Active build lane remains Milestone 8 (Sector 3 buildout + boss-pit expansion).
+- Milestone 8 is in later-stage execution (consistency/polish shaping), not early bootstrap.
+- Chamber 1 polish is a later milestone item, not the active main milestone.
 - Do not casually derail active milestone direction with unrelated system expansion during routine passes.
