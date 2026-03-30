@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Player } from '../entities/Player.js';
-import { PressureDeacon as MisassignedSeraphBossEntity } from '../entities/PressureDeacon.js';
+import { MisassignedSeraph } from '../entities/MisassignedSeraph.js';
 import { EnemyProjectile } from '../entities/EnemyProjectile.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
@@ -27,8 +27,6 @@ const CHAMBER = {
   rewardKey: 'sector03-chamber02-major-boss-misassigned-seraph'
 };
 
-// Sector 3 Chamber 2 keeps the proven PressureDeacon combat chassis,
-// but the chamber-facing identity, naming, and payoff are Seraph-specific.
 const MISASSIGNED_SERAPH_BOSS = {
   name: 'THE MISASSIGNED SERAPH',
   subtitle: 'House Terminal Adjudicator',
@@ -141,7 +139,7 @@ export class Sector03Chamber02BossChamberScene extends Phaser.Scene {
     this.createInvisiblePlatform(CHAMBER.worldWidth / 2, WORLD.floorY + 28, CHAMBER.worldWidth, CHAMBER.floorColliderHeight);
 
     this.audioDirector = new AudioDirector(this);
-    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.1 });
+    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.092 });
 
     this.createBackdrop();
     this.createCombat();
@@ -195,7 +193,7 @@ export class Sector03Chamber02BossChamberScene extends Phaser.Scene {
     this.enemyProjectileGroup = this.physics.add.group({ allowGravity: false, immovable: true });
     this.physics.add.overlap(this.player.sprite, this.enemyProjectileGroup, (_playerSprite, projectileSprite) => this.handleEnemyProjectileHit(projectileSprite));
 
-    this.boss = new MisassignedSeraphBossEntity(
+    this.boss = new MisassignedSeraph(
       this,
       MISASSIGNED_SERAPH_BOSS.spawnX,
       MISASSIGNED_SERAPH_BOSS.spawnY,

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Player } from '../entities/Player.js';
-import { PressureDeacon } from '../entities/PressureDeacon.js';
+import { FirstRefused } from '../entities/FirstRefused.js';
 import { EnemyProjectile } from '../entities/EnemyProjectile.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
@@ -27,7 +27,7 @@ const CHAMBER = {
   rewardKey: 'sector03-chamber03-major-boss-first-refused'
 };
 
-const BOSS = {
+const FIRST_REFUSED_BOSS = {
   name: 'THE FIRST REFUSED',
   subtitle: 'Gate Primarch of Nonentry',
   textureKey: ASSET_KEYS.sector03Chamber03BossFirstRefused,
@@ -91,12 +91,12 @@ const ALTAR = {
 };
 
 const VICTORY = {
-  preExplosionShakeMs: 3340,
+  preExplosionShakeMs: 3400,
   preExplosionShakeIntensity: 0.0076,
-  goreFountainCadenceMs: 82,
+  goreFountainCadenceMs: 80,
   explosionFadeStartDelayMs: 120,
-  explosionFadeDurationMs: 380,
-  postExplosionDespawnDelayMs: 640
+  explosionFadeDurationMs: 390,
+  postExplosionDespawnDelayMs: 680
 };
 
 const DEATH_CAMERA = {
@@ -139,7 +139,7 @@ export class Sector03Chamber03BossChamberScene extends Phaser.Scene {
     this.createInvisiblePlatform(CHAMBER.worldWidth / 2, WORLD.floorY + 28, CHAMBER.worldWidth, CHAMBER.floorColliderHeight);
 
     this.audioDirector = new AudioDirector(this);
-    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.1 });
+    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.095 });
 
     this.createBackdrop();
     this.createCombat();
@@ -171,8 +171,9 @@ export class Sector03Chamber03BossChamberScene extends Phaser.Scene {
         .setTint(0xd2c2ad)
         .setDepth(-14.8);
     }
-    this.add.rectangle(CHAMBER.worldWidth / 2, WORLD.floorY - 18, CHAMBER.worldWidth, 110, 0x17110e, 0.95).setDepth(-6.2);
-    this.add.ellipse(CHAMBER.worldWidth / 2, WORLD.floorY + 10, CHAMBER.worldWidth, 56, 0x010101, 0.36).setDepth(-5.9);
+    this.add.rectangle(CHAMBER.worldWidth / 2, WORLD.floorY - 14, CHAMBER.worldWidth, 96, 0x1a1411, 0.95).setDepth(-6.3);
+    this.add.rectangle(CHAMBER.worldWidth / 2, WORLD.floorY - 48, CHAMBER.worldWidth, 24, 0x2c2018, 0.76).setDepth(-6.26);
+    this.add.ellipse(CHAMBER.worldWidth / 2, WORLD.floorY + 10, CHAMBER.worldWidth, 54, 0x020202, 0.36).setDepth(-5.94);
 
     const altarKey = ASSET_KEYS.bossPit02AltarSuper;
     const altarSprite = this.textures.exists(altarKey)
@@ -192,7 +193,7 @@ export class Sector03Chamber03BossChamberScene extends Phaser.Scene {
     this.enemyProjectileGroup = this.physics.add.group({ allowGravity: false, immovable: true });
     this.physics.add.overlap(this.player.sprite, this.enemyProjectileGroup, (_playerSprite, projectileSprite) => this.handleEnemyProjectileHit(projectileSprite));
 
-    this.boss = new PressureDeacon(this, BOSS.spawnX, BOSS.spawnY, BOSS);
+    this.boss = new FirstRefused(this, FIRST_REFUSED_BOSS.spawnX, FIRST_REFUSED_BOSS.spawnY, FIRST_REFUSED_BOSS);
     this.boss.setActive(false);
     this.boss.sprite.setDepth(6.2);
     this.physics.add.collider(this.boss.sprite, this.platforms);
@@ -264,7 +265,7 @@ export class Sector03Chamber03BossChamberScene extends Phaser.Scene {
     };
 
     this.player.update(time, input);
-    if (!this.boss.dead && !this.boss.active && this.player.sprite.x >= BOSS.activationX) {
+    if (!this.boss.dead && !this.boss.active && this.player.sprite.x >= FIRST_REFUSED_BOSS.activationX) {
       this.boss.setActive(true);
     }
     this.boss.update(time, this.player.sprite);
@@ -543,7 +544,7 @@ export class Sector03Chamber03BossChamberScene extends Phaser.Scene {
     if (this.boss?.dead || !this.boss.canDealContactDamage(this.time.now)) {
       return;
     }
-    const tookDamage = this.player.receiveDamage(BOSS.contactDamage, this.time.now);
+    const tookDamage = this.player.receiveDamage(FIRST_REFUSED_BOSS.contactDamage, this.time.now);
     if (tookDamage) {
       this.boss.recordContactDamage(this.time.now);
       const knockDirection = Math.sign(this.player.sprite.x - this.boss.sprite.x) || 1;
@@ -574,8 +575,8 @@ export class Sector03Chamber03BossChamberScene extends Phaser.Scene {
   refreshBossBar(time) {
     this.hud.setBossBarState({
       visible: !this.boss.dead && this.boss.active,
-      name: BOSS.name,
-      subtitle: BOSS.subtitle,
+      name: FIRST_REFUSED_BOSS.name,
+      subtitle: FIRST_REFUSED_BOSS.subtitle,
       current: this.boss.health,
       max: this.boss.maxHealth,
       telegraph: this.boss.getTelegraphProgress(time),

@@ -42,10 +42,7 @@ const BOSS_PIT_ALTARS = {
   returnAltarId: 'return-altar',
   interaction: {
     zoneWidth: 196,
-    zoneHeight: 212,
-    promptOffsetY: -170,
-    inactivePrompt: '',
-    activePrompt: ''
+    zoneHeight: 212
   }
 };
 
@@ -170,7 +167,7 @@ export class Sector03Chamber01BossPitScene extends Phaser.Scene {
 
   createAudio() {
     this.audioDirector = new AudioDirector(this);
-    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.11 });
+    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.094 });
   }
 
   createBackdrop() {
@@ -724,7 +721,7 @@ export class Sector03Chamber01BossPitScene extends Phaser.Scene {
 
       const zone = this.add.zone(altarConfig.x, WORLD.floorY - 74, BOSS_PIT_ALTARS.interaction.zoneWidth, BOSS_PIT_ALTARS.interaction.zoneHeight).setOrigin(0.5);
       this.physics.add.existing(zone, true);
-      this.exitAltar = { ...altarEntry, zone, prompt: null };
+      this.exitAltar = { ...altarEntry, zone };
     });
     this.updateExitAltarVisualState();
   }
@@ -757,7 +754,6 @@ export class Sector03Chamber01BossPitScene extends Phaser.Scene {
   refreshExitAltarPresence() {
     this.currentExitAltar = null;
     if (!this.exitAltar?.zone || this.returnTransitionActive || this.victorySequenceActive) {
-      this.exitAltar?.prompt?.setVisible(false);
       return;
     }
 
@@ -765,7 +761,6 @@ export class Sector03Chamber01BossPitScene extends Phaser.Scene {
       this.currentExitAltar = this.exitAltar;
     });
 
-    this.exitAltar?.prompt?.setVisible(false);
   }
 
   tryUseExitAltar(mobileInput) {

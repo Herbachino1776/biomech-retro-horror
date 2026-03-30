@@ -133,11 +133,10 @@ const CRADLE_POCKETS = [
     markerWidth: 376,
     markerHeight: 76,
     markerAlpha: 0.08,
-    promptOffsetY: -136,
     enemies: [
       { type: 'failed-saint', x: 1260, y: PLAYER.startY, patrolDistance: 96 },
-      { type: 'bird-judge', x: 1490, y: PLAYER.startY, patrolDistance: 128, wakeDelayMs: 80 },
-      { type: 'failed-saint', x: 1705, y: PLAYER.startY, patrolDistance: 92, wakeDelayMs: 120 }
+      { type: 'bird-judge', x: 1480, y: PLAYER.startY, patrolDistance: 128, wakeDelayMs: 70 },
+      { type: 'failed-saint', x: 1680, y: PLAYER.startY, patrolDistance: 92, wakeDelayMs: 120 }
     ]
   },
   {
@@ -150,12 +149,11 @@ const CRADLE_POCKETS = [
     markerWidth: 428,
     markerHeight: 82,
     markerAlpha: 0.1,
-    promptOffsetY: -148,
     enemies: [
-      { type: 'bird-judge', x: 2040, y: PLAYER.startY, patrolDistance: 126 },
-      { type: 'failed-saint', x: 2280, y: PLAYER.startY, patrolDistance: 102, wakeDelayMs: 60 },
-      { type: 'bird-judge', x: 2485, y: PLAYER.startY, patrolDistance: 132, wakeDelayMs: 120 },
-      { type: 'failed-saint', x: 2630, y: PLAYER.startY, patrolDistance: 94, wakeDelayMs: 170 }
+      { type: 'bird-judge', x: 2060, y: PLAYER.startY, patrolDistance: 126 },
+      { type: 'failed-saint', x: 2290, y: PLAYER.startY, patrolDistance: 102, wakeDelayMs: 52 },
+      { type: 'bird-judge', x: 2470, y: PLAYER.startY, patrolDistance: 132, wakeDelayMs: 108 },
+      { type: 'failed-saint', x: 2600, y: PLAYER.startY, patrolDistance: 94, wakeDelayMs: 154 }
     ]
   },
   {
@@ -168,12 +166,11 @@ const CRADLE_POCKETS = [
     markerWidth: 556,
     markerHeight: 84,
     markerAlpha: 0.12,
-    promptOffsetY: -152,
     enemies: [
       { type: 'failed-saint', x: 2790, y: PLAYER.startY, patrolDistance: 100 },
-      { type: 'bird-judge', x: 3010, y: PLAYER.startY, patrolDistance: 128, wakeDelayMs: 70 },
-      { type: 'withheld-vessel', x: 3260, y: PLAYER.startY, patrolDistance: 90, wakeDelayMs: 130 },
-      { type: 'bird-judge', x: 3460, y: PLAYER.startY, patrolDistance: 122, wakeDelayMs: 170 }
+      { type: 'bird-judge', x: 2990, y: PLAYER.startY, patrolDistance: 128, wakeDelayMs: 64 },
+      { type: 'withheld-vessel', x: 3240, y: PLAYER.startY, patrolDistance: 90, wakeDelayMs: 124 },
+      { type: 'bird-judge', x: 3440, y: PLAYER.startY, patrolDistance: 122, wakeDelayMs: 166 }
     ]
   }
 ];
@@ -182,12 +179,10 @@ const CRADLE_LORE = {
   cutsceneId: 'sector03-chamber01-gallery-refusal-shrine',
   anchor: {
     id: 'gallery-refusal-shrine',
-    label: '',
     zoneX: 650,
     zoneY: WORLD.floorY - 78,
     zoneWidth: 214,
     zoneHeight: 210,
-    promptOffsetY: -176,
     altarX: 650,
     altarY: WORLD.floorY - 104,
     altarDisplayWidth: 194,
@@ -210,13 +205,10 @@ const CRADLE_LORE = {
 
 const CRADLE_TRAP_ALTAR = {
   id: 'gallery-withheld-descent-altar',
-  label: '',
-  exhaustedLabel: '',
   zoneX: 3240,
   zoneY: WORLD.floorY - 78,
   zoneWidth: 218,
   zoneHeight: 214,
-  promptOffsetY: -174,
   altarX: 3240,
   altarY: WORLD.floorY - 106,
   altarDisplayWidth: 208,
@@ -235,11 +227,8 @@ const CRADLE_FORWARD_GATE = {
   thresholdX: 5636,
   thresholdY: WORLD.floorY - 76,
   thresholdWidth: 188,
-  thresholdHeight: 224,
-  promptOffsetY: -166
+  thresholdHeight: 224
 };
-
-const SHOW_SECTOR03_DEBUG_LABELS = false;
 
 export class Sector03Chamber01Scene extends Phaser.Scene {
   constructor() {
@@ -300,7 +289,7 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
 
   createAudio() {
     this.audioDirector = new AudioDirector(this);
-    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.11 });
+    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.105 });
   }
 
   createBackdrop() {
@@ -374,14 +363,8 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     this.physics.add.existing(zone, true);
 
     const markerShadow = this.add.ellipse(pocketConfig.zoneX, WORLD.floorY - 4, pocketConfig.markerWidth, pocketConfig.markerHeight, 0x040302, pocketConfig.markerAlpha).setDepth(-5.84);
-    const promptText = SHOW_SECTOR03_DEBUG_LABELS
-      ? this.add.text(pocketConfig.zoneX, pocketConfig.zoneY + pocketConfig.promptOffsetY, pocketConfig.label, {
-        fontFamily: 'monospace', fontSize: '13px', color: '#d8cab8', align: 'center', stroke: '#110d0b', strokeThickness: 4
-      }).setOrigin(0.5).setDepth(-4.82).setAlpha(0.84).setVisible(false)
-      : null;
-
     const enemies = pocketConfig.enemies.map((enemyConfig) => this.createEncounterEnemy(enemyConfig, pocketConfig));
-    return { ...pocketConfig, zone, markerShadow, promptText, enemies, activated: false, resolved: false };
+    return { ...pocketConfig, zone, markerShadow, enemies, activated: false, resolved: false };
   }
 
   createEncounterEnemy(enemyConfig, pocketConfig) {
@@ -459,7 +442,7 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     const zone = this.add.zone(anchor.zoneX, anchor.zoneY, anchor.zoneWidth, anchor.zoneHeight).setOrigin(0.5);
     this.physics.add.existing(zone, true);
 
-    this.loreAnchor = { ...anchor, zone, prompt: null };
+    this.loreAnchor = { ...anchor, zone };
   }
 
   createTrapAltar() {
@@ -484,7 +467,7 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     const aura = this.add.ellipse(altar.altarX, altar.altarY - 2, altar.altarDisplayWidth * 0.72, altar.altarDisplayHeight * 0.66, 0xc5ad88, 0.08).setDepth(-6.06);
     const zone = this.add.zone(altar.zoneX, altar.zoneY, altar.zoneWidth, altar.zoneHeight).setOrigin(0.5);
     this.physics.add.existing(zone, true);
-    this.trapAltar = { ...altar, sprite, aura, zone, prompt: null };
+    this.trapAltar = { ...altar, sprite, aura, zone };
     this.updateTrapAltarVisualState();
   }
 
@@ -617,14 +600,12 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
       this.physics.overlap(this.player.sprite, pocket.zone, () => {
         playerInsidePocket = true;
       });
-      pocket.promptText?.setVisible(playerInsidePocket && !pocket.activated && !pocket.resolved);
     });
   }
 
   updateEncounterPockets(time) {
     this.encounterPockets.forEach((pocket) => {
       if (pocket.resolved) {
-        pocket.promptText?.setVisible(false);
         pocket.markerShadow.setAlpha(0.03);
         return;
       }
@@ -636,7 +617,6 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
 
       if (playerInsidePocket && !pocket.activated) {
         pocket.activated = true;
-        pocket.promptText?.setText(`${pocket.label}\nREFUSAL STIRS`).setVisible(true);
         pocket.markerShadow.setAlpha(pocket.markerAlpha + 0.06);
         pocket.enemies.forEach((enemy, index) => {
           if (enemy.dead) {
@@ -657,7 +637,6 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
       const remainingEnemies = pocket.enemies.filter((enemy) => !enemy.dead);
       if (pocket.activated && remainingEnemies.length === 0) {
         pocket.resolved = true;
-        pocket.promptText?.setText(`${pocket.label}\nMEASURE COLLAPSED`).setVisible(playerInsidePocket);
         pocket.markerShadow.setAlpha(0.04);
       }
     });
@@ -686,7 +665,6 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     this.currentLoreZone = null;
 
     if (!this.loreAnchor || this.isLoreTransitionActive || this.hasCompletedLoreBeat) {
-      this.loreAnchor?.prompt?.setVisible(false);
       return;
     }
 
@@ -696,7 +674,6 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
       this.currentLoreZone = this.loreAnchor;
     });
 
-    this.loreAnchor.prompt?.setVisible(isInside);
   }
 
   tryBeginLoreSequence(mobileInput) {
@@ -715,7 +692,6 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
   refreshTrapAltarPresence() {
     this.currentTrapAltar = null;
     if (!this.trapAltar?.zone || this.isLoreTransitionActive) {
-      this.trapAltar?.prompt?.setVisible(false);
       return;
     }
 
@@ -723,7 +699,6 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
       this.currentTrapAltar = this.trapAltar;
     });
 
-    this.trapAltar?.prompt?.setVisible(false);
   }
 
   tryBeginTrapAltarDescent(mobileInput) {
@@ -748,7 +723,6 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
 
     this.hasTriggeredTrapAltar = true;
     this.currentTrapAltar = null;
-    this.trapAltar?.prompt?.setVisible(false);
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
     this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
@@ -784,7 +758,6 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
 
     this.isLoreTransitionActive = true;
     this.currentLoreZone = null;
-    this.loreAnchor?.prompt?.setVisible(false);
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
     this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
@@ -821,7 +794,7 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     this.mobileControls.setMode('gameplay');
     this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
-    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.11 });
+    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.105 });
     this.cameras.main.fadeIn(500, 0, 0, 0);
   }
 
@@ -900,7 +873,6 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
       if (snapshot.resolvedPocketIds?.includes(pocket.id)) {
         pocket.activated = true;
         pocket.resolved = true;
-        pocket.promptText?.setText(`${pocket.label}\nMEASURE COLLAPSED`).setVisible(false);
         pocket.markerShadow?.setAlpha(0.04);
       }
 
