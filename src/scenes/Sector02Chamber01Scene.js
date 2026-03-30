@@ -1157,7 +1157,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
 
     this.cleanupSceneUi?.();
     this.audioDirector?.shutdown();
-    this.scene.start('Sector02Chamber01Scene', { devWarp: true, source: this.scene.key });
+    this.scene.start('Sector03Chamber01Scene', { devWarp: true, source: this.scene.key });
   }
 
   cleanupSceneUi() {

@@ -16,6 +16,7 @@ class BossPitRunState {
       sector03Chamber02Pit02: false,
       sector03Chamber02Pit03: false
     };
+    this.sector03Chamber01EncounterState = null;
     this.sector03Chamber02EncounterState = null;
   }
 
@@ -49,6 +50,18 @@ class BossPitRunState {
 
   markSector03Chamber01BossPitRewardGranted() {
     this.rewardGranted.sector03Chamber01 = true;
+  }
+
+  getSector03Chamber01EncounterState() {
+    return this.sector03Chamber01EncounterState
+      ? JSON.parse(JSON.stringify(this.sector03Chamber01EncounterState))
+      : null;
+  }
+
+  setSector03Chamber01EncounterState(state) {
+    this.sector03Chamber01EncounterState = state
+      ? JSON.parse(JSON.stringify(state))
+      : null;
   }
 
   hasSector03Chamber02Pit02BossPitCompleted() {

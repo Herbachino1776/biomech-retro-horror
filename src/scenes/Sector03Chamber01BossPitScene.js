@@ -181,8 +181,9 @@ export class Sector03Chamber01BossPitScene extends Phaser.Scene {
         .setAlpha(0.78)
         .setDepth(-14.8);
     }
-    this.add.rectangle(BOSS_PIT_BOOTSTRAP.worldWidth / 2, WORLD.floorY - 18, BOSS_PIT_BOOTSTRAP.worldWidth, 110, 0x17110e, 0.95).setDepth(-6.2);
-    this.add.ellipse(BOSS_PIT_BOOTSTRAP.worldWidth / 2, WORLD.floorY + 10, BOSS_PIT_BOOTSTRAP.worldWidth, 56, 0x010101, 0.36).setDepth(-5.9);
+    this.add.rectangle(BOSS_PIT_BOOTSTRAP.worldWidth / 2, WORLD.floorY - 14, BOSS_PIT_BOOTSTRAP.worldWidth, 96, 0x1a1411, 0.95).setDepth(-6.3);
+    this.add.rectangle(BOSS_PIT_BOOTSTRAP.worldWidth / 2, WORLD.floorY - 48, BOSS_PIT_BOOTSTRAP.worldWidth, 24, 0x2c2018, 0.76).setDepth(-6.26);
+    this.add.ellipse(BOSS_PIT_BOOTSTRAP.worldWidth / 2, WORLD.floorY + 10, BOSS_PIT_BOOTSTRAP.worldWidth, 54, 0x020202, 0.36).setDepth(-5.94);
     this.createPitAltars();
   }
 
