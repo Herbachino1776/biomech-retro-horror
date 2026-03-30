@@ -249,4 +249,26 @@ export const LORE_CUTSCENES = {
       }
     }
   }
+,
+  'sector03-chamber03-gate-of-refusal': {
+    id: 'sector03-chamber03-gate-of-refusal',
+    imageKey: ASSET_KEYS.sector03Chamber03LoreImage,
+    title: 'SECTOR 3 CHAMBER 3 // THE GATE OF REFUSAL',
+    body: [
+      'The nave remembers every vessel the cradle denied and stacks their silence into a gate.',
+      'The archon at the opening is only a witness. The true refusal waits beyond the final threshold.',
+      'Crossing this rite marks the end of borrowed face and the beginning of first refusal.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xb7a48f,
+      titleColor: '#a9b98f',
+      bodyColor: '#d9ccb9',
+      promptColor: '#8fa778',
+      imageTint: 0xd8c9b6,
+      imageAlpha: 0.95,
+      backgroundColor: '#000000'
+    }
+  }
+
 };
