@@ -56,7 +56,7 @@ const MISASSIGNED_SERAPH_BOSS = {
   poise: { max: 6, recoverDelayMs: 1900, recoverPerSecond: 1.1, staggerDurationMs: 2400, finisherRange: 156 },
   presentation: {
     display: { width: 392, height: 406 },
-    origin: { x: 0.52, y: 0.986 },
+    origin: { x: 0.52, y: 0.94 },
     alpha: 0.99,
     tint: 0xd8c6b0,
     scaleX: 1,

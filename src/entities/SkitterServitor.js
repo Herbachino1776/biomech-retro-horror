@@ -386,7 +386,9 @@ export class SkitterServitor {
     this.scene.audioDirector?.playEnemyHurt(this.config.audioProfile ?? 'enemy');
     this.enterState('hurt', time, this.config.hurtLockMs);
     this.body.setVelocityX(this.hurtPushDirection * this.config.recoilVelocityX);
-    this.body.setVelocityY(this.config.recoilVelocityY);
+    const hurtRiseClamp = this.config.maxHurtRiseVelocity ?? -44;
+    const hurtFallClamp = this.config.maxHurtFallVelocity ?? 220;
+    this.body.setVelocityY(Phaser.Math.Clamp(this.config.recoilVelocityY, hurtRiseClamp, hurtFallClamp));
   }
 
   applyPoiseDamage(amount = 1, time = this.scene.time.now) {
