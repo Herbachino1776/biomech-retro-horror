@@ -142,7 +142,7 @@ export class BootScene extends Phaser.Scene {
       frameHeight: 1335,
       endFrame: 4
     });
-    this.load.image(ASSET_KEYS.playerAttackBodySource, ASSET_URLS[ASSET_KEYS.playerAttackBodySource]);
+    this.load.image(ASSET_KEYS.playerAttackStrip, ASSET_URLS[ASSET_KEYS.playerAttackStrip]);
     this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
     this.load.image(ASSET_KEYS.laughingEngine, ASSET_URLS[ASSET_KEYS.laughingEngine]);
@@ -232,11 +232,11 @@ export class BootScene extends Phaser.Scene {
   }
 
   registerPlayerAttackBodySpritesheet() {
-    if (!this.textures.exists(ASSET_KEYS.playerAttackBodySource) || this.textures.exists(ASSET_KEYS.playerAttackBody)) {
+    if (!this.textures.exists(ASSET_KEYS.playerAttackStrip) || this.textures.exists(ASSET_KEYS.playerAttackStripFrames)) {
       return;
     }
 
-    const attackStripTexture = this.textures.get(ASSET_KEYS.playerAttackBodySource);
+    const attackStripTexture = this.textures.get(ASSET_KEYS.playerAttackStrip);
     const attackStripImage = attackStripTexture?.getSourceImage();
     const frameCount = 5;
     const frameWidth = Math.floor((attackStripImage?.width ?? 0) / frameCount);
@@ -246,7 +246,7 @@ export class BootScene extends Phaser.Scene {
       return;
     }
 
-    this.textures.addSpriteSheet(ASSET_KEYS.playerAttackBody, attackStripImage, {
+    this.textures.addSpriteSheet(ASSET_KEYS.playerAttackStripFrames, attackStripImage, {
       frameWidth,
       frameHeight,
       endFrame: frameCount - 1
