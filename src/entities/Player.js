@@ -29,17 +29,25 @@ export class Player {
 
     this.usingConceptSprite = scene.textures.exists(ASSET_KEYS.player);
     const playerPresentation = CONCEPT_PRESENTATION.player;
-    const displaySize = getNormalizedDisplaySize(playerPresentation);
-    const origin = getNormalizedOrigin(playerPresentation);
+    const baseDisplaySize = getNormalizedDisplaySize(playerPresentation);
+    const baseOrigin = getNormalizedOrigin(playerPresentation);
     const visualYOffset = getNormalizedYOffset(playerPresentation);
-    this.presentationDisplaySize = displaySize;
-    this.presentationOrigin = origin;
+    const jumpPresentation = {
+      ...playerPresentation,
+      normalization: playerPresentation.jumpStaticNormalization ?? playerPresentation.normalization
+    };
+    const jumpDisplaySize = getNormalizedDisplaySize(jumpPresentation);
+    const jumpOrigin = getNormalizedOrigin(jumpPresentation);
+    this.basePresentationDisplaySize = baseDisplaySize;
+    this.basePresentationOrigin = baseOrigin;
+    this.jumpPresentationDisplaySize = jumpDisplaySize;
+    this.jumpPresentationOrigin = jumpOrigin;
 
     this.sprite = this.usingConceptSprite
       ? scene.add
           .sprite(x, y + visualYOffset, ASSET_KEYS.player, 0)
-          .setOrigin(origin.x, origin.y)
-          .setDisplaySize(displaySize.width, displaySize.height)
+          .setOrigin(baseOrigin.x, baseOrigin.y)
+          .setDisplaySize(baseDisplaySize.width, baseDisplaySize.height)
           .setAlpha(playerPresentation.alpha ?? 1)
           .setDepth(6)
       : scene.add.rectangle(x, y, 48, 60, 0xb8aa92).setOrigin(0.5).setDepth(6);
@@ -406,6 +414,8 @@ export class Player {
       return;
     }
 
+    this.restoreBaseConceptVisual();
+
     if (canPlayWalk) {
       if (this.sprite.anims.currentAnim?.key !== PLAYER_WALK_ANIMATION_KEY || !this.sprite.anims.isPlaying) {
         this.sprite.play(PLAYER_WALK_ANIMATION_KEY, true);
@@ -454,10 +464,21 @@ export class Player {
       return;
     }
 
+    this.restoreBaseConceptVisual();
+
     if (this.sprite.anims.isPlaying) {
       this.sprite.anims.stop();
     }
     this.sprite.setFrame(frameIndex);
+  }
+
+  restoreBaseConceptVisual() {
+    if (this.sprite.texture.key === ASSET_KEYS.playerJumpStatic) {
+      this.sprite.setTexture(ASSET_KEYS.player, 0);
+    }
+
+    this.sprite.setOrigin(this.basePresentationOrigin.x, this.basePresentationOrigin.y);
+    this.sprite.setDisplaySize(this.basePresentationDisplaySize.width, this.basePresentationDisplaySize.height);
   }
 
   setJumpStaticVisual() {
@@ -474,8 +495,8 @@ export class Player {
       this.sprite.setTexture(ASSET_KEYS.playerJumpStatic);
     }
 
-    this.sprite.setOrigin(this.presentationOrigin.x, this.presentationOrigin.y);
-    this.sprite.setDisplaySize(this.presentationDisplaySize.width, this.presentationDisplaySize.height);
+    this.sprite.setOrigin(this.jumpPresentationOrigin.x, this.jumpPresentationOrigin.y);
+    this.sprite.setDisplaySize(this.jumpPresentationDisplaySize.width, this.jumpPresentationDisplaySize.height);
   }
 
 

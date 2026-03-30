@@ -88,6 +88,11 @@ export const CONCEPT_PRESENTATION = {
       origin: { x: 0.5, y: 0.995 },
       yOffset: -10
     },
+    jumpStaticNormalization: {
+      targetDisplayHeight: 170,
+      origin: { x: 0.5, y: 0.995 },
+      yOffset: -10
+    },
     alpha: 0.94
   },
   skitter: {
