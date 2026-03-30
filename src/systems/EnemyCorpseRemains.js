@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { ASSET_KEYS } from '../data/assetKeys.js';
+import { ignoreRuntimeWorldObjectFromUiCamera } from '../ui/mobileUiCamera.js';
 
 const REMAINS_PROFILES = {
   small: {
@@ -123,6 +124,7 @@ export function spawnEnemyCorpseRemains(scene, {
   const pieceCount = Phaser.Math.Between(profile.pieceCountRange[0], profile.pieceCountRange[1]);
   const groundedPlaneY = (floorPlaneY ?? groundY ?? y) + REMAINS_FLOOR_PLANE_OFFSET_Y;
   const container = scene.add.container(x, groundedPlaneY).setDepth(depth - 0.1);
+  ignoreRuntimeWorldObjectFromUiCamera(scene, container);
 
   const bloodShadow = scene.add
     .ellipse(0, BLOOD_POOL_UNDERLAY_OFFSET_Y, bloodPoolProfile.width * 1.04, bloodPoolProfile.height * 1.18, 0x18080a, 0.34)
