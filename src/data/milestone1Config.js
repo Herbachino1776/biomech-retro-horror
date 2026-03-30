@@ -24,13 +24,13 @@ export const PLAYER = {
   startX: 120,
   startY: 368,
   weaponVisual: {
-    display: { width: 72, height: 72 },
-    restingPose: { offsetX: 14, offsetY: -34, rotationDeg: 20, depthOffset: -1 },
+    display: { width: 58, height: 58 },
+    restingPose: { offsetX: 14, offsetY: -46, rotationDeg: 20, depthOffset: -1 },
     swingPose: {
-      windup: { offsetX: 6, offsetY: -64, rotationDeg: -112, durationMs: 70 },
-      downswing: { offsetX: 34, offsetY: -20, rotationDeg: 68, durationMs: 55 },
-      impactSettle: { offsetX: 24, offsetY: -24, rotationDeg: 42, durationMs: 70 },
-      recover: { offsetX: 14, offsetY: -34, rotationDeg: 20, durationMs: 140 }
+      windup: { offsetX: 6, offsetY: -76, rotationDeg: -112, durationMs: 70 },
+      downswing: { offsetX: 34, offsetY: -32, rotationDeg: 68, durationMs: 55 },
+      impactSettle: { offsetX: 24, offsetY: -36, rotationDeg: 42, durationMs: 70 },
+      recover: { offsetX: 14, offsetY: -46, rotationDeg: 20, durationMs: 140 }
     }
   }
 };
@@ -78,7 +78,7 @@ export const CONCEPT_PRESENTATION = {
     display: { width: 196, height: 322 },
     origin: { x: 0.5, y: 0.985 },
     normalization: {
-      targetDisplayHeight: 126,
+      targetDisplayHeight: 141,
       origin: { x: 0.5, y: 0.995 },
       yOffset: -10
     },
