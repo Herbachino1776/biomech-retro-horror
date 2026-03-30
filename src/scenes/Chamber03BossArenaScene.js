@@ -11,6 +11,7 @@ import { AudioDirector } from '../audio/AudioDirector.js';
 import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
 import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
+import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
 
 const CHAMBER03_BOSS_ARENA = {
   worldWidth: 1920,
@@ -110,12 +111,15 @@ const CHAMBER03_BOSS_COMBAT = {
 };
 
 const CHAMBER03_FINALE = {
-  bloodFlashMs: 860,
+  preExplosionShakeMs: 2920,
+  preExplosionShakeIntensity: 0.0062,
+  goreFountainCadenceMs: 88,
+  explosionFadeStartDelayMs: 90,
+  explosionFadeDurationMs: 340,
+  postExplosionDespawnDelayMs: 560,
   progressionRevealDelayMs: 3260,
   bossBarDropDelayMs: 1180,
   controlReleaseDelayMs: 3720,
-  progressionInteractDelayMs: 360,
-  progressionPromptText: '',
   holdingStateReason: 'sector-i-complete-holding-threshold'
 };
 
@@ -136,6 +140,9 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossDefeatCeremonyBossBarActive = false;
     this.currentProgressionThresholdZone = null;
     this.integrityRewardTracker = new Set();
+    this.victoryGoreFountainTimer = null;
+    this.deathCameraFocusTween = null;
+    this.deathCameraRestoreTween = null;
   }
 
   create() {
@@ -492,6 +499,9 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       this.scale.off('resize', this.applyResponsiveLayout, this);
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.audioDirector?.shutdown();
+      this.stopVictoryGoreFountain();
+      this.deathCameraFocusTween?.remove();
+      this.deathCameraRestoreTween?.remove();
       this.majorEncounterResolution?.teardown();
     });
   }
@@ -843,48 +853,50 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'chamber03-precentor-true-boss');
         this.cancelBossProjectileTimer();
         this.clearBossProjectiles();
-        this.tweens.killTweensOf([this.bossSprite, this.bossFallbackLabel, this.bossArrivalAura, this.bossArrivalHalo].filter(Boolean));
-        this.resetBossPresentationState();
+        this.tweens.killTweensOf([this.bossSprite, this.bossFallbackLabel, this.bossArrivalAura, this.bossArrivalHalo, this.bossArrivalShadow].filter(Boolean));
         this.bossBody.enable = false;
         this.bossBody.setVelocity(0, 0);
         this.bossDefeatCeremonyBossBarActive = true;
         this.audioDirector?.playEnemyDeath('miniboss');
-        const bossRemainsX = this.bossSprite.x;
-        const bossGroundedY = WORLD.floorY + 2 - this.bossSprite.displayHeight * (1 - this.bossSprite.originY);
-        this.bossSprite.setY(bossGroundedY);
-        this.bossBody?.setVelocity?.(0, 0);
-        this.triggerSectorFinalePayoff();
-        this.tweens.add({
-          targets: [this.bossSprite, this.bossFallbackLabel].filter(Boolean),
-          alpha: 0.06,
-          y: '-=42',
-          duration: 1180,
-          ease: 'Cubic.easeOut'
-        });
-        this.time.delayedCall(1180, () => {
-          spawnEnemyCorpseRemains(this, {
-            x: bossRemainsX,
-            groundY: WORLD.floorY + 2,
-            depth: this.bossSprite.depth,
-            size: 'sector3Boss'
-          });
-          this.bossSprite.setVisible(false).setAlpha(0);
-          this.bossFallbackLabel?.setVisible(false).setAlpha(0);
-        });
-        this.tweens.add({
-          targets: this.bossArrivalAura,
-          alpha: 0.06,
-          duration: 860,
-          ease: 'Sine.out'
-        });
-        this.tweens.add({
-          targets: this.bossArrivalHalo,
-          alpha: 0.05,
-          duration: 860,
-          ease: 'Sine.out'
-        });
+        this.stabilizeBossCorpseForPayoff();
+        this.focusCameraOnBossDeathPayoff();
+        this.cameras.main.shake(CHAMBER03_FINALE.preExplosionShakeMs, CHAMBER03_FINALE.preExplosionShakeIntensity, true);
+        this.startVictoryGoreFountain();
       },
       stages: [
+        {
+          atMs: CHAMBER03_FINALE.preExplosionShakeMs,
+          run: () => {
+            this.stopVictoryGoreFountain();
+            this.triggerPrecentorDeathBurst({
+              x: this.bossSprite.x,
+              y: (this.bossSprite.body?.bottom ?? this.bossSprite.y) - Phaser.Math.Between(96, 138),
+              depth: this.bossSprite.depth + 0.46,
+              scale: 1.36,
+              durationMs: 820,
+              burstCount: 96,
+              sprayCount: 128,
+              mistCount: 20,
+              emberCount: 18,
+              burstRadiusX: 160,
+              burstRadiusY: 194,
+              dropletWidth: [12, 30],
+              dropletHeight: [22, 54],
+              sprayWidth: [5, 14],
+              sprayHeight: [16, 42]
+            });
+            this.majorEncounterResolution?.schedule(CHAMBER03_FINALE.explosionFadeStartDelayMs, () => {
+              this.startBossExplosionFade();
+            });
+            this.audioDirector?.playBanishmentSting();
+          }
+        },
+        {
+          atMs: CHAMBER03_FINALE.preExplosionShakeMs + CHAMBER03_FINALE.postExplosionDespawnDelayMs,
+          run: () => {
+            this.despawnBossAfterPayoff();
+          }
+        },
         {
           atMs: CHAMBER03_FINALE.bossBarDropDelayMs,
           run: () => {
@@ -903,108 +915,146 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
           run: () => {
             this.isSectorFinaleActive = true;
             this.player.attackHitbox?.body?.setEnable(false);
-            this.cameras.main.startFollow(
-              this.player.sprite,
-              true,
-              CHAMBER03_BOSS_ARENA.cameraLerp.x,
-              CHAMBER03_BOSS_ARENA.cameraLerp.y,
-              this.getFollowOffsetX(),
-              0
-            );
-            this.tweens.add({
-              targets: this.cameras.main,
-              zoom: this.mobileControls.enabled && this.scale.height >= this.scale.width ? PORTRAIT_LAYOUT.portraitZoom : 1,
-              duration: 280,
-              ease: 'Sine.easeInOut'
-            });
-
+            this.restoreCameraAfterBossDeathPayoff();
           }
         }
       ],
       onComplete: () => {
         this.bossDefeatCeremonyBossBarActive = false;
+        this.stopVictoryGoreFountain();
       }
     });
   }
 
-  triggerSectorFinalePayoff() {
-    this.isSectorFinaleActive = false;
-    this.currentProgressionThresholdZone = null;
-    this.player.attackHitbox?.body?.setEnable(false);
-    this.focusCameraOnBossPayoff();
-    this.cameras.main.shake(920, 0.028, true);
-    this.time.delayedCall(150, () => this.cameras.main.shake(680, 0.024, true));
-    this.time.delayedCall(330, () => this.cameras.main.shake(560, 0.02, true));
-    this.time.delayedCall(90, () => {
-      this.spawnSectorFinaleAftermath(this.bossSprite.x, WORLD.floorY - 2);
-    });
-    this.time.delayedCall(220, () => {
-      this.audioDirector?.playBanishmentSting();
-    });
+  stabilizeBossCorpseForPayoff() {
+    const floorBottomY = WORLD.floorY + 2;
+    const groundedY = floorBottomY - this.bossSprite.displayHeight * (1 - this.bossSprite.originY);
+    this.bossSprite
+      .setAlpha(1)
+      .setVisible(true)
+      .setScale(this.bossBaseScaleX ?? this.bossSprite.scaleX, this.bossBaseScaleY ?? this.bossSprite.scaleY)
+      .setAngle(0)
+      .setY(groundedY);
+    this.bossFallbackLabel
+      ?.setVisible(true)
+      .setAlpha(0.8)
+      .setPosition(this.bossSprite.x, this.bossSprite.y - 12);
+    this.bossArrivalAura?.setAlpha(0.18);
+    this.bossArrivalHalo?.setAlpha(0.12);
+    this.bossArrivalShadow?.setAlpha(0.22);
   }
 
-  spawnSectorFinaleAftermath(x, y) {
-    this.bossAftermathPool?.destroy(true);
-    this.bossAftermathBurst?.destroy(true);
-
-    const burst = this.add.container(x, y - 116).setDepth(6.12);
-    const splashA = this.add.ellipse(0, 0, 210, 118, 0x561517, 0.82).setAngle(-18);
-    const splashB = this.add.ellipse(-52, 8, 132, 80, 0x6e1b1c, 0.72).setAngle(-34);
-    const splashC = this.add.ellipse(64, 12, 126, 76, 0x3e1012, 0.68).setAngle(26);
-    const mist = this.add.ellipse(0, -22, 244, 126, 0xb97563, 0.14);
-    burst.add([splashA, splashB, splashC, mist]);
-    burst.setScale(0.32).setAlpha(0);
-
-    this.tweens.add({
-      targets: burst,
-      scaleX: 1.08,
-      scaleY: 1.04,
-      alpha: 0.94,
-      duration: 360,
-      ease: 'Cubic.easeOut',
-      yoyo: false
-    });
-    this.tweens.add({
-      targets: burst,
-      alpha: 0,
-      y: burst.y - 32,
-      duration: 980,
-      delay: 240,
-      ease: 'Sine.easeIn',
-      onComplete: () => burst.destroy()
-    });
-
-    const pool = this.add.container(x, y).setDepth(1.4);
-    const shadow = this.add.ellipse(0, 10, 324, 64, 0x090505, 0.5);
-    const outerPool = this.add.ellipse(0, 0, 294, 66, 0x3a1012, 0.9).setStrokeStyle(5, 0x724746, 0.24);
-    const midPool = this.add.ellipse(-18, -2, 236, 48, 0x631719, 0.78);
-    const tornGloss = this.add.ellipse(42, -10, 118, 18, 0xb97160, 0.2);
-    const clotA = this.add.ellipse(-78, 6, 82, 18, 0x220809, 0.5);
-    const clotB = this.add.ellipse(70, 8, 64, 16, 0x2b0c0d, 0.46);
-    pool.add([shadow, outerPool, midPool, tornGloss, clotA, clotB]);
-    pool.setScale(0.15, 0.15).setAlpha(0);
-
-    this.tweens.add({
-      targets: pool,
-      scaleX: 1.08,
-      scaleY: 1,
-      alpha: 1,
-      duration: 720,
-      ease: 'Cubic.easeOut'
-    });
-
-    this.bossAftermathBurst = burst;
-    this.bossAftermathPool = pool;
-  }
-
-  focusCameraOnBossPayoff() {
+  focusCameraOnBossDeathPayoff() {
+    this.deathCameraFocusTween?.remove();
+    this.deathCameraRestoreTween?.remove();
     this.cameras.main.startFollow(this.bossSprite, true, 0.12, 0.12, -12, -26);
-    this.tweens.add({
+    this.deathCameraFocusTween = this.tweens.add({
       targets: this.cameras.main,
       zoom: this.cameras.main.zoom * 1.22,
       duration: 260,
       ease: 'Sine.easeOut'
     });
+  }
+
+  restoreCameraAfterBossDeathPayoff() {
+    this.deathCameraFocusTween?.remove();
+    this.deathCameraRestoreTween?.remove();
+    this.cameras.main.startFollow(
+      this.player.sprite,
+      true,
+      CHAMBER03_BOSS_ARENA.cameraLerp.x,
+      CHAMBER03_BOSS_ARENA.cameraLerp.y,
+      this.getFollowOffsetX(),
+      0
+    );
+    this.deathCameraRestoreTween = this.tweens.add({
+      targets: this.cameras.main,
+      zoom: this.mobileControls.enabled && this.scale.height >= this.scale.width ? PORTRAIT_LAYOUT.portraitZoom : PORTRAIT_LAYOUT.desktopZoom,
+      duration: 280,
+      ease: 'Sine.easeInOut'
+    });
+  }
+
+  startVictoryGoreFountain() {
+    this.stopVictoryGoreFountain();
+    const spawnFountainBurst = () => {
+      if (!this.resolutionLockActive || !this.bossSprite?.active || !this.bossSprite.visible) {
+        return;
+      }
+      this.triggerPrecentorDeathBurst({
+        x: this.bossSprite.x + Phaser.Math.Between(-62, 62),
+        y: (this.bossSprite.body?.bottom ?? this.bossSprite.y) - Phaser.Math.Between(106, 162),
+        depth: this.bossSprite.depth + 0.38,
+        scale: Phaser.Math.FloatBetween(0.74, 0.96),
+        durationMs: 600,
+        burstCount: 60,
+        sprayCount: 84,
+        mistCount: 8,
+        emberCount: 8,
+        burstRadiusX: 130,
+        burstRadiusY: 174,
+        dropletWidth: [8, 22],
+        dropletHeight: [18, 46],
+        sprayWidth: [4, 12],
+        sprayHeight: [14, 38]
+      });
+    };
+
+    spawnFountainBurst();
+    this.victoryGoreFountainTimer = this.time.addEvent({
+      delay: CHAMBER03_FINALE.goreFountainCadenceMs,
+      repeat: Math.ceil(CHAMBER03_FINALE.preExplosionShakeMs / CHAMBER03_FINALE.goreFountainCadenceMs),
+      callback: spawnFountainBurst
+    });
+  }
+
+  stopVictoryGoreFountain() {
+    this.victoryGoreFountainTimer?.remove(false);
+    this.victoryGoreFountainTimer = null;
+  }
+
+  triggerPrecentorDeathBurst(config = {}) {
+    triggerSector02BlackOilBlowout(this, {
+      source: this.bossSprite,
+      splashColor: 0x8b111c,
+      heavyColor: 0x5e0a13,
+      highlightColor: 0xb43645,
+      redSpeckColor: 0xc84a55,
+      mistColor: 0x1d080b,
+      alpha: 0.98,
+      includeGroundPool: false,
+      persistPuddle: false,
+      fadeSource: false,
+      ...config
+    });
+  }
+
+  startBossExplosionFade() {
+    this.tweens.killTweensOf([this.bossSprite, this.bossFallbackLabel, this.bossArrivalAura, this.bossArrivalHalo, this.bossArrivalShadow].filter(Boolean));
+    this.tweens.add({
+      targets: [this.bossSprite, this.bossFallbackLabel].filter(Boolean),
+      alpha: 0,
+      duration: CHAMBER03_FINALE.explosionFadeDurationMs,
+      ease: 'Sine.easeInOut'
+    });
+    this.tweens.add({
+      targets: [this.bossArrivalAura, this.bossArrivalHalo, this.bossArrivalShadow].filter(Boolean),
+      alpha: 0,
+      duration: CHAMBER03_FINALE.explosionFadeDurationMs,
+      ease: 'Sine.easeInOut'
+    });
+  }
+
+  despawnBossAfterPayoff() {
+    this.stopVictoryGoreFountain();
+    spawnEnemyCorpseRemains(this, {
+      x: this.bossSprite.x,
+      groundY: WORLD.floorY + 2,
+      depth: this.bossSprite.depth,
+      size: 'sector3Boss'
+    });
+    this.bossSprite.setVisible(false).setAlpha(0);
+    this.bossFallbackLabel?.setVisible(false).setAlpha(0);
   }
 
   revealProgressionGate() {
@@ -1414,6 +1464,12 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
   getBossPromptY() {
     const cameraHeight = this.cameras.main.height || this.scale.height;
     return Math.max(72, cameraHeight * 0.16);
+  }
+
+  getFollowOffsetX() {
+    return this.mobileControls.enabled && this.scale.height >= this.scale.width
+      ? CHAMBER03_BOSS_ARENA.portraitFollowOffsetX
+      : CHAMBER03_BOSS_ARENA.desktopFollowOffsetX;
   }
 
   createInvisiblePlatform(x, y, width, height) {
