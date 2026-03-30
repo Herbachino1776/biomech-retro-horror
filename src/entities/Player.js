@@ -234,6 +234,7 @@ export class Player {
   }
 
   updateVisuals(time) {
+    this.applyFacingVisual();
     this.updateWeaponAttachment();
 
     if (this.usingConceptSprite) {
@@ -256,6 +257,15 @@ export class Player {
     }
 
     this.setVisualTint(0xb8aa92);
+  }
+
+
+  applyFacingVisual() {
+    if (!this.usingConceptSprite) {
+      return;
+    }
+
+    this.sprite.setFlipX(this.facing < 0);
   }
 
   createWeaponSprite(x, y) {
