@@ -56,7 +56,7 @@ const FAILED_SAINT = {
   presentation: {
     alpha: 0.98,
     display: { width: 226, height: 188 },
-    origin: { x: 0.52, y: 0.91 },
+    origin: { x: 0.52, y: 0.95 },
     stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 }
   },
   eyeGlowColor: 0xe4d6b4,
@@ -100,15 +100,15 @@ const WITHHELD_VESSEL = {
   preferredRange: 140,
   rangeBand: 20,
   lungeSpeedBonus: 102,
-  lungeJumpVelocity: -90,
+  lungeJumpVelocity: 0,
   recoilVelocityX: 148,
-  recoilVelocityY: -86,
+  recoilVelocityY: 0,
   patrolDistance: 94,
   body: { width: 74, height: 44, offsetX: 28, offsetY: 90 },
   presentation: {
     alpha: 0.98,
     display: { width: 346, height: 268 },
-    origin: { x: 0.52, y: 0.885 },
+    origin: { x: 0.52, y: 0.93 },
     stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.46 }
   },
   eyeGlowColor: 0xf0e0be,

@@ -292,9 +292,12 @@ export class SkitterServitor {
     this.nextAttackAllowedAt = time + this.config.attackRecoveryMs + this.config.attackCooldownMs;
     this.enterState('attack', time, this.config.attackActiveMs);
     this.body.setVelocityX(this.direction * (this.config.speed + this.config.lungeSpeedBonus));
-    const attackRiseClamp = this.config.maxAttackRiseVelocity ?? -24;
-    const attackFallClamp = this.config.maxAttackFallVelocity ?? 200;
-    this.body.setVelocityY(Phaser.Math.Clamp(this.config.lungeJumpVelocity, attackRiseClamp, attackFallClamp));
+    const attackRiseClamp = this.config.maxAttackRiseVelocity ?? -8;
+    const attackFallClamp = this.config.maxAttackFallVelocity ?? 120;
+    const attackLiftVelocity = Phaser.Math.Clamp(this.config.lungeJumpVelocity ?? 0, attackRiseClamp, attackFallClamp);
+    if (attackLiftVelocity !== 0) {
+      this.body.setVelocityY(attackLiftVelocity);
+    }
 
     if (!this.attackAudioLocked) {
       this.attackAudioLocked = true;
@@ -388,9 +391,12 @@ export class SkitterServitor {
     this.scene.audioDirector?.playEnemyHurt(this.config.audioProfile ?? 'enemy');
     this.enterState('hurt', time, this.config.hurtLockMs);
     this.body.setVelocityX(this.hurtPushDirection * this.config.recoilVelocityX);
-    const hurtRiseClamp = this.config.maxHurtRiseVelocity ?? -22;
-    const hurtFallClamp = this.config.maxHurtFallVelocity ?? 220;
-    this.body.setVelocityY(Phaser.Math.Clamp(this.config.recoilVelocityY, hurtRiseClamp, hurtFallClamp));
+    const hurtRiseClamp = this.config.maxHurtRiseVelocity ?? -8;
+    const hurtFallClamp = this.config.maxHurtFallVelocity ?? 120;
+    const hurtLiftVelocity = Phaser.Math.Clamp(this.config.recoilVelocityY ?? 0, hurtRiseClamp, hurtFallClamp);
+    if (hurtLiftVelocity !== 0) {
+      this.body.setVelocityY(hurtLiftVelocity);
+    }
   }
 
   applyPoiseDamage(amount = 1, time = this.scene.time.now) {
