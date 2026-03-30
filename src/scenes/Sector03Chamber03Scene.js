@@ -35,25 +35,25 @@ const ENEMIES = {
   barrierSinger: {
     ...SKITTER,
     textureKey: ASSET_KEYS.sector03Chamber03EnemyBasicBarrierSinger,
-    presentation: { alpha: 0.98, display: { width: 184, height: 152 }, origin: { x: 0.52, y: 0.92 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    presentation: { alpha: 0.98, display: { width: 184, height: 152 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
     corpseRemainsProfile: 'sector3Basic'
   },
   nullClaimant: {
     ...SKITTER,
     textureKey: ASSET_KEYS.sector03Chamber03EnemyBasicNullClaimant,
-    presentation: { alpha: 0.98, display: { width: 184, height: 152 }, origin: { x: 0.52, y: 0.92 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    presentation: { alpha: 0.98, display: { width: 184, height: 152 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
     corpseRemainsProfile: 'sector3Basic'
   },
   refusalWarden: {
     ...SKITTER,
     textureKey: ASSET_KEYS.sector03Chamber03EnemyBasicRefusalWarden,
-    presentation: { alpha: 0.98, display: { width: 188, height: 154 }, origin: { x: 0.52, y: 0.92 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    presentation: { alpha: 0.98, display: { width: 188, height: 154 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
     corpseRemainsProfile: 'sector3Basic'
   },
   sealedArchetype: {
     ...SKITTER,
     textureKey: ASSET_KEYS.sector03Chamber03EnemyBasicSealedArchetype,
-    presentation: { alpha: 0.98, display: { width: 190, height: 154 }, origin: { x: 0.52, y: 0.92 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    presentation: { alpha: 0.98, display: { width: 190, height: 154 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
     corpseRemainsProfile: 'sector3Basic'
   },
   elite: {
@@ -71,12 +71,12 @@ const ENEMIES = {
 
 const POCKETS = [
   {
-    id: 'entry-nave-procession', label: 'GATE OF REFUSAL', zoneX: 1520, zoneY: WORLD.floorY - 72, zoneWidth: 680, zoneHeight: 226,
-    enemies: [{ type: 'barrierSinger', x: 1300 }, { type: 'nullClaimant', x: 1510 }, { type: 'refusalWarden', x: 1730 }]
+    id: 'entry-nave-procession', label: 'GATE OF REFUSAL', zoneX: 1500, zoneY: WORLD.floorY - 72, zoneWidth: 650, zoneHeight: 226,
+    enemies: [{ type: 'barrierSinger', x: 1290 }, { type: 'nullClaimant', x: 1490 }, { type: 'refusalWarden', x: 1680, wakeDelayMs: 80 }]
   },
   {
-    id: 'wall-module-run', label: 'WALL OF NONENTRY', zoneX: 2460, zoneY: WORLD.floorY - 72, zoneWidth: 840, zoneHeight: 236,
-    enemies: [{ type: 'sealedArchetype', x: 2140 }, { type: 'barrierSinger', x: 2400 }, { type: 'nullClaimant', x: 2630 }, { type: 'refusalWarden', x: 2860 }]
+    id: 'wall-module-run', label: 'WALL OF NONENTRY', zoneX: 2420, zoneY: WORLD.floorY - 72, zoneWidth: 790, zoneHeight: 236,
+    enemies: [{ type: 'sealedArchetype', x: 2160 }, { type: 'barrierSinger', x: 2380, wakeDelayMs: 40 }, { type: 'nullClaimant', x: 2580, wakeDelayMs: 96 }, { type: 'refusalWarden', x: 2770, wakeDelayMs: 150 }]
   },
   {
     id: 'refusal-opening-reveal', label: 'REFUSAL OPENING', zoneX: 3940, zoneY: WORLD.floorY - 76, zoneWidth: 1020, zoneHeight: 242,
@@ -111,7 +111,7 @@ export class Sector03Chamber03Scene extends Phaser.Scene {
   create() {
     this.createWorld();
     this.audioDirector = new AudioDirector(this);
-    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.11 });
+    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.102 });
     this.createBackdrop();
     this.createPlayer();
     this.createEncounterPockets();
@@ -309,7 +309,7 @@ export class Sector03Chamber03Scene extends Phaser.Scene {
         pocket.activated = true;
         pocket.enemies.forEach((enemy, index) => {
           if (!enemy.dead) {
-            enemy.pocketWakeAtTime = time + index * 80;
+            enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 66;
           }
         });
       }
@@ -398,7 +398,7 @@ export class Sector03Chamber03Scene extends Phaser.Scene {
     this.mobileControls.setMode('gameplay');
     this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
-    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.11 });
+    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.102 });
     this.cameras.main.fadeIn(500, 0, 0, 0);
   }
 

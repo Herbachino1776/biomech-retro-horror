@@ -72,16 +72,16 @@ const ENEMIES = {
 
 const POCKETS = [
   {
-    id: 'corridor-faces-01', label: 'BORROWED PROCESSION', zoneX: 1540, zoneY: WORLD.floorY - 72, zoneWidth: 700, zoneHeight: 226,
-    enemies: [{ type: 'veil', x: 1300 }, { type: 'husk', x: 1540 }, { type: 'cantor', x: 1760 }]
+    id: 'corridor-faces-01', label: 'BORROWED PROCESSION', zoneX: 1520, zoneY: WORLD.floorY - 72, zoneWidth: 660, zoneHeight: 226,
+    enemies: [{ type: 'veil', x: 1290 }, { type: 'husk', x: 1500, wakeDelayMs: 40 }, { type: 'cantor', x: 1700, wakeDelayMs: 90 }]
   },
   {
-    id: 'corridor-faces-02', label: 'MASK PRESSURE', zoneX: 2320, zoneY: WORLD.floorY - 72, zoneWidth: 760, zoneHeight: 236,
-    enemies: [{ type: 'collector', x: 2040 }, { type: 'veil', x: 2280 }, { type: 'husk', x: 2480 }, { type: 'cantor', x: 2660 }]
+    id: 'corridor-faces-02', label: 'MASK PRESSURE', zoneX: 2280, zoneY: WORLD.floorY - 72, zoneWidth: 730, zoneHeight: 236,
+    enemies: [{ type: 'collector', x: 2020 }, { type: 'veil', x: 2240, wakeDelayMs: 40 }, { type: 'husk', x: 2440, wakeDelayMs: 90 }, { type: 'cantor', x: 2610, wakeDelayMs: 150 }]
   },
   {
-    id: 'gallery-elite-domain', label: 'GALLERY NULL DOMAIN', zoneX: 3180, zoneY: WORLD.floorY - 76, zoneWidth: 1020, zoneHeight: 242,
-    enemies: [{ type: 'veil', x: 2840 }, { type: 'collector', x: 3040 }, { type: 'elite', x: 3280 }, { type: 'husk', x: 3520 }]
+    id: 'gallery-elite-domain', label: 'GALLERY NULL DOMAIN', zoneX: 3160, zoneY: WORLD.floorY - 76, zoneWidth: 980, zoneHeight: 242,
+    enemies: [{ type: 'veil', x: 2860 }, { type: 'collector', x: 3050, wakeDelayMs: 50 }, { type: 'elite', x: 3270, wakeDelayMs: 130 }, { type: 'husk', x: 3470, wakeDelayMs: 190 }]
   }
 ];
 
@@ -111,7 +111,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
   create() {
     this.createWorld();
     this.audioDirector = new AudioDirector(this);
-    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.11 });
+    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.108 });
     this.createBackdrop();
     this.createPlayer();
     this.createEncounterPockets();
@@ -196,7 +196,6 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
       const zone = this.add.zone(pocketConfig.zoneX, pocketConfig.zoneY, pocketConfig.zoneWidth, pocketConfig.zoneHeight).setOrigin(0.5);
       this.physics.add.existing(zone, true);
       const markerShadow = this.add.ellipse(pocketConfig.zoneX, WORLD.floorY - 4, pocketConfig.zoneWidth * 0.62, 78, 0x040302, 0.09).setDepth(-5.84);
-      const promptText = null;
 
       const enemies = pocketConfig.enemies.map((enemyConfig) => {
         const baseConfig = ENEMIES[enemyConfig.type];
@@ -233,7 +232,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
         return enemy;
       });
 
-      return { ...pocketConfig, zone, markerShadow, promptText, enemies, activated: false, resolved: false };
+      return { ...pocketConfig, zone, markerShadow, enemies, activated: false, resolved: false };
     });
   }
 
@@ -248,13 +247,13 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     }
     const zone = this.add.zone(altarX, WORLD.floorY - 78, 214, 210).setOrigin(0.5);
     this.physics.add.existing(zone, true);
-    this.loreAnchor = { zone, prompt: null };
+    this.loreAnchor = { zone };
   }
 
   createBossPitAltars() {
     this.pitAltars = [
-      { id: 'bosspit02', x: 3360, y: WORLD.floorY - 106, label: '' },
-      { id: 'bosspit03', x: 5380, y: WORLD.floorY - 106, label: '' }
+      { id: 'bosspit02', x: 3360, y: WORLD.floorY - 106 },
+      { id: 'bosspit03', x: 5380, y: WORLD.floorY - 106 }
     ].map((pit) => {
       const sprite = this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)
         ? this.add.image(pit.x, pit.y, ASSET_KEYS.sector03Chamber02LoreAltar).setDisplaySize(208, 208).setTint(0xd6c4ae).setAlpha(0.86).setDepth(-6.08)
@@ -262,7 +261,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
       const aura = this.add.ellipse(pit.x, pit.y + 4, 156, 146, 0xc5ad88, 0.08).setDepth(-6.06);
       const zone = this.add.zone(pit.x, WORLD.floorY - 78, 218, 214).setOrigin(0.5);
       this.physics.add.existing(zone, true);
-      return { ...pit, sprite, aura, zone, prompt: null };
+      return { ...pit, sprite, aura, zone };
     });
 
     this.updatePitAltarState();
@@ -368,14 +367,12 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     this.encounterPockets.forEach((pocket) => {
       let inside = false;
       this.physics.overlap(this.player.sprite, pocket.zone, () => { inside = true; });
-      pocket.promptText?.setVisible(inside && !pocket.resolved);
 
       if (inside && !pocket.activated) {
         pocket.activated = true;
-        pocket.promptText?.setText(`${pocket.label}\nFACES STIR`);
         pocket.enemies.forEach((enemy, index) => {
           if (!enemy.dead) {
-            enemy.pocketWakeAtTime = time + index * 70;
+            enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 58;
           }
         });
       }
@@ -389,7 +386,6 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
 
       if (pocket.activated && pocket.enemies.every((enemy) => enemy.dead)) {
         pocket.resolved = true;
-        pocket.promptText?.setText(`${pocket.label}\nDOMAIN SILENCED`).setVisible(inside);
         pocket.markerShadow.setAlpha(0.03);
       }
     });
@@ -402,14 +398,12 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
   refreshLoreZonePresence() {
     this.currentLoreZone = null;
     if (!this.loreAnchor || this.isLoreTransitionActive || this.hasCompletedLoreBeat) {
-      this.loreAnchor?.prompt?.setVisible(false);
       return;
     }
 
     this.physics.overlap(this.player.sprite, this.loreAnchor.zone, () => {
       this.currentLoreZone = this.loreAnchor;
     });
-    this.loreAnchor.prompt?.setVisible(Boolean(this.currentLoreZone));
   }
 
   tryBeginLoreSequence(mobileInput) {
@@ -431,7 +425,6 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
 
     this.isLoreTransitionActive = true;
     this.currentLoreZone = null;
-    this.loreAnchor?.prompt?.setVisible(false);
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
     this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
@@ -468,7 +461,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     this.mobileControls.setMode('gameplay');
     this.hud?.setVisible(true);
     this.uiCamera?.setVisible(true);
-    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01, { volume: 0.11 });
+    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.108 });
     this.cameras.main.fadeIn(500, 0, 0, 0);
   }
 
@@ -485,7 +478,6 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
         this.currentPitAltar = altar;
       });
 
-      altar.prompt?.setVisible(false);
     });
   }
 
@@ -534,7 +526,6 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
       if (snapshot.resolvedPocketIds?.includes(pocket.id)) {
         pocket.activated = true;
         pocket.resolved = true;
-        pocket.promptText?.setText(`${pocket.label}\nDOMAIN SILENCED`).setVisible(false);
         pocket.markerShadow?.setAlpha(0.03);
       }
 
