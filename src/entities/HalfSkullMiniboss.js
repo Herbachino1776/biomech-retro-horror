@@ -122,9 +122,12 @@ export class HalfSkullMiniboss {
           this.scene.audioDirector?.playEnemyAttack(this.config.audioProfile ?? 'miniboss');
         }
         this.body.setVelocityX(this.direction * this.config.attackSpeed);
-        const attackRiseClamp = this.config.maxAttackRiseVelocity ?? -28;
-        const attackFallClamp = this.config.maxAttackFallVelocity ?? 200;
-        this.body.setVelocityY(Phaser.Math.Clamp(this.config.attackLiftVelocity, attackRiseClamp, attackFallClamp));
+        const attackRiseClamp = this.config.maxAttackRiseVelocity ?? -10;
+        const attackFallClamp = this.config.maxAttackFallVelocity ?? 120;
+        const attackLiftVelocity = Phaser.Math.Clamp(this.config.attackLiftVelocity ?? 0, attackRiseClamp, attackFallClamp);
+        if (attackLiftVelocity !== 0) {
+          this.body.setVelocityY(attackLiftVelocity);
+        }
       }
       return;
     }
@@ -194,9 +197,12 @@ export class HalfSkullMiniboss {
     this.hitPulseUntil = time + this.config.hitPulseMs;
     this.hurtUntil = time + this.config.hurtRecoverMs;
     this.body.setVelocityX(-this.direction * this.config.hurtRecoilVelocityX);
-    const hurtRiseClamp = this.config.maxHurtRiseVelocity ?? -24;
-    const hurtFallClamp = this.config.maxHurtFallVelocity ?? 220;
-    this.body.setVelocityY(Phaser.Math.Clamp(this.config.hurtRecoilVelocityY, hurtRiseClamp, hurtFallClamp));
+    const hurtRiseClamp = this.config.maxHurtRiseVelocity ?? -10;
+    const hurtFallClamp = this.config.maxHurtFallVelocity ?? 120;
+    const hurtLiftVelocity = Phaser.Math.Clamp(this.config.hurtRecoilVelocityY ?? 0, hurtRiseClamp, hurtFallClamp);
+    if (hurtLiftVelocity !== 0) {
+      this.body.setVelocityY(hurtLiftVelocity);
+    }
     this.scene.audioDirector?.playEnemyHurt(this.config.audioProfile ?? 'miniboss');
 
     if (this.health <= 0) {
