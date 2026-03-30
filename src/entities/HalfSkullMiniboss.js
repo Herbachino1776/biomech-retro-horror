@@ -122,7 +122,9 @@ export class HalfSkullMiniboss {
           this.scene.audioDirector?.playEnemyAttack(this.config.audioProfile ?? 'miniboss');
         }
         this.body.setVelocityX(this.direction * this.config.attackSpeed);
-        this.body.setVelocityY(this.config.attackLiftVelocity);
+        const attackRiseClamp = this.config.maxAttackRiseVelocity ?? -28;
+        const attackFallClamp = this.config.maxAttackFallVelocity ?? 200;
+        this.body.setVelocityY(Phaser.Math.Clamp(this.config.attackLiftVelocity, attackRiseClamp, attackFallClamp));
       }
       return;
     }
@@ -192,7 +194,7 @@ export class HalfSkullMiniboss {
     this.hitPulseUntil = time + this.config.hitPulseMs;
     this.hurtUntil = time + this.config.hurtRecoverMs;
     this.body.setVelocityX(-this.direction * this.config.hurtRecoilVelocityX);
-    const hurtRiseClamp = this.config.maxHurtRiseVelocity ?? -42;
+    const hurtRiseClamp = this.config.maxHurtRiseVelocity ?? -24;
     const hurtFallClamp = this.config.maxHurtFallVelocity ?? 220;
     this.body.setVelocityY(Phaser.Math.Clamp(this.config.hurtRecoilVelocityY, hurtRiseClamp, hurtFallClamp));
     this.scene.audioDirector?.playEnemyHurt(this.config.audioProfile ?? 'miniboss');
