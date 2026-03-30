@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { COLORS } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
+import { enforceEnemyFloorIntegrity } from '../systems/EnemyFloorIntegrity.js';
 
 const FALLBACK_WIDTH = 188;
 const FALLBACK_HEIGHT = 208;
@@ -76,6 +77,7 @@ export class HalfSkullMiniboss {
   }
 
   update(time, player) {
+    enforceEnemyFloorIntegrity(this.sprite, this.body);
     this.updatePoiseState(time);
     this.updateVisuals(time);
 

@@ -12,6 +12,7 @@ import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '..
 import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
 import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
+import { enforceEnemyFloorIntegrity } from '../systems/EnemyFloorIntegrity.js';
 
 const CHAMBER03_BOSS_ARENA = {
   worldWidth: 1920,
@@ -1303,6 +1304,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       return;
     }
 
+    enforceEnemyFloorIntegrity(this.bossSprite, this.bossBody);
     this.updateBossProjectiles(time);
 
     const phase = this.getBossPhaseConfig();
