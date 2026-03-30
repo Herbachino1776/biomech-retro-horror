@@ -6,9 +6,15 @@ const DEFAULTS = {
   lookAheadBoostMultiplier: 1.75,
   lerpFactor: 0.14,
   directionLerpFactor: 0.16,
+  reversalLerpFactor: 0.2,
+  reversalDirectionLerpFactor: 0.28,
   movementThresholdEnter: 26,
   movementThresholdExit: 14,
-  idleSettleDelayMs: 260
+  idleSettleDelayMs: 260,
+  desktopBaseOffsetCompensationFactor: 0.75,
+  portraitBaseOffsetCompensationFactor: 0.62,
+  idleDirectionRetainFactor: 0.84,
+  idleSettleDirectionLerpFactor: 0.035
 };
 
 export class DirectionalCameraBias {
@@ -22,10 +28,16 @@ export class DirectionalCameraBias {
     lookAheadBoostMultiplier,
     lerpFactor,
     directionLerpFactor,
+    reversalLerpFactor,
+    reversalDirectionLerpFactor,
     movementThreshold,
     movementThresholdEnter,
     movementThresholdExit,
-    idleSettleDelayMs
+    idleSettleDelayMs,
+    desktopBaseOffsetCompensationFactor,
+    portraitBaseOffsetCompensationFactor,
+    idleDirectionRetainFactor,
+    idleSettleDirectionLerpFactor
   }) {
     this.camera = camera;
     this.player = player;
@@ -38,11 +50,17 @@ export class DirectionalCameraBias {
 
     this.lerpFactor = lerpFactor ?? DEFAULTS.lerpFactor;
     this.directionLerpFactor = directionLerpFactor ?? DEFAULTS.directionLerpFactor;
+    this.reversalLerpFactor = reversalLerpFactor ?? DEFAULTS.reversalLerpFactor;
+    this.reversalDirectionLerpFactor = reversalDirectionLerpFactor ?? DEFAULTS.reversalDirectionLerpFactor;
 
     const legacyMovementThreshold = movementThreshold ?? null;
     this.movementThresholdEnter = movementThresholdEnter ?? legacyMovementThreshold ?? DEFAULTS.movementThresholdEnter;
     this.movementThresholdExit = movementThresholdExit ?? Math.min(this.movementThresholdEnter, DEFAULTS.movementThresholdExit);
     this.idleSettleDelayMs = idleSettleDelayMs ?? DEFAULTS.idleSettleDelayMs;
+    this.desktopBaseOffsetCompensationFactor = desktopBaseOffsetCompensationFactor ?? DEFAULTS.desktopBaseOffsetCompensationFactor;
+    this.portraitBaseOffsetCompensationFactor = portraitBaseOffsetCompensationFactor ?? DEFAULTS.portraitBaseOffsetCompensationFactor;
+    this.idleDirectionRetainFactor = idleDirectionRetainFactor ?? DEFAULTS.idleDirectionRetainFactor;
+    this.idleSettleDirectionLerpFactor = idleSettleDirectionLerpFactor ?? DEFAULTS.idleSettleDirectionLerpFactor;
 
     this.isPortrait = false;
     this.followOffsetY = 0;
@@ -91,21 +109,33 @@ export class DirectionalCameraBias {
       this.stationaryTimeMs += deltaMs;
     }
 
-    const desiredDirection = this.stationaryTimeMs > this.idleSettleDelayMs
-      ? 0
+    const isSettlingIdleDirection = this.stationaryTimeMs > this.idleSettleDelayMs;
+    const desiredDirection = isSettlingIdleDirection
+      ? this.lastMovementDirection * this.idleDirectionRetainFactor
       : this.lastMovementDirection;
+    const reversingDirection = desiredDirection !== 0
+      && Math.sign(this.smoothedDirection) !== 0
+      && Math.sign(this.smoothedDirection) !== Math.sign(desiredDirection);
+    const directionLerp = isSettlingIdleDirection
+      ? this.idleSettleDirectionLerpFactor
+      : (reversingDirection ? this.reversalDirectionLerpFactor : this.directionLerpFactor);
+    const offsetLerp = reversingDirection ? this.reversalLerpFactor : this.lerpFactor;
 
-    this.smoothedDirection = Phaser.Math.Linear(this.smoothedDirection, desiredDirection, this.directionLerpFactor);
+    this.smoothedDirection = Phaser.Math.Linear(this.smoothedDirection, desiredDirection, directionLerp);
 
     const targetOffsetX = this.getTargetOffsetX();
-    this.currentOffsetX = Phaser.Math.Linear(this.currentOffsetX, targetOffsetX, this.lerpFactor);
+    this.currentOffsetX = Phaser.Math.Linear(this.currentOffsetX, targetOffsetX, offsetLerp);
     this.camera.setFollowOffset(this.currentOffsetX, this.followOffsetY);
   }
 
   getTargetOffsetX() {
     const baseOffset = this.isPortrait ? this.portraitBaseOffsetX : this.desktopBaseOffsetX;
+    const baseOffsetCompensationFactor = this.isPortrait
+      ? this.portraitBaseOffsetCompensationFactor
+      : this.desktopBaseOffsetCompensationFactor;
+    const directionalBaseOffset = baseOffset - (Math.sign(baseOffset) * Math.abs(baseOffset) * baseOffsetCompensationFactor);
     const lookAhead = this.isPortrait ? this.portraitLookAheadX : this.desktopLookAheadX;
-    return baseOffset - this.smoothedDirection * lookAhead;
+    return directionalBaseOffset - this.smoothedDirection * lookAhead;
   }
 
   getFollowOffsetX() {
