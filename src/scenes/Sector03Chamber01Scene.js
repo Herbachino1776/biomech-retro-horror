@@ -55,7 +55,7 @@ const FAILED_SAINT = {
   presentation: {
     alpha: 0.98,
     display: { width: 184, height: 152 },
-    origin: { x: 0.52, y: 0.92 },
+    origin: { x: 0.52, y: 0.95 },
     stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 }
   },
   eyeGlowColor: 0xe4d6b4,
@@ -107,7 +107,7 @@ const WITHHELD_VESSEL = {
   presentation: {
     alpha: 0.98,
     display: { width: 292, height: 226 },
-    origin: { x: 0.52, y: 0.965 },
+    origin: { x: 0.52, y: 0.975 },
     stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.46 }
   },
   eyeGlowColor: 0xf0e0be,
