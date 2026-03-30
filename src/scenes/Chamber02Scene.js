@@ -6,6 +6,7 @@ import { MobileControls } from '../ui/MobileControls.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
+import { createDirectionalCameraBias } from '../systems/DirectionalCameraBias.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
 import { applyChamberEntryRestore } from '../systems/VesselRunEconomy.js';
@@ -192,6 +193,15 @@ export class Chamber02Scene extends Phaser.Scene {
     this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
+
+    this.directionalCameraBias = createDirectionalCameraBias({
+      camera: this.cameras.main,
+      player: this.player,
+      desktopBaseOffsetX: -140,
+      portraitBaseOffsetX: -120,
+      desktopLookAheadX: 56,
+      portraitLookAheadX: 24
+    });
     this.scale.on('resize', this.applyResponsiveLayout, this);
     this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -205,6 +215,7 @@ export class Chamber02Scene extends Phaser.Scene {
     });
 
     this.applyResponsiveLayout();
+    this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
   }
 
@@ -533,6 +544,7 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
 
+    this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
   }
 
@@ -923,7 +935,7 @@ export class Chamber02Scene extends Phaser.Scene {
       );
       camera.setViewport(0, 0, width, worldBandHeight);
       camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
-      camera.setFollowOffset(-120, PORTRAIT_LAYOUT.portraitFollowOffsetY);
+      this.directionalCameraBias?.setLayout({ isPortrait: true, followOffsetY: PORTRAIT_LAYOUT.portraitFollowOffsetY });
       this.mobileControls.setReservedBottomPx(height - worldBandHeight);
       this.restartText.setPosition(
         width / 2,
@@ -934,7 +946,7 @@ export class Chamber02Scene extends Phaser.Scene {
 
     camera.setViewport(0, 0, width, height);
     camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
-    camera.setFollowOffset(-140, PORTRAIT_LAYOUT.desktopFollowOffsetY);
+    this.directionalCameraBias?.setLayout({ isPortrait: false, followOffsetY: PORTRAIT_LAYOUT.desktopFollowOffsetY });
     this.mobileControls.setReservedBottomPx(0);
     this.restartText.setPosition(width / 2, 90);
   }
