@@ -8,6 +8,7 @@ import { AudioDirector } from '../audio/AudioDirector.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { PLAYER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
+import { createDirectionalCameraBias } from '../systems/DirectionalCameraBias.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
 import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
@@ -228,8 +229,17 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
 
   configureCameraAndLayout() {
     this.cameras.main.startFollow(this.player.sprite, true, BOSS_PIT_BOOTSTRAP.cameraLerp.x, BOSS_PIT_BOOTSTRAP.cameraLerp.y, -128, 0);
-    this.scale.on('resize', this.applyResponsiveLayout, this);
+
+    this.directionalCameraBias = createDirectionalCameraBias({
+      camera: this.cameras.main,
+      player: this.player,
+      desktopBaseOffsetX: BOSS_PIT_BOOTSTRAP.desktopFollowOffsetX,
+      portraitBaseOffsetX: BOSS_PIT_BOOTSTRAP.portraitFollowOffsetX,
+      desktopLookAheadX: 44,
+      portraitLookAheadX: 18
+    });    this.scale.on('resize', this.applyResponsiveLayout, this);
     this.applyResponsiveLayout();
+    this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
   }
 
@@ -260,7 +270,8 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
       this.boss?.body?.setVelocity?.(0, 0);
       this.setEnemyProjectilesPaused(true);
       this.refreshBossBar(time);
-      this.hud.update(this.player.health, this.player.maxHealth);
+      this.directionalCameraBias?.update();
+    this.hud.update(this.player.health, this.player.maxHealth);
       return;
     }
 
@@ -284,6 +295,7 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     this.tryUseExitAltar(mobileInput);
     this.enemyProjectiles.forEach((projectile) => projectile.update(time, this.game.loop.delta));
     this.refreshBossBar(time);
+    this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
   }
 
@@ -772,11 +784,11 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
       const topLetterbox = Math.floor((height - worldBandHeight) / 2);
       camera.setViewport(0, topLetterbox, width, worldBandHeight);
       camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
-      camera.setFollowOffset(BOSS_PIT_BOOTSTRAP.portraitFollowOffsetX, PORTRAIT_LAYOUT.portraitFollowOffsetY);
+      this.directionalCameraBias?.setLayout({ isPortrait: true, followOffsetY: PORTRAIT_LAYOUT.portraitFollowOffsetY });
     } else {
       camera.setViewport(0, 0, width, height);
       camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
-      camera.setFollowOffset(BOSS_PIT_BOOTSTRAP.desktopFollowOffsetX, PORTRAIT_LAYOUT.desktopFollowOffsetY);
+      this.directionalCameraBias?.setLayout({ isPortrait: false, followOffsetY: PORTRAIT_LAYOUT.desktopFollowOffsetY });
     }
 
     this.restartText.setPosition(width / 2, Math.max(76, height * 0.2));

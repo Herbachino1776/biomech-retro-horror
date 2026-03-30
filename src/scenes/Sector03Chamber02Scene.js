@@ -7,6 +7,7 @@ import { AudioDirector } from '../audio/AudioDirector.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
+import { createDirectionalCameraBias } from '../systems/DirectionalCameraBias.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { applyChamberEntryRestore } from '../systems/VesselRunEconomy.js';
 import { bossPitRunState } from '../systems/BossPitRunState.js';
@@ -305,9 +306,18 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
 
   configureLayout() {
     this.cameras.main.startFollow(this.player.sprite, true, CHAMBER.cameraLerp.x, CHAMBER.cameraLerp.y, CHAMBER.desktopFollowOffsetX, 0);
-    this.scale.on('resize', this.applyResponsiveLayout, this);
+
+    this.directionalCameraBias = createDirectionalCameraBias({
+      camera: this.cameras.main,
+      player: this.player,
+      desktopBaseOffsetX: CHAMBER.desktopFollowOffsetX,
+      portraitBaseOffsetX: CHAMBER.portraitFollowOffsetX,
+      desktopLookAheadX: 56,
+      portraitLookAheadX: 24
+    });    this.scale.on('resize', this.applyResponsiveLayout, this);
     this.applyResponsiveLayout();
     this.mobileControls.setMode('gameplay');
+    this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
   }
 
@@ -350,6 +360,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     this.tryBeginPitDescent(mobileInput);
     this.refreshForwardThresholdPresence();
     this.tryAdvanceForwardThreshold(mobileInput);
+    this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
   }
 
@@ -684,7 +695,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
 
       camera.setViewport(0, 0, width, worldBandHeight);
       camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
-      camera.setFollowOffset(CHAMBER.portraitFollowOffsetX, PORTRAIT_LAYOUT.portraitFollowOffsetY);
+      this.directionalCameraBias?.setLayout({ isPortrait: true, followOffsetY: PORTRAIT_LAYOUT.portraitFollowOffsetY });
       this.mobileControls.setReservedBottomPx(height - worldBandHeight);
       this.restartText?.setPosition(width / 2, Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY));
       this.hud?.layout();
@@ -693,7 +704,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
 
     camera.setViewport(0, 0, width, height);
     camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
-    camera.setFollowOffset(CHAMBER.desktopFollowOffsetX, PORTRAIT_LAYOUT.desktopFollowOffsetY);
+    this.directionalCameraBias?.setLayout({ isPortrait: false, followOffsetY: PORTRAIT_LAYOUT.desktopFollowOffsetY });
     this.mobileControls.setReservedBottomPx(0);
     this.restartText?.setPosition(width / 2, 90);
     this.hud?.layout();

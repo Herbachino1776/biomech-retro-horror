@@ -14,6 +14,7 @@ import {
 } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
+import { createDirectionalCameraBias } from '../systems/DirectionalCameraBias.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
 import { grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
@@ -470,8 +471,17 @@ export class Chamber01Scene extends Phaser.Scene {
 
   configureLayout() {
     this.cameras.main.startFollow(this.player.sprite, true, CHAMBER.cameraLerp.x, CHAMBER.cameraLerp.y, CHAMBER.desktopFollowOffsetX, 0);
-    this.scale.on('resize', this.applyResponsiveLayout, this);
+
+    this.directionalCameraBias = createDirectionalCameraBias({
+      camera: this.cameras.main,
+      player: this.player,
+      desktopBaseOffsetX: CHAMBER.desktopFollowOffsetX,
+      portraitBaseOffsetX: CHAMBER.portraitFollowOffsetX,
+      desktopLookAheadX: 56,
+      portraitLookAheadX: 24
+    });    this.scale.on('resize', this.applyResponsiveLayout, this);
     this.applyResponsiveLayout();
+    this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
   }
 
@@ -524,6 +534,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.tryBeginGateTransition(mobileInput);
 
     this.updateBossArenaFeedback(time);
+    this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
     this.hud.setBossBarState({
       visible: this.bossEncounterStarted && (!this.bossDefeated || this.bossCeremonyBossBarActive),
@@ -1128,7 +1139,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
       camera.setViewport(0, 0, width, worldBandHeight);
       camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
-      camera.setFollowOffset(CHAMBER.portraitFollowOffsetX, PORTRAIT_LAYOUT.portraitFollowOffsetY);
+      this.directionalCameraBias?.setLayout({ isPortrait: true, followOffsetY: PORTRAIT_LAYOUT.portraitFollowOffsetY });
       this.mobileControls.setReservedBottomPx(height - worldBandHeight);
       this.restartText?.setPosition(width / 2, Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY));
       this.layoutBossRewardText(width, height, worldBandHeight);
@@ -1138,7 +1149,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
     camera.setViewport(0, 0, width, height);
     camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
-    camera.setFollowOffset(CHAMBER.desktopFollowOffsetX, PORTRAIT_LAYOUT.desktopFollowOffsetY);
+    this.directionalCameraBias?.setLayout({ isPortrait: false, followOffsetY: PORTRAIT_LAYOUT.desktopFollowOffsetY });
     this.mobileControls.setReservedBottomPx(0);
     this.restartText?.setPosition(width / 2, 90);
     this.layoutBossRewardText(width, height, height);
@@ -1159,6 +1170,9 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   getFollowOffsetX() {
+    if (this.directionalCameraBias) {
+      return this.directionalCameraBias.getFollowOffsetX();
+    }
     return this.mobileControls.enabled && this.scale.height >= this.scale.width
       ? CHAMBER.portraitFollowOffsetX
       : CHAMBER.desktopFollowOffsetX;

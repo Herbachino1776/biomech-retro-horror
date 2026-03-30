@@ -6,6 +6,7 @@ import { MobileControls } from '../ui/MobileControls.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
+import { createDirectionalCameraBias } from '../systems/DirectionalCameraBias.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
 import { applyChamberEntryRestore } from '../systems/VesselRunEconomy.js';
@@ -814,9 +815,18 @@ export class Chamber03Scene extends Phaser.Scene {
       CHAMBER03_BOOTSTRAP.desktopFollowOffsetX,
       0
     );
+    this.directionalCameraBias = createDirectionalCameraBias({
+      camera: this.cameras.main,
+      player: this.player,
+      desktopBaseOffsetX: CHAMBER03_BOOTSTRAP.desktopFollowOffsetX,
+      portraitBaseOffsetX: CHAMBER03_BOOTSTRAP.portraitFollowOffsetX,
+      desktopLookAheadX: 56,
+      portraitLookAheadX: 24
+    });
     this.scale.on('resize', this.applyResponsiveLayout, this);
     this.applyResponsiveLayout();
     this.mobileControls.setMode('gameplay');
+    this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
   }
 
@@ -863,6 +873,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.refreshBossThresholdPresence();
     this.tryBeginBossArenaTransition(mobileInput);
     this.updateBossThresholdAura(time);
+    this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
   }
 
@@ -1069,7 +1080,7 @@ export class Chamber03Scene extends Phaser.Scene {
 
       camera.setViewport(0, 0, width, worldBandHeight);
       camera.setZoom(PORTRAIT_LAYOUT.portraitZoom);
-      camera.setFollowOffset(CHAMBER03_BOOTSTRAP.portraitFollowOffsetX, PORTRAIT_LAYOUT.portraitFollowOffsetY);
+      this.directionalCameraBias?.setLayout({ isPortrait: true, followOffsetY: PORTRAIT_LAYOUT.portraitFollowOffsetY });
       this.mobileControls.setReservedBottomPx(height - worldBandHeight);
       this.restartText.setPosition(
         width / 2,
@@ -1080,7 +1091,7 @@ export class Chamber03Scene extends Phaser.Scene {
 
     camera.setViewport(0, 0, width, height);
     camera.setZoom(PORTRAIT_LAYOUT.desktopZoom);
-    camera.setFollowOffset(CHAMBER03_BOOTSTRAP.desktopFollowOffsetX, PORTRAIT_LAYOUT.desktopFollowOffsetY);
+    this.directionalCameraBias?.setLayout({ isPortrait: false, followOffsetY: PORTRAIT_LAYOUT.desktopFollowOffsetY });
     this.mobileControls.setReservedBottomPx(0);
     this.restartText.setPosition(width / 2, 90);
   }
