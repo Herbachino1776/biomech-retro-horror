@@ -16,9 +16,9 @@ export const PLAYER = {
   jumpVelocity: -430,
   body: { width: 30, height: 54, offsetX: 9, offsetY: 4 },
   attackHitbox: {
-    width: 50,
+    width: 56,
     height: 34,
-    forwardOffset: 42,
+    forwardOffset: 48,
     yOffset: 2
   },
   attackCooldownMs: 520,
