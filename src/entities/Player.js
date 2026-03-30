@@ -6,12 +6,12 @@ import { vesselIntegrityState } from '../systems/VesselIntegrityState.js';
 
 const PLAYER_WALK_ANIMATION_KEY = 'player-walk';
 const PLAYER_IDLE_ANIMATION_KEY = 'player-idle';
-const PLAYER_ATTACK_ANIMATION_KEY = 'player-attack-body';
 const PLAYER_WALK_FPS = 8;
 const PLAYER_WALK_MIN_SPEED = 36;
 const PLAYER_IDLE_FPS = 5;
 const PLAYER_IDLE_MAX_SPEED = 20;
-const PLAYER_ATTACK_FPS = 12;
+const PLAYER_ATTACK_MANUAL_FRAME_COUNT = 5;
+const PLAYER_ATTACK_EXPLICIT_FRAME_KEY_PREFIX = 'player-attack-explicit-frame';
 
 export class Player {
   constructor(scene, x, y, config) {
@@ -24,6 +24,7 @@ export class Player {
     this.attackActive = false;
     this.attackPhase = 'idle';
     this.attackId = 0;
+    this.currentAttackFrameIndex = 0;
     this.lastAttackTime = -Infinity;
     this.lastHitTime = -Infinity;
     this.lastFootstepAt = -Infinity;
@@ -48,7 +49,6 @@ export class Player {
     if (this.usingConceptSprite) {
       this.registerWalkAnimation();
       this.registerIdleAnimation();
-      this.registerAttackAnimation();
     }
     scene.physics.add.existing(this.sprite);
 
@@ -60,6 +60,7 @@ export class Player {
     const scaleY = Math.abs(this.sprite.scaleY) || 1;
     this.body.setSize(config.body.width / scaleX, config.body.height / scaleY);
     this.body.setOffset(config.body.offsetX / scaleX, config.body.offsetY / scaleY);
+    this.attackFootPlaneOffsetY = this.sprite.y - (this.body.y + this.body.height);
 
     this.attackHitbox = scene.add.zone(x + 26, y, 38, 30);
     scene.physics.add.existing(this.attackHitbox);
@@ -120,9 +121,7 @@ export class Player {
     this.attackActive = false;
     this.attackPhase = 'startup';
     this.attackHitbox.body.enable = false;
-    if (this.usingConceptSprite && this.scene.anims.exists(PLAYER_ATTACK_ANIMATION_KEY)) {
-      this.sprite.play(PLAYER_ATTACK_ANIMATION_KEY, true);
-    }
+    this.currentAttackFrameIndex = 0;
     this.setVisualTint(0x6f8c59);
     this.scene.audioDirector?.playPlayerAttack();
   }
@@ -227,7 +226,7 @@ export class Player {
 
   updateVisuals(time) {
     if (this.usingConceptSprite) {
-      this.updateSpriteAnimationState();
+      this.updateSpriteAnimationState(time);
     }
 
     if (this.isDead) {
@@ -248,7 +247,7 @@ export class Player {
     this.setVisualTint(0xb8aa92);
   }
 
-  updateSpriteAnimationState() {
+  updateSpriteAnimationState(time) {
     this.applyNormalizedVisualPresentation();
 
     const isGrounded = this.body.blocked.down;
@@ -260,10 +259,8 @@ export class Player {
     const canPlayWalk = canAnimate && isMovingHorizontally;
     const canPlayIdle = canAnimate && isNearlyStationary;
 
-    if (inAttackCommit && this.scene.anims.exists(PLAYER_ATTACK_ANIMATION_KEY)) {
-      if (this.sprite.anims.currentAnim?.key !== PLAYER_ATTACK_ANIMATION_KEY) {
-        this.sprite.play(PLAYER_ATTACK_ANIMATION_KEY, true);
-      }
+    if (inAttackCommit) {
+      this.applyManualAttackFrame(time);
       return;
     }
 
@@ -310,17 +307,28 @@ export class Player {
     });
   }
 
-  registerAttackAnimation() {
-    if (!this.scene.textures.exists(ASSET_KEYS.playerAttackStripFrames) || this.scene.anims.exists(PLAYER_ATTACK_ANIMATION_KEY)) {
-      return;
+
+  applyManualAttackFrame(time) {
+    const totalAttackMs = this.config.attackStartupMs + this.config.attackActiveMs + this.config.attackRecoveryMs;
+    const safeTotalAttackMs = Math.max(1, totalAttackMs);
+    const attackElapsed = Phaser.Math.Clamp(time - this.lastAttackTime, 0, safeTotalAttackMs);
+    const normalizedProgress = Phaser.Math.Clamp(attackElapsed / safeTotalAttackMs, 0, 0.999999);
+    const frameIndex = Math.min(
+      PLAYER_ATTACK_MANUAL_FRAME_COUNT - 1,
+      Math.floor(normalizedProgress * PLAYER_ATTACK_MANUAL_FRAME_COUNT)
+    );
+
+    if (this.sprite.anims.isPlaying) {
+      this.sprite.anims.stop();
     }
 
-    this.scene.anims.create({
-      key: PLAYER_ATTACK_ANIMATION_KEY,
-      frames: this.scene.anims.generateFrameNumbers(ASSET_KEYS.playerAttackStripFrames, { start: 0, end: 4 }),
-      frameRate: PLAYER_ATTACK_FPS,
-      repeat: 0
-    });
+    const attackFrameKey = `${PLAYER_ATTACK_EXPLICIT_FRAME_KEY_PREFIX}-${frameIndex}`;
+    this.sprite.setTexture(ASSET_KEYS.playerAttackStrip, attackFrameKey);
+    this.currentAttackFrameIndex = frameIndex;
+    this.applyNormalizedVisualPresentation();
+
+    const attackFootPlaneY = this.body.y + this.body.height + this.attackFootPlaneOffsetY;
+    this.sprite.setY(attackFootPlaneY);
   }
 
   applyNormalizedVisualPresentation() {

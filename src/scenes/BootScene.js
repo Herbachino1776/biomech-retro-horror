@@ -12,9 +12,10 @@ const TITLE_SCENE_AUDIO = {
 };
 
 const PLAYER_ATTACK_STRIP_FRAME_CONFIG = {
-  sourceColumns: 6,
   usableFrames: 5
 };
+
+const PLAYER_ATTACK_EXPLICIT_FRAME_KEY_PREFIX = 'player-attack-explicit-frame';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -237,7 +238,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   registerPlayerAttackBodySpritesheet() {
-    if (!this.textures.exists(ASSET_KEYS.playerAttackStrip) || this.textures.exists(ASSET_KEYS.playerAttackStripFrames)) {
+    if (!this.textures.exists(ASSET_KEYS.playerAttackStrip)) {
       return;
     }
 
@@ -250,18 +251,34 @@ export class BootScene extends Phaser.Scene {
       return;
     }
 
-    const frameWidth = stripWidth % PLAYER_ATTACK_STRIP_FRAME_CONFIG.sourceColumns === 0
-      ? stripWidth / PLAYER_ATTACK_STRIP_FRAME_CONFIG.sourceColumns
-      : Math.floor(stripWidth / PLAYER_ATTACK_STRIP_FRAME_CONFIG.usableFrames);
-
+    const frameCount = PLAYER_ATTACK_STRIP_FRAME_CONFIG.usableFrames;
+    const frameWidth = Math.floor(stripWidth / frameCount);
     if (!frameWidth) {
+      return;
+    }
+
+    for (let frameIndex = 0; frameIndex < frameCount; frameIndex += 1) {
+      const explicitFrameKey = `${PLAYER_ATTACK_EXPLICIT_FRAME_KEY_PREFIX}-${frameIndex}`;
+      if (!attackStripTexture.has(explicitFrameKey)) {
+        attackStripTexture.add(
+          explicitFrameKey,
+          0,
+          frameIndex * frameWidth,
+          0,
+          frameWidth,
+          frameHeight
+        );
+      }
+    }
+
+    if (this.textures.exists(ASSET_KEYS.playerAttackStripFrames)) {
       return;
     }
 
     this.textures.addSpriteSheet(ASSET_KEYS.playerAttackStripFrames, attackStripImage, {
       frameWidth,
       frameHeight,
-      endFrame: PLAYER_ATTACK_STRIP_FRAME_CONFIG.usableFrames - 1
+      endFrame: frameCount - 1
     });
   }
 
