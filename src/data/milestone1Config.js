@@ -25,12 +25,12 @@ export const PLAYER = {
   startY: 368,
   weaponVisual: {
     display: { width: 58, height: 58 },
-    restingPose: { offsetX: 14, offsetY: -58, rotationDeg: 20, depthOffset: -1 },
+    restingPose: { offsetX: 16, offsetY: -84, rotationDeg: 18, depthOffset: -1 },
     swingPose: {
-      windup: { offsetX: 6, offsetY: -88, rotationDeg: -112, durationMs: 70 },
-      downswing: { offsetX: 34, offsetY: -44, rotationDeg: 68, durationMs: 55 },
-      impactSettle: { offsetX: 24, offsetY: -48, rotationDeg: 42, durationMs: 70 },
-      recover: { offsetX: 14, offsetY: -58, rotationDeg: 20, durationMs: 140 }
+      windup: { offsetX: 10, offsetY: -118, rotationDeg: -116, durationMs: 70 },
+      downswing: { offsetX: 36, offsetY: -74, rotationDeg: 72, durationMs: 55 },
+      impactSettle: { offsetX: 26, offsetY: -78, rotationDeg: 46, durationMs: 70 },
+      recover: { offsetX: 16, offsetY: -84, rotationDeg: 18, durationMs: 140 }
     }
   }
 };

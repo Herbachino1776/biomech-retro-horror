@@ -128,7 +128,6 @@ export class Player {
     this.attackActive = false;
     this.attackPhase = 'startup';
     this.attackHitbox.body.enable = false;
-    this.setVisualTint(0x6f8c59);
     this.playWeaponSwing();
     this.scene.audioDirector?.playPlayerAttack();
   }
@@ -246,11 +245,6 @@ export class Player {
       return;
     }
 
-    if (this.attackPhase !== 'idle') {
-      this.setVisualTint(0x6f8c59);
-      return;
-    }
-
     if (time < this.lastHitTime + 140) {
       this.setVisualTint(0x64453a);
       return;
@@ -276,7 +270,7 @@ export class Player {
     const display = this.config.weaponVisual?.display ?? { width: 72, height: 72 };
     return this.scene.add
       .image(x, y, ASSET_KEYS.playerWeaponHammer01)
-      .setOrigin(0.5, 0.74)
+      .setOrigin(0.5, 0.58)
       .setDisplaySize(display.width, display.height)
       .setDepth((this.sprite.depth ?? 6) - 1);
   }
