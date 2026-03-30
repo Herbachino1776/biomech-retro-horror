@@ -150,6 +150,8 @@ import ambientChamber02Loop01Url from '../../assets/audio/ambient/ambient_chambe
 import { PROCEDURAL_AUDIO_URLS } from '../audio/proceduralAudio.js';
 import { ASSET_KEYS } from './assetKeys.js';
 
+const playerJumpStatic01Url = new URL('../../art/raw/player/player_jump_static_01.PNG', import.meta.url).href;
+
 export const ASSET_URLS = {
   [ASSET_KEYS.titleScreenBackground01]: titleScreenBackground01Url,
   [ASSET_KEYS.titleLogoOuterEngine01]: titleLogoOuterEngine01Url,
@@ -271,6 +273,7 @@ export const ASSET_URLS = {
   [ASSET_KEYS.enemyGoreClusterMeatBone01]: enemyGoreClusterMeatBone01Url,
   [ASSET_KEYS.player]: playerWalkPuppetStrip06Url,
   [ASSET_KEYS.playerIdle]: playerIdleBreatheStrip05Url,
+  [ASSET_KEYS.playerJumpStatic]: playerJumpStatic01Url,
   [ASSET_KEYS.playerWeaponHammer01]: playerWeaponHammer01Url,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,

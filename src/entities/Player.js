@@ -32,6 +32,8 @@ export class Player {
     const displaySize = getNormalizedDisplaySize(playerPresentation);
     const origin = getNormalizedOrigin(playerPresentation);
     const visualYOffset = getNormalizedYOffset(playerPresentation);
+    this.presentationDisplaySize = displaySize;
+    this.presentationOrigin = origin;
 
     this.sprite = this.usingConceptSprite
       ? scene.add
@@ -394,9 +396,15 @@ export class Player {
     const isMovingHorizontally = horizontalSpeed >= PLAYER_WALK_MIN_SPEED;
     const isNearlyStationary = horizontalSpeed <= PLAYER_IDLE_MAX_SPEED;
     const inAttackCommit = this.attackPhase === 'startup' || this.attackPhase === 'active' || this.attackPhase === 'recovery';
+    const showAirborneJumpSprite = !this.isDead && !inAttackCommit && !isGrounded;
     const canAnimate = !this.isDead && !inAttackCommit && isGrounded;
     const canPlayWalk = canAnimate && isMovingHorizontally;
     const canPlayIdle = canAnimate && isNearlyStationary;
+
+    if (showAirborneJumpSprite) {
+      this.setJumpStaticVisual();
+      return;
+    }
 
     if (canPlayWalk) {
       if (this.sprite.anims.currentAnim?.key !== PLAYER_WALK_ANIMATION_KEY || !this.sprite.anims.isPlaying) {
@@ -450,6 +458,24 @@ export class Player {
       this.sprite.anims.stop();
     }
     this.sprite.setFrame(frameIndex);
+  }
+
+  setJumpStaticVisual() {
+    if (!this.scene.textures.exists(ASSET_KEYS.playerJumpStatic)) {
+      this.setStaticFrame(0);
+      return;
+    }
+
+    if (this.sprite.anims.isPlaying) {
+      this.sprite.anims.stop();
+    }
+
+    if (this.sprite.texture.key !== ASSET_KEYS.playerJumpStatic) {
+      this.sprite.setTexture(ASSET_KEYS.playerJumpStatic);
+    }
+
+    this.sprite.setOrigin(this.presentationOrigin.x, this.presentationOrigin.y);
+    this.sprite.setDisplaySize(this.presentationDisplaySize.width, this.presentationDisplaySize.height);
   }
 
 

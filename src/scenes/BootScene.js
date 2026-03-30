@@ -162,6 +162,7 @@ export class BootScene extends Phaser.Scene {
       frameHeight: 1335,
       endFrame: 4
     });
+    this.load.image(ASSET_KEYS.playerJumpStatic, ASSET_URLS[ASSET_KEYS.playerJumpStatic]);
     this.load.image(ASSET_KEYS.playerWeaponHammer01, ASSET_URLS[ASSET_KEYS.playerWeaponHammer01]);
     this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
