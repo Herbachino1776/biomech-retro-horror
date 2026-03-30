@@ -164,6 +164,7 @@ export class Player {
     this.attackPhase = 'idle';
     this.attackActive = false;
     this.attackHitbox.body.enable = false;
+    this.stopWeaponSwingTween();
     this.resetWeaponToRestPose();
   }
 
@@ -275,23 +276,53 @@ export class Player {
       return;
     }
 
-    this.weaponSwingTween?.stop();
-    this.weaponSwingTween = this.scene.tweens.timeline({
-      targets: this.weaponPoseState,
-      tweens: [
-        this.buildWeaponTweenStep(this.config.weaponVisual?.swingPose?.windup, 1),
-        this.buildWeaponTweenStep(this.config.weaponVisual?.swingPose?.downswing, 2),
-        this.buildWeaponTweenStep(this.config.weaponVisual?.swingPose?.impactSettle, 1),
-        this.buildWeaponTweenStep(this.config.weaponVisual?.swingPose?.recover, -1)
-      ],
-      onUpdate: () => {
-        this.applyWeaponPoseState();
-      },
-      onComplete: () => {
+    this.stopWeaponSwingTween();
+
+    const swingSteps = [
+      this.buildWeaponTweenStep(this.config.weaponVisual?.swingPose?.windup, 1),
+      this.buildWeaponTweenStep(this.config.weaponVisual?.swingPose?.downswing, 2),
+      this.buildWeaponTweenStep(this.config.weaponVisual?.swingPose?.impactSettle, 1),
+      this.buildWeaponTweenStep(this.config.weaponVisual?.swingPose?.recover, -1)
+    ];
+
+    const playStep = (stepIndex) => {
+      if (stepIndex >= swingSteps.length) {
         this.weaponSwingTween = null;
-        this.resetWeaponToRestPose();
+        if (this.attackPhase === 'idle') {
+          this.resetWeaponToRestPose();
+        }
+        return;
       }
-    });
+
+      const step = swingSteps[stepIndex];
+      this.weaponSwingTween = this.scene.tweens.add({
+        targets: this.weaponPoseState,
+        offsetX: step.offsetX,
+        offsetY: step.offsetY,
+        rotationDeg: step.rotationDeg,
+        depthOffset: step.depthOffset,
+        duration: step.duration,
+        ease: step.ease,
+        onUpdate: () => {
+          this.applyWeaponPoseState();
+        },
+        onComplete: () => {
+          playStep(stepIndex + 1);
+        }
+      });
+    };
+
+    playStep(0);
+  }
+
+  stopWeaponSwingTween() {
+    if (!this.weaponSwingTween) {
+      return;
+    }
+
+    this.weaponSwingTween.stop();
+    this.weaponSwingTween.remove();
+    this.weaponSwingTween = null;
   }
 
   buildWeaponTweenStep(pose, depthOffset) {
@@ -324,7 +355,7 @@ export class Player {
   }
 
   resetWeaponToRestPose() {
-    if (!this.weaponSprite || !this.weaponPoseState || this.attackPhase !== 'idle') {
+    if (!this.weaponSprite || !this.weaponPoseState) {
       return;
     }
 
