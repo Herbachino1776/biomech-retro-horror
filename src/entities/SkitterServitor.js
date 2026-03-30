@@ -4,6 +4,7 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { triggerEnemyDeathRuptureBurst } from '../systems/EnemyDeathRuptureBurst.js';
 import { triggerEnemyHitSplatterBurst } from '../systems/EnemyHitSplatterBurst.js';
 import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
+import { enforceEnemyFloorIntegrity } from '../systems/EnemyFloorIntegrity.js';
 
 export class SkitterServitor {
   constructor(scene, x, y, config) {
@@ -96,6 +97,7 @@ export class SkitterServitor {
   }
 
   update(time, playerX) {
+    enforceEnemyFloorIntegrity(this.sprite, this.body);
     this.updatePoiseState(time);
     this.updateVisuals(time);
 
