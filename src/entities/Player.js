@@ -276,7 +276,7 @@ export class Player {
     const display = this.config.weaponVisual?.display ?? { width: 72, height: 72 };
     return this.scene.add
       .image(x, y, ASSET_KEYS.playerWeaponHammer01)
-      .setOrigin(0.5, 0.85)
+      .setOrigin(0.5, 0.74)
       .setDisplaySize(display.width, display.height)
       .setDepth((this.sprite.depth ?? 6) - 1);
   }
