@@ -11,6 +11,11 @@ const TITLE_SCENE_AUDIO = {
   startGameSfxVolume: 0.34
 };
 
+const PLAYER_ATTACK_STRIP_FRAME_CONFIG = {
+  sourceColumns: 6,
+  usableFrames: 5
+};
+
 export class BootScene extends Phaser.Scene {
   constructor() {
     super('BootScene');
@@ -238,18 +243,25 @@ export class BootScene extends Phaser.Scene {
 
     const attackStripTexture = this.textures.get(ASSET_KEYS.playerAttackStrip);
     const attackStripImage = attackStripTexture?.getSourceImage();
-    const frameCount = 5;
-    const frameWidth = Math.floor((attackStripImage?.width ?? 0) / frameCount);
+    const stripWidth = attackStripImage?.width ?? 0;
     const frameHeight = attackStripImage?.height ?? 0;
 
-    if (!frameWidth || !frameHeight) {
+    if (!stripWidth || !frameHeight) {
+      return;
+    }
+
+    const frameWidth = stripWidth % PLAYER_ATTACK_STRIP_FRAME_CONFIG.sourceColumns === 0
+      ? stripWidth / PLAYER_ATTACK_STRIP_FRAME_CONFIG.sourceColumns
+      : Math.floor(stripWidth / PLAYER_ATTACK_STRIP_FRAME_CONFIG.usableFrames);
+
+    if (!frameWidth) {
       return;
     }
 
     this.textures.addSpriteSheet(ASSET_KEYS.playerAttackStripFrames, attackStripImage, {
       frameWidth,
       frameHeight,
-      endFrame: frameCount - 1
+      endFrame: PLAYER_ATTACK_STRIP_FRAME_CONFIG.usableFrames - 1
     });
   }
 
