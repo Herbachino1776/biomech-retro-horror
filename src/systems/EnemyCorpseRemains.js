@@ -61,6 +61,16 @@ const REMAINS_PROFILES = {
     settleDropY: [0, 6],
     settleSinkIntoFloorPx: [5, 10],
     settleDurationMs: [180, 310]
+  },
+  sector3Boss: {
+    pieceCountRange: [10, 14],
+    maxDisplaySidePx: [58, 84],
+    spawnRadiusX: 30,
+    settleRadiusX: 70,
+    spawnDropY: [24, 36],
+    settleDropY: [0, 5],
+    settleSinkIntoFloorPx: [6, 11],
+    settleDurationMs: [200, 340]
   }
 };
 
@@ -75,7 +85,8 @@ const BLOOD_POOL_PROFILES = {
   large: { width: 116, height: 30, growMs: 920 },
   elite: { width: 122, height: 34, growMs: 980 },
   sector3Basic: { width: 78, height: 24, growMs: 820 },
-  sector3Elite: { width: 152, height: 46, growMs: 1040 }
+  sector3Elite: { width: 152, height: 46, growMs: 1040 },
+  sector3Boss: { width: 188, height: 56, growMs: 1120 }
 };
 
 function ensureStore(scene) {
