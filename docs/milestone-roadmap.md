@@ -53,11 +53,18 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 **Purpose:** build Sector 3 (**The Cradle of Refusal**) as an escalation sector while expanding boss pits as core structural rhythm.
 
 **Current immediate path inside Milestone 8:**
-- Use Sector 3 Chamber 1 (**Gallery of Failed Measures**) as the playable backbone handoff point.
-- Expand chamber content with deliberate encounter-tier/background-tier synergy.
+- Treat Sector 3 as late buildout, not early bootstrap.
+- Keep Sector 3 Chamber 1 (**Gallery of Failed Measures**) aligned to newer authored-chamber quality.
+- Expand/align chamber content with deliberate encounter-tier/background-tier synergy.
 - Add additional trap-altar-to-boss-pit routes with deterministic return behavior.
 - Increase elite-domain identity in opened room segments.
 - Preserve all established run-state and progression invariants.
+
+**Current-reality notes inside Milestone 8:**
+- Chamber 1 has been rebuilt toward later-chamber standards.
+- Half-Skull was removed from Chamber 1 and replaced provisionally using `art/raw/sector03/chamber02/enemy_chamber02_blind_cantor_basic_01.png`.
+- Chamber 1 boss flow now uses modern full boss treatment (zoom, shake, elongated ceremonial finish, stronger gore payoff, escalated remains).
+- Chamber 3 is substantially built from uploaded art pack and now part of consistency/polish shaping.
 
 **Canonical chamber-authoring rhythm for new chambers:**
 1. opening setpiece / lore altar segment
@@ -74,6 +81,7 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 - lore/combat cadence balancing
 - readability cleanup under dense altar + pit + encounter flows
 - mobile/desktop parity polish under full Sector 3 load
+- Chamber 1 polish and consistency cleanup as a specific late-polish sub-item (not active mainline while Milestone 8 execution continues)
 
 ## Milestone 10 — Global Boss/Chamber Refinement + Uniformity
 **Purpose:** bring boss/chamber quality, readability, and reward signaling to consistent cross-sector standards.
@@ -83,15 +91,17 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 - chamber-end ritual consistency pass
 - reward messaging and run-growth clarity pass
 - retrofitted cleanup for earlier chambers where needed
+- lock all bosses/minibosses/pit bosses to the modern boss-pit-standard death/payoff family (zoom + shake + elongated ceremonial finish + stronger gore + escalated remains)
 
 ## Milestone 11 — Character/Action Animation Lane (Deferred, Explicit)
 **Purpose:** evolve presentation language from static-sprite-heavy baseline to authored character action performance.
 
 **Planned sequencing:**
-- start with player sprite animation lane
-- improve player locomotion readability/feel
-- add weapon swing animation language
+- conservative baseline already present: player idle + walk + visible hammer attack
+- start deferred polish with player weapon/attack refinement
+- improve player locomotion readability/feel where needed
+- expand attack language into alternate families (smash / thrust / swipe / upswing)
 - add Rite animation language
-- expand into broader combat/performance animation vocabulary
+- expand weapon-set breadth and broader combat/performance animation vocabulary
 
 **Status:** planned and intentionally deferred; not active until Sector 3 buildout lane stabilizes.

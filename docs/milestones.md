@@ -25,10 +25,17 @@ Plain-language snapshot of milestone state.
     - 7I Sponge vs Satisfaction Balance
 
 - **Milestone 8 — Sector 3 buildout + boss-pit expansion (coupled):** active in practice.
-  - practical meaning: Sector 3 (The Cradle of Refusal) is being built as a high-escalation sector with significantly more trap altars and boss pits, where boss pits are treated as core run-structure encounters rather than detached side content.
-  - current grounding: Sector 3 Chamber 1 (**Gallery of Failed Measures**) exists as a playable backbone scene.
+  - practical meaning: Sector 3 (The Cradle of Refusal) is now in later-stage build + consistency shaping, with boss pits treated as core run-structure encounters rather than detached side content.
+  - current grounding:
+    - Chamber 1 rebuilt toward later authored-chamber quality
+    - Half-Skull removed from Chamber 1
+    - Chamber 1 provisional replacement boss based on `art/raw/sector03/chamber02/enemy_chamber02_blind_cantor_basic_01.png`
+    - Chamber 1 boss flow now uses modern full boss treatment (zoom + shake + elongated ceremonial finish + stronger gore payoff + escalated remains)
+    - Chamber 3 substantially built from uploaded art pack
 
 - **Milestone 9+ — polish and expansion lanes:**
+  - **Polish Chamber 1** (later polish lane; not current mainline)
   - Sector 3 pacing/density/readability polish
   - global boss/chamber refinement + uniformity
+  - deferred player weapon/attack polish + broader weapon-set expansion + alternate attack families (smash/thrust/swipe/upswing)
   - explicit later character/action animation lane (planned, deferred)

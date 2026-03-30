@@ -53,3 +53,14 @@ Known failure patterns and what future tasks must protect.
 **Observed risk:** fallback primitives become accidental primary visuals.  
 - Loaded textures remain primary.
 - Fallback visuals are resilience-only.
+
+## 11) Sector 3 Bootstrap Assumption Regressions
+**Observed risk:** docs/tasks treat Sector 3 as early bootstrap and regress already-authored chamber quality.  
+- Treat Sector 3 as later-stage build/polish-consistency shaping.
+- Do not describe Chamber 1 as an old prototype layout.
+- Preserve Chamber 1 rebuild alignment to newer authored-chamber standards.
+
+## 12) Boss Death/Payoff Doctrine Drift
+**Observed risk:** bosses regress to lighter/older death handling.  
+- Keep all bosses/minibosses/pit bosses on the modern death/payoff family.
+- Preserve zoom + shake + elongated ceremonial finish + stronger gore payoff + escalated remains.

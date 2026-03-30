@@ -2,8 +2,8 @@
 
 A browser-playable retro horror action prototype built with Phaser 3 + Vite, developed in a GitHub + Codex workflow.
 
-## Project State (March 28, 2026)
-This is a **multi-sector prototype** with active Sector 3 expansion underway.
+## Project State (March 30, 2026)
+This is a **multi-sector prototype** with Sector 3 in a later-stage build + consistency pass.
 
 - **Sector 1 (Ossuary / dead-god palace arc)** is functionally in place:
   - Chamber 01
@@ -19,15 +19,19 @@ This is a **multi-sector prototype** with active Sector 3 expansion underway.
   - first trap-altar -> boss-pit loop in Sector 2 Chamber 2
   - established kill-payoff language (**Black Oil / Tar-laced Blood**)
   - live projectile + AOE readability combat tech in shipped encounters
-- **Sector 3 (The Cradle of Refusal)** has started in playable form:
-  - Chamber 1: **Gallery of Failed Measures** (`Sector03Chamber01Scene`)
-  - functional encounter pockets + lore altar + threshold/seal handoff scaffold
+- **Sector 3 (The Cradle of Refusal)** is substantially built and in polish/consistency shaping:
+  - Chamber 1: **Gallery of Failed Measures** rebuilt toward the later authored-chamber standard
+  - Chamber 1 now uses a provisional replacement boss (Half-Skull removed) based on:
+    - `art/raw/sector03/chamber02/enemy_chamber02_blind_cantor_basic_01.png`
+  - Chamber 1 boss treatment follows modern doctrine: zoom + shake + elongated ceremonial finish + stronger gore payoff + escalated boss remains
+  - Chamber 3 has already been substantially built out from its uploaded art pack
 
 ## Milestone Direction Snapshot
 - **Milestone 7** was meaningfully advanced through shared major-encounter resolution flow, chamber-end ritual/cinematic motion groundwork, and boss-death doctrine hardening.
 - Milestone 7 is now **largely established** but can still receive targeted follow-up in remaining quality lanes.
 - **Boss pits are core structural identity** (not optional side flavor).
-- **Milestone 8 is now active in practice** through Sector 3 Chamber 1 and early Sector 3 buildout.
+- **Milestone 8 remains active**, but current reality is no longer early bootstrap; work is in later-stage Sector 3 consistency/polish shaping.
+- **Polish Chamber 1** is tracked as a **later polish milestone item**, not the current mainline.
 
 ## Current Direction
 - Preserve Sector 1 + Sector 2 + early Sector 3 functionality while reducing regressions.
@@ -38,11 +42,16 @@ This is a **multi-sector prototype** with active Sector 3 expansion underway.
 ## Planned (Not Active Yet): Character Animation Lane
 Character animation is a real future production lane, but it is **not** the current implementation focus.
 
-Planned later scope includes:
-- player locomotion animation improvements
-- weapon swing animation
-- Rite animation
-- broader combat/performance animation language
+Current baseline now includes:
+- working player idle
+- working player walk
+- functional visible hammer attack baseline
+
+Deferred later scope includes:
+- player weapon/attack polish
+- broader weapon-set expansion
+- alternate attack families (smash / thrust / swipe / upswing)
+- additional locomotion + Rite + combat/performance animation polish
 
 Current static-sprite-heavy gameplay presentation is an interim production state, not permanent doctrine.
 

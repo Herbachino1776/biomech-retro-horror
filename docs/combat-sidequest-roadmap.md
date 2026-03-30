@@ -4,6 +4,10 @@ Planned, approved future lane for combat-focused systems work.
 
 This roadmap is **not** a statement that these systems already exist in the build. It is a sequencing and implementation-planning guide for future milestone work after active stabilization priorities are protected.
 
+Current conservative reality note:
+- Player baseline now has working idle + walk + functional visible hammer attack.
+- Treat weapon/attack polish and broader attack-family expansion as deferred later work, not active mainline.
+
 ## Intended Order
 
 `7A -> 7B -> 7C -> 7D -> 7E -> 7F -> 7G -> 7H -> 7I`
@@ -37,6 +41,7 @@ This roadmap is **not** a statement that these systems already exist in the buil
 - Keep telegraphs readable and implementation-consistent.
 - Ensure clean elite/miniboss/boss integration paths.
 - Reduce “what even hit me” outcomes.
+- Keep attack-family expansion (smash/thrust/swipe/upswing) in later deferred buckets unless milestone direction explicitly pulls it forward.
 
 ## Milestone 7E — Boss / Miniboss Readability Pass
 - Improve telegraph clarity.

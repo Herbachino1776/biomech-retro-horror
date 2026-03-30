@@ -6,6 +6,7 @@ Use this file to start a fresh planning/implementation session from real current
 - The project is beyond an early vertical slice and now operates as a multi-sector prototype.
 - Boss pits are now core structure, not optional side garnish.
 - Milestone 8 (Sector 3 + boss-pit expansion) is active in practice.
+- Sector 3 is now in later-stage build/polish-consistency shaping, not early bootstrap.
 - Dense lore should be balanced by violent combat payoff, trap-altar tension, and meaningful run-growth rewards.
 
 ## Where the Project Actually Is
@@ -16,7 +17,12 @@ Use this file to start a fresh planning/implementation session from real current
   - Chamber 3: The Kiln of Judgement
   - Chamber 3 boss payoff: The Sorrow Engine
 - **First boss pit template exists in Sector 2 Chamber 2** (trap altar descent, pit boss kill, exit altar return).
-- **Sector 3 Chamber 1 exists and is playable:** Gallery of Failed Measures (`Sector03Chamber01Scene`).
+- **Sector 3 state has moved beyond bootstrap:**
+  - Chamber 1 (**Gallery of Failed Measures**) rebuilt toward later authored-chamber standard
+  - Half-Skull removed from Chamber 1
+  - Chamber 1 provisional replacement boss based on `art/raw/sector03/chamber02/enemy_chamber02_blind_cantor_basic_01.png`
+  - Chamber 1 boss sequence now follows modern full treatment (zoom + shake + elongated ceremonial finish + stronger gore + escalated remains)
+  - Chamber 3 substantially built from uploaded art pack
 
 ## Milestone Snapshot
 ### Milestone 7 (advanced/largely established)
@@ -37,7 +43,12 @@ Still available as targeted follow-up:
 
 ### Milestone 8 (active)
 - Sector 3 buildout + boss-pit expansion are coupled and underway.
-- Current practical anchor is Sector 3 Chamber 1 handoff-safe expansion.
+- Current practical anchor is Sector 3 quality consistency + polish shaping across already-authored chambers.
+
+### Later polish lanes (not current mainline)
+- **Polish Chamber 1**
+- deferred player weapon/attack polish
+- broader weapon-set expansion + alternate attack families (smash / thrust / swipe / upswing)
 
 ## Chamber Authoring Doctrine (Default)
 Author new chambers in this rhythm:
@@ -57,6 +68,7 @@ Guidance:
 - Boss pit state resets on death/fresh run.
 - Boss pits now matter strategically because they grow the run (Vessel progression impact).
 - Sector 3 is expected to heavily expand trap altars and boss pits.
+- Boss/miniboss/pit-boss payoff treatment is locked to modern stronger doctrine (zoom + shake + elongated ceremonial finish + stronger gore + escalated remains).
 
 ## Current Build/Platform Baseline
 - Phaser 3 + Vite.
@@ -77,10 +89,12 @@ Guidance:
 
 ## Planned Future Lane (Do Not Lose)
 Character animation is a real planned lane, but it is **not active focus yet**.
-- starts with player sprite animation work
-- later includes locomotion, weapon swing, Rite, and broader combat/performance animation language
+- conservative current baseline: player idle + walk + functional visible hammer attack
+- deferred lane starts with player weapon/attack polish
+- later includes broader weapon-set expansion, alternate attack families (smash / thrust / swipe / upswing), Rite, and broader combat/performance animation language
 - respect the user-defined animation process when this lane begins
 
 ## Most Likely Next Gameplay Pass After Docs
-1. Expand Sector 3 with first stronger trap-altar/boss-pit route(s) and/or elite-domain reinforcement in opened-up room segments.
-2. Keep Milestone 8 buildout primary; revisit Milestone 7 follow-up only when it directly supports the Sector 3 lane.
+1. Continue Sector 3 consistency/polish shaping using the modern chamber quality standard.
+2. Keep Milestone 8 primary; place Chamber 1 polish and weapon/attack polish in later milestone buckets.
+3. Revisit Milestone 7 follow-up only when it directly supports the Sector 3 lane.
