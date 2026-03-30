@@ -57,15 +57,14 @@ export function applyEnemyFloorClamp(entity, floorPlaneY = getConfiguredFloorPla
     return;
   }
 
-  const maxBodyY = groundedY - body.offset.y;
-  if (body.y <= maxBodyY) {
+  const floorOvershoot = body.bottom - floorPlaneY;
+  if (floorOvershoot <= 0.5) {
     return;
   }
 
-  body.y = maxBodyY;
+  body.y -= floorOvershoot;
   body.prev.y = body.y;
   if (body.velocity.y > 0) {
     body.velocity.y = 0;
   }
-  sprite.y = groundedY;
 }
