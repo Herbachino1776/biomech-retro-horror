@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { COLORS } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
+import { applyEnemyFloorClamp } from '../systems/enemyGrounding.js';
 
 const FALLBACK_WIDTH = 188;
 const FALLBACK_HEIGHT = 208;
@@ -78,6 +79,7 @@ export class HalfSkullMiniboss {
   update(time, player) {
     this.updatePoiseState(time);
     this.updateVisuals(time);
+    applyEnemyFloorClamp(this);
 
     if (this.dead) {
       this.body.setVelocityX(0);

@@ -3,6 +3,7 @@ import { HalfSkullMiniboss } from './HalfSkullMiniboss.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { GroundBurstAttack } from '../systems/GroundBurstAttack.js';
 import { LineSweepAttack } from '../systems/LineSweepAttack.js';
+import { applyEnemyFloorClamp } from '../systems/enemyGrounding.js';
 
 const DEFAULT_PROJECTILE_CONFIG = {
   cooldownMs: 3200,
@@ -61,6 +62,7 @@ export class AbyssalArchon extends HalfSkullMiniboss {
   update(time, player) {
     if (this.dead) {
       this.updateVisuals(time);
+      applyEnemyFloorClamp(this);
       this.body.setVelocityX(0);
       this.projectileTelegraph?.setVisible(false);
       this.lineSweep?.resetState();
@@ -74,6 +76,7 @@ export class AbyssalArchon extends HalfSkullMiniboss {
       this.attackState = 'idle';
       this.body.setVelocityX(0);
       this.updateVisuals(time);
+      applyEnemyFloorClamp(this);
       return;
     }
 
@@ -85,6 +88,7 @@ export class AbyssalArchon extends HalfSkullMiniboss {
       this.body.setVelocityX(0);
       this.updateVisuals(time);
       this.updateProjectileTelegraph(time);
+      applyEnemyFloorClamp(this);
       return;
     }
 
@@ -95,12 +99,14 @@ export class AbyssalArchon extends HalfSkullMiniboss {
       this.body.setVelocityX(0);
       this.updateVisuals(time);
       this.updateProjectileTelegraph(time);
+      applyEnemyFloorClamp(this);
       return;
     }
 
     if (this.runProjectileState(time, player)) {
       this.updateVisuals(time);
       this.updateProjectileTelegraph(time);
+      applyEnemyFloorClamp(this);
       return;
     }
 

@@ -12,6 +12,7 @@ import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '..
 import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
 import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
+import { getGroundedVisualY } from '../systems/enemyGrounding.js';
 
 const CHAMBER03_BOSS_ARENA = {
   worldWidth: 1920,
@@ -1402,11 +1403,18 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     }
 
     const bossX = this.bossBody?.enable ? this.bossBody.gameObject.x : this.bossSprite.x;
-    const bossY = this.bossBody?.enable
+    const unclampedBossY = this.bossBody?.enable
       ? this.bossBody.bottom + this.bossGroundedBodyOffsetY + floatOffset
       : CHAMBER03_BOSS_ARENA.bossAnchorY + floatOffset;
-    this.bossSprite.setPosition(bossX, bossY);
+    this.bossSprite.setPosition(bossX, unclampedBossY);
     this.bossSprite.setScale(scaleX, scaleY);
+    const groundedBossY = getGroundedVisualY({
+      sprite: this.bossSprite,
+      config: { grounding: { floorPlaneY: WORLD.floorY + 2 } }
+    });
+    if (Number.isFinite(groundedBossY) && this.bossSprite.y > groundedBossY) {
+      this.bossSprite.y = groundedBossY;
+    }
     this.bossSprite.setAngle(angle);
     if (typeof this.bossSprite.setFlipX === 'function') {
       this.bossSprite.setFlipX(this.bossCombat.facing > 0);
