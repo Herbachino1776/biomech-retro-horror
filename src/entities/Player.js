@@ -34,6 +34,8 @@ export class Player {
     const displaySize = getNormalizedDisplaySize(playerPresentation);
     const origin = getNormalizedOrigin(playerPresentation);
     const visualYOffset = getNormalizedYOffset(playerPresentation);
+    this.normalizedVisualDisplaySize = displaySize;
+    this.normalizedVisualOrigin = origin;
 
     this.sprite = this.usingConceptSprite
       ? scene.add
@@ -247,6 +249,8 @@ export class Player {
   }
 
   updateSpriteAnimationState() {
+    this.applyNormalizedVisualPresentation();
+
     const isGrounded = this.body.blocked.down;
     const horizontalSpeed = Math.abs(this.body.velocity.x);
     const isMovingHorizontally = horizontalSpeed >= PLAYER_WALK_MIN_SPEED;
@@ -307,16 +311,26 @@ export class Player {
   }
 
   registerAttackAnimation() {
-    if (!this.scene.textures.exists(ASSET_KEYS.playerAttackBody) || this.scene.anims.exists(PLAYER_ATTACK_ANIMATION_KEY)) {
+    if (!this.scene.textures.exists(ASSET_KEYS.playerAttackStripFrames) || this.scene.anims.exists(PLAYER_ATTACK_ANIMATION_KEY)) {
       return;
     }
 
     this.scene.anims.create({
       key: PLAYER_ATTACK_ANIMATION_KEY,
-      frames: this.scene.anims.generateFrameNumbers(ASSET_KEYS.playerAttackBody, { start: 0, end: 4 }),
+      frames: this.scene.anims.generateFrameNumbers(ASSET_KEYS.playerAttackStripFrames, { start: 0, end: 4 }),
       frameRate: PLAYER_ATTACK_FPS,
       repeat: 0
     });
+  }
+
+  applyNormalizedVisualPresentation() {
+    if (!this.usingConceptSprite) {
+      return;
+    }
+
+    this.sprite
+      .setOrigin(this.normalizedVisualOrigin.x, this.normalizedVisualOrigin.y)
+      .setDisplaySize(this.normalizedVisualDisplaySize.width, this.normalizedVisualDisplaySize.height);
   }
 
   setStaticFrame(frameIndex = 0) {

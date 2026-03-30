@@ -241,7 +241,7 @@ export const ASSET_URLS = {
   [ASSET_KEYS.enemyGoreClusterMeatBone01]: enemyGoreClusterMeatBone01Url,
   [ASSET_KEYS.player]: playerWalkPuppetStrip06Url,
   [ASSET_KEYS.playerIdle]: playerIdleBreatheStrip05Url,
-  [ASSET_KEYS.playerAttackBodySource]: playerAttackDownwardForwardStripAligned01Url,
+  [ASSET_KEYS.playerAttackStrip]: playerAttackDownwardForwardStripAligned01Url,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,
   [ASSET_KEYS.laughingEngine]: laughingEngineConceptUrl,
