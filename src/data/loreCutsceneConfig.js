@@ -1,8 +1,20 @@
 import sector02Chamber01LoreTextRaw from '../../art/raw/sector02/chamber01/sector02_chamber01_lore_text_01.txt?raw';
+import sector02Chamber02LoreTextRaw from '../../art/raw/sector02/chamber02/sector02_chamber02_lore_text_01.txt?raw';
+import sector02Chamber03LoreTextRaw from '../../art/raw/sector02/chamber03/sector02_chamber03_lore_text_01.txt?raw';
 import { ASSET_KEYS } from './assetKeys.js';
 
 
 const sector02Chamber01LoreBody = sector02Chamber01LoreTextRaw
+  .split(/\n\s*\n/g)
+  .map((paragraph) => paragraph.trim())
+  .filter(Boolean);
+
+const sector02Chamber02LoreBody = sector02Chamber02LoreTextRaw
+  .split(/\n\s*\n/g)
+  .map((paragraph) => paragraph.trim())
+  .filter(Boolean);
+
+const sector02Chamber03LoreBody = sector02Chamber03LoreTextRaw
   .split(/\n\s*\n/g)
   .map((paragraph) => paragraph.trim())
   .filter(Boolean);
@@ -86,9 +98,71 @@ export const LORE_CUTSCENES = {
       backgroundColor: '#000000'
     }
   },
+  'sector02-chamber02-compression-altar': {
+    id: 'sector02-chamber02-compression-altar',
+    imageKey: ASSET_KEYS.sector02Chamber02LoreImage,
+    title: 'SECTOR 02 // COMPRESSION VAULTS ALTAR',
+    body: sector02Chamber02LoreBody.length > 0
+      ? sector02Chamber02LoreBody
+      : [
+        'The vault does not judge the dead at first touch. It narrows them until judgment can hold.',
+        'Every sealed basin disciplines memory, burden, and refusal into a form the return engine can stack.',
+        'The altar records a chamber that compresses souls into obedient pressure before the next descent.'
+      ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xaeb6aa,
+      titleColor: '#9cb18f',
+      bodyColor: '#d4c8b7',
+      promptColor: '#88a171',
+      imageTint: 0xd7dfd2,
+      imageAlpha: 0.96,
+      backgroundColor: '#000000',
+      motion: {
+        panX: 10,
+        panY: -6,
+        zoom: 1.028,
+        duration: 9000,
+        shakeX: 2,
+        shakeY: 2,
+        shakeDuration: 3200
+      }
+    }
+  },
+  'sector02-chamber03-kiln-altar': {
+    id: 'sector02-chamber03-kiln-altar',
+    imageKey: ASSET_KEYS.sector02Chamber03LoreImage,
+    title: 'SECTOR 02 // KILN OF JUDGEMENT',
+    body: sector02Chamber03LoreBody.length > 0
+      ? sector02Chamber03LoreBody
+      : [
+        'The banisher does not feed on heat alone. It requires a grief that keeps returning.',
+        'Beneath the kiln, sorrow is refined until the chamber can call it cleanliness.',
+        'The altar records a judgment engine that stays pure by making something below it suffer.'
+      ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xb7b499,
+      titleColor: '#9eb48a',
+      bodyColor: '#d9cdb9',
+      promptColor: '#8ca46f',
+      imageTint: 0xd9d7c5,
+      imageAlpha: 0.96,
+      backgroundColor: '#000000',
+      motion: {
+        panX: 10,
+        panY: -8,
+        zoom: 1.03,
+        duration: 9000,
+        shakeX: 2,
+        shakeY: 2,
+        shakeDuration: 3400
+      }
+    }
+  },
   'sector02-chamber01-basin-reliquary': {
     id: 'sector02-chamber01-basin-reliquary',
-    imageKey: ASSET_KEYS.sector02Chamber01AbyssalArchon,
+    imageKey: ASSET_KEYS.sector02Chamber01LoreImage,
     title: 'SECTOR 02 // BLACK AQUEDUCT RELIQUARY',
     body: sector02Chamber01LoreBody.length > 0
       ? sector02Chamber01LoreBody
@@ -103,51 +177,75 @@ export const LORE_CUTSCENES = {
       titleColor: '#9ab18a',
       bodyColor: '#d2c5b4',
       promptColor: '#86a06d',
-      imageTint: 0xd9e1d4,
-      imageAlpha: 0.98,
+      imageTint: 0xd4dccf,
+      imageAlpha: 0.96,
       backgroundColor: '#000000',
-      imageSizingMode: 'contain',
-      imageBackgroundColor: 0x000000,
-      imageBackgroundAlpha: 0,
-      imageFrameAlpha: 0,
-      imageStrokeAlpha: 0,
-      imageScaleMultiplier: 1.68,
-      imageOffsetX: 26,
-      imageOffsetY: -12,
-      textRegionColor: 0x050707,
-      textRegionAlpha: 0.76,
-      textRegionStrokeColor: 0xaab1a1,
-      textRegionStrokeAlpha: 0.3,
-      promptRegionColor: 0x030505,
-      promptRegionAlpha: 0.5,
-      promptRegionStrokeColor: 0x96ab8a,
-      promptRegionStrokeAlpha: 0.22,
-      layoutOverrides: {
-        portrait: {
-          imageHeightRatio: 0.66,
-          textHeightRatio: 0.22,
-          promptHeightRatio: 0.12,
-          textPadding: 10,
-          bodySize: 13,
-          minBodySize: 10
-        },
-        landscape: {
-          imageHeightRatio: 0.68,
-          textHeightRatio: 0.2,
-          promptHeightRatio: 0.12,
-          textPadding: 12,
-          bodySize: 14,
-          minBodySize: 11
-        }
-      },
       motion: {
-        panX: 10,
+        panX: 12,
         panY: -8,
-        zoom: 1.035,
+        zoom: 1.03,
         duration: 9200,
         shakeX: 2,
         shakeY: 2,
-        shakeDuration: 3400
+        shakeDuration: 3600
+      }
+    }
+  },
+  'sector03-chamber01-gallery-refusal-shrine': {
+    id: 'sector03-chamber01-gallery-refusal-shrine',
+    imageKey: ASSET_KEYS.sector03Chamber01LoreApparitionRefused,
+    title: 'SECTOR 03 // GALLERY OF FAILED MEASURES',
+    body: [
+      'Each glass egg bears a vessel that reached for incarnation and was denied by the cradle.',
+      'The shrine names them as measures that almost held: saint, judge, child, choir, all returned unopened.',
+      'To pass this hall is to accept refusal as sacrament; the gate ahead tests whether your shape may continue.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xb6a58f,
+      titleColor: '#a8b78f',
+      bodyColor: '#d9cbb8',
+      promptColor: '#90a979',
+      imageTint: 0xdacdb7,
+      imageAlpha: 0.95,
+      backgroundColor: '#000000',
+      motion: {
+        panX: 12,
+        panY: -10,
+        zoom: 1.034,
+        duration: 9200,
+        shakeX: 2,
+        shakeY: 2,
+        shakeDuration: 3200
+      }
+    }
+  },
+  'sector03-chamber02-house-of-borrowed-faces': {
+    id: 'sector03-chamber02-house-of-borrowed-faces',
+    imageKey: ASSET_KEYS.sector03Chamber02LoreImage,
+    title: 'SECTOR 03 // HOUSE OF BORROWED FACES',
+    body: [
+      'The narthex keeps a face for every vow the cradle refused to keep.',
+      'Blind mirrors carve identity from whoever kneels first, then hang the remainder in patient rows.',
+      'The sanctum waits for a final borrowing; descent begins when your own mask stops fitting.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xb7a48f,
+      titleColor: '#a9b98f',
+      bodyColor: '#d9ccb9',
+      promptColor: '#8fa778',
+      imageTint: 0xd8c9b6,
+      imageAlpha: 0.95,
+      backgroundColor: '#000000',
+      motion: {
+        panX: 12,
+        panY: -10,
+        zoom: 1.034,
+        duration: 9200,
+        shakeX: 2,
+        shakeY: 2,
+        shakeDuration: 3200
       }
     }
   }

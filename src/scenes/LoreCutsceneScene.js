@@ -47,6 +47,39 @@ const LAYOUT = {
   }
 };
 
+const BLACK_AQUEDUCT_CLOSEUP_LAYOUT = {
+  portrait: {
+    outerMarginX: 10,
+    outerMarginY: 10,
+    sectionGap: 10,
+    imageHeightRatio: 0.62,
+    textHeightRatio: 0.24,
+    promptHeightRatio: 0.14,
+    textPadding: 12,
+    promptPadding: 8,
+    titleSize: 14,
+    bodySize: 13,
+    minBodySize: 10,
+    bodyLineSpacing: 3,
+    promptSize: 13
+  },
+  landscape: {
+    outerMarginX: 18,
+    outerMarginY: 14,
+    sectionGap: 10,
+    imageHeightRatio: 0.58,
+    textHeightRatio: 0.24,
+    promptHeightRatio: 0.18,
+    textPadding: 14,
+    promptPadding: 10,
+    titleSize: 15,
+    bodySize: 14,
+    minBodySize: 11,
+    bodyLineSpacing: 4,
+    promptSize: 14
+  }
+};
+
 export class LoreCutsceneScene extends Phaser.Scene {
   constructor() {
     super('LoreCutsceneScene');
@@ -115,7 +148,15 @@ export class LoreCutsceneScene extends Phaser.Scene {
     this.clearLayout();
     const { width, height } = this.scale;
     const isPortrait = height >= width;
-    const layout = isPortrait ? LAYOUT.portrait : LAYOUT.landscape;
+    const layout = this.resolveLayout(isPortrait);
+    const compositionKey = this.cutscene?.style?.composition;
+
+    this.trackLayoutElement(this.add.rectangle(0, 0, width, height, 0x000000, 1).setOrigin(0).setDepth(DEPTH.backdrop));
+
+    if (compositionKey === 'black-aqueduct-closeup') {
+      this.drawBlackAqueductCloseupLayout(width, height, layout);
+      return;
+    }
 
     const containerWidth = width - layout.outerMarginX * 2;
     const containerHeight = height - layout.outerMarginY * 2;
@@ -131,8 +172,6 @@ export class LoreCutsceneScene extends Phaser.Scene {
     const containerLeft = layout.outerMarginX;
     const containerTop = layout.outerMarginY;
 
-    this.trackLayoutElement(this.add.rectangle(0, 0, width, height, 0x000000, 1).setOrigin(0).setDepth(DEPTH.backdrop));
-
     const imageRegion = new Phaser.Geom.Rectangle(containerLeft, containerTop, containerWidth, imageHeight);
     const textRegion = new Phaser.Geom.Rectangle(containerLeft, imageRegion.bottom + sectionGap, containerWidth, textHeight);
     const promptRegion = new Phaser.Geom.Rectangle(containerLeft, textRegion.bottom + sectionGap, containerWidth, promptHeight);
@@ -140,6 +179,44 @@ export class LoreCutsceneScene extends Phaser.Scene {
     this.drawImageRegion(imageRegion);
     this.drawTextRegion(textRegion, layout);
     this.drawPromptRegion(promptRegion, layout);
+  }
+
+  drawBlackAqueductCloseupLayout(width, height, layout) {
+    const containerWidth = width - layout.outerMarginX * 2;
+    const containerHeight = height - layout.outerMarginY * 2;
+    const promptHeight = Math.max(layout.promptMinHeight ?? 36, Math.floor(containerHeight * layout.promptHeightRatio));
+    const textHeight = Math.max(layout.textMinHeight ?? 128, Math.floor(containerHeight * layout.textHeightRatio));
+    const bottomInset = layout.bottomInset ?? 12;
+    const sectionGap = layout.sectionGap;
+
+    const imageRegion = new Phaser.Geom.Rectangle(layout.outerMarginX, layout.outerMarginY, containerWidth, containerHeight);
+    const textWidth = Math.floor(containerWidth * (layout.textWidthRatio ?? 0.86));
+    const promptWidth = Math.floor(containerWidth * (layout.promptWidthRatio ?? 0.7));
+    const promptX = width / 2 - (layout.promptOffsetX ?? 0);
+    const promptY = height - layout.outerMarginY - bottomInset - promptHeight / 2;
+    const textY = promptY - promptHeight / 2 - sectionGap - textHeight / 2;
+    const textX = width / 2 + (layout.textOffsetX ?? 0);
+    const textRegion = new Phaser.Geom.Rectangle(textX - textWidth / 2, textY - textHeight / 2, textWidth, textHeight);
+    const promptRegion = new Phaser.Geom.Rectangle(promptX - promptWidth / 2, promptY - promptHeight / 2, promptWidth, promptHeight);
+
+    this.drawImageRegion(imageRegion);
+    this.drawTextRegion(textRegion, layout);
+    this.drawPromptRegion(promptRegion, layout);
+  }
+
+  resolveLayout(isPortrait) {
+    const orientationKey = isPortrait ? 'portrait' : 'landscape';
+    const compositionKey = this.cutscene?.style?.composition;
+    const baseTable = compositionKey === 'black-aqueduct-closeup'
+      ? BLACK_AQUEDUCT_CLOSEUP_LAYOUT
+      : LAYOUT;
+    const baseLayout = baseTable[orientationKey];
+    const overrides = this.cutscene?.style?.layoutOverrides?.[orientationKey] ?? {};
+
+    return {
+      ...baseLayout,
+      ...overrides
+    };
   }
 
   drawImageRegion(region) {
@@ -164,6 +241,15 @@ export class LoreCutsceneScene extends Phaser.Scene {
     }
 
     const hasImage = this.cutscene?.imageKey && this.textures.exists(this.cutscene.imageKey);
+
+    if (imageStyle.composition === 'black-aqueduct-closeup') {
+      this.trackLayoutElement(this.add
+        .ellipse(region.centerX, region.bottom - 18, region.width * 0.92, Math.max(28, region.height * 0.14), 0x020304, 0.72)
+        .setDepth(DEPTH.image - 0.25));
+      this.trackLayoutElement(this.add
+        .ellipse(region.centerX, region.centerY + region.height * 0.08, region.width * 0.9, region.height * 0.88, 0x101616, 0.18)
+        .setDepth(DEPTH.image - 0.24));
+    }
 
     if (imageBackgroundAlpha > 0) {
       this.trackLayoutElement(
@@ -221,6 +307,7 @@ export class LoreCutsceneScene extends Phaser.Scene {
 
     const image = this.trackLayoutElement(this.add
       .image(region.centerX + imageOffsetX, region.centerY + imageOffsetY, this.cutscene.imageKey)
+      .setOrigin(imageStyle.imageOriginX ?? 0.5, imageStyle.imageOriginY ?? 0.5)
       .setDisplaySize(drawWidth, drawHeight)
       .setTint(imageStyle.imageTint ?? 0xd4b9a5)
       .setAlpha(imageStyle.imageAlpha ?? 0.94)
@@ -275,6 +362,12 @@ export class LoreCutsceneScene extends Phaser.Scene {
       .rectangle(region.centerX, region.centerY, region.width, region.height, textRegionColor, textRegionAlpha)
       .setStrokeStyle(textRegionStrokeThickness, textRegionStrokeColor, textRegionStrokeAlpha)
       .setDepth(DEPTH.textRegion));
+
+    if (this.cutscene?.style?.composition === 'black-aqueduct-closeup') {
+      this.trackLayoutElement(this.add
+        .rectangle(region.centerX, region.top + 8, region.width * 0.92, 12, 0x13191a, 0.9)
+        .setDepth(DEPTH.textRegion + 0.05));
+    }
 
     const title = this.cutscene?.title?.trim();
     const bodyText = Array.isArray(this.cutscene?.body)

@@ -1,17 +1,36 @@
 import Phaser from 'phaser';
-import { CONCEPT_PRESENTATION, DEBUG_BOOT_OVERRIDES } from '../data/milestone1Config.js';
+import { DEBUG_BOOT_OVERRIDES } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { ASSET_URLS } from '../data/assetUrls.js';
+import { vesselIntegrityState } from '../systems/VesselIntegrityState.js';
+import { AudioDirector } from '../audio/AudioDirector.js';
+
+const TITLE_SCENE_AUDIO = {
+  ambientVolume: 0.3276,
+  startConfirmDelayMs: 180,
+  startGameSfxVolume: 0.34
+};
 
 export class BootScene extends Phaser.Scene {
   constructor() {
     super('BootScene');
     this.hasStarted = false;
-    this.domEnterHandler = null;
-    this.domPointerHandler = null;
+    this.isStarting = false;
+    this.audioDirector = null;
+    this.layoutElements = {};
+    this.menuButtons = [];
+    this.menuOptions = [
+      {
+        id: 'start-game',
+        label: 'START GAME',
+        action: () => this.beginChamber()
+      }
+    ];
   }
 
   preload() {
+    this.load.image(ASSET_KEYS.titleScreenBackground01, ASSET_URLS[ASSET_KEYS.titleScreenBackground01]);
+    this.load.image(ASSET_KEYS.titleLogoOuterEngine01, ASSET_URLS[ASSET_KEYS.titleLogoOuterEngine01]);
     this.load.image(ASSET_KEYS.chamberBackground, ASSET_URLS[ASSET_KEYS.chamberBackground]);
     this.load.image(ASSET_KEYS.chamber01Wall, ASSET_URLS[ASSET_KEYS.chamber01Wall]);
     this.load.image(ASSET_KEYS.chamber01FloorStrip, ASSET_URLS[ASSET_KEYS.chamber01FloorStrip]);
@@ -44,11 +63,88 @@ export class BootScene extends Phaser.Scene {
     this.load.image(ASSET_KEYS.sector02Chamber01LoreImage, ASSET_URLS[ASSET_KEYS.sector02Chamber01LoreImage]);
     this.load.image(ASSET_KEYS.sector02Chamber01Gate, ASSET_URLS[ASSET_KEYS.sector02Chamber01Gate]);
     this.load.image(ASSET_KEYS.sector02Chamber01Floor, ASSET_URLS[ASSET_KEYS.sector02Chamber01Floor]);
-    this.load.image(ASSET_KEYS.player, ASSET_URLS[ASSET_KEYS.player]);
+    this.load.image(ASSET_KEYS.sector02Chamber02BackgroundWallModule, ASSET_URLS[ASSET_KEYS.sector02Chamber02BackgroundWallModule]);
+    this.load.image(ASSET_KEYS.sector02Chamber02BackgroundEntryLockBasin, ASSET_URLS[ASSET_KEYS.sector02Chamber02BackgroundEntryLockBasin]);
+    this.load.image(ASSET_KEYS.sector02Chamber02BackgroundCompressionVault, ASSET_URLS[ASSET_KEYS.sector02Chamber02BackgroundCompressionVault]);
+    this.load.image(ASSET_KEYS.sector02Chamber02BackgroundThreshold, ASSET_URLS[ASSET_KEYS.sector02Chamber02BackgroundThreshold]);
+    this.load.image(ASSET_KEYS.sector02Chamber02BackgroundClimaxCrucibleGate, ASSET_URLS[ASSET_KEYS.sector02Chamber02BackgroundClimaxCrucibleGate]);
+    this.load.image(ASSET_KEYS.sector02Chamber02EnemyBasic01, ASSET_URLS[ASSET_KEYS.sector02Chamber02EnemyBasic01]);
+    this.load.image(ASSET_KEYS.sector02Chamber02EnemyBasic02, ASSET_URLS[ASSET_KEYS.sector02Chamber02EnemyBasic02]);
+    this.load.image(ASSET_KEYS.sector02Chamber02EnemyElite, ASSET_URLS[ASSET_KEYS.sector02Chamber02EnemyElite]);
+    this.load.image(ASSET_KEYS.sector02Chamber02PressureDeacon, ASSET_URLS[ASSET_KEYS.sector02Chamber02PressureDeacon]);
+    this.load.image(ASSET_KEYS.sector02Chamber02LoreAltar, ASSET_URLS[ASSET_KEYS.sector02Chamber02LoreAltar]);
+    this.load.image(ASSET_KEYS.sector02Chamber02LoreImage, ASSET_URLS[ASSET_KEYS.sector02Chamber02LoreImage]);
+    this.load.image(ASSET_KEYS.sector02Chamber02Gate, ASSET_URLS[ASSET_KEYS.sector02Chamber02Gate]);
+    this.load.image(ASSET_KEYS.sector02Chamber02Floor, ASSET_URLS[ASSET_KEYS.sector02Chamber02Floor]);
+    this.load.image(ASSET_KEYS.sector02Chamber03BackgroundWallModule, ASSET_URLS[ASSET_KEYS.sector02Chamber03BackgroundWallModule]);
+    this.load.image(ASSET_KEYS.sector02Chamber03BackgroundEntryCondensers, ASSET_URLS[ASSET_KEYS.sector02Chamber03BackgroundEntryCondensers]);
+    this.load.image(ASSET_KEYS.sector02Chamber03BackgroundRefinementKiln, ASSET_URLS[ASSET_KEYS.sector02Chamber03BackgroundRefinementKiln]);
+    this.load.image(ASSET_KEYS.sector02Chamber03BackgroundThreshold, ASSET_URLS[ASSET_KEYS.sector02Chamber03BackgroundThreshold]);
+    this.load.image(ASSET_KEYS.sector02Chamber03BackgroundBanisherAltar, ASSET_URLS[ASSET_KEYS.sector02Chamber03BackgroundBanisherAltar]);
+    this.load.image(ASSET_KEYS.sector02Chamber03EnemyBasic01, ASSET_URLS[ASSET_KEYS.sector02Chamber03EnemyBasic01]);
+    this.load.image(ASSET_KEYS.sector02Chamber03EnemyBasic02, ASSET_URLS[ASSET_KEYS.sector02Chamber03EnemyBasic02]);
+    this.load.image(ASSET_KEYS.sector02Chamber03EnemyElite, ASSET_URLS[ASSET_KEYS.sector02Chamber03EnemyElite]);
+    this.load.image(ASSET_KEYS.sector02Chamber03LoreAltar, ASSET_URLS[ASSET_KEYS.sector02Chamber03LoreAltar]);
+    this.load.image(ASSET_KEYS.sector02Chamber03LoreImage, ASSET_URLS[ASSET_KEYS.sector02Chamber03LoreImage]);
+    this.load.image(ASSET_KEYS.sector02Chamber03BossSorrowEngine, ASSET_URLS[ASSET_KEYS.sector02Chamber03BossSorrowEngine]);
+    this.load.image(ASSET_KEYS.sector02Chamber03Gate, ASSET_URLS[ASSET_KEYS.sector02Chamber03Gate]);
+    this.load.image(ASSET_KEYS.sector02Chamber03Floor, ASSET_URLS[ASSET_KEYS.sector02Chamber03Floor]);
+    this.load.image(ASSET_KEYS.sector03Chamber01BackgroundEntryGallery, ASSET_URLS[ASSET_KEYS.sector03Chamber01BackgroundEntryGallery]);
+    this.load.image(ASSET_KEYS.sector03Chamber01BackgroundOpeningRecess, ASSET_URLS[ASSET_KEYS.sector03Chamber01BackgroundOpeningRecess]);
+    this.load.image(ASSET_KEYS.sector03Chamber01BackgroundWallModule01, ASSET_URLS[ASSET_KEYS.sector03Chamber01BackgroundWallModule01]);
+    this.load.image(ASSET_KEYS.sector03Chamber01BackgroundWallModule02, ASSET_URLS[ASSET_KEYS.sector03Chamber01BackgroundWallModule02]);
+    this.load.image(ASSET_KEYS.sector03Chamber01BackgroundFeatureWall01, ASSET_URLS[ASSET_KEYS.sector03Chamber01BackgroundFeatureWall01]);
+    this.load.image(ASSET_KEYS.sector03Chamber01BackgroundFeatureWall02, ASSET_URLS[ASSET_KEYS.sector03Chamber01BackgroundFeatureWall02]);
+    this.load.image(ASSET_KEYS.sector03Chamber01BackgroundThreshold, ASSET_URLS[ASSET_KEYS.sector03Chamber01BackgroundThreshold]);
+    this.load.image(ASSET_KEYS.sector03Chamber01BackgroundThresholdAlt, ASSET_URLS[ASSET_KEYS.sector03Chamber01BackgroundThresholdAlt]);
+    this.load.image(ASSET_KEYS.sector03Chamber01EnemyBasicFailedSaint, ASSET_URLS[ASSET_KEYS.sector03Chamber01EnemyBasicFailedSaint]);
+    this.load.image(ASSET_KEYS.sector03Chamber01EnemyBasicBirdJudge, ASSET_URLS[ASSET_KEYS.sector03Chamber01EnemyBasicBirdJudge]);
+    this.load.image(ASSET_KEYS.sector03Chamber01EnemyEliteWithheldVessel, ASSET_URLS[ASSET_KEYS.sector03Chamber01EnemyEliteWithheldVessel]);
+    this.load.image(ASSET_KEYS.sector03Chamber01LoreApparitionRefused, ASSET_URLS[ASSET_KEYS.sector03Chamber01LoreApparitionRefused]);
+    this.load.image(ASSET_KEYS.sector03Chamber01GateRefusalSeal, ASSET_URLS[ASSET_KEYS.sector03Chamber01GateRefusalSeal]);
+    this.load.image(ASSET_KEYS.sector03Chamber01BossRefusalMass, ASSET_URLS[ASSET_KEYS.sector03Chamber01BossRefusalMass]);
+    this.load.image(ASSET_KEYS.sector03Chamber02BackgroundEntryNarthex, ASSET_URLS[ASSET_KEYS.sector03Chamber02BackgroundEntryNarthex]);
+    this.load.image(ASSET_KEYS.sector03Chamber02BackgroundWallModule01, ASSET_URLS[ASSET_KEYS.sector03Chamber02BackgroundWallModule01]);
+    this.load.image(ASSET_KEYS.sector03Chamber02BackgroundWallModule02, ASSET_URLS[ASSET_KEYS.sector03Chamber02BackgroundWallModule02]);
+    this.load.image(ASSET_KEYS.sector03Chamber02BackgroundMaskGalleryOpening, ASSET_URLS[ASSET_KEYS.sector03Chamber02BackgroundMaskGalleryOpening]);
+    this.load.image(ASSET_KEYS.sector03Chamber02BackgroundThreshold, ASSET_URLS[ASSET_KEYS.sector03Chamber02BackgroundThreshold]);
+    this.load.image(ASSET_KEYS.sector03Chamber02BackgroundClimaxSanctum, ASSET_URLS[ASSET_KEYS.sector03Chamber02BackgroundClimaxSanctum]);
+    this.load.image(ASSET_KEYS.sector03Chamber02LoreAltar, ASSET_URLS[ASSET_KEYS.sector03Chamber02LoreAltar]);
+    this.load.image(ASSET_KEYS.sector03Chamber02LoreImage, ASSET_URLS[ASSET_KEYS.sector03Chamber02LoreImage]);
+    this.load.image(ASSET_KEYS.sector03Chamber02EnemyBasicVeilStripper, ASSET_URLS[ASSET_KEYS.sector03Chamber02EnemyBasicVeilStripper]);
+    this.load.image(ASSET_KEYS.sector03Chamber02EnemyBasicMaskHusk, ASSET_URLS[ASSET_KEYS.sector03Chamber02EnemyBasicMaskHusk]);
+    this.load.image(ASSET_KEYS.sector03Chamber02EnemyBasicBlindCantor, ASSET_URLS[ASSET_KEYS.sector03Chamber02EnemyBasicBlindCantor]);
+    this.load.image(ASSET_KEYS.sector03Chamber02EnemyBasicFaceCollector, ASSET_URLS[ASSET_KEYS.sector03Chamber02EnemyBasicFaceCollector]);
+    this.load.image(ASSET_KEYS.sector03Chamber02EnemyEliteDoubleFacedNull, ASSET_URLS[ASSET_KEYS.sector03Chamber02EnemyEliteDoubleFacedNull]);
+    this.load.image(ASSET_KEYS.sector03Chamber02BossMisassignedSeraph, ASSET_URLS[ASSET_KEYS.sector03Chamber02BossMisassignedSeraph]);
+    this.load.image(ASSET_KEYS.sector03Chamber02PropMaskRack, ASSET_URLS[ASSET_KEYS.sector03Chamber02PropMaskRack]);
+    this.load.image(ASSET_KEYS.sector03Chamber02PropBlindMirror, ASSET_URLS[ASSET_KEYS.sector03Chamber02PropBlindMirror]);
+    this.load.image(ASSET_KEYS.sector03Chamber02PropBonusAltar, ASSET_URLS[ASSET_KEYS.sector03Chamber02PropBonusAltar]);
+    this.load.image(ASSET_KEYS.sector02PressureShardProjectile, ASSET_URLS[ASSET_KEYS.sector02PressureShardProjectile]);
+    this.load.image(ASSET_KEYS.bossPit01BackgroundHornGate, ASSET_URLS[ASSET_KEYS.bossPit01BackgroundHornGate]);
+    this.load.image(ASSET_KEYS.bossPit01TheHornGateWitness, ASSET_URLS[ASSET_KEYS.bossPit01TheHornGateWitness]);
+    this.load.image(ASSET_KEYS.bossPit01AltarTrap, ASSET_URLS[ASSET_KEYS.bossPit01AltarTrap]);
+    this.load.image(ASSET_KEYS.bossPit01AltarSuper, ASSET_URLS[ASSET_KEYS.bossPit01AltarSuper]);
+    this.load.image(ASSET_KEYS.bossPit02BackgroundAshProphecyHall, ASSET_URLS[ASSET_KEYS.bossPit02BackgroundAshProphecyHall]);
+    this.load.image(ASSET_KEYS.bossPit02StarvedProphetOfAsh, ASSET_URLS[ASSET_KEYS.bossPit02StarvedProphetOfAsh]);
+    this.load.image(ASSET_KEYS.bossPit02AltarTrap, ASSET_URLS[ASSET_KEYS.bossPit02AltarTrap]);
+    this.load.image(ASSET_KEYS.bossPit02AltarSuper, ASSET_URLS[ASSET_KEYS.bossPit02AltarSuper]);
+    this.load.image(ASSET_KEYS.bossPit03BackgroundHollowSkyTheatre, ASSET_URLS[ASSET_KEYS.bossPit03BackgroundHollowSkyTheatre]);
+    this.load.image(ASSET_KEYS.bossPit03RedMaskHollowSky, ASSET_URLS[ASSET_KEYS.bossPit03RedMaskHollowSky]);
+    this.load.image(ASSET_KEYS.enemyGoreClusterMeatBone01, ASSET_URLS[ASSET_KEYS.enemyGoreClusterMeatBone01]);
+    this.load.spritesheet(ASSET_KEYS.player, ASSET_URLS[ASSET_KEYS.player], {
+      frameWidth: 658,
+      frameHeight: 1300,
+      endFrame: 5
+    });
+    this.load.spritesheet(ASSET_KEYS.playerIdle, ASSET_URLS[ASSET_KEYS.playerIdle], {
+      frameWidth: 560,
+      frameHeight: 1335,
+      endFrame: 4
+    });
     this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
     this.load.image(ASSET_KEYS.laughingEngine, ASSET_URLS[ASSET_KEYS.laughingEngine]);
-    this.load.image(ASSET_KEYS.uiFrame, ASSET_URLS[ASSET_KEYS.uiFrame]);
     this.preloadAudioAsset(ASSET_KEYS.playerFootstepSlate01);
     this.preloadAudioAsset(ASSET_KEYS.playerFootstepSlate02);
     this.preloadAudioAsset(ASSET_KEYS.playerFootstepSlate03);
@@ -85,7 +181,6 @@ export class BootScene extends Phaser.Scene {
     this.preloadAudioAsset(ASSET_KEYS.ambientChamber02Loop01);
   }
 
-
   preloadAudioAsset(assetKey) {
     const assetUrl = ASSET_URLS[assetKey];
     if (!assetUrl) {
@@ -96,131 +191,53 @@ export class BootScene extends Phaser.Scene {
   }
 
   create() {
+    const skipPreTitle = Boolean(this.scene.settings.data?.skipPreTitle);
     this.hasStarted = false;
+    this.isStarting = false;
     this.cameras.main.setBackgroundColor('#110d0c');
-    this.sound?.getAll?.().forEach((sound) => {
-      if (sound?.key === ASSET_KEYS.ambientChamber01Loop01 || sound?.key === ASSET_KEYS.ambientChamber02Loop01) {
-        sound.stop();
-        sound.destroy();
-      }
-    });
+    this.stopPersistentAmbient();
 
     if (DEBUG_BOOT_OVERRIDES.skipTitleAndBootSceneDirect) {
       this.beginChamber();
       return;
     }
 
-    const centerX = this.scale.width / 2;
-    const centerY = this.scale.height / 2;
-    const smallViewport = this.scale.width < 760;
-
-    if (this.textures.exists(ASSET_KEYS.chamberBackground)) {
-      this.add
-        .image(centerX, centerY, ASSET_KEYS.chamberBackground)
-        .setDisplaySize(CONCEPT_PRESENTATION.chamberBackdrop.panelWidth, CONCEPT_PRESENTATION.chamberBackdrop.panelHeight)
-        .setAlpha(0.2)
-        .setTint(CONCEPT_PRESENTATION.chamberBackdrop.panelTint);
+    if (!skipPreTitle) {
+      this.scene.start('PreTitleScene');
+      return;
     }
 
-    this.add
-      .text(centerX, centerY - (smallViewport ? 88 : 42), 'BIOMECH RETRO HORROR', {
-        fontFamily: 'monospace',
-        fontSize: smallViewport ? '24px' : '32px',
-        color: '#d4c8ba',
-        align: 'center'
-      })
-      .setOrigin(0.5);
+    this.audioDirector = new AudioDirector(this);
+    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: TITLE_SCENE_AUDIO.ambientVolume });
 
-    this.add
-      .text(centerX, centerY - (smallViewport ? 44 : 2), 'CHAMBERS 01-02 // RESTORED BASELINE', {
-        fontFamily: 'monospace',
-        fontSize: '16px',
-        color: '#8f7d72',
-        align: 'center'
-      })
-      .setOrigin(0.5);
+    this.createTitleVisuals();
+    this.layoutTitleVisuals();
+    this.scale.on('resize', this.layoutTitleVisuals, this);
 
-    const interactionPrompt = smallViewport ? 'Tap to Begin' : 'Tap or Press Enter';
-    const instructionText = smallViewport
-      ? `Move: Arrow Keys\nAttack: X\nLore: E\nRestart: R\n\n${interactionPrompt}`
-      : `Move: Arrow Keys\nAttack: X\nLore: E\nRestart after death: R\n\n${interactionPrompt}`;
-
-    this.add
-      .text(centerX, centerY + (smallViewport ? 48 : 54), instructionText, {
-        fontFamily: 'monospace',
-        fontSize: smallViewport ? '13px' : '14px',
-        color: '#8a9f79',
-        align: 'center'
-      })
-      .setOrigin(0.5);
-
-    const buttonWidth = smallViewport ? 280 : 320;
-    const buttonHeight = 74;
-    const buttonY = centerY + (smallViewport ? 136 : 158);
-
-    const tapRegion = this.add
-      .rectangle(centerX, buttonY, buttonWidth, buttonHeight, 0x181211, 0.55)
-      .setStrokeStyle(2, 0x8f7d72, 0.9)
-      .setInteractive({ useHandCursor: true });
-
-    this.add
-      .text(centerX, buttonY, interactionPrompt.toUpperCase(), {
-        fontFamily: 'monospace',
-        fontSize: smallViewport ? '20px' : '22px',
-        color: '#d2c2ac',
-        align: 'center'
-      })
-      .setOrigin(0.5);
-
-    this.tweens.add({
-      targets: tapRegion,
-      alpha: { from: 0.5, to: 0.85 },
-      duration: 900,
-      yoyo: true,
-      repeat: -1
-    });
-
-    const enter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-    enter.once('down', () => this.beginChamber());
-    tapRegion.once('pointerdown', () => this.beginChamber());
-
-    this.input.once('pointerdown', () => {
-      this.beginChamber();
-    });
-
-    if (typeof window !== 'undefined') {
-      this.domEnterHandler = (event) => {
-        if (event.code === 'Enter') {
-          this.beginChamber();
-        }
-      };
-      this.domPointerHandler = () => {
-        this.beginChamber();
-      };
-      window.addEventListener('keydown', this.domEnterHandler);
-      window.addEventListener('pointerdown', this.domPointerHandler, { passive: true });
-    }
+    this.keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+    this.keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.keyEnter.on('down', () => this.beginChamber());
+    this.keySpace.on('down', () => this.beginChamber());
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      if (typeof window !== 'undefined') {
-        if (this.domEnterHandler) {
-          window.removeEventListener('keydown', this.domEnterHandler);
-          this.domEnterHandler = null;
-        }
-        if (this.domPointerHandler) {
-          window.removeEventListener('pointerdown', this.domPointerHandler);
-          this.domPointerHandler = null;
-        }
-      }
+      this.scale.off('resize', this.layoutTitleVisuals, this);
+      this.keyEnter?.off('down');
+      this.keySpace?.off('down');
+      this.audioDirector?.shutdown();
+      this.audioDirector = null;
     });
   }
 
   beginChamber() {
-    if (this.hasStarted) {
+    if (this.hasStarted || this.isStarting) {
       return;
     }
 
-    this.hasStarted = true;
+    this.isStarting = true;
+    this.audioDirector?.stopAmbientLoop({ fadeOut: false });
+    this.playStartGameSfx();
+    this.disableMenuButtons();
+    vesselIntegrityState.resetForFreshRun();
 
     if (this.sound?.context?.state === 'suspended') {
       this.sound.context.resume().catch(() => {
@@ -228,7 +245,184 @@ export class BootScene extends Phaser.Scene {
       });
     }
 
-    const bootTargetScene = DEBUG_BOOT_OVERRIDES.startScene ?? 'Chamber01Scene';
-    this.scene.start(bootTargetScene);
+    this.time.delayedCall(TITLE_SCENE_AUDIO.startConfirmDelayMs, () => {
+      this.hasStarted = true;
+      const bootTargetScene = DEBUG_BOOT_OVERRIDES.startScene
+        ?? (DEBUG_BOOT_OVERRIDES.skipTitleAndBootSceneDirect ? 'Sector03Chamber01Scene' : 'Chamber01Scene');
+      this.scene.start(bootTargetScene);
+    });
+  }
+
+  playStartGameSfx() {
+    if (!this.sound || this.sound.mute || !this.cache.audio.exists(ASSET_KEYS.banishmentSting)) {
+      return;
+    }
+
+    const startGameSfx = this.sound.add(ASSET_KEYS.banishmentSting, {
+      volume: TITLE_SCENE_AUDIO.startGameSfxVolume
+    });
+    startGameSfx.once('complete', () => {
+      startGameSfx.destroy();
+    });
+    startGameSfx.play();
+  }
+
+  createTitleVisuals() {
+    this.layoutElements.backdropShade = this.add.rectangle(0, 0, 1, 1, 0x060505, 0.9).setOrigin(0).setDepth(2);
+    this.layoutElements.background = this.add.image(0, 0, ASSET_KEYS.titleScreenBackground01).setDepth(0);
+    this.layoutElements.backgroundVeil = this.add.rectangle(0, 0, 1, 1, 0x090706, 0.34).setOrigin(0).setDepth(3);
+
+    if (this.textures.exists(ASSET_KEYS.titleLogoOuterEngine01)) {
+      this.layoutElements.titleLogo = this.add.image(0, 0, ASSET_KEYS.titleLogoOuterEngine01).setDepth(5);
+    } else {
+      this.layoutElements.titleText = this.add
+        .text(0, 0, 'THE OUTER ENGINE', {
+          fontFamily: 'monospace',
+          fontSize: '46px',
+          color: '#ded1bf',
+          align: 'center',
+          stroke: '#0f0a09',
+          strokeThickness: 8
+        })
+        .setOrigin(0.5)
+        .setDepth(5);
+    }
+
+    this.layoutElements.subtitle = this.add
+      .text(0, 0, 'RITUAL DESCENT PROTOCOL', {
+        fontFamily: 'monospace',
+        fontSize: '16px',
+        color: '#95a67f',
+        align: 'center'
+      })
+      .setOrigin(0.5)
+      .setDepth(6);
+
+    this.layoutElements.instructions = this.add
+      .text(0, 0, 'MOVE: ARROWS  ATTACK: X  RITE: E  RESTART: R', {
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        color: '#c3b49f',
+        align: 'center'
+      })
+      .setOrigin(0.5)
+      .setDepth(6);
+
+    this.layoutElements.menuPanel = this.add.rectangle(0, 0, 1, 1, 0x0f0c0c, 0.7).setDepth(6.4);
+    this.layoutElements.menuPanel.setStrokeStyle(2, 0x8c786b, 0.86);
+
+    this.menuButtons = this.menuOptions.map((option) => this.createMenuButton(option));
+  }
+
+  createMenuButton(option) {
+    const button = this.add.rectangle(0, 0, 1, 1, 0x191311, 0.88).setDepth(7).setStrokeStyle(2, 0x9e8b79, 0.95);
+    const label = this.add
+      .text(0, 0, option.label, {
+        fontFamily: 'monospace',
+        fontSize: '28px',
+        color: '#e2d6c1',
+        align: 'center'
+      })
+      .setOrigin(0.5)
+      .setDepth(7.2);
+
+    button.setInteractive({ useHandCursor: true });
+    button.on('pointerover', () => {
+      if (this.isStarting) {
+        return;
+      }
+      button.setFillStyle(0x2a201c, 0.96);
+      label.setColor('#f0e3cf');
+    });
+    button.on('pointerout', () => {
+      button.setFillStyle(0x191311, 0.88);
+      label.setColor('#e2d6c1');
+    });
+    button.on('pointerdown', () => option.action());
+
+    return { button, label };
+  }
+
+  disableMenuButtons() {
+    this.menuButtons.forEach(({ button, label }) => {
+      button.disableInteractive();
+      button.setFillStyle(0x17110f, 0.7);
+      label.setAlpha(0.7);
+    });
+  }
+
+  layoutTitleVisuals() {
+    const width = this.scale.width;
+    const height = this.scale.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const isPortrait = height >= width;
+    const safeTop = this.getSafeAreaInsetPx('top');
+    const safeBottom = this.getSafeAreaInsetPx('bottom');
+
+    this.layoutElements.backdropShade.setSize(width, height);
+    this.layoutElements.background
+      .setPosition(centerX, centerY)
+      .setDisplaySize(Math.max(width, height) * 1.24, Math.max(width, height) * 0.82)
+      .setAlpha(0.95)
+      .setTint(0xb5a28d);
+    this.layoutElements.backgroundVeil.setSize(width, height);
+
+    if (this.layoutElements.titleLogo) {
+      const maxLogoWidth = Math.min(width * 0.86, isPortrait ? 460 : 640);
+      const logoTexture = this.textures.get(ASSET_KEYS.titleLogoOuterEngine01).getSourceImage();
+      const logoRatio = logoTexture.width / logoTexture.height;
+      this.layoutElements.titleLogo
+        .setPosition(centerX, safeTop + (isPortrait ? height * 0.2 : height * 0.24))
+        .setDisplaySize(maxLogoWidth, maxLogoWidth / logoRatio);
+    } else {
+      this.layoutElements.titleText
+        .setPosition(centerX, safeTop + (isPortrait ? height * 0.2 : height * 0.24))
+        .setFontSize(isPortrait ? '38px' : '52px');
+    }
+
+    this.layoutElements.subtitle
+      .setPosition(centerX, safeTop + (isPortrait ? height * 0.36 : height * 0.43))
+      .setFontSize(isPortrait ? '14px' : '16px');
+    this.layoutElements.instructions
+      .setPosition(centerX, height - safeBottom - (isPortrait ? 28 : 22))
+      .setFontSize(isPortrait ? '12px' : '14px');
+
+    const buttonWidth = Math.min(width - 44, isPortrait ? 352 : 420);
+    const buttonHeight = isPortrait ? 74 : 80;
+    const panelPadding = isPortrait ? 18 : 22;
+    const buttonGap = 14;
+    const stackHeight = this.menuButtons.length * buttonHeight + Math.max(0, this.menuButtons.length - 1) * buttonGap;
+    const panelWidth = buttonWidth + panelPadding * 2;
+    const panelHeight = stackHeight + panelPadding * 2;
+    const panelY = centerY + (isPortrait ? height * 0.18 : height * 0.16);
+
+    this.layoutElements.menuPanel.setPosition(centerX, panelY).setSize(panelWidth, panelHeight);
+
+    this.menuButtons.forEach(({ button, label }, index) => {
+      const y = panelY - stackHeight / 2 + buttonHeight / 2 + index * (buttonHeight + buttonGap);
+      button.setPosition(centerX, y).setSize(buttonWidth, buttonHeight);
+      label.setPosition(centerX, y).setFontSize(isPortrait ? '24px' : '28px');
+    });
+  }
+
+  getSafeAreaInsetPx(edge = 'top') {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return 0;
+    }
+
+    const cssVar = `--safe-area-inset-${edge}`;
+    const rawValue = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+    const parsed = Number.parseFloat(rawValue);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  stopPersistentAmbient() {
+    this.sound?.getAll?.().forEach((sound) => {
+      if (sound?.key === ASSET_KEYS.ambientChamber01Loop01 || sound?.key === ASSET_KEYS.ambientChamber02Loop01) {
+        sound.stop();
+        sound.destroy();
+      }
+    });
   }
 }

@@ -1,63 +1,86 @@
 # Session Handoff
 
-Use this file to start a fresh planning/implementation session quickly.
+Use this file to start a fresh planning/implementation session from real current state.
 
-## Project Identity (Non-Negotiable)
-Biomech Retro Horror is a browser-playable **biomechanical ritual horror** vertical slice.
-Priorities: oppressive pacing, gameplay readability, diegetic UI, cryptic symbolic lore, and milestone discipline over feature sprawl.
+## Big-Picture Doctrine (Read First)
+- The project is beyond an early vertical slice and now operates as a multi-sector prototype.
+- Boss pits are now core structure, not optional side garnish.
+- Milestone 8 (Sector 3 + boss-pit expansion) is active in practice.
+- Dense lore should be balanced by violent combat payoff, trap-altar tension, and meaningful run-growth rewards.
 
-## Current Stack + Deployment Model
-- Engine/runtime: Phaser 3 (ES modules)
-- Toolchain: Vite
-- Deployment: GitHub Pages project-site (`/biomech-retro-horror/` base in production)
-- Target support: iPhone portrait touch play + desktop keyboard parity
+## Where the Project Actually Is
+- **Sector 1 arc is functionally present:** Chamber 01 -> Chamber 02 -> Chamber 03 -> separate boss arena finale.
+- **Sector 2 arc is functionally present in prototype form:**
+  - Chamber 1: Black Aqueduct Intake
+  - Chamber 2: The Compression Vaults
+  - Chamber 3: The Kiln of Judgement
+  - Chamber 3 boss payoff: The Sorrow Engine
+- **First boss pit template exists in Sector 2 Chamber 2** (trap altar descent, pit boss kill, exit altar return).
+- **Sector 3 Chamber 1 exists and is playable:** Gallery of Failed Measures (`Sector03Chamber01Scene`).
 
-## Fresh-Session Truth
-- Chamber 3 finally works because the scene handoff contract was fixed, not because Chamber 3 internals were endlessly patched in isolation.
-- The breakthrough was simple and surgical: ensure `Chamber03Scene` is registered, ensure Chamber 02's unlocked exit gate actually starts `Chamber03Scene`, and stop treating the failure as a deep chamber-content problem first.
-- Sector 1 now has a real Chamber 3, a separate boss arena, a playable boss flow, a payoff path, and a forward progression contract.
-- Known remaining Chamber 3 issues are real, but they are now secondary polish debt rather than the main blocker.
-- The next best step is **not** more Chamber 3 rescue.
-- The next best step is **Milestone 6: Bucket 2 foothold / The Black Aqueduct start**.
+## Milestone Snapshot
+### Milestone 7 (advanced/largely established)
+Established lanes include:
+- 7A Vessel Run Economy
+- 7B Gore-Driven Combat Feedback
+- 7D Projectile + AOE Combat Kit
+- 7E Boss / Miniboss Readability pass (first-pass)
+- 7F Poise / Stagger / Rite Finisher pass (first-pass)
+- first 7G prototype (trap altar + boss pit)
+- shared major-encounter resolution + boss-death doctrine hardening
+- chamber-end ritual/cinematic motion groundwork
 
-## What Works Now
-- Start/title flow into Chamber 01 and death/restart loop.
-- Chamber 01 core loop, lore beats, miniboss, and gate-release payoff remain stable.
-- Chamber 02 is playable with shrine/cutscene flow, TOLL-KEEPER gate unlock, and onward progression wiring intact.
-- Chamber 03 is playable in the active progression path.
-- Chamber 03 now hands off into a separate boss arena for the Sector 1 finale.
-- Sector 1 now has a complete functional arc: Chamber 01 -> Chamber 02 -> Chamber 03 -> boss flow -> onward progression contract.
-- Mobile controls remain corrected for portrait and landscape playability.
-- Desktop keyboard support remains intact.
-- Texture-first asset loading with fallback resilience remains stable.
-- GitHub Pages/Vite deployment invariants remain in force.
+Still available as targeted follow-up:
+- 7C Enemy Pursuit + Encounter Chemistry
+- 7H Chamber-End Rituals + Cinematic Lore Motion
+- 7I Sponge vs Satisfaction Balance
 
-## Remaining Debt (Secondary)
-- Chamber 3 encounter/pacing polish can still improve.
-- Boss finale presentation and readability can still improve.
-- Additional audiovisual cleanup remains worthwhile later, but it should not block Bucket 2 work.
+### Milestone 8 (active)
+- Sector 3 buildout + boss-pit expansion are coupled and underway.
+- Current practical anchor is Sector 3 Chamber 1 handoff-safe expansion.
 
-## Active Milestone
-**Milestone 6 — Bucket 2 Foothold / The Black Aqueduct Start: active.**
+## Chamber Authoring Doctrine (Default)
+Author new chambers in this rhythm:
+1. opening setpiece / lore altar segment
+2. corridor wall-module run with basic enemy pockets
+3. larger opened-up room background reveal
+4. elite / miniboss domain inside that opened-up room
+5. terminal threshold / seal / endcap
 
-### Immediate Best Next Step
-- Establish the first safe continuation beyond Sector 1.
-- Build the initial Bucket 2 / The Black Aqueduct foothold as a canal/transit/infrastructure zone rather than a garden biome.
-- Use black reflective liquid, necro-industrial canals, monumental gates/sluices, and oppressive symmetry as the current art-direction baseline.
-- Preserve the now-working Sector 1 progression contract while opening the next area.
+Guidance:
+- keep basic pockets mostly in corridor wall-module segments
+- place elites/minibosses/trap-altar reveals mostly in larger room-style segments
+- keep background segmentation and encounter tiering visibly coupled
 
-## Lessons Learned to Preserve
-- **Bootstrap before spectacle.** Get the chamber booting and handing off correctly before layering setpiece content.
-- **Do not one-shot giant chamber builds.** The failed single-pass Chamber 3 mega-build was the wrong implementation strategy.
-- **When a chamber will not boot, check scene registration and transition wiring first.** Chamber flow bugs may be simpler than they look.
-- **Do not patch a broken chamber in isolation when the real blocker is the previous scene's handoff contract.**
+## Boss Pit Strategic Meaning (Current Doctrine)
+- Boss pits are one-time per run.
+- Boss pit state resets on death/fresh run.
+- Boss pits now matter strategically because they grow the run (Vessel progression impact).
+- Sector 3 is expected to heavily expand trap altars and boss pits.
 
-## Most Important Constraints
-1. Do not regress GitHub Pages/Vite base-path behavior.
-2. Keep mobile controls visible, fixed, and aligned in portrait and landscape.
-3. Preserve desktop keyboard controls.
-4. Keep texture-first rendering; fallback only on load failure.
-5. Preserve dedicated cinematic lore-screen flow as the preferred lore delivery direction.
-6. Preserve in-world ritual shrine/ossuary lore trigger presentation direction.
-7. Preserve the shipped Sector 1 arc while opening Bucket 2.
-8. End meaningful tasks with `npm run build` when code changes are involved.
+## Current Build/Platform Baseline
+- Phaser 3 + Vite.
+- GitHub Pages project-site base path: `/biomech-retro-horror/`.
+- Mobile iPhone-sized browser playability is required.
+- Desktop keyboard parity is required.
+
+## What Must Not Be Broken
+- Base-path-safe deploy behavior.
+- Mobile controls visibility/alignment and desktop keyboard parity.
+- Sector 1 and Sector 2 end-to-end scene handoff contracts.
+- Sector 3 Chamber 1 scene registration and threshold/seal handoff behavior.
+- Fresh-interact threshold progression rule.
+- Lore scene isolation from chamber viewport blackout/matte layers.
+- Shared enemy presentation consistency across chambers.
+- Projectile hit/damage lifecycle contract.
+- Boss pit completion/reward reset behavior across run restart.
+
+## Planned Future Lane (Do Not Lose)
+Character animation is a real planned lane, but it is **not active focus yet**.
+- starts with player sprite animation work
+- later includes locomotion, weapon swing, Rite, and broader combat/performance animation language
+- respect the user-defined animation process when this lane begins
+
+## Most Likely Next Gameplay Pass After Docs
+1. Expand Sector 3 with first stronger trap-altar/boss-pit route(s) and/or elite-domain reinforcement in opened-up room segments.
+2. Keep Milestone 8 buildout primary; revisit Milestone 7 follow-up only when it directly supports the Sector 3 lane.

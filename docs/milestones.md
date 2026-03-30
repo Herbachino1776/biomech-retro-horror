@@ -1,51 +1,34 @@
 # Milestones
 
-## Milestone 0 — Repo Foundation (Completed)
-- create project scaffold
-- create docs folder
-- create asset folders
-- set up build/run instructions
-- choose Phaser 3 structure
+Plain-language snapshot of milestone state.
 
-## Milestone 1 — Playable Mobile Vertical Slice (Completed)
-- player movement and collision
-- chamber 01 core loop
-- responsive/mobile-safe controls
-- one active enemy archetype + death/restart
-- first cinematic lore-screen beat
+- **Milestone 0 — Foundation:** completed.
+- **Milestone 1 — Mobile vertical slice baseline:** completed.
+- **Milestone 2 — Art/lore pattern consolidation:** completed.
+- **Milestone 3 — Encounter readability expansion:** completed.
+- **Milestone 4 — Audio identity pass:** completed.
+- **Milestone 5 — Sector 1 content expansion (Chamber 03 + separate boss arena):** completed/closed in first pass.
+- **Milestone 6 — Sector 2 expansion (The Black Aqueduct / Pressure Gospel):** functionally in place in prototype form (Chambers 1–3 + Sorrow Engine payoff).
 
-## Milestone 2 — Slice Art Cohesion + Lore Pattern Consolidation (Completed / Closed Out)
-- preserve chamber 01 readability and shrine-driven lore affordance
-- activate chamber 01 -> chamber 02 continuity path
-- keep chamber 01's first shrine lore beat on `LoreScreenScene`
-- ship chamber 02 lore beat on the reusable `LoreCutsceneScene` path
-- harden lore-screen composition for portrait + landscape readability
-- establish chamber 02 first post-lore reaction state (environmental shift + threat increase)
-- remove remaining temporary mobile HUD debug label from shipped gameplay UI
+- **Milestone 7 — Combat-sidequest integration + Sector 2 hardening:** advanced/largely established.
+  - **Established so far:**
+    - Vessel run economy baseline (start, chamber restore, major encounter max-cap growth behavior)
+    - stronger gore/payoff combat feedback
+    - projectile + AOE combat kit in shipped rooms
+    - boss/miniboss readability + stagger/finisher groundwork
+    - first trap-altar -> boss-pit prototype in Sector 2 Chamber 2
+    - shared major-encounter resolution and boss-death doctrine hardening
+    - chamber-end ritual/cinematic motion groundwork
+  - **Still available as targeted follow-up:**
+    - 7C Enemy Pursuit + Encounter Chemistry
+    - 7H Chamber-End Rituals + Cinematic Lore Motion
+    - 7I Sponge vs Satisfaction Balance
 
-## Milestone 3 — Encounter Expansion + Combat Readability (Completed / Closed Out)
-- deepen regular enemy readability and commitment pacing in the existing slice
-- ship the chamber 01 miniboss refinement and payoff gate release
-- preserve chamber 01 -> chamber 02 continuity
-- ship chamber 02 TOLL-KEEPER gate unlock state while preserving room for a later real Chamber 03 gate transition
-- preserve death/restart/reset plus portrait/landscape usability
+- **Milestone 8 — Sector 3 buildout + boss-pit expansion (coupled):** active in practice.
+  - practical meaning: Sector 3 (The Cradle of Refusal) is being built as a high-escalation sector with significantly more trap altars and boss pits, where boss pits are treated as core run-structure encounters rather than detached side content.
+  - current grounding: Sector 3 Chamber 1 (**Gallery of Failed Measures**) exists as a playable backbone scene.
 
-## Milestone 4 — Audio Identity (Completed / Closed Out)
-- ship ambient audio and SFX layering in the current slice
-- reinforce chamber/lore transition mood with integrated cues
-- keep the audio pass scoped to the shipped Chamber 01 + Chamber 02 baseline
-
-## Milestone 5 — Content Expansion (Completed / Closed Out in a First Pass)
-- land Chamber 03 first-pass completion rather than leaving it as a bootstrap-only stub
-- put the Chamber 02 -> Chamber 03 progression contract back in place through real scene handoff wiring
-- ship the separate boss arena and first sector finale path
-- establish Sector 1 payoff and onward progression contract
-- record remaining Chamber 3/boss-finale work as polish debt rather than a blocker
-
-## Milestone 6 — Bucket 2 Foothold / The Black Aqueduct Start (Active)
-- establish the first safe foothold beyond Sector 1
-- introduce The Black Aqueduct as the next area bucket
-- define Bucket 2 as necro-industrial canal/transit infrastructure rather than a garden biome
-- build Sector 2 Chamber 1 from the Chamber 3 blueprint with new chamber-specific backgrounds, enemies, lore altar/trigger art, lore image, lore text, and gate/progression art
-- prove progression continues after the Sector 1 finale
-- preserve the shipped Sector 1 arc while opening the next path
+- **Milestone 9+ — polish and expansion lanes:**
+  - Sector 3 pacing/density/readability polish
+  - global boss/chamber refinement + uniformity
+  - explicit later character/action animation lane (planned, deferred)

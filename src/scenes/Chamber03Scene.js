@@ -8,6 +8,7 @@ import { COLORS, PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
+import { applyChamberEntryRestore } from '../systems/VesselRunEconomy.js';
 
 const CHAMBER03_BOOTSTRAP = {
   worldWidth: 4800,
@@ -228,7 +229,7 @@ const CHAMBER03_ENCOUNTER_POCKETS = [
         y: PLAYER.startY,
         awakenPlayerX: undefined,
         patrolDistance: 96,
-        wakeDelayMs: 120
+        wakeDelayMs: 70
       }
     ]
   },
@@ -258,7 +259,15 @@ const CHAMBER03_ENCOUNTER_POCKETS = [
         y: PLAYER.startY,
         awakenPlayerX: undefined,
         patrolDistance: 84,
-        wakeDelayMs: 180
+        wakeDelayMs: 90
+      },
+      {
+        type: 'skitter',
+        x: 2660,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 82,
+        wakeDelayMs: 140
       },
       {
         type: 'skitter',
@@ -266,7 +275,7 @@ const CHAMBER03_ENCOUNTER_POCKETS = [
         y: PLAYER.startY,
         awakenPlayerX: undefined,
         patrolDistance: 132,
-        wakeDelayMs: 300
+        wakeDelayMs: 170
       }
     ]
   },
@@ -296,18 +305,28 @@ const CHAMBER03_ENCOUNTER_POCKETS = [
         y: PLAYER.startY,
         awakenPlayerX: undefined,
         patrolDistance: 108,
-        wakeDelayMs: 140
+        wakeDelayMs: 90
+      },
+      {
+        type: 'skitter',
+        x: 3815,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 94,
+        wakeDelayMs: 160
       },
       {
         type: 'tollkeeper',
         x: 4160,
         y: PLAYER.startY,
         awakenPlayerX: undefined,
-        wakeDelayMs: 280
+        patrolDistance: 98,
+        wakeDelayMs: 170
       }
     ]
   }
 ];
+const SHOW_CHAMBER03_DEBUG_LABELS = false;
 
 export class Chamber03Scene extends Phaser.Scene {
   constructor() {
@@ -415,16 +434,18 @@ export class Chamber03Scene extends Phaser.Scene {
       .rectangle(x, segment.y + 16, segment.width - 34, segment.height - 46, frameColor, 0.48)
       .setDepth(segment.depth + 0.02);
 
-    this.add
-      .text(x, segment.y + 12, `CHAMBER 03\nSEGMENT ${index + 1}`, {
-        fontFamily: 'monospace',
-        fontSize: '16px',
-        color: '#d6c7b2',
-        align: 'center'
-      })
-      .setOrigin(0.5)
-      .setAlpha(0.74)
-      .setDepth(segment.depth + 0.04);
+    if (SHOW_CHAMBER03_DEBUG_LABELS) {
+      this.add
+        .text(x, segment.y + 12, `CHAMBER 03\nSEGMENT ${index + 1}`, {
+          fontFamily: 'monospace',
+          fontSize: '16px',
+          color: '#d6c7b2',
+          align: 'center'
+        })
+        .setOrigin(0.5)
+        .setAlpha(0.74)
+        .setDepth(segment.depth + 0.04);
+    }
   }
 
   renderArchitecturalMarkers() {
@@ -590,6 +611,9 @@ export class Chamber03Scene extends Phaser.Scene {
 
   createPlayerAndColliders() {
     this.player = new Player(this, CHAMBER03_BOOTSTRAP.spawnX, CHAMBER03_BOOTSTRAP.spawnY, PLAYER);
+    const entryIntegrity = applyChamberEntryRestore(this.transitionContext);
+    this.player.health = entryIntegrity.current;
+    this.player.maxHealth = entryIntegrity.max;
     this.applyGameplayReadabilitySupport(this.player.sprite, CHAMBER03_BOOTSTRAP.playerHalo);
     this.physics.add.collider(this.player.sprite, this.platforms);
     this.enemies = [];
@@ -620,19 +644,21 @@ export class Chamber03Scene extends Phaser.Scene {
         pocketConfig.markerAlpha
       )
       .setDepth(-4.95);
-    const promptText = this.add
-      .text(pocketConfig.zoneX, pocketConfig.zoneY + pocketConfig.promptOffsetY, pocketConfig.label, {
-        fontFamily: 'monospace',
-        fontSize: '13px',
-        color: '#d2c4b2',
-        align: 'center',
-        stroke: '#130e0d',
-        strokeThickness: 4
-      })
-      .setOrigin(0.5)
-      .setDepth(-4.86)
-      .setAlpha(0.82)
-      .setVisible(false);
+    const promptText = SHOW_CHAMBER03_DEBUG_LABELS
+      ? this.add
+        .text(pocketConfig.zoneX, pocketConfig.zoneY + pocketConfig.promptOffsetY, pocketConfig.label, {
+          fontFamily: 'monospace',
+          fontSize: '13px',
+          color: '#d2c4b2',
+          align: 'center',
+          stroke: '#130e0d',
+          strokeThickness: 4
+        })
+        .setOrigin(0.5)
+        .setDepth(-4.86)
+        .setAlpha(0.82)
+        .setVisible(false)
+      : null;
 
     const enemies = pocketConfig.enemies.map((enemyConfig) => this.createEncounterEnemy(enemyConfig, pocketConfig));
     const pocket = {
@@ -791,7 +817,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.scale.on('resize', this.applyResponsiveLayout, this);
     this.applyResponsiveLayout();
     this.mobileControls.setMode('gameplay');
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   update(time) {
@@ -837,7 +863,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.refreshBossThresholdPresence();
     this.tryBeginBossArenaTransition(mobileInput);
     this.updateBossThresholdAura(time);
-    this.hud.update(this.player.health, PLAYER.maxHealth);
+    this.hud.update(this.player.health, this.player.maxHealth);
   }
 
   refreshEncounterPocketPresence() {
@@ -888,7 +914,7 @@ export class Chamber03Scene extends Phaser.Scene {
         return;
       }
 
-      enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 60;
+      enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 28;
     });
   }
 
@@ -1059,29 +1085,11 @@ export class Chamber03Scene extends Phaser.Scene {
     this.restartText.setPosition(width / 2, 90);
   }
 
-  applyGameplayReadabilitySupport(target, { fill = 0xd2c2ac, alpha = 0.16, scale = 1.08 } = {}) {
+  applyGameplayReadabilitySupport(target) {
     if (!target) {
       return null;
     }
 
-    const shadow = this.add
-      .ellipse(target.x, WORLD.floorY + 6, 104 * scale, 22 * scale, 0x050404, alpha * 1.05)
-      .setDepth(target.depth - 0.6);
-    const halo = this.add
-      .ellipse(target.x, target.y - 6, 84 * scale, 118 * scale, fill, alpha)
-      .setDepth(target.depth - 0.4);
-
-    this.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      if (!target.active) {
-        halo.setVisible(false);
-        shadow.setVisible(false);
-        return;
-      }
-
-      halo.setVisible(target.visible).setPosition(target.x, target.y - 8).setAlpha(target.visible ? alpha : 0);
-      shadow.setVisible(target.visible).setPosition(target.x, WORLD.floorY + 6).setAlpha(target.visible ? alpha * 1.05 : 0);
-    });
-
-    return { halo, shadow };
+    return null;
   }
 }

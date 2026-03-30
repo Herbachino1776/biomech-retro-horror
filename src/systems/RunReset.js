@@ -1,10 +1,19 @@
 import { ASSET_KEYS } from '../data/assetKeys.js';
+import { vesselIntegrityState } from './VesselIntegrityState.js';
+import { bossPitRunState } from './BossPitRunState.js';
 
 const CHAMBER01_SCENE_KEY = 'Chamber01Scene';
 const CHAMBER02_SCENE_KEY = 'Chamber02Scene';
 const CHAMBER03_SCENE_KEY = 'Chamber03Scene';
 const CHAMBER03_BOSS_ARENA_SCENE_KEY = 'Chamber03BossArenaScene';
 const SECTOR02_CHAMBER01_SCENE_KEY = 'Sector02Chamber01Scene';
+const SECTOR02_CHAMBER02_SCENE_KEY = 'Sector02Chamber02Scene';
+const SECTOR02_CHAMBER02_BOSS_PIT_SCENE_KEY = 'Sector02Chamber02BossPitScene';
+const SECTOR02_CHAMBER03_SCENE_KEY = 'Sector02Chamber03Scene';
+const SECTOR03_CHAMBER01_SCENE_KEY = 'Sector03Chamber01Scene';
+const SECTOR03_CHAMBER01_BOSS_PIT_SCENE_KEY = 'Sector03Chamber01BossPitScene';
+const SECTOR03_CHAMBER02_SCENE_KEY = 'Sector03Chamber02Scene';
+const SECTOR03_CHAMBER02_BOSS_PIT_SCENE_KEY = 'Sector03Chamber02BossPitScene';
 const SECTOR_COMPLETE_SCENE_KEY = 'SectorCompleteScene';
 const LORE_SCENE_KEYS = ['LoreScreenScene', 'LoreCutsceneScene'];
 const GAMEPLAY_AMBIENT_KEYS = [ASSET_KEYS.ambientChamber01Loop01, ASSET_KEYS.ambientChamber02Loop01];
@@ -25,6 +34,13 @@ export function restartRunFromDeath(scene) {
     scene.scene.stop(loreSceneKey);
   });
   scene.scene.stop(SECTOR_COMPLETE_SCENE_KEY);
+  scene.scene.stop(SECTOR03_CHAMBER02_BOSS_PIT_SCENE_KEY);
+  scene.scene.stop(SECTOR03_CHAMBER02_SCENE_KEY);
+  scene.scene.stop(SECTOR03_CHAMBER01_BOSS_PIT_SCENE_KEY);
+  scene.scene.stop(SECTOR03_CHAMBER01_SCENE_KEY);
+  scene.scene.stop(SECTOR02_CHAMBER03_SCENE_KEY);
+  scene.scene.stop(SECTOR02_CHAMBER02_BOSS_PIT_SCENE_KEY);
+  scene.scene.stop(SECTOR02_CHAMBER02_SCENE_KEY);
   scene.scene.stop(SECTOR02_CHAMBER01_SCENE_KEY);
   scene.scene.stop(CHAMBER03_BOSS_ARENA_SCENE_KEY);
   scene.scene.stop(CHAMBER03_SCENE_KEY);
@@ -32,5 +48,7 @@ export function restartRunFromDeath(scene) {
   if (scene.scene.isActive(CHAMBER01_SCENE_KEY) || scene.scene.isPaused(CHAMBER01_SCENE_KEY)) {
     scene.scene.stop(CHAMBER01_SCENE_KEY);
   }
+  vesselIntegrityState.resetForFreshRun();
+  bossPitRunState.resetForFreshRun();
   scene.scene.start(CHAMBER01_SCENE_KEY);
 }

@@ -24,6 +24,17 @@ export class HalfSkullMiniboss {
     this.attackWindupStartedAt = -Infinity;
     this.attackCommitAt = -Infinity;
     this.attackAudioLocked = false;
+    this.poiseConfig = {
+      max: Math.max(1, config.poise?.max ?? 10),
+      recoverDelayMs: Math.max(0, config.poise?.recoverDelayMs ?? 1650),
+      recoverPerSecond: Math.max(0, config.poise?.recoverPerSecond ?? 1.9),
+      staggerDurationMs: Math.max(400, config.poise?.staggerDurationMs ?? 2200),
+      finisherRange: Math.max(84, config.poise?.finisherRange ?? 156)
+    };
+    this.poise = this.poiseConfig.max;
+    this.poiseBroken = false;
+    this.lastPoiseDamageAt = -Infinity;
+    this.staggerUntil = -Infinity;
 
     this.textureKey = config.textureKey ?? ASSET_KEYS.chamber01HalfSkullMiniboss;
     this.usingTexture = scene.textures.exists(this.textureKey);
@@ -63,6 +74,7 @@ export class HalfSkullMiniboss {
   }
 
   update(time, player) {
+    this.updatePoiseState(time);
     this.updateVisuals(time);
 
     if (this.dead) {
@@ -73,6 +85,12 @@ export class HalfSkullMiniboss {
     if (!this.active) {
       this.attackState = 'idle';
       this.body.setVelocityX(0);
+      return;
+    }
+
+    if (this.isStaggered(time)) {
+      this.body.setVelocity(0, 0);
+      this.recordContactDamage(time);
       return;
     }
 
@@ -185,6 +203,64 @@ export class HalfSkullMiniboss {
     return true;
   }
 
+  applyPoiseDamage(amount = 1, time = this.scene.time.now) {
+    if (this.dead || amount <= 0) {
+      return false;
+    }
+
+    this.lastPoiseDamageAt = time;
+    this.poise = Phaser.Math.Clamp(this.poise - amount, 0, this.poiseConfig.max);
+    if (this.poise <= 0 && !this.poiseBroken) {
+      this.enterStagger(time);
+      return true;
+    }
+
+    return false;
+  }
+
+  updatePoiseState(time) {
+    if (this.dead || this.poiseBroken) {
+      return;
+    }
+
+    if (time < this.lastPoiseDamageAt + this.poiseConfig.recoverDelayMs) {
+      return;
+    }
+
+    const dtSeconds = Math.max(0, this.scene.game.loop.delta / 1000);
+    this.poise = Phaser.Math.Clamp(this.poise + this.poiseConfig.recoverPerSecond * dtSeconds, 0, this.poiseConfig.max);
+  }
+
+  enterStagger(time = this.scene.time.now) {
+    this.poiseBroken = true;
+    this.staggerUntil = time + this.poiseConfig.staggerDurationMs;
+    this.clearAttackState();
+    this.body.setVelocity(0, 0);
+    this.recordContactDamage(time);
+  }
+
+  isStaggered(time = this.scene.time.now) {
+    if (!this.poiseBroken || this.dead) {
+      return false;
+    }
+
+    if (time <= this.staggerUntil) {
+      return true;
+    }
+
+    this.poiseBroken = false;
+    this.poise = this.poiseConfig.max;
+    return false;
+  }
+
+  canReceiveRiteFinisher(playerSprite, time = this.scene.time.now) {
+    if (!this.isStaggered(time) || !playerSprite?.active) {
+      return false;
+    }
+
+    return Phaser.Math.Distance.Between(playerSprite.x, playerSprite.y, this.sprite.x, this.sprite.y) <= this.poiseConfig.finisherRange;
+  }
+
   playDeathEffect() {
     if (this.deathEffectStarted) {
       return;
@@ -249,6 +325,12 @@ export class HalfSkullMiniboss {
       scaleY *= recoilPulse * 0.98;
       angle = this.direction * (takingHit ? 8 : 4);
       tint = takingHit ? 0xd9efae : 0xb8c987;
+    } else if (this.poiseBroken) {
+      const staggerPulse = 0.9 + Math.sin(time / 38) * 0.06;
+      scaleX *= 0.88;
+      scaleY *= staggerPulse * 0.9;
+      angle = this.direction * 16;
+      tint = 0xd8cdb7;
     } else if (hitPulsing) {
       const pulse = 1 + Math.sin(time / 36) * 0.03;
       scaleX *= pulse;

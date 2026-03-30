@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
-import { CONCEPT_PRESENTATION } from '../data/milestone1Config.js';
+import { CONCEPT_PRESENTATION, WORLD } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
+import { triggerEnemyDeathRuptureBurst } from '../systems/EnemyDeathRuptureBurst.js';
+import { triggerEnemyHitSplatterBurst } from '../systems/EnemyHitSplatterBurst.js';
+import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
 
 export class SkitterServitor {
   constructor(scene, x, y, config) {
@@ -22,6 +25,21 @@ export class SkitterServitor {
     this.contactDamageWindowUntil = -Infinity;
     this.hurtPushDirection = 0;
     this.attackAudioLocked = false;
+    this.lastSeenPlayerAt = -Infinity;
+    this.pursuitCommittedUntil = -Infinity;
+    this.wasAwakenedLastUpdate = this.awakened;
+    this.wakeRushUntil = -Infinity;
+    this.poiseConfig = {
+      max: Math.max(1, config.poise?.max ?? 0),
+      recoverDelayMs: Math.max(0, config.poise?.recoverDelayMs ?? 1400),
+      recoverPerSecond: Math.max(0, config.poise?.recoverPerSecond ?? 1.4),
+      staggerDurationMs: Math.max(260, config.poise?.staggerDurationMs ?? 1800),
+      finisherRange: Math.max(68, config.poise?.finisherRange ?? 132)
+    };
+    this.poise = this.poiseConfig.max;
+    this.poiseBroken = false;
+    this.lastPoiseDamageAt = -Infinity;
+    this.staggerUntil = -Infinity;
 
     const spriteKey = config.textureKey ?? ASSET_KEYS.skitter;
     const spritePresentation = config.presentation ?? {};
@@ -60,7 +78,6 @@ export class SkitterServitor {
 
     this.body = this.sprite.body;
     this.body.setCollideWorldBounds(true);
-
     const scaleX = Math.abs(this.sprite.scaleX) || 1;
     const scaleY = Math.abs(this.sprite.scaleY) || 1;
     this.body.setSize(config.body.width / scaleX, config.body.height / scaleY);
@@ -77,6 +94,7 @@ export class SkitterServitor {
   }
 
   update(time, playerX) {
+    this.updatePoiseState(time);
     this.updateVisuals(time);
 
     if (this.dead) {
@@ -85,6 +103,21 @@ export class SkitterServitor {
     }
 
     this.updateAwakeningState(time, playerX);
+    if (this.awakened && !this.wasAwakenedLastUpdate) {
+      this.wakeRushUntil = time + (this.config.wakeRushMs ?? 420);
+      this.nextAttackAllowedAt = Math.min(this.nextAttackAllowedAt, time + (this.config.wakeAttackLeadInMs ?? 160));
+      this.pursuitCommittedUntil = Math.max(this.pursuitCommittedUntil, time + (this.config.wakePursuitCommitMs ?? 1180));
+      this.direction = Math.sign(playerX - this.sprite.x) || this.direction;
+      this.enterState('stalk', time);
+    }
+    this.wasAwakenedLastUpdate = this.awakened;
+
+    if (this.isStaggered(time)) {
+      this.body.setVelocity(0, 0);
+      this.contactDamageWindowUntil = time;
+      return;
+    }
+
     this.updateState(time, playerX);
 
     if (!this.awakened) {
@@ -117,9 +150,23 @@ export class SkitterServitor {
   updateState(time, playerX) {
     const dx = playerX - this.sprite.x;
     const absDx = Math.abs(dx);
-    const closeEnoughToAggro = absDx < this.config.aggroRange;
+    const wakeRushActive = time < this.wakeRushUntil;
+    const heatSeekRange = this.config.heatSeekRange ?? this.config.aggroRange * 1.22;
+    const closeEnoughToAggro = absDx < (wakeRushActive ? Math.max(this.config.aggroRange, heatSeekRange) : this.config.aggroRange);
+    const pressureTrackingRange = this.config.pressureTrackingRange ?? this.config.aggroRange * 1.5;
+    const pressureTracking = absDx < pressureTrackingRange;
+    const pursuitCommitMs = (this.config.pursuitCommitMs ?? 980) + (wakeRushActive ? (this.config.wakeCommitBonusMs ?? 220) : 0);
+    const pursueAfterLosingAggro = time < this.pursuitCommittedUntil;
+    const shouldPursue = closeEnoughToAggro || pursueAfterLosingAggro || pressureTracking;
 
-    if (closeEnoughToAggro && this.combatState !== 'hurt') {
+    if (closeEnoughToAggro) {
+      this.lastSeenPlayerAt = time;
+      this.pursuitCommittedUntil = time + pursuitCommitMs;
+    } else if (pressureTracking && this.combatState === 'stalk') {
+      this.pursuitCommittedUntil = Math.max(this.pursuitCommittedUntil, time + (this.config.trailingCommitMs ?? 340));
+    }
+
+    if (shouldPursue && this.combatState !== 'hurt') {
       this.direction = Math.sign(dx) || this.direction;
     }
 
@@ -157,44 +204,61 @@ export class SkitterServitor {
         break;
       case 'stalk':
       default:
-        if (closeEnoughToAggro) {
-          this.runAggroStalk(absDx);
-          if (absDx <= this.config.attackTriggerRange && time >= this.nextAttackAllowedAt) {
+        if (shouldPursue) {
+          this.runAggroStalk(absDx, time);
+          const wakeAttackCommitRange = this.config.wakeAttackCommitRange ?? this.config.attackTriggerRange * 1.16;
+          const canStartAttack = absDx <= this.config.attackTriggerRange
+            || (wakeRushActive && absDx <= wakeAttackCommitRange);
+          if (canStartAttack && time >= this.nextAttackAllowedAt) {
             this.enterState('windup', time, this.config.windupMs);
           }
         } else {
-          this.runPatrol();
+          this.runPatrol(absDx);
         }
         break;
     }
   }
 
-  runAggroStalk(absDx) {
+  runAggroStalk(absDx, time) {
     const lowerBound = this.config.preferredRange - this.config.rangeBand;
     const upperBound = this.config.preferredRange + this.config.rangeBand;
+    const wakeRushFactor = time < this.wakeRushUntil ? (this.config.wakeRushSpeedFactor ?? 1.16) : 1;
+    const baseSpeed = this.config.speed * wakeRushFactor;
 
     if (absDx < lowerBound) {
-      this.body.setVelocityX(-this.direction * this.config.speed * 0.55);
+      this.body.setVelocityX(-this.direction * baseSpeed * 0.24);
       return;
     }
 
     if (absDx > upperBound) {
-      this.body.setVelocityX(this.direction * this.config.speed);
+      this.body.setVelocityX(this.direction * baseSpeed * 1.24);
       return;
     }
 
-    this.body.setVelocityX(this.direction * this.config.speed * 0.18);
+    this.body.setVelocityX(this.direction * baseSpeed * 0.7);
   }
 
   runCooldownSpacing(absDx) {
-    const needsSpace = absDx < this.config.preferredRange * 0.82;
-    const retreatSpeed = this.config.speed * (needsSpace ? 0.48 : 0.22);
-    this.body.setVelocityX(-this.direction * retreatSpeed);
+    const retreatRange = this.config.preferredRange * 0.66;
+    const reengageRange = this.config.preferredRange * 1.18;
+
+    if (absDx < retreatRange) {
+      this.body.setVelocityX(-this.direction * this.config.speed * 0.38);
+      return;
+    }
+
+    if (absDx > reengageRange) {
+      this.body.setVelocityX(this.direction * this.config.speed * 0.74);
+      return;
+    }
+
+    this.body.setVelocityX(this.direction * this.config.speed * 0.34);
   }
 
-  runPatrol() {
+  runPatrol(absDx) {
     const patrolMin = this.originX - this.config.patrolDistance;
     const patrolMax = this.originX + this.config.patrolDistance;
+    const farFromHome = Math.abs(this.sprite.x - this.originX) > this.config.patrolDistance * 0.45;
 
     if (this.sprite.x < patrolMin) {
       this.direction = 1;
@@ -203,7 +267,13 @@ export class SkitterServitor {
       this.direction = -1;
     }
 
-    this.body.setVelocityX(this.direction * this.config.speed * 0.45);
+    if (farFromHome && absDx > this.config.aggroRange * 1.15) {
+      this.direction = Math.sign(this.originX - this.sprite.x) || this.direction;
+      this.body.setVelocityX(this.direction * this.config.speed * 0.58);
+      return;
+    }
+
+    this.body.setVelocityX(this.direction * this.config.speed * 0.52);
   }
 
   beginAttack(time) {
@@ -257,7 +327,14 @@ export class SkitterServitor {
     this.lastDamageFlashTime = time;
     this.contactDamageWindowUntil = time;
     this.nextAttackAllowedAt = time + this.config.attackCooldownMs;
+    this.wakeRushUntil = Math.max(this.wakeRushUntil, time + (this.config.hurtReengageRushMs ?? 260));
+    this.pursuitCommittedUntil = Math.max(this.pursuitCommittedUntil, time + (this.config.hurtPursuitCommitMs ?? 1100));
     this.setVisualTint(0x6f8c59);
+    triggerEnemyHitSplatterBurst(this.scene, {
+      x: this.sprite.x + this.hurtPushDirection * 8,
+      y: (this.body?.center?.y ?? this.sprite.y) - 8,
+      depth: this.sprite.depth
+    });
 
     if (this.health <= 0) {
       this.scene.audioDirector?.playEnemyDeath(this.config.audioProfile ?? 'enemy');
@@ -268,10 +345,28 @@ export class SkitterServitor {
       this.body.enable = false;
       this.eyeGlow.setVisible(false);
       this.setVisualTint(0x1f1714);
+      triggerEnemyDeathRuptureBurst(this.scene, {
+        x: this.sprite.x,
+        y: (this.body?.bottom ?? this.sprite.y) - 16,
+        depth: this.sprite.depth,
+        isElite: Boolean(this.isElite || this.isTollKeeper || this.config.isElite)
+      });
       this.scene.tweens.add({
         targets: this.sprite,
-        alpha: this.getStateAlpha('dead', 0.4),
-        duration: 380
+        alpha: 0,
+        duration: 380,
+        onComplete: () => {
+          this.sprite.setVisible(false);
+          const floorPlaneY = this.scene?.player?.sprite?.body?.bottom ?? WORLD.floorY + 2;
+          const remainsSize = this.config.corpseRemainsProfile
+            ?? (this.isElite || this.isTollKeeper || this.config.isElite ? 'elite' : 'small');
+          spawnEnemyCorpseRemains(this.scene, {
+            x: this.sprite.x,
+            groundY: floorPlaneY,
+            depth: this.sprite.depth,
+            size: remainsSize
+          });
+        }
       });
       this.scene.tweens.add({
         targets: [this.eyeGlow],
@@ -288,6 +383,64 @@ export class SkitterServitor {
     this.enterState('hurt', time, this.config.hurtLockMs);
     this.body.setVelocityX(this.hurtPushDirection * this.config.recoilVelocityX);
     this.body.setVelocityY(this.config.recoilVelocityY);
+  }
+
+  applyPoiseDamage(amount = 1, time = this.scene.time.now) {
+    if (this.dead || amount <= 0) {
+      return false;
+    }
+
+    this.lastPoiseDamageAt = time;
+    this.poise = Phaser.Math.Clamp(this.poise - amount, 0, this.poiseConfig.max);
+    if (this.poise <= 0 && !this.poiseBroken) {
+      this.enterStagger(time);
+      return true;
+    }
+
+    return false;
+  }
+
+  updatePoiseState(time) {
+    if (this.dead || this.poiseBroken) {
+      return;
+    }
+
+    if (time < this.lastPoiseDamageAt + this.poiseConfig.recoverDelayMs) {
+      return;
+    }
+
+    const dtSeconds = Math.max(0, this.scene.game.loop.delta / 1000);
+    this.poise = Phaser.Math.Clamp(this.poise + this.poiseConfig.recoverPerSecond * dtSeconds, 0, this.poiseConfig.max);
+  }
+
+  enterStagger(time = this.scene.time.now) {
+    this.poiseBroken = true;
+    this.staggerUntil = time + this.poiseConfig.staggerDurationMs;
+    this.clearAttackState(time, 'staggered');
+    this.body.setVelocity(0, 0);
+    this.contactDamageWindowUntil = time;
+  }
+
+  isStaggered(time = this.scene.time.now) {
+    if (!this.poiseBroken || this.dead) {
+      return false;
+    }
+
+    if (time <= this.staggerUntil) {
+      return true;
+    }
+
+    this.poiseBroken = false;
+    this.poise = this.poiseConfig.max;
+    return false;
+  }
+
+  canReceiveRiteFinisher(playerSprite, time = this.scene.time.now) {
+    if (!this.isStaggered(time) || !playerSprite?.active) {
+      return false;
+    }
+
+    return Phaser.Math.Distance.Between(playerSprite.x, playerSprite.y, this.sprite.x, this.sprite.y) <= this.poiseConfig.finisherRange;
   }
 
   updateVisuals(time) {
@@ -325,6 +478,15 @@ export class SkitterServitor {
       return;
     }
 
+    if (this.poiseBroken) {
+      const pulse = 0.8 + Math.sin(time * 0.026) * 0.06;
+      this.sprite.setScale(this.baseScaleX * 0.9, this.baseScaleY * 0.94);
+      this.sprite.setAngle(this.direction * 12);
+      this.setVisualTint(0xb4ab95);
+      this.sprite.setAlpha(this.getStateAlpha('staggered', pulse));
+      return;
+    }
+
     this.sprite.setScale(this.baseScaleX, this.baseScaleY);
     this.sprite.setAlpha(this.baseAlpha);
 
@@ -339,7 +501,6 @@ export class SkitterServitor {
   getStateAlpha(state, fallbackAlpha) {
     return this.stateAlphas[state] ?? fallbackAlpha;
   }
-
 
   updateEyeGlow(time) {
     if (!this.eyeGlow) {

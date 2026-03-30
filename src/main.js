@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { gameConfig } from './data/gameConfig.js';
 import { BootScene } from './scenes/BootScene.js';
+import { PreTitleScene } from './scenes/PreTitleScene.js';
 import { Chamber01Scene } from './scenes/Chamber01Scene.js';
 import { LoreScreenScene } from './scenes/LoreScreenScene.js';
 import { Chamber02Scene } from './scenes/Chamber02Scene.js';
@@ -9,11 +10,19 @@ import { Chamber03BossArenaScene } from './scenes/Chamber03BossArenaScene.js';
 import { LoreCutsceneScene } from './scenes/LoreCutsceneScene.js';
 import { SectorCompleteScene } from './scenes/SectorCompleteScene.js';
 import { Sector02Chamber01Scene } from './scenes/Sector02Chamber01Scene.js';
+import { Sector02Chamber02Scene } from './scenes/Sector02Chamber02Scene.js';
+import { Sector02Chamber02BossPitScene } from './scenes/Sector02Chamber02BossPitScene.js';
+import { Sector02Chamber03Scene } from './scenes/Sector02Chamber03Scene.js';
+import { Sector03Chamber01Scene } from './scenes/Sector03Chamber01Scene.js';
+import { Sector03Chamber01BossPitScene } from './scenes/Sector03Chamber01BossPitScene.js';
+import { Sector03Chamber02Scene } from './scenes/Sector03Chamber02Scene.js';
+import { Sector03Chamber02BossPitScene } from './scenes/Sector03Chamber02BossPitScene.js';
 
 const config = {
   ...gameConfig,
   scene: [
     BootScene,
+    PreTitleScene,
     Chamber01Scene,
     LoreScreenScene,
     Chamber02Scene,
@@ -21,7 +30,14 @@ const config = {
     Chamber03BossArenaScene,
     LoreCutsceneScene,
     SectorCompleteScene,
-    Sector02Chamber01Scene
+    Sector02Chamber01Scene,
+    Sector02Chamber02Scene,
+    Sector02Chamber02BossPitScene,
+    Sector02Chamber03Scene,
+    Sector03Chamber01Scene,
+    Sector03Chamber01BossPitScene,
+    Sector03Chamber02Scene,
+    Sector03Chamber02BossPitScene
   ],
   physics: {
     default: 'arcade',

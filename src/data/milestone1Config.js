@@ -8,7 +8,7 @@ export const WORLD = {
 };
 
 export const PLAYER = {
-  maxHealth: 10,
+  maxHealth: 5,
   moveSpeed: 164,
   moveAcceleration: 2200,
   moveDeceleration: 2600,
@@ -64,12 +64,12 @@ export const CONCEPT_PRESENTATION = {
   // Conservative grounding tuning: presentation-only origins; collision bodies remain authoritative.
   // `normalization` provides reusable target-height grounding rules for future sprite swaps.
   player: {
-    crop: { x: 60, y: 14, width: 888, height: 1460 },
+    crop: { x: 0, y: 0, width: 658, height: 1300 },
     display: { width: 196, height: 322 },
     origin: { x: 0.5, y: 0.985 },
     normalization: {
-      targetDisplayHeight: 252,
-      origin: { x: 0.5, y: 0.965 },
+      targetDisplayHeight: 126,
+      origin: { x: 0.5, y: 0.995 },
       yOffset: -10
     },
     alpha: 0.94
@@ -104,9 +104,6 @@ export const CONCEPT_PRESENTATION = {
     slabTintWithConcept: 0x3b2e29,
     slabTintFallbackOnly: 0x1f1714,
     anchorXs: [405, 1215, 2025]
-  },
-  uiFrame: {
-    crop: { x: 276, y: 720, width: 984, height: 248 }
   }
 };
 
@@ -171,10 +168,10 @@ export const LORE_SCREENS = {
 export const CHAMBER01_MINIBOSS = {
   name: 'THE HALF-SKULL ASCENDANT',
   subtitle: 'Laughing Engine Warden',
-  health: 15,
+  health: 12,
   contactDamage: 1,
-  contactDamageCooldownMs: 1200,
-  attackCooldownMs: 3950,
+  contactDamageCooldownMs: 1320,
+  attackCooldownMs: 3400,
   attackTelegraphMs: 760,
   attackRecoveryMs: 620,
   attackRange: 210,

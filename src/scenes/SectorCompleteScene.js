@@ -50,8 +50,14 @@ export class SectorCompleteScene extends Phaser.Scene {
       .rectangle(centerX, centerY, cardWidth, cardHeight, CARD_STYLE.panel, 0.92)
       .setStrokeStyle(3, CARD_STYLE.border, 0.88);
 
+    const titleText = this.transitionContext?.title ?? 'SECTOR I SEALED';
+    const bodyText = this.transitionContext?.body
+      ?? 'The Ossuary Choir falls silent.\nA deeper descent now waits below the ruptured gate.';
+    const holdText = this.transitionContext?.holdText
+      ?? 'This is an intentional holding threshold.\nBucket II is not yet embodied in this build.\n\nPress [ENTER] or tap to return to the title rite.';
+
     this.add
-      .text(centerX, centerY - 122, 'SECTOR I SEALED', {
+      .text(centerX, centerY - 122, titleText, {
         fontFamily: 'monospace',
         fontSize: width < 520 ? '24px' : '30px',
         color: '#d6c8b3',
@@ -60,7 +66,7 @@ export class SectorCompleteScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(centerX, centerY - 58, 'The Ossuary Choir falls silent.\nA deeper descent now waits below the ruptured gate.', {
+      .text(centerX, centerY - 58, bodyText, {
         fontFamily: 'monospace',
         fontSize: width < 520 ? '15px' : '18px',
         color: '#aebd95',
@@ -74,7 +80,7 @@ export class SectorCompleteScene extends Phaser.Scene {
       .text(
         centerX,
         centerY + 36,
-        'This is an intentional holding threshold.\nBucket II is not yet embodied in this build.\n\nPress [ENTER] or tap to return to the title rite.',
+        holdText,
         {
           fontFamily: 'monospace',
           fontSize: width < 520 ? '13px' : '15px',
