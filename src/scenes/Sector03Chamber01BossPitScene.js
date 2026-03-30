@@ -464,7 +464,7 @@ export class Sector03Chamber01BossPitScene extends Phaser.Scene {
       x: this.boss.sprite.x,
       groundY: WORLD.floorY + 2,
       depth: this.boss.sprite.depth,
-      size: 'large'
+      size: 'sector3Boss'
     });
     this.boss.sprite.setVisible(false).setAlpha(0);
     this.boss.setActive(false);

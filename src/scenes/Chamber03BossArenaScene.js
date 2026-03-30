@@ -111,15 +111,11 @@ const CHAMBER03_BOSS_COMBAT = {
 
 const CHAMBER03_FINALE = {
   bloodFlashMs: 860,
-  payoffRevealDelayMs: 880,
-  payoffHoldMs: 2100,
   progressionRevealDelayMs: 3260,
   bossBarDropDelayMs: 1180,
   controlReleaseDelayMs: 3720,
   progressionInteractDelayMs: 360,
   progressionPromptText: '',
-  payoffTitle: 'THE PRECENTOR IS SILENCED',
-  payoffBody: 'Sector I stands complete.\nThe marrow route below has opened.',
   holdingStateReason: 'sector-i-complete-holding-threshold'
 };
 
@@ -467,21 +463,6 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       .setDepth(36)
       .setVisible(false);
 
-    this.sectorPayoffText = this.add
-      .text(this.scale.width / 2, this.getBossPromptY() + 42, '', {
-        fontFamily: 'monospace',
-        fontSize: '18px',
-        color: '#d7ccb9',
-        align: 'center',
-        stroke: '#0c0908',
-        strokeThickness: 5,
-        lineSpacing: 8
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(37)
-      .setAlpha(0)
-      .setVisible(false);
   }
 
   createUiAndInput() {
@@ -748,7 +729,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       this.hud.setBossBarState({
         visible: true,
         name: CHAMBER03_BOSS_COMBAT.name,
-        subtitle: 'THRESHOLD VERDICT COLLAPSING',
+        subtitle: CHAMBER03_BOSS_COMBAT.subtitle,
         current: 0,
         max: this.bossCombat?.maxHealth ?? CHAMBER03_BOSS_COMBAT.maxHealth,
         telegraph: 1,
@@ -872,13 +853,6 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         const bossGroundedY = WORLD.floorY + 2 - this.bossSprite.displayHeight * (1 - this.bossSprite.originY);
         this.bossSprite.setY(bossGroundedY);
         this.bossBody?.setVelocity?.(0, 0);
-        this.bossStatusPrompt
-          ?.setText(CHAMBER03_FINALE.payoffTitle)
-          .setPosition(this.scale.width / 2, this.getBossPromptY())
-          .setVisible(true);
-        this.sectorPayoffText
-          ?.setText(CHAMBER03_FINALE.payoffBody)
-          .setPosition(this.scale.width / 2, this.getBossPromptY() + 44);
         this.triggerSectorFinalePayoff();
         this.tweens.add({
           targets: [this.bossSprite, this.bossFallbackLabel].filter(Boolean),
@@ -892,7 +866,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
             x: bossRemainsX,
             groundY: WORLD.floorY + 2,
             depth: this.bossSprite.depth,
-            size: 'large'
+            size: 'sector3Boss'
           });
           this.bossSprite.setVisible(false).setAlpha(0);
           this.bossFallbackLabel?.setVisible(false).setAlpha(0);
@@ -912,12 +886,6 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       },
       stages: [
         {
-          atMs: CHAMBER03_FINALE.payoffRevealDelayMs,
-          run: () => {
-            this.showSectorPayoffText();
-          }
-        },
-        {
           atMs: CHAMBER03_FINALE.bossBarDropDelayMs,
           run: () => {
             this.bossDefeatCeremonyBossBarActive = false;
@@ -935,6 +903,20 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
           run: () => {
             this.isSectorFinaleActive = true;
             this.player.attackHitbox?.body?.setEnable(false);
+            this.cameras.main.startFollow(
+              this.player.sprite,
+              true,
+              CHAMBER03_BOSS_ARENA.cameraLerp.x,
+              CHAMBER03_BOSS_ARENA.cameraLerp.y,
+              this.getFollowOffsetX(),
+              0
+            );
+            this.tweens.add({
+              targets: this.cameras.main,
+              zoom: this.mobileControls.enabled && this.scale.height >= this.scale.width ? PORTRAIT_LAYOUT.portraitZoom : 1,
+              duration: 280,
+              ease: 'Sine.easeInOut'
+            });
 
           }
         }
@@ -949,6 +931,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.isSectorFinaleActive = false;
     this.currentProgressionThresholdZone = null;
     this.player.attackHitbox?.body?.setEnable(false);
+    this.focusCameraOnBossPayoff();
     this.cameras.main.shake(920, 0.028, true);
     this.time.delayedCall(150, () => this.cameras.main.shake(680, 0.024, true));
     this.time.delayedCall(330, () => this.cameras.main.shake(560, 0.02, true));
@@ -1014,35 +997,13 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossAftermathPool = pool;
   }
 
-  showSectorPayoffText() {
-    if (!this.bossStatusPrompt || !this.sectorPayoffText) {
-      return;
-    }
-
-    this.tweens.killTweensOf([this.bossStatusPrompt, this.sectorPayoffText]);
-    this.bossStatusPrompt.setVisible(true).setAlpha(0).setScale(0.94);
-    this.sectorPayoffText.setVisible(true).setAlpha(0).setScale(0.96);
-
+  focusCameraOnBossPayoff() {
+    this.cameras.main.startFollow(this.bossSprite, true, 0.12, 0.12, -12, -26);
     this.tweens.add({
-      targets: [this.bossStatusPrompt, this.sectorPayoffText],
-      alpha: 1,
-      scaleX: 1,
-      scaleY: 1,
-      duration: 360,
-      ease: 'Cubic.easeOut',
-      hold: CHAMBER03_FINALE.payoffHoldMs,
-      onComplete: () => {
-        this.tweens.add({
-          targets: [this.bossStatusPrompt, this.sectorPayoffText],
-          alpha: 0,
-          duration: 460,
-          ease: 'Cubic.easeIn',
-          onComplete: () => {
-            this.bossStatusPrompt?.setVisible(false);
-            this.sectorPayoffText?.setVisible(false);
-          }
-        });
-      }
+      targets: this.cameras.main,
+      zoom: this.cameras.main.zoom * 1.22,
+      duration: 260,
+      ease: 'Sine.easeOut'
     });
   }
 
@@ -1509,7 +1470,6 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY)
       );
       this.bossStatusPrompt?.setPosition(width / 2, this.getBossPromptY());
-      this.sectorPayoffText?.setPosition(width / 2, this.getBossPromptY() + 44);
       return;
     }
 
@@ -1519,7 +1479,6 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.mobileControls.setReservedBottomPx(0);
     this.restartText.setPosition(width / 2, 90);
     this.bossStatusPrompt?.setPosition(width / 2, this.getBossPromptY());
-    this.sectorPayoffText?.setPosition(width / 2, this.getBossPromptY() + 44);
   }
 
   applyGameplayReadabilitySupport(target) {

@@ -310,6 +310,8 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.enemyProjectilesPaused = false;
     this.integrityRewardTracker = new Set();
     this.resolutionLockActive = false;
+    this.deathCameraFocusTween = null;
+    this.deathCameraRestoreTween = null;
   }
 
   create() {
@@ -667,6 +669,8 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.audioDirector?.shutdown();
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.enemyProjectiles.forEach((projectile) => projectile.destroy());
+      this.deathCameraFocusTween?.remove();
+      this.deathCameraRestoreTween?.remove();
       this.majorEncounterResolution?.teardown();
     });
   }
@@ -943,24 +947,72 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
           this.resolutionLockActive = locked;
         },
         onStart: () => {
-          grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber01-archon-miniboss');
           this.archon.sprite.y = WORLD.floorY + 2 - this.archon.sprite.displayHeight * (1 - this.archon.sprite.originY);
-          this.triggerSector02BlackOilPayoff(this.archon, { scale: 1.12, burstCount: 12, puddleWidth: 204, puddleHeight: 48 });
-          spawnEnemyCorpseRemains(this, {
-            x: this.archon.sprite.x,
-            groundY: WORLD.floorY + 2,
-            depth: this.archon.sprite.depth,
-            size: 'large'
-          });
-          this.archon.sprite.setVisible(false).setAlpha(0);
-          this.archon.body?.setEnable(false);
-          this.archon.setActive(false);
-          this.cameras.main.shake(620, 0.008, true);
-          this.audioDirector?.playBanishmentSting();
+          this.focusCameraOnBossPayoff(this.archon.sprite);
+          this.cameras.main.shake(2200, 0.0094, true);
         },
-        stages: [{ atMs: 420, run: () => this.unlockForwardPath() }]
+        stages: [
+          {
+            atMs: 1660,
+            run: () => {
+              this.triggerSector02BlackOilPayoff(this.archon, { scale: 1.12, burstCount: 12, puddleWidth: 204, puddleHeight: 48 });
+              spawnEnemyCorpseRemains(this, {
+                x: this.archon.sprite.x,
+                groundY: WORLD.floorY + 2,
+                depth: this.archon.sprite.depth,
+                size: 'sector3Boss'
+              });
+              this.archon.sprite.setVisible(false).setAlpha(0);
+              this.archon.body?.setEnable(false);
+              this.archon.setActive(false);
+              this.audioDirector?.playBanishmentSting();
+              grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber01-archon-miniboss');
+            }
+          },
+          {
+            atMs: 2400,
+            run: () => {
+              this.restoreCameraAfterBossPayoff();
+              this.unlockForwardPath();
+            }
+          }
+        ]
       });
     }
+  }
+
+  focusCameraOnBossPayoff(targetSprite) {
+    this.deathCameraFocusTween?.remove();
+    this.deathCameraRestoreTween?.remove();
+    this.cameras.main.startFollow(targetSprite, true, 0.12, 0.12, -12, -22);
+    this.deathCameraFocusTween = this.tweens.add({
+      targets: this.cameras.main,
+      zoom: this.cameras.main.zoom * 1.2,
+      duration: 260,
+      ease: 'Sine.easeOut'
+    });
+  }
+
+  restoreCameraAfterBossPayoff() {
+    this.deathCameraFocusTween?.remove();
+    this.deathCameraRestoreTween?.remove();
+    this.cameras.main.startFollow(
+      this.player.sprite,
+      true,
+      BLACK_AQUEDUCT_BOOTSTRAP.cameraLerp.x,
+      BLACK_AQUEDUCT_BOOTSTRAP.cameraLerp.y,
+      this.mobileControls.enabled && this.scale.height >= this.scale.width
+        ? BLACK_AQUEDUCT_BOOTSTRAP.portraitFollowOffsetX
+        : BLACK_AQUEDUCT_BOOTSTRAP.desktopFollowOffsetX,
+      0
+    );
+    this.deathCameraRestoreTween = this.tweens.add({
+      targets: this.cameras.main,
+      zoom: this.mobileControls.enabled && this.scale.height >= this.scale.width ? PORTRAIT_LAYOUT.portraitZoom : PORTRAIT_LAYOUT.desktopZoom,
+      duration: 280,
+      ease: 'Sine.easeInOut',
+      onComplete: () => this.applyResponsiveLayout()
+    });
   }
 
   handleArchonContactPlayer(enemySprite) {
@@ -1078,8 +1130,8 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
       this.forwardBarrier.body.updateFromGameObject?.();
     }
     this.forwardPrompt?.setVisible(false);
-    this.processionalLabel?.setText('BLACK AQUEDUCT\nTHRESHOLD UNSEALED');
-    this.archonWakeLabel?.setText('ABYSSAL ARCHON\nNULLIFIED').setAlpha(0.84);
+    this.processionalLabel?.setVisible(false);
+    this.archonWakeLabel?.setVisible(false);
   }
 
   refreshForwardThresholdPresence() {
