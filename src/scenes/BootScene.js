@@ -24,6 +24,11 @@ export class BootScene extends Phaser.Scene {
         id: 'start-game',
         label: 'START GAME',
         action: () => this.beginChamber()
+      },
+      {
+        id: 'dev-start',
+        label: 'DEV',
+        action: () => this.beginDevChamber()
       }
     ];
   }
@@ -245,6 +250,14 @@ export class BootScene extends Phaser.Scene {
   }
 
   beginChamber() {
+    this.beginScene('Chamber01Scene');
+  }
+
+  beginDevChamber() {
+    this.beginScene('Sector03Chamber01Scene');
+  }
+
+  beginScene(targetSceneKey) {
     if (this.hasStarted || this.isStarting) {
       return;
     }
@@ -264,6 +277,7 @@ export class BootScene extends Phaser.Scene {
     this.time.delayedCall(TITLE_SCENE_AUDIO.startConfirmDelayMs, () => {
       this.hasStarted = true;
       const bootTargetScene = DEBUG_BOOT_OVERRIDES.startScene
+        ?? targetSceneKey
         ?? (DEBUG_BOOT_OVERRIDES.skipTitleAndBootSceneDirect ? 'Sector03Chamber01Scene' : 'Chamber01Scene');
       this.scene.start(bootTargetScene);
     });

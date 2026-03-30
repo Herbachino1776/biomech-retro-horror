@@ -56,7 +56,13 @@ export class Player {
     this.body.setSize(config.body.width / scaleX, config.body.height / scaleY);
     this.body.setOffset(config.body.offsetX / scaleX, config.body.offsetY / scaleY);
 
-    this.attackHitbox = scene.add.zone(x + 26, y, 38, 30);
+    const attackHitboxConfig = this.config.attackHitbox ?? {};
+    this.attackHitbox = scene.add.zone(
+      x + (attackHitboxConfig.forwardOffset ?? 42),
+      y + (attackHitboxConfig.yOffset ?? 2),
+      attackHitboxConfig.width ?? 50,
+      attackHitboxConfig.height ?? 34
+    );
     scene.physics.add.existing(this.attackHitbox);
     this.attackHitbox.body.allowGravity = false;
     this.attackHitbox.body.moves = false;
@@ -467,9 +473,10 @@ export class Player {
   }
 
   updateAttackHitbox() {
-    const strikeY = this.body.y + this.body.height - 14;
-    const offsetX = this.facing * 28;
-    this.attackHitbox.setPosition(this.sprite.x + offsetX, strikeY);
+    const attackHitboxConfig = this.config.attackHitbox ?? {};
+    const strikeY = this.body.center.y + (attackHitboxConfig.yOffset ?? 2);
+    const offsetX = this.facing * (attackHitboxConfig.forwardOffset ?? 42);
+    this.attackHitbox.setPosition(this.body.center.x + offsetX, strikeY);
     this.attackHitbox.body.updateFromGameObject();
   }
 

@@ -15,6 +15,12 @@ export const PLAYER = {
   attackMoveSpeedMultiplier: 0.3,
   jumpVelocity: -430,
   body: { width: 30, height: 54, offsetX: 9, offsetY: 4 },
+  attackHitbox: {
+    width: 50,
+    height: 34,
+    forwardOffset: 42,
+    yOffset: 2
+  },
   attackCooldownMs: 520,
   attackStartupMs: 110,
   attackActiveMs: 100,
@@ -54,7 +60,7 @@ export const SKITTER = {
   lungeJumpVelocity: -130,
   recoilVelocityX: 170,
   recoilVelocityY: -110,
-  body: { width: 42, height: 26, offsetX: 4, offsetY: 14 },
+  body: { width: 38, height: 26, offsetX: 6, offsetY: 14 },
   patrolDistance: 150,
   awakenPlayerX: 760,
   wakeDelayMs: 700,

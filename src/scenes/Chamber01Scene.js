@@ -54,10 +54,10 @@ const BLIND_CANTOR = {
   hurtRecoverMs: 240,
   hurtRecoilVelocityX: 120,
   hurtRecoilVelocityY: -64,
-  spawnX: 1890,
+  spawnX: 1980,
   spawnY: WORLD.floorY,
-  activationX: 1680,
-  arenaStartX: 1650,
+  activationX: 1640,
+  arenaStartX: 1600,
   body: { width: 90, height: 134, offsetX: 98, offsetY: 78 },
   textureKey: ASSET_KEYS.sector03Chamber02EnemyBasicBlindCantor,
   audioProfile: 'miniboss',
@@ -580,6 +580,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.boss.sprite.setVisible(true);
     this.boss.body.enable = true;
     this.boss.setActive(true);
+    this.boss.recordContactDamage(this.time.now + 320);
     this.gateSigil?.setAlpha(0.16);
     this.gateArt?.setAlpha(0.56).setTint(0xaa9881);
     this.gateFrame?.setAlpha(0.48).setTint(0xa5927a);
