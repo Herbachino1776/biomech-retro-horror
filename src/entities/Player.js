@@ -240,6 +240,7 @@ export class Player {
 
   updateVisuals(time) {
     this.applyFacingVisual();
+    this.applyAirborneTiltVisual();
     this.updateWeaponAttachment();
 
     if (this.usingConceptSprite) {
@@ -257,6 +258,25 @@ export class Player {
     }
 
     this.setVisualTint(0xb8aa92);
+  }
+
+  applyAirborneTiltVisual() {
+    if (this.isDead) {
+      this.sprite.setAngle(0);
+      return;
+    }
+
+    const inAttackCommit = this.attackPhase === 'startup' || this.attackPhase === 'active' || this.attackPhase === 'recovery';
+    if (inAttackCommit || this.body.blocked.down) {
+      this.sprite.setAngle(0);
+      return;
+    }
+
+    const airborneVisualConfig = this.config.visual ?? {};
+    const ascendTiltDeg = airborneVisualConfig.airborneTiltAscendDeg ?? 7;
+    const fallTiltDeg = airborneVisualConfig.airborneTiltFallDeg ?? 9;
+    const tiltDeg = this.body.velocity.y < 0 ? ascendTiltDeg : fallTiltDeg;
+    this.sprite.setAngle(tiltDeg * this.facing);
   }
 
 

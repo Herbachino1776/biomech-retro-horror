@@ -14,6 +14,10 @@ export const PLAYER = {
   moveDeceleration: 2600,
   attackMoveSpeedMultiplier: 0.3,
   jumpVelocity: -430,
+  visual: {
+    airborneTiltAscendDeg: 7,
+    airborneTiltFallDeg: 9
+  },
   body: { width: 30, height: 54, offsetX: 9, offsetY: 4 },
   attackHitbox: {
     width: 56,
