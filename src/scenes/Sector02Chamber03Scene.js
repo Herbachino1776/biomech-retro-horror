@@ -378,6 +378,8 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.integrityRewardTracker = new Set();
     this.currentRiteFinisherTarget = null;
     this.resolutionLockActive = false;
+    this.deathCameraFocusTween = null;
+    this.deathCameraRestoreTween = null;
   }
 
   create() {
@@ -702,6 +704,8 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       this.enemyProjectiles.forEach((projectile) => projectile.destroy());
       this.enemies.forEach((enemy) => enemy.projectileTelegraph?.destroy?.());
       this.sorrowEngine?.destroyCombatTelegraphs?.();
+      this.deathCameraFocusTween?.remove();
+      this.deathCameraRestoreTween?.remove();
       this.majorEncounterResolution?.teardown();
     });
   }
@@ -1288,10 +1292,11 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
           ease: 'Sine.inOut'
         });
         this.sorrowEngine.projectileTelegraph?.setVisible(false);
+        this.focusCameraOnSorrowEngineDeathPayoff();
         this.hud.setBossBarState({
           visible: true,
           name: KILN_SORROW_ENGINE.name,
-          subtitle: 'RUPTURE IMMINENT',
+          subtitle: KILN_SORROW_ENGINE.subtitle,
           current: 0,
           max: this.sorrowEngine.maxHealth,
           telegraph: 1,
@@ -1317,7 +1322,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
             this.hud.setBossBarState({
               visible: true,
               name: KILN_SORROW_ENGINE.name,
-              subtitle: 'CORE LITURGY COLLAPSING',
+              subtitle: KILN_SORROW_ENGINE.subtitle,
               current: 0,
               max: this.sorrowEngine.maxHealth,
               telegraph: 1,
@@ -1328,7 +1333,6 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
         {
           atMs: KILN_SORROW_ENGINE.deathPayoff.collapseCueDelayMs,
           run: () => {
-            this.forwardPrompt?.setText('JUDGEMENT GATE STRAINING');
             this.forwardPrompt?.setVisible(true);
             this.cameras.main.shake(480, 0.012, true);
           }
@@ -1347,7 +1351,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
               x: this.sorrowEngine.sprite.x,
               groundY: WORLD.floorY + 2,
               depth: this.sorrowEngine.sprite.depth,
-              size: 'large'
+              size: 'sector3Boss'
             });
             this.sorrowEngine.sprite.setVisible(false);
             this.sorrowEngineDeathFinished = true;
@@ -1372,7 +1376,42 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
       ],
       onComplete: () => {
         this.sorrowEngineDeathSequenceActive = false;
+        this.restoreCameraAfterSorrowEngineDeathPayoff();
       }
+    });
+  }
+
+  focusCameraOnSorrowEngineDeathPayoff() {
+    this.deathCameraFocusTween?.remove();
+    this.deathCameraRestoreTween?.remove();
+    this.cameras.main.startFollow(this.sorrowEngine.sprite, true, 0.12, 0.12, -14, -24);
+    this.deathCameraFocusTween = this.tweens.add({
+      targets: this.cameras.main,
+      zoom: this.cameras.main.zoom * 1.2,
+      duration: 260,
+      ease: 'Sine.easeOut'
+    });
+  }
+
+  restoreCameraAfterSorrowEngineDeathPayoff() {
+    this.deathCameraFocusTween?.remove();
+    this.deathCameraRestoreTween?.remove();
+    this.cameras.main.startFollow(
+      this.player.sprite,
+      true,
+      KILN_OF_JUDGEMENT_BOOTSTRAP.cameraLerp.x,
+      KILN_OF_JUDGEMENT_BOOTSTRAP.cameraLerp.y,
+      this.mobileControls.enabled && this.scale.height >= this.scale.width
+        ? KILN_OF_JUDGEMENT_BOOTSTRAP.portraitFollowOffsetX
+        : KILN_OF_JUDGEMENT_BOOTSTRAP.desktopFollowOffsetX,
+      0
+    );
+    this.deathCameraRestoreTween = this.tweens.add({
+      targets: this.cameras.main,
+      zoom: this.mobileControls.enabled && this.scale.height >= this.scale.width ? PORTRAIT_LAYOUT.portraitZoom : PORTRAIT_LAYOUT.desktopZoom,
+      duration: 280,
+      ease: 'Sine.easeInOut',
+      onComplete: () => this.applyResponsiveLayout()
     });
   }
 

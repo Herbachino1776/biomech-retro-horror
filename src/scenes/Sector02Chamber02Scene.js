@@ -421,6 +421,8 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.bossPitReturnStagingMask = null;
     this.isEntryStagingActive = false;
     this.resolutionLockActive = false;
+    this.deathCameraFocusTween = null;
+    this.deathCameraRestoreTween = null;
   }
 
   create() {
@@ -872,6 +874,8 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.enemyProjectiles.forEach((projectile) => projectile.destroy());
       this.enemies.forEach((enemy) => enemy.projectileTelegraph?.destroy?.());
       this.pressureDeacon?.destroyCombatTelegraphs?.();
+      this.deathCameraFocusTween?.remove();
+      this.deathCameraRestoreTween?.remove();
       this.majorEncounterResolution?.teardown();
     });
   }
@@ -1298,21 +1302,70 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
         this.resolutionLockActive = locked;
       },
       onStart: () => {
-        grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber02-pressure-deacon-miniboss');
         target.sprite.y = WORLD.floorY + 2 - target.sprite.displayHeight * (1 - target.sprite.originY);
-        this.triggerSector02BlackOilPayoff(target, COMPRESSION_VAULTS_PRESSURE_DEACON.blowout);
-        spawnEnemyCorpseRemains(this, {
-          x: target.sprite.x,
-          groundY: WORLD.floorY + 2,
-          depth: target.sprite.depth,
-          size: 'large'
-        });
-        target.sprite.setVisible(false).setAlpha(0);
-        target.body?.setEnable(false);
-        target.setActive(false);
-        this.cameras.main.shake(560, 0.0078, true);
+        this.focusCameraOnBossPayoff(target.sprite);
+        this.cameras.main.shake(2200, 0.0096, true);
       },
-      stages: [{ atMs: 420, run: () => this.unlockForwardPath() }]
+      stages: [
+        {
+          atMs: 1680,
+          run: () => {
+            this.audioDirector?.playBanishmentSting();
+            this.triggerSector02BlackOilPayoff(target, COMPRESSION_VAULTS_PRESSURE_DEACON.blowout);
+            spawnEnemyCorpseRemains(this, {
+              x: target.sprite.x,
+              groundY: WORLD.floorY + 2,
+              depth: target.sprite.depth,
+              size: 'sector3Boss'
+            });
+            target.sprite.setVisible(false).setAlpha(0);
+            target.body?.setEnable(false);
+            target.setActive(false);
+            grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'sector02-chamber02-pressure-deacon-miniboss');
+          }
+        },
+        {
+          atMs: 2420,
+          run: () => {
+            this.restoreCameraAfterBossPayoff();
+            this.unlockForwardPath();
+          }
+        }
+      ]
+    });
+  }
+
+  focusCameraOnBossPayoff(targetSprite) {
+    this.deathCameraFocusTween?.remove();
+    this.deathCameraRestoreTween?.remove();
+    this.cameras.main.startFollow(targetSprite, true, 0.12, 0.12, -12, -22);
+    this.deathCameraFocusTween = this.tweens.add({
+      targets: this.cameras.main,
+      zoom: this.cameras.main.zoom * 1.2,
+      duration: 260,
+      ease: 'Sine.easeOut'
+    });
+  }
+
+  restoreCameraAfterBossPayoff() {
+    this.deathCameraFocusTween?.remove();
+    this.deathCameraRestoreTween?.remove();
+    this.cameras.main.startFollow(
+      this.player.sprite,
+      true,
+      COMPRESSION_VAULTS_BOOTSTRAP.cameraLerp.x,
+      COMPRESSION_VAULTS_BOOTSTRAP.cameraLerp.y,
+      this.mobileControls.enabled && this.scale.height >= this.scale.width
+        ? COMPRESSION_VAULTS_BOOTSTRAP.portraitFollowOffsetX
+        : COMPRESSION_VAULTS_BOOTSTRAP.desktopFollowOffsetX,
+      0
+    );
+    this.deathCameraRestoreTween = this.tweens.add({
+      targets: this.cameras.main,
+      zoom: this.mobileControls.enabled && this.scale.height >= this.scale.width ? PORTRAIT_LAYOUT.portraitZoom : PORTRAIT_LAYOUT.desktopZoom,
+      duration: 280,
+      ease: 'Sine.easeInOut',
+      onComplete: () => this.applyResponsiveLayout()
     });
   }
 
@@ -1566,7 +1619,7 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
       this.forwardBarrier.body.updateFromGameObject?.();
     }
     this.forwardPrompt?.setVisible(false);
-    this.processionalLabel?.setText('PRESSURE DEACON NULLIFIED\nCHAMBER 3 DESCENT MARKED');
+    this.processionalLabel?.setVisible(false);
   }
 
   refreshForwardThresholdPresence() {

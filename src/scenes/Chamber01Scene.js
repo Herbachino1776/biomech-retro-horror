@@ -365,22 +365,6 @@ export class Chamber01Scene extends Phaser.Scene {
     this.boss.sprite.setVisible(false);
     this.boss.body.enable = false;
 
-    this.bossRewardText = this.add
-      .text(this.scale.width / 2, this.scale.height * 0.28, 'BLIND CANTOR\nBANISHED', {
-        fontFamily: 'Georgia, Times, serif',
-        fontSize: '42px',
-        fontStyle: 'bold',
-        align: 'center',
-        color: '#f4efe5',
-        stroke: '#201514',
-        strokeThickness: 8,
-        shadow: { offsetX: 0, offsetY: 6, color: '#090404', blur: 10, fill: true }
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(34)
-      .setAlpha(0)
-      .setVisible(false);
   }
 
   createLoreZones() {
@@ -539,7 +523,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.hud.setBossBarState({
       visible: this.bossEncounterStarted && (!this.bossDefeated || this.bossCeremonyBossBarActive),
       name: BLIND_CANTOR.name,
-      subtitle: this.bossCeremonyBossBarActive ? 'CEREMONIAL BANISHMENT' : BLIND_CANTOR.subtitle,
+      subtitle: BLIND_CANTOR.subtitle,
       current: this.bossCeremonyBossBarActive ? 0 : this.boss.health,
       max: this.boss.maxHealth,
       telegraph: this.bossCeremonyBossBarActive ? 1 : this.boss.getTelegraphProgress(time),
@@ -713,7 +697,6 @@ export class Chamber01Scene extends Phaser.Scene {
               this.startBossExplosionFade();
             });
             this.audioDirector?.playBanishmentSting();
-            this.bossRewardText?.setText('BLIND CANTOR\nBANISHED');
             grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, BLIND_CANTOR.encounterId);
             this.audioDirector?.playGateUnlock();
             this.updateGateActivationVisuals();
@@ -741,20 +724,6 @@ export class Chamber01Scene extends Phaser.Scene {
     this.cameras.main.shake(BLIND_CANTOR.resolution.preExplosionShakeMs, BLIND_CANTOR.resolution.preExplosionShakeIntensity, true);
     this.time.delayedCall(210, () => this.cameras.main.shake(1200, BLIND_CANTOR.resolution.preExplosionShakeIntensity * 0.82, true));
     this.startBossVictoryGoreFountain();
-    this.bossRewardText?.setText('CEREMONIAL\nBANISHMENT');
-
-    if (this.bossRewardText) {
-      this.tweens.killTweensOf(this.bossRewardText);
-      this.bossRewardText.setVisible(true).setAlpha(0).setScale(0.92);
-      this.tweens.add({
-        targets: this.bossRewardText,
-        alpha: 1,
-        scaleX: 1,
-        scaleY: 1,
-        duration: 330,
-        ease: 'Cubic.easeOut'
-      });
-    }
   }
 
   focusCameraOnBoss() {
@@ -884,17 +853,6 @@ export class Chamber01Scene extends Phaser.Scene {
     this.bossCeremonyBossBarActive = false;
     this.hud.setBossBarState({ visible: false });
     this.isBossCeremonyActive = false;
-
-    if (this.bossRewardText) {
-      this.tweens.killTweensOf(this.bossRewardText);
-      this.tweens.add({
-        targets: this.bossRewardText,
-        alpha: 0,
-        duration: 300,
-        ease: 'Cubic.easeIn',
-        onComplete: () => this.bossRewardText.setVisible(false)
-      });
-    }
 
     if (this.cameraPreCeremonyZoom) {
       this.tweens.add({
