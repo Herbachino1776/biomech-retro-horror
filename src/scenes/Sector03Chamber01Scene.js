@@ -55,8 +55,8 @@ const FAILED_SAINT = {
   patrolDistance: 128,
   presentation: {
     alpha: 0.98,
-    display: { width: 184, height: 152 },
-    origin: { x: 0.52, y: 0.95 },
+    display: { width: 226, height: 188 },
+    origin: { x: 0.52, y: 0.998 },
     stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 }
   },
   eyeGlowColor: 0xe4d6b4,
@@ -77,7 +77,7 @@ const BIRD_JUDGE = {
   patrolDistance: 136,
   presentation: {
     ...FAILED_SAINT.presentation,
-    display: { width: 188, height: 154 }
+    display: { width: 232, height: 192 }
   },
   eyeGlowColor: 0xe7dfc6,
   corpseRemainsProfile: 'sector3Basic'
@@ -107,8 +107,8 @@ const WITHHELD_VESSEL = {
   body: { width: 74, height: 44, offsetX: 28, offsetY: 90 },
   presentation: {
     alpha: 0.98,
-    display: { width: 292, height: 226 },
-    origin: { x: 0.52, y: 0.975 },
+    display: { width: 346, height: 268 },
+    origin: { x: 0.52, y: 0.992 },
     stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.46 }
   },
   eyeGlowColor: 0xf0e0be,

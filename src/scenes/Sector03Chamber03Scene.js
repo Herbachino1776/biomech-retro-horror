@@ -35,25 +35,25 @@ const ENEMIES = {
   barrierSinger: {
     ...SKITTER,
     textureKey: ASSET_KEYS.sector03Chamber03EnemyBasicBarrierSinger,
-    presentation: { alpha: 0.98, display: { width: 184, height: 152 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    presentation: { alpha: 0.98, display: { width: 226, height: 188 }, origin: { x: 0.52, y: 0.998 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
     corpseRemainsProfile: 'sector3Basic'
   },
   nullClaimant: {
     ...SKITTER,
     textureKey: ASSET_KEYS.sector03Chamber03EnemyBasicNullClaimant,
-    presentation: { alpha: 0.98, display: { width: 184, height: 152 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    presentation: { alpha: 0.98, display: { width: 226, height: 188 }, origin: { x: 0.52, y: 0.998 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
     corpseRemainsProfile: 'sector3Basic'
   },
   refusalWarden: {
     ...SKITTER,
     textureKey: ASSET_KEYS.sector03Chamber03EnemyBasicRefusalWarden,
-    presentation: { alpha: 0.98, display: { width: 188, height: 154 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    presentation: { alpha: 0.98, display: { width: 232, height: 192 }, origin: { x: 0.52, y: 0.998 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
     corpseRemainsProfile: 'sector3Basic'
   },
   sealedArchetype: {
     ...SKITTER,
     textureKey: ASSET_KEYS.sector03Chamber03EnemyBasicSealedArchetype,
-    presentation: { alpha: 0.98, display: { width: 190, height: 154 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    presentation: { alpha: 0.98, display: { width: 236, height: 192 }, origin: { x: 0.52, y: 0.998 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
     corpseRemainsProfile: 'sector3Basic'
   },
   elite: {
@@ -64,7 +64,7 @@ const ENEMIES = {
     aggroRange: 296,
     patrolDistance: 94,
     body: { width: 76, height: 46, offsetX: 30, offsetY: 92 },
-    presentation: { alpha: 0.98, display: { width: 312, height: 242 }, origin: { x: 0.52, y: 0.965 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.46 } },
+    presentation: { alpha: 0.98, display: { width: 366, height: 286 }, origin: { x: 0.52, y: 0.992 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.46 } },
     corpseRemainsProfile: 'sector3Elite'
   }
 };
