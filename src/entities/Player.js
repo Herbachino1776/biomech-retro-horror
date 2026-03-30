@@ -61,6 +61,19 @@ export class Player {
     this.attackHitbox.body.allowGravity = false;
     this.attackHitbox.body.moves = false;
     this.attackHitbox.body.enable = false;
+
+    this.weaponSwingTween = null;
+    this.weaponSprite = this.createWeaponSprite(x, y + visualYOffset);
+    const restingPose = this.config.weaponVisual?.restingPose;
+    this.weaponPoseState = restingPose
+      ? {
+          offsetX: restingPose.offsetX,
+          offsetY: restingPose.offsetY,
+          rotationDeg: restingPose.rotationDeg,
+          depthOffset: restingPose.depthOffset ?? -1
+        }
+      : null;
+    this.updateWeaponAttachment();
   }
 
   update(time, input) {
@@ -116,6 +129,7 @@ export class Player {
     this.attackPhase = 'startup';
     this.attackHitbox.body.enable = false;
     this.setVisualTint(0x6f8c59);
+    this.playWeaponSwing();
     this.scene.audioDirector?.playPlayerAttack();
   }
 
@@ -150,6 +164,7 @@ export class Player {
     this.attackPhase = 'idle';
     this.attackActive = false;
     this.attackHitbox.body.enable = false;
+    this.resetWeaponToRestPose();
   }
 
   receiveDamage(amount, time) {
@@ -218,6 +233,8 @@ export class Player {
   }
 
   updateVisuals(time) {
+    this.updateWeaponAttachment();
+
     if (this.usingConceptSprite) {
       this.updateSpriteAnimationState();
     }
@@ -238,6 +255,96 @@ export class Player {
     }
 
     this.setVisualTint(0xb8aa92);
+  }
+
+  createWeaponSprite(x, y) {
+    if (!this.scene.textures.exists(ASSET_KEYS.playerWeaponHammer01)) {
+      return null;
+    }
+
+    const display = this.config.weaponVisual?.display ?? { width: 72, height: 72 };
+    return this.scene.add
+      .image(x, y, ASSET_KEYS.playerWeaponHammer01)
+      .setOrigin(0.5, 0.85)
+      .setDisplaySize(display.width, display.height)
+      .setDepth((this.sprite.depth ?? 6) - 1);
+  }
+
+  playWeaponSwing() {
+    if (!this.weaponSprite || !this.weaponPoseState) {
+      return;
+    }
+
+    this.weaponSwingTween?.stop();
+    this.weaponSwingTween = this.scene.tweens.timeline({
+      targets: this.weaponPoseState,
+      tweens: [
+        this.buildWeaponTweenStep(this.config.weaponVisual?.swingPose?.windup, 1),
+        this.buildWeaponTweenStep(this.config.weaponVisual?.swingPose?.downswing, 2),
+        this.buildWeaponTweenStep(this.config.weaponVisual?.swingPose?.impactSettle, 1),
+        this.buildWeaponTweenStep(this.config.weaponVisual?.swingPose?.recover, -1)
+      ],
+      onUpdate: () => {
+        this.applyWeaponPoseState();
+      },
+      onComplete: () => {
+        this.weaponSwingTween = null;
+        this.resetWeaponToRestPose();
+      }
+    });
+  }
+
+  buildWeaponTweenStep(pose, depthOffset) {
+    const resolvedPose = pose ?? this.config.weaponVisual?.restingPose;
+
+    return {
+      offsetX: resolvedPose?.offsetX ?? 0,
+      offsetY: resolvedPose?.offsetY ?? 0,
+      rotationDeg: resolvedPose?.rotationDeg ?? 0,
+      depthOffset,
+      duration: resolvedPose?.durationMs ?? 90,
+      ease: 'Sine.InOut'
+    };
+  }
+
+  updateWeaponAttachment() {
+    if (!this.weaponSprite || !this.weaponPoseState) {
+      return;
+    }
+
+    if (this.attackPhase === 'idle') {
+      const restPose = this.config.weaponVisual?.restingPose;
+      this.weaponPoseState.offsetX = restPose?.offsetX ?? this.weaponPoseState.offsetX;
+      this.weaponPoseState.offsetY = restPose?.offsetY ?? this.weaponPoseState.offsetY;
+      this.weaponPoseState.rotationDeg = restPose?.rotationDeg ?? this.weaponPoseState.rotationDeg;
+      this.weaponPoseState.depthOffset = restPose?.depthOffset ?? -1;
+    }
+
+    this.applyWeaponPoseState();
+  }
+
+  resetWeaponToRestPose() {
+    if (!this.weaponSprite || !this.weaponPoseState || this.attackPhase !== 'idle') {
+      return;
+    }
+
+    const restPose = this.config.weaponVisual?.restingPose;
+    this.weaponPoseState.offsetX = restPose?.offsetX ?? this.weaponPoseState.offsetX;
+    this.weaponPoseState.offsetY = restPose?.offsetY ?? this.weaponPoseState.offsetY;
+    this.weaponPoseState.rotationDeg = restPose?.rotationDeg ?? this.weaponPoseState.rotationDeg;
+    this.weaponPoseState.depthOffset = restPose?.depthOffset ?? -1;
+    this.applyWeaponPoseState();
+  }
+
+  applyWeaponPoseState() {
+    if (!this.weaponSprite || !this.weaponPoseState) {
+      return;
+    }
+
+    const facing = this.facing >= 0 ? 1 : -1;
+    this.weaponSprite.setPosition(this.sprite.x + this.weaponPoseState.offsetX * facing, this.sprite.y + this.weaponPoseState.offsetY);
+    this.weaponSprite.setRotation(Phaser.Math.DegToRad(this.weaponPoseState.rotationDeg * facing));
+    this.weaponSprite.setDepth((this.sprite.depth ?? 6) + this.weaponPoseState.depthOffset);
   }
 
   updateSpriteAnimationState() {
