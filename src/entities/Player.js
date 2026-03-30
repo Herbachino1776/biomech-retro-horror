@@ -6,10 +6,12 @@ import { vesselIntegrityState } from '../systems/VesselIntegrityState.js';
 
 const PLAYER_WALK_ANIMATION_KEY = 'player-walk';
 const PLAYER_IDLE_ANIMATION_KEY = 'player-idle';
+const PLAYER_ATTACK_ANIMATION_KEY = 'player-attack-hammer';
 const PLAYER_WALK_FPS = 8;
 const PLAYER_WALK_MIN_SPEED = 36;
 const PLAYER_IDLE_FPS = 5;
 const PLAYER_IDLE_MAX_SPEED = 20;
+const PLAYER_ATTACK_FPS = 12;
 
 export class Player {
   constructor(scene, x, y, config) {
@@ -22,6 +24,8 @@ export class Player {
     this.attackActive = false;
     this.attackPhase = 'idle';
     this.attackId = 0;
+    this.attackAnimationId = 0;
+    this.lastPlayedAttackAnimationId = 0;
     this.lastAttackTime = -Infinity;
     this.lastHitTime = -Infinity;
     this.lastFootstepAt = -Infinity;
@@ -44,6 +48,7 @@ export class Player {
     if (this.usingConceptSprite) {
       this.registerWalkAnimation();
       this.registerIdleAnimation();
+      this.registerAttackAnimation();
     }
     scene.physics.add.existing(this.sprite);
 
@@ -112,6 +117,7 @@ export class Player {
 
   startAttack(time) {
     this.lastAttackTime = time;
+    this.attackAnimationId += 1;
     this.attackActive = false;
     this.attackPhase = 'startup';
     this.attackHitbox.body.enable = false;
@@ -250,6 +256,14 @@ export class Player {
     const canPlayWalk = canAnimate && isMovingHorizontally;
     const canPlayIdle = canAnimate && isNearlyStationary;
 
+    if (!this.isDead && isGrounded && inAttackCommit) {
+      if (this.lastPlayedAttackAnimationId !== this.attackAnimationId) {
+        this.sprite.play(PLAYER_ATTACK_ANIMATION_KEY, true);
+        this.lastPlayedAttackAnimationId = this.attackAnimationId;
+      }
+      return;
+    }
+
     if (canPlayWalk) {
       if (this.sprite.anims.currentAnim?.key !== PLAYER_WALK_ANIMATION_KEY || !this.sprite.anims.isPlaying) {
         this.sprite.play(PLAYER_WALK_ANIMATION_KEY, true);
@@ -290,6 +304,19 @@ export class Player {
       frames: this.scene.anims.generateFrameNumbers(ASSET_KEYS.playerIdle, { start: 0, end: 4 }),
       frameRate: PLAYER_IDLE_FPS,
       repeat: -1
+    });
+  }
+
+  registerAttackAnimation() {
+    if (this.scene.anims.exists(PLAYER_ATTACK_ANIMATION_KEY)) {
+      return;
+    }
+
+    this.scene.anims.create({
+      key: PLAYER_ATTACK_ANIMATION_KEY,
+      frames: this.scene.anims.generateFrameNumbers(ASSET_KEYS.playerAttackHammerStrip05, { start: 0, end: 4 }),
+      frameRate: PLAYER_ATTACK_FPS,
+      repeat: 0
     });
   }
 

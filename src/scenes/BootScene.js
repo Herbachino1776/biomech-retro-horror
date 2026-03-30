@@ -157,6 +157,11 @@ export class BootScene extends Phaser.Scene {
       frameHeight: 1335,
       endFrame: 4
     });
+    this.load.spritesheet(ASSET_KEYS.playerAttackHammerStrip05, ASSET_URLS[ASSET_KEYS.playerAttackHammerStrip05], {
+      frameWidth: 520,
+      frameHeight: 760,
+      endFrame: 4
+    });
     this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
     this.load.image(ASSET_KEYS.laughingEngine, ASSET_URLS[ASSET_KEYS.laughingEngine]);
