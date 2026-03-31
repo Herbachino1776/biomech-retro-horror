@@ -25,6 +25,10 @@ export const PLAYER = {
   attackStartupMs: 110,
   attackActiveMs: 100,
   attackRecoveryMs: 210,
+  airborneVisual: {
+    jumpTiltDeg: 6,
+    fallTiltDeg: 9
+  },
   invulnMs: 550,
   contactDamage: 1,
   startX: 120,
@@ -32,6 +36,7 @@ export const PLAYER = {
   weaponVisual: {
     display: { width: 58, height: 58 },
     restingPose: { offsetX: 16, offsetY: -84, rotationDeg: 18, depthOffset: -1 },
+    airborneAttackPoseAdjust: { offsetX: 8, offsetY: -4, rotationDeg: 10 },
     swingPose: {
       windup: { offsetX: 10, offsetY: -118, rotationDeg: -116, durationMs: 70 },
       downswing: { offsetX: 36, offsetY: -74, rotationDeg: 72, durationMs: 55 },
