@@ -34,6 +34,11 @@ const CHAMBER = {
   gateX: WORLD.width - 82
 };
 
+const CHAMBER_ENEMY_FLOOR = {
+  bodyBottomY: WORLD.floorY + 2,
+  markerY: WORLD.floorY - 8
+};
+
 const BLIND_CANTOR = {
   encounterId: 'chamber01-blind-cantor-major-encounter',
   name: 'THE BLIND CANTOR',
@@ -82,40 +87,40 @@ const BLIND_CANTOR = {
   }
 };
 
-const POCKET_CONFIGS = [
+const CHAMBER01_ENCOUNTERS = [
   {
-    id: 'corridor-wall-pocket-01',
-    zoneX: 740,
+    id: 'corridor-run-a',
+    zoneX: 780,
     zoneY: WORLD.floorY - 76,
-    zoneWidth: 420,
+    zoneWidth: 380,
     zoneHeight: 236,
     enemies: [
-      { x: 610, variant: 'basic' },
-      { x: 790, variant: 'basic' }
+      { x: 650, variant: 'basic' },
+      { x: 840, variant: 'basic' }
     ]
   },
   {
-    id: 'corridor-wall-pocket-02',
-    zoneX: 1160,
+    id: 'corridor-run-b',
+    zoneX: 1180,
     zoneY: WORLD.floorY - 76,
-    zoneWidth: 520,
+    zoneWidth: 460,
     zoneHeight: 236,
     enemies: [
-      { x: 980, variant: 'basic' },
-      { x: 1160, variant: 'basic' },
+      { x: 1020, variant: 'basic' },
+      { x: 1190, variant: 'basic' },
       { x: 1320, variant: 'basic' }
     ]
   },
   {
-    id: 'opened-reveal-domain',
-    zoneX: 1540,
+    id: 'revealed-sanctum',
+    zoneX: 1550,
     zoneY: WORLD.floorY - 82,
-    zoneWidth: 660,
+    zoneWidth: 640,
     zoneHeight: 248,
     enemies: [
-      { x: 1400, variant: 'basic' },
-      { x: 1540, variant: 'elite' },
-      { x: 1680, variant: 'basic' }
+      { x: 1440, variant: 'basic' },
+      { x: 1580, variant: 'elite' },
+      { x: 1710, variant: 'basic' }
     ]
   }
 ];
@@ -189,7 +194,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.252 });
 
     this.createPlayer();
-    this.createEncounterPockets();
+    this.createChamber01Encounters();
     this.createBoss();
     this.createLoreZones();
     this.createGate();
@@ -318,23 +323,30 @@ export class Chamber01Scene extends Phaser.Scene {
     this.physics.add.collider(this.player.sprite, this.platforms);
   }
 
-  createEncounterPockets() {
+  createChamber01Encounters() {
     this.enemies = [];
-    this.encounterPockets = POCKET_CONFIGS.map((pocketConfig) => {
-      const zone = this.add.zone(pocketConfig.zoneX, pocketConfig.zoneY, pocketConfig.zoneWidth, pocketConfig.zoneHeight).setOrigin(0.5);
+    this.encounterPockets = CHAMBER01_ENCOUNTERS.map((encounterConfig) => {
+      const zone = this.add.zone(
+        encounterConfig.zoneX,
+        encounterConfig.zoneY,
+        encounterConfig.zoneWidth,
+        encounterConfig.zoneHeight
+      ).setOrigin(0.5);
       this.physics.add.existing(zone, true);
       const markerShadow = this.add
-        .ellipse(pocketConfig.zoneX, WORLD.floorY - 5, pocketConfig.zoneWidth * 0.58, 74, 0x050403, 0.08)
+        .ellipse(encounterConfig.zoneX, CHAMBER_ENEMY_FLOOR.markerY, encounterConfig.zoneWidth * 0.58, 74, 0x050403, 0.08)
         .setDepth(-6.04);
 
-      const enemies = pocketConfig.enemies.map((enemyConfig) => {
+      const enemies = encounterConfig.enemies.map((enemyConfig) => {
         const config = ENEMY_VARIANTS[enemyConfig.variant] ?? ENEMY_VARIANTS.basic;
         const enemy = new SkitterServitor(this, enemyConfig.x, PLAYER.startY, {
           ...config,
           textureKey: ASSET_KEYS.skitter
         });
         enemy.awakened = false;
-        enemy.pocketWakeAtTime = null;
+        enemy.awakenAtTime = null;
+        enemy.body.setAllowGravity(false);
+        this.lockEnemyToChamberFloor(enemy);
 
         this.physics.add.collider(enemy.sprite, this.platforms);
         this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, () => this.handlePlayerHitEnemy(enemy));
@@ -345,7 +357,7 @@ export class Chamber01Scene extends Phaser.Scene {
       });
 
       return {
-        ...pocketConfig,
+        ...encounterConfig,
         zone,
         markerShadow,
         enemies,
@@ -363,6 +375,8 @@ export class Chamber01Scene extends Phaser.Scene {
     this.boss.setActive(false);
     this.boss.sprite.setVisible(false);
     this.boss.body.enable = false;
+    this.boss.body.setAllowGravity(false);
+    this.lockEnemyToChamberFloor(this.boss);
 
   }
 
@@ -505,11 +519,13 @@ export class Chamber01Scene extends Phaser.Scene {
     };
 
     this.player.update(time, input);
-    this.updateEncounterPockets(time);
+    this.updateChamber01Encounters(time);
+    this.applyChamberEnemyGrounding(this.enemies);
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
 
     this.tryStartBossEncounter();
     this.boss.update(time, this.player.sprite);
+    this.applyChamberEnemyGrounding([this.boss]);
 
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
@@ -530,7 +546,7 @@ export class Chamber01Scene extends Phaser.Scene {
     });
   }
 
-  updateEncounterPockets(time) {
+  updateChamber01Encounters(time) {
     this.encounterPockets.forEach((pocket) => {
       let playerInside = false;
       this.physics.overlap(this.player.sprite, pocket.zone, () => {
@@ -541,15 +557,15 @@ export class Chamber01Scene extends Phaser.Scene {
         pocket.activated = true;
         pocket.enemies.forEach((enemy, index) => {
           if (!enemy.dead) {
-            enemy.pocketWakeAtTime = time + index * 80;
+            enemy.awakenAtTime = time + index * 90;
           }
         });
       }
 
       pocket.enemies.forEach((enemy) => {
-        if (!enemy.dead && !enemy.awakened && enemy.pocketWakeAtTime !== null && time >= enemy.pocketWakeAtTime) {
+        if (!enemy.dead && !enemy.awakened && enemy.awakenAtTime !== null && time >= enemy.awakenAtTime) {
           enemy.awakened = true;
-          enemy.pocketWakeAtTime = null;
+          enemy.awakenAtTime = null;
         }
       });
 
@@ -558,6 +574,30 @@ export class Chamber01Scene extends Phaser.Scene {
         pocket.markerShadow.setAlpha(0.024);
       }
     });
+  }
+
+  applyChamberEnemyGrounding(enemyCollection = []) {
+    enemyCollection.forEach((enemy) => {
+      this.lockEnemyToChamberFloor(enemy);
+    });
+  }
+
+  lockEnemyToChamberFloor(enemy) {
+    if (!enemy?.sprite?.active || !enemy?.body?.enable) {
+      return;
+    }
+
+    const body = enemy.body;
+    const bodyTopY = CHAMBER_ENEMY_FLOOR.bodyBottomY - body.height;
+    body.y = bodyTopY;
+    body.prev.y = bodyTopY;
+    body.velocity.y = 0;
+    body.blocked.down = true;
+    body.touching.down = true;
+    body.wasTouching.down = true;
+
+    const displayOriginY = enemy.sprite.displayHeight * enemy.sprite.originY;
+    enemy.sprite.y = body.y - body.offset.y + displayOriginY;
   }
 
   tryStartBossEncounter() {
