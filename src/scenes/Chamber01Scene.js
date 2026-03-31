@@ -455,6 +455,7 @@ export class Chamber01Scene extends Phaser.Scene {
       .setDepth(35)
       .setOrigin(0.5)
       .setVisible(false);
+    this.uiCamera?.ignore(this.restartText);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
