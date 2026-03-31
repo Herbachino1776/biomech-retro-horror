@@ -943,12 +943,6 @@ export class Chamber02Scene extends Phaser.Scene {
       this.launchLoreCutscene(loreEntry.cutsceneId);
     });
 
-    if (typeof window !== 'undefined') {
-      window.setTimeout(() => {
-        this.launchLoreCutscene(loreEntry.cutsceneId);
-      }, 520);
-    }
-
     this.cameras.main.fadeOut(450, 0, 0, 0);
   }
 
@@ -964,6 +958,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.isLoreTransitionActive = false;
     this.mobileControls.setMode('gameplay');
     this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01);
+    this.cameras.main.resetFX();
     this.cameras.main.fadeIn(500, 0, 0, 0);
   }
 
