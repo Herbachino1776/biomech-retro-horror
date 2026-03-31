@@ -268,13 +268,7 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   createPlatforms() {
-    const lanePlatforms = [
-      { x: 460, y: 360, w: 172, h: 16 },
-      { x: 860, y: 344, w: 148, h: 16 },
-      { x: 1210, y: 336, w: 128, h: 16 },
-      { x: 1530, y: 352, w: 154, h: 16 },
-      { x: 1860, y: 334, w: 164, h: 16 }
-    ];
+    const lanePlatforms = [];
 
     lanePlatforms.forEach((platform) => {
       this.createInvisiblePlatform(platform.x, platform.y, platform.w, platform.h);

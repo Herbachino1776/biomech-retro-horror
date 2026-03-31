@@ -5,12 +5,14 @@ class BossPitRunState {
 
   resetForFreshRun() {
     this.completed = {
+      chamber02: false,
       sector02Chamber02: false,
       sector03Chamber01: false,
       sector03Chamber02Pit02: false,
       sector03Chamber02Pit03: false
     };
     this.rewardGranted = {
+      chamber02: false,
       sector02Chamber02: false,
       sector03Chamber01: false,
       sector03Chamber02Pit02: false,
@@ -34,6 +36,22 @@ class BossPitRunState {
 
   markSector02Chamber02BossPitRewardGranted() {
     this.rewardGranted.sector02Chamber02 = true;
+  }
+
+  hasChamber02BossPitCompleted() {
+    return this.completed.chamber02;
+  }
+
+  hasChamber02BossPitRewardGranted() {
+    return this.rewardGranted.chamber02;
+  }
+
+  markChamber02BossPitCompleted() {
+    this.completed.chamber02 = true;
+  }
+
+  markChamber02BossPitRewardGranted() {
+    this.rewardGranted.chamber02 = true;
   }
 
   hasSector03Chamber01BossPitCompleted() {
