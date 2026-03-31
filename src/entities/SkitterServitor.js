@@ -335,7 +335,7 @@ export class SkitterServitor {
     this.nextAttackAllowedAt = time + this.config.attackCooldownMs;
     this.wakeRushUntil = Math.max(this.wakeRushUntil, time + (this.config.hurtReengageRushMs ?? 260));
     this.pursuitCommittedUntil = Math.max(this.pursuitCommittedUntil, time + (this.config.hurtPursuitCommitMs ?? 1100));
-    this.setVisualTint(0x6f8c59);
+    this.setVisualTint(0x7b6155);
     triggerEnemyHitSplatterBurst(this.scene, {
       x: this.sprite.x + this.hurtPushDirection * 8,
       y: (this.body?.center?.y ?? this.sprite.y) - 8,
@@ -485,7 +485,7 @@ export class SkitterServitor {
 
     if (this.combatState === 'hurt') {
       this.sprite.setScale(this.baseScaleX * 1.02, this.baseScaleY * 0.96);
-      this.setVisualTint(0x6f8c59);
+      this.setVisualTint(0x7b6155);
       this.sprite.setAlpha(this.getStateAlpha('hurt', 0.88));
       return;
     }
@@ -503,7 +503,7 @@ export class SkitterServitor {
     this.sprite.setAlpha(this.baseAlpha);
 
     if (time < this.lastDamageFlashTime + 120) {
-      this.setVisualTint(0x6f8c59);
+      this.setVisualTint(0x7b6155);
       return;
     }
 
@@ -551,8 +551,8 @@ export class SkitterServitor {
 
   setVisualTint(color) {
     if (this.usingConceptSprite) {
-      if (color === 0x6f8c59) {
-        this.sprite.setTint(0xb5cb8b);
+      if (color === 0x7b6155) {
+        this.sprite.setTint(0xc9ab9a);
         return;
       }
 

@@ -326,7 +326,7 @@ export class HalfSkullMiniboss {
       scaleX *= 1.01;
       scaleY *= recoilPulse * 0.98;
       angle = this.direction * (takingHit ? 8 : 4);
-      tint = takingHit ? 0xd9efae : 0xb8c987;
+      tint = takingHit ? 0xe4cdbb : 0xc4ab98;
     } else if (this.poiseBroken) {
       const staggerPulse = 0.9 + Math.sin(time / 38) * 0.06;
       scaleX *= 0.88;
@@ -344,7 +344,7 @@ export class HalfSkullMiniboss {
     if (this.usingTexture) {
       this.sprite.setTint(tint);
     } else {
-      this.sprite.setFillStyle(telegraphing ? 0xd6bb7a : takingHit ? 0xc5d89a : COLORS.bone, telegraphing ? 0.96 : 0.94);
+      this.sprite.setFillStyle(telegraphing ? 0xd6bb7a : takingHit ? 0xd8bdaa : COLORS.bone, telegraphing ? 0.96 : 0.94);
     }
 
   }

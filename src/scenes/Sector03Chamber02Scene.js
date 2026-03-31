@@ -275,6 +275,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     this.restartText = this.add.text(this.scale.width / 2, 90, '', {
       fontFamily: 'monospace', fontSize: '22px', color: '#d2c2ac', align: 'center'
     }).setScrollFactor(0).setDepth(35).setOrigin(0.5).setVisible(false);
+    this.uiCamera?.ignore(this.restartText);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);

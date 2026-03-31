@@ -681,6 +681,7 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.mobileControls = new MobileControls(this);
     this.setupMobileUiCamera();
     this.restartText = this.add.text(this.scale.width / 2, 90, '', { fontFamily: 'monospace', fontSize: '22px', color: '#d2c2ac', align: 'center' }).setScrollFactor(0).setDepth(35).setOrigin(0.5).setVisible(false);
+    this.uiCamera?.ignore(this.restartText);
     this.riteFinisherPrompt = this.add.text(this.scale.width / 2, this.scale.height * 0.2, MAJOR_FINISHER.ritePromptText, {
       fontFamily: 'monospace',
       fontSize: '13px',
