@@ -5,6 +5,9 @@ import { triggerEnemyDeathRuptureBurst } from '../systems/EnemyDeathRuptureBurst
 import { triggerEnemyHitSplatterBurst } from '../systems/EnemyHitSplatterBurst.js';
 import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
 
+const DEATH_FADE_DURATION_MS = 180;
+const DEATH_REMAINS_SPAWN_DELAY_MS = 60;
+
 export class SkitterServitor {
   constructor(scene, x, y, config) {
     this.scene = scene;
@@ -29,6 +32,7 @@ export class SkitterServitor {
     this.pursuitCommittedUntil = -Infinity;
     this.wasAwakenedLastUpdate = this.awakened;
     this.wakeRushUntil = -Infinity;
+    this.deathRemainsSpawned = false;
     this.poiseConfig = {
       max: Math.max(1, config.poise?.max ?? 0),
       recoverDelayMs: Math.max(0, config.poise?.recoverDelayMs ?? 1400),
@@ -356,19 +360,25 @@ export class SkitterServitor {
       this.scene.tweens.add({
         targets: this.sprite,
         alpha: 0,
-        duration: 380,
+        duration: DEATH_FADE_DURATION_MS,
         onComplete: () => {
           this.sprite.setVisible(false);
-          const floorPlaneY = this.scene?.player?.sprite?.body?.bottom ?? WORLD.floorY + 2;
-          const remainsSize = this.config.corpseRemainsProfile
-            ?? (this.isElite || this.isTollKeeper || this.config.isElite ? 'elite' : 'small');
-          spawnEnemyCorpseRemains(this.scene, {
-            x: this.sprite.x,
-            groundY: floorPlaneY,
-            depth: this.sprite.depth,
-            size: remainsSize
-          });
         }
+      });
+      this.scene.time.delayedCall(DEATH_REMAINS_SPAWN_DELAY_MS, () => {
+        if (this.deathRemainsSpawned) {
+          return;
+        }
+        this.deathRemainsSpawned = true;
+        const floorPlaneY = this.scene?.player?.sprite?.body?.bottom ?? WORLD.floorY + 2;
+        const remainsSize = this.config.corpseRemainsProfile
+          ?? (this.isElite || this.isTollKeeper || this.config.isElite ? 'elite' : 'small');
+        spawnEnemyCorpseRemains(this.scene, {
+          x: this.sprite.x,
+          groundY: floorPlaneY,
+          depth: this.sprite.depth,
+          size: remainsSize
+        });
       });
       this.scene.tweens.add({
         targets: [this.eyeGlow],
