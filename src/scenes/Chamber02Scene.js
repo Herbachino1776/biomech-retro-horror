@@ -107,18 +107,10 @@ const CHAMBER02_ENCOUNTER_POCKETS = [
   }
 ];
 
-const CHAMBER02_LORE_ENTRY = {
-  id: 'entry-chamber02-ossuary',
-  x: 1970,
-  y: 402,
-  width: 170,
-  height: 180,
-  cutsceneId: 'chamber02-horn-arch'
-};
 
 const CHAMBER02_BOSS_PIT_ALTAR = {
-  x: 960,
-  y: WORLD.floorY - 104,
+  x: 1970,
+  y: 402,
   width: 176,
   height: 176,
   zoneWidth: 196,
@@ -133,13 +125,6 @@ const CHAMBER02_SEGMENTS = [
   { type: 'reveal', x: 2900, width: 980, tint: 0xcab79f, alpha: 0.8 },
   { type: 'threshold', x: 3820, width: 760, tint: 0xcfbca4, alpha: 0.72 }
 ];
-
-const CHAMBER02_POST_LORE_REACTION = {
-  gateTint: 0xbca775,
-  gateAlpha: 0.94,
-  sanctumAuraAlpha: 0.2,
-  ambientVeilAlpha: 0.11
-};
 
 const EXIT_GATE_UNLOCK_AUDIO_DELAY_MS = 2000;
 
@@ -180,17 +165,12 @@ export class Chamber02Scene extends Phaser.Scene {
     this.cameras.main.fadeIn(700, 0, 0, 0);
 
     this.platforms = this.physics.add.staticGroup();
-    this.loreZones = this.physics.add.staticGroup();
-    this.triggeredLoreIds = new Set();
-    this.currentLoreZone = null;
     this.currentBossPitAltar = null;
     this.currentExitGateZone = null;
     this.currentExitThresholdZone = null;
-    this.isLoreTransitionActive = false;
     this.isExitGateTransitionActive = false;
     this.isHandingOffToChamber03 = false;
     this.isRestartingRun = false;
-    this.hasAppliedPostLoreReaction = false;
     this.exitGateUnlockAudioTimer = null;
     this.exitGatePromptText = null;
     this.chamber03StartHasRun = false;
@@ -198,7 +178,6 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
-    this.createLoreZones();
     this.createBossPitAltar();
 
     this.audioDirector = new AudioDirector(this);
@@ -251,10 +230,8 @@ export class Chamber02Scene extends Phaser.Scene {
       portraitLookAheadX: 24
     });
     this.scale.on('resize', this.applyResponsiveLayout, this);
-    this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
-      this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.exitGateUnlockAudioTimer?.remove(false);
       this.exitGateUnlockAudioTimer = null;
       console.log('[Chamber02Scene] shutdown event fired');
@@ -572,7 +549,7 @@ export class Chamber02Scene extends Phaser.Scene {
       return;
     }
 
-    if (this.isLoreTransitionActive || this.isExitGateTransitionActive || this.bossPitTransitionActive) {
+    if (this.isExitGateTransitionActive || this.bossPitTransitionActive) {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body.setVelocity(0, 0));
@@ -591,8 +568,6 @@ export class Chamber02Scene extends Phaser.Scene {
       attackPressed: Phaser.Input.Keyboard.JustDown(this.keyAttack) || mobileInput.attackPressed
     });
 
-    this.refreshLoreZonePresence();
-    this.tryBeginLoreSequence(mobileInput);
     this.refreshBossPitAltarPresence();
     this.tryBeginBossPitTransition(mobileInput);
     this.refreshExitGateState();
@@ -700,132 +675,6 @@ export class Chamber02Scene extends Phaser.Scene {
     }
   }
 
-  createLoreZones() {
-    const entry = CHAMBER02_LORE_ENTRY;
-    const zone = this.add.zone(entry.x, entry.y, entry.width, entry.height).setOrigin(0.5);
-    this.physics.add.existing(zone, true);
-    zone.loreEntry = entry;
-    this.loreZones.add(zone);
-    this.createLoreShrineProp(entry);
-  }
-
-  createLoreShrineProp(entry) {
-    const baseY = entry.y + 14;
-    this.add.ellipse(entry.x, baseY + 4, 188, 44, COLORS.oil, 0.3).setDepth(-5.1);
-    if (this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)) {
-      this.add.image(entry.x, baseY - 20, ASSET_KEYS.sector03Chamber02LoreAltar)
-        .setDisplaySize(164, 164)
-        .setTint(0xc8baa4)
-        .setAlpha(0.86)
-        .setDepth(-4.9);
-    } else {
-      this.add.ellipse(entry.x, baseY + 2, 142, 30, COLORS.sickly, 0.14).setDepth(-5.05);
-      this.add.ellipse(entry.x, baseY - 2, 134, 24, COLORS.bloodMetal, 0.72).setDepth(-5);
-      this.add.ellipse(entry.x, baseY - 8, 88, 16, COLORS.foreground, 0.86).setDepth(-4.95);
-      this.add.ellipse(entry.x, baseY - 26, 84, 40, COLORS.bone, 0.86).setDepth(-4.9);
-      this.add.ellipse(entry.x, baseY - 24, 44, 16, COLORS.oil, 0.84).setDepth(-4.85);
-      this.add.ellipse(entry.x - 28, baseY - 30, 28, 64, COLORS.bone, 0.7).setAngle(-18).setDepth(-4.84);
-      this.add.ellipse(entry.x + 28, baseY - 30, 28, 64, COLORS.bone, 0.7).setAngle(18).setDepth(-4.84);
-      this.add.rectangle(entry.x, baseY - 34, 10, 54, COLORS.rust, 0.78).setAngle(4).setDepth(-4.83);
-      this.add.ellipse(entry.x, baseY - 42, 16, 10, COLORS.sickly, 0.36).setDepth(-4.8);
-    }
-  }
-
-  createBossPitAltar() {
-    const altar = CHAMBER02_BOSS_PIT_ALTAR;
-    this.add.ellipse(altar.x, altar.y + 26, 220, 54, COLORS.oil, 0.34).setDepth(-5.08);
-    if (this.textures.exists(ASSET_KEYS.bossPit01AltarSuper)) {
-      this.bossPitAltarSprite = this.add.image(altar.x, altar.y, ASSET_KEYS.bossPit01AltarSuper)
-        .setDisplaySize(altar.width, altar.height)
-        .setAlpha(0.44)
-        .setTint(0xc6b79f)
-        .setDepth(-4.96);
-    } else {
-      this.bossPitAltarSprite = this.add.ellipse(altar.x, altar.y + 8, 164, 150, COLORS.bone, 0.32).setDepth(-4.96);
-    }
-    this.bossPitAltarAura = this.add.ellipse(altar.x, altar.y - 4, 170, 152, COLORS.sickly, 0.05).setDepth(-4.92);
-    this.bossPitAltarZone = this.add.zone(altar.x, WORLD.floorY - 74, altar.zoneWidth, altar.zoneHeight).setOrigin(0.5);
-    this.physics.add.existing(this.bossPitAltarZone, true);
-    this.updateBossPitAltarVisualState();
-  }
-
-  updateBossPitAltarVisualState() {
-    const isComplete = this.hasCompletedBossPitLoop;
-    this.bossPitAltarSprite?.setAlpha(isComplete ? 0.22 : 0.44);
-    this.bossPitAltarAura?.setAlpha(isComplete ? 0.02 : 0.08);
-  }
-
-  refreshBossPitAltarPresence() {
-    this.currentBossPitAltar = null;
-    if (this.hasCompletedBossPitLoop || !this.bossPitAltarZone || this.bossPitTransitionActive || this.isLoreTransitionActive) {
-      return;
-    }
-    this.physics.overlap(this.player.sprite, this.bossPitAltarZone, () => {
-      this.currentBossPitAltar = this.bossPitAltarZone;
-    });
-  }
-
-  tryBeginBossPitTransition(mobileInput) {
-    if (!this.currentBossPitAltar || this.hasCompletedBossPitLoop || this.bossPitTransitionActive || this.isLoreTransitionActive) {
-      return;
-    }
-    const interactPressed =
-      Phaser.Input.Keyboard.JustDown(this.keyInteract) ||
-      Phaser.Input.Keyboard.JustDown(this.keyEnter) ||
-      mobileInput.interactPressed;
-    if (!interactPressed) {
-      return;
-    }
-
-    this.bossPitTransitionActive = true;
-    this.mobileControls.setMode('dialogue');
-    this.player.body.setVelocity(0, 0);
-    this.audioDirector?.stopAmbientLoop();
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.start('Chamber02BossPitScene', {
-        returnSceneKey: this.scene.key,
-        returnPlayerX: 1110,
-        returnPlayerY: PLAYER.startY
-      });
-    });
-    this.cameras.main.fadeOut(460, 0, 0, 0);
-  }
-
-  refreshLoreZonePresence() {
-    this.currentLoreZone = null;
-
-    this.physics.overlap(this.player.sprite, this.loreZones, (_, zone) => {
-      if (!zone?.loreEntry || this.triggeredLoreIds.has(zone.loreEntry.id)) {
-        return;
-      }
-
-      this.currentLoreZone = zone;
-    });
-  }
-
-  tryBeginLoreSequence(mobileInput) {
-    if (!this.currentLoreZone || this.isLoreTransitionActive) {
-      return;
-    }
-
-    const interactPressed =
-      Phaser.Input.Keyboard.JustDown(this.keyInteract) ||
-      Phaser.Input.Keyboard.JustDown(this.keyEnter) ||
-      mobileInput.interactPressed;
-
-    if (!interactPressed) {
-      return;
-    }
-
-    const { loreEntry } = this.currentLoreZone;
-    if (!loreEntry || this.triggeredLoreIds.has(loreEntry.id)) {
-      return;
-    }
-
-    this.triggeredLoreIds.add(loreEntry.id);
-    this.beginLoreSequence(loreEntry);
-  }
-
   refreshExitGateZonePresence() {
     this.currentExitGateZone = null;
     
@@ -881,8 +730,6 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.currentExitThresholdZone = null;
     this.currentExitGateZone = null;
-    this.currentLoreZone = null;
-
     this.exitThresholdZone?.disableBody?.(true, true);
     this.exitThresholdAura?.setVisible(false);
     this.exitGatePromptText?.setVisible(false);
@@ -912,74 +759,6 @@ export class Chamber02Scene extends Phaser.Scene {
         console.error("[Chamber02Scene] scene.start('Chamber03Scene') failed", error);
       }
     });
-  }
-
-  launchLoreCutscene(cutsceneId) {
-    if (this.hasLaunchedLoreCutscene || !cutsceneId) {
-      return;
-    }
-
-    this.hasLaunchedLoreCutscene = true;
-    this.scene.pause();
-    this.scene.launch('LoreCutsceneScene', {
-      cutsceneId,
-      returnSceneKey: this.scene.key
-    });
-  }
-
-  beginLoreSequence(loreEntry) {
-    if (!loreEntry?.cutsceneId || this.isLoreTransitionActive) {
-      return;
-    }
-
-    this.isLoreTransitionActive = true;
-    this.hasLaunchedLoreCutscene = false;
-    this.mobileControls.setMode('dialogue');
-    this.player.body.setVelocity(0, 0);
-    this.enemies.forEach((enemy) => enemy.body.setVelocity(0, 0));
-
-    this.audioDirector?.stopAmbientLoop();
-
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.launchLoreCutscene(loreEntry.cutsceneId);
-    });
-
-    this.cameras.main.fadeOut(450, 0, 0, 0);
-  }
-
-  handleLoreCutsceneComplete({ cutsceneId } = {}) {
-    if (cutsceneId === CHAMBER02_LORE_ENTRY.cutsceneId) {
-      this.applyPostLoreReactionState();
-    }
-
-    if (cutsceneId !== CHAMBER02_LORE_ENTRY.cutsceneId) {
-      return;
-    }
-
-    this.isLoreTransitionActive = false;
-    this.mobileControls.setMode('gameplay');
-    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01);
-    this.cameras.main.resetFX();
-    this.cameras.main.fadeIn(500, 0, 0, 0);
-  }
-
-  applyPostLoreReactionState() {
-    if (this.hasAppliedPostLoreReaction) {
-      return;
-    }
-
-    this.hasAppliedPostLoreReaction = true;
-    this.sanctumAura?.setAlpha(CHAMBER02_POST_LORE_REACTION.sanctumAuraAlpha);
-    this.ambientVeil?.setAlpha(CHAMBER02_POST_LORE_REACTION.ambientVeilAlpha);
-    this.hornGateMonument?.setTint(CHAMBER02_POST_LORE_REACTION.gateTint).setAlpha(CHAMBER02_POST_LORE_REACTION.gateAlpha);
-
-    const sleepingEnemy = this.enemies.find((enemy) => !enemy.dead && !enemy.awakened);
-    if (!sleepingEnemy) {
-      return;
-    }
-
-    sleepingEnemy.awakened = true;
-    sleepingEnemy.awakenAtTime = null;
   }
 
   setupMobileUiCamera() {
