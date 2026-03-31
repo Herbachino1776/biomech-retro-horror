@@ -59,12 +59,12 @@ const BOSS_PIT_VICTORY = {
 };
 
 const BOSS_PIT_BOSS = {
-  name: 'THE HORN GATE WITNESS',
-  subtitle: 'Pitbound Litigator',
+  name: 'THE STARVED PROPHET OF ASH',
+  subtitle: 'Ash Prophecy Litigator',
   spawnX: 960,
   spawnY: WORLD.floorY - 2,
   activationX: 760,
-  textureKey: ASSET_KEYS.bossPit01TheHornGateWitness,
+  textureKey: ASSET_KEYS.bossPit02StarvedProphetOfAsh,
   health: 8,
   contactDamage: 2,
   contactDamageCooldownMs: 1200,
@@ -173,8 +173,8 @@ export class Chamber02BossPitScene extends Phaser.Scene {
 
   createBackdrop() {
     this.add.rectangle(BOSS_PIT_BOOTSTRAP.worldWidth / 2, WORLD.height / 2, BOSS_PIT_BOOTSTRAP.worldWidth, WORLD.height, 0x040304, 1).setDepth(-16);
-    if (this.textures.exists(ASSET_KEYS.bossPit01BackgroundHornGate)) {
-      this.add.image(BOSS_PIT_BOOTSTRAP.worldWidth / 2, 210, ASSET_KEYS.bossPit01BackgroundHornGate)
+    if (this.textures.exists(ASSET_KEYS.bossPit02BackgroundAshProphecyHall)) {
+      this.add.image(BOSS_PIT_BOOTSTRAP.worldWidth / 2, 210, ASSET_KEYS.bossPit02BackgroundAshProphecyHall)
         .setDisplaySize(BOSS_PIT_BOOTSTRAP.worldWidth, 480)
         .setAlpha(0.9)
         .setDepth(-14.8);
@@ -658,9 +658,9 @@ export class Chamber02BossPitScene extends Phaser.Scene {
       this.add.ellipse(altarConfig.x, WORLD.floorY + 10, altarConfig.width + 152, 36, 0x010101, 0.34).setDepth(-6.04);
 
       const primaryKey = altarConfig.id === BOSS_PIT_ALTARS.returnAltarId
-        ? ASSET_KEYS.bossPit01AltarSuper
-        : ASSET_KEYS.bossPit01AltarTrap;
-      const fallbackKey = ASSET_KEYS.bossPit01AltarTrap;
+        ? ASSET_KEYS.bossPit02AltarSuper
+        : ASSET_KEYS.bossPit02AltarTrap;
+      const fallbackKey = ASSET_KEYS.bossPit02AltarTrap;
       const altarTextureKey = this.textures.exists(primaryKey)
         ? primaryKey
         : this.textures.exists(fallbackKey)

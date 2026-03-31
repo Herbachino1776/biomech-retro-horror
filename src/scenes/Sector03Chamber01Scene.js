@@ -431,8 +431,8 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     this.add.ellipse(anchor.altarX, WORLD.floorY - 18, anchor.shadowWidth, 30, 0x3c281c, 0.18).setDepth(-6.12);
     this.add.ellipse(anchor.altarX, WORLD.floorY + 10, anchor.shadowWidth + 180, 38, 0x020202, 0.36).setDepth(-6.04);
 
-    if (this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)) {
-      this.add.image(anchor.altarX, anchor.altarY, ASSET_KEYS.sector03Chamber02LoreAltar)
+    if (this.textures.exists(ASSET_KEYS.bossPit02AltarTrap)) {
+      this.add.image(anchor.altarX, anchor.altarY, ASSET_KEYS.bossPit02AltarTrap)
         .setDisplaySize(anchor.altarDisplayWidth, anchor.altarDisplayHeight)
         .setTint(0xe0ccb5)
         .setAlpha(0.9)
@@ -452,8 +452,8 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     this.add.ellipse(altar.altarX, WORLD.floorY - 18, altar.shadowWidth, 30, 0x412d20, 0.18).setDepth(-6.12);
     this.add.ellipse(altar.altarX, WORLD.floorY + 10, altar.shadowWidth + 180, 38, 0x020202, 0.36).setDepth(-6.04);
 
-    const primaryKey = this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)
-      ? ASSET_KEYS.sector03Chamber02LoreAltar
+    const primaryKey = this.textures.exists(ASSET_KEYS.bossPit02AltarTrap)
+      ? ASSET_KEYS.bossPit02AltarTrap
       : null;
 
     const sprite = primaryKey

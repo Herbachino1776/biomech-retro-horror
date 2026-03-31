@@ -159,7 +159,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
     const props = [
       { key: ASSET_KEYS.sector03Chamber02PropMaskRack, x: 1860, w: 170, h: 170 },
       { key: ASSET_KEYS.sector03Chamber02PropBlindMirror, x: 3360, w: 184, h: 194 },
-      { key: ASSET_KEYS.sector03Chamber02LoreAltar, x: 5250, w: 212, h: 212 }
+      { key: ASSET_KEYS.bossPit02AltarTrap, x: 5250, w: 212, h: 212 }
     ];
     props.forEach((prop) => {
       if (!this.textures.exists(prop.key)) {
@@ -238,8 +238,8 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
 
   createLoreAnchor() {
     const altarX = 640;
-    if (this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)) {
-      this.add.image(altarX, WORLD.floorY - 104, ASSET_KEYS.sector03Chamber02LoreAltar)
+    if (this.textures.exists(ASSET_KEYS.bossPit02AltarTrap)) {
+      this.add.image(altarX, WORLD.floorY - 104, ASSET_KEYS.bossPit02AltarTrap)
         .setDisplaySize(194, 194)
         .setTint(0xe0ccb5)
         .setAlpha(0.9)
@@ -255,8 +255,8 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
       { id: 'bosspit02', x: 3360, y: WORLD.floorY - 106 },
       { id: 'bosspit03', x: 5380, y: WORLD.floorY - 106 }
     ].map((pit) => {
-      const sprite = this.textures.exists(ASSET_KEYS.sector03Chamber02LoreAltar)
-        ? this.add.image(pit.x, pit.y, ASSET_KEYS.sector03Chamber02LoreAltar).setDisplaySize(208, 208).setTint(0xd6c4ae).setAlpha(0.86).setDepth(-6.08)
+      const sprite = this.textures.exists(ASSET_KEYS.bossPit02AltarTrap)
+        ? this.add.image(pit.x, pit.y, ASSET_KEYS.bossPit02AltarTrap).setDisplaySize(208, 208).setTint(0xd6c4ae).setAlpha(0.86).setDepth(-6.08)
         : this.add.ellipse(pit.x, pit.y + 6, 160, 160, 0x836d5f, 0.8).setDepth(-6.08);
       const aura = this.add.ellipse(pit.x, pit.y + 4, 156, 146, 0xc5ad88, 0.08).setDepth(-6.06);
       const zone = this.add.zone(pit.x, WORLD.floorY - 78, 218, 214).setOrigin(0.5);
