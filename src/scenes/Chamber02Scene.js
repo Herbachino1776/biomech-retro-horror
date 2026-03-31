@@ -10,6 +10,7 @@ import { createDirectionalCameraBias } from '../systems/DirectionalCameraBias.js
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
 import { applyChamberEntryRestore } from '../systems/VesselRunEconomy.js';
+import { bossPitRunState } from '../systems/BossPitRunState.js';
 
 const CHAMBER02_WORLD_WIDTH = 4300;
 
@@ -25,13 +26,7 @@ const CHAMBER02_EXIT_CORRIDOR = {
   cameraHintX: 3910
 };
 
-const CHAMBER02_PLATFORMS = [
-  { x: 700, y: 372, width: 170, height: 20 },
-  { x: 1170, y: 338, width: 160, height: 20 },
-  { x: 1810, y: 384, width: 230, height: 20 },
-  { x: 2420, y: 346, width: 190, height: 20 },
-  { x: 3070, y: 376, width: 220, height: 20 }
-];
+const CHAMBER02_PLATFORMS = [];
 
 const CHAMBER02_TOLL_KEEPER_CONFIG = {
   ...SKITTER,
@@ -72,15 +67,44 @@ const CHAMBER02_TOLL_KEEPER_CONFIG = {
   audioProfile: 'tollkeeper'
 };
 
-const CHAMBER02_TOLL_KEEPER_SPAWNS = [
-  { x: 3005, y: 404, awakenPlayerX: 2820, wakeDelayMs: 0 },
-  { x: 3325, y: 404, awakenPlayerX: 3010, wakeDelayMs: 120, patrolDistance: 90 }
-];
-
-const CHAMBER02_ENEMY_SPAWNS = [
-  { x: 1600, y: 402, awakenPlayerX: 1360, patrolDistance: 210, wakeDelayMs: 120 },
-  { x: 2410, y: 402, awakenPlayerX: 2050, patrolDistance: 204, wakeDelayMs: 90 },
-  { x: 2795, y: 402, awakenPlayerX: 2440, patrolDistance: 196, wakeDelayMs: 140 }
+const CHAMBER02_ENCOUNTER_POCKETS = [
+  {
+    id: 'ossuary-procession-pocket-01',
+    zoneX: 1000,
+    zoneY: WORLD.floorY - 76,
+    zoneWidth: 520,
+    zoneHeight: 236,
+    spawns: [
+      { type: 'basic', x: 840, awakenPlayerX: 620, patrolDistance: 86, wakeDelayMs: 0 },
+      { type: 'basic', x: 1020, awakenPlayerX: 760, patrolDistance: 108, wakeDelayMs: 80 },
+      { type: 'basic', x: 1180, awakenPlayerX: 880, patrolDistance: 92, wakeDelayMs: 140 }
+    ]
+  },
+  {
+    id: 'ossuary-procession-pocket-02',
+    zoneX: 1910,
+    zoneY: WORLD.floorY - 76,
+    zoneWidth: 640,
+    zoneHeight: 240,
+    spawns: [
+      { type: 'basic', x: 1670, awakenPlayerX: 1420, patrolDistance: 126, wakeDelayMs: 0 },
+      { type: 'basic', x: 1880, awakenPlayerX: 1540, patrolDistance: 104, wakeDelayMs: 110 },
+      { type: 'basic', x: 2090, awakenPlayerX: 1660, patrolDistance: 110, wakeDelayMs: 170 }
+    ]
+  },
+  {
+    id: 'horn-vault-reveal-domain',
+    zoneX: 2880,
+    zoneY: WORLD.floorY - 82,
+    zoneWidth: 840,
+    zoneHeight: 248,
+    spawns: [
+      { type: 'basic', x: 2540, awakenPlayerX: 2240, patrolDistance: 116, wakeDelayMs: 0 },
+      { type: 'tollKeeper', x: 2880, awakenPlayerX: 2480, patrolDistance: 84, wakeDelayMs: 100 },
+      { type: 'basic', x: 3170, awakenPlayerX: 2600, patrolDistance: 108, wakeDelayMs: 150 },
+      { type: 'tollKeeper', x: 3340, awakenPlayerX: 2730, patrolDistance: 92, wakeDelayMs: 220 }
+    ]
+  }
 ];
 
 const CHAMBER02_LORE_ENTRY = {
@@ -91,6 +115,24 @@ const CHAMBER02_LORE_ENTRY = {
   height: 180,
   cutsceneId: 'chamber02-horn-arch'
 };
+
+const CHAMBER02_BOSS_PIT_ALTAR = {
+  x: 960,
+  y: WORLD.floorY - 104,
+  width: 176,
+  height: 176,
+  zoneWidth: 196,
+  zoneHeight: 216,
+  promptOffsetY: -168
+};
+
+const CHAMBER02_SEGMENTS = [
+  { type: 'opening', x: 420, width: 780, tint: 0xc1b199, alpha: 0.72 },
+  { type: 'corridor', x: 1180, width: 700, tint: 0xb3a48f, alpha: 0.58 },
+  { type: 'corridor', x: 1960, width: 760, tint: 0xa59682, alpha: 0.54 },
+  { type: 'reveal', x: 2900, width: 980, tint: 0xcab79f, alpha: 0.8 },
+  { type: 'threshold', x: 3820, width: 760, tint: 0xcfbca4, alpha: 0.72 }
+];
 
 const CHAMBER02_POST_LORE_REACTION = {
   gateTint: 0xbca775,
@@ -126,6 +168,7 @@ export class Chamber02Scene extends Phaser.Scene {
 
   init(data) {
     this.transitionContext = data ?? {};
+    this.hasCompletedBossPitLoop = Boolean(this.transitionContext?.returnFromBossPit) || bossPitRunState.hasChamber02BossPitCompleted();
   }
 
   create() {
@@ -140,6 +183,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.loreZones = this.physics.add.staticGroup();
     this.triggeredLoreIds = new Set();
     this.currentLoreZone = null;
+    this.currentBossPitAltar = null;
     this.currentExitGateZone = null;
     this.currentExitThresholdZone = null;
     this.isLoreTransitionActive = false;
@@ -150,15 +194,19 @@ export class Chamber02Scene extends Phaser.Scene {
     this.exitGateUnlockAudioTimer = null;
     this.exitGatePromptText = null;
     this.chamber03StartHasRun = false;
+    this.bossPitTransitionActive = false;
 
     this.renderProcessionalBackdrop();
     this.createPlatforms();
     this.createLoreZones();
+    this.createBossPitAltar();
 
     this.audioDirector = new AudioDirector(this);
     this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01);
 
-    this.player = new Player(this, 150, 360, PLAYER);
+    const spawnX = this.transitionContext?.returnFromBossPit ? this.transitionContext.returnPlayerX ?? 1110 : 150;
+    const spawnY = this.transitionContext?.returnFromBossPit ? this.transitionContext.returnPlayerY ?? PLAYER.startY : 360;
+    this.player = new Player(this, spawnX, spawnY, PLAYER);
     const entryIntegrity = applyChamberEntryRestore(this.transitionContext);
     this.player.health = entryIntegrity.current;
     this.player.maxHealth = entryIntegrity.max;
@@ -167,7 +215,6 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.enemies = [];
     this.tollKeepers = [];
-    this.createTollKeeperEncounter();
     this.createEnemyEncounter();
 
     this.hud = new HudOverlay(this);
@@ -217,6 +264,10 @@ export class Chamber02Scene extends Phaser.Scene {
     this.applyResponsiveLayout();
     this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
+    if (this.transitionContext?.returnFromBossPit) {
+      this.hasCompletedBossPitLoop = true;
+      bossPitRunState.markChamber02BossPitCompleted();
+    }
   }
 
   renderProcessionalBackdrop() {
@@ -225,35 +276,38 @@ export class Chamber02Scene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(-14);
 
-    const plateSegmentWidth = 540;
-    const segmentCount = Math.ceil(CHAMBER02_WORLD_WIDTH / plateSegmentWidth) + 1;
-
-    for (let i = 0; i < segmentCount; i += 1) {
-      const segmentX = i * plateSegmentWidth + plateSegmentWidth / 2;
-      const parityTint = i % 2 === 0 ? 0xbfae95 : 0xb1a38e;
+    CHAMBER02_SEGMENTS.forEach((segment, index) => {
+      const segmentX = segment.x;
+      const parityTint = index % 2 === 0 ? segment.tint : Phaser.Display.Color.Interpolate.ColorWithColor(
+        Phaser.Display.Color.ValueToColor(segment.tint),
+        Phaser.Display.Color.ValueToColor(0x9d8f7b),
+        100,
+        34
+      ).color;
       if (this.textures.exists(ASSET_KEYS.chamber02BackgroundPlate)) {
         this.add
           .image(segmentX, 220, ASSET_KEYS.chamber02BackgroundPlate)
-          .setDisplaySize(plateSegmentWidth + 44, 382)
+          .setDisplaySize(segment.width + 36, segment.type === 'reveal' ? 416 : 388)
           .setTint(parityTint)
-          .setAlpha(0.46)
-          .setDepth(-13);
+          .setAlpha(segment.alpha)
+          .setDepth(-13.2 + index * 0.03);
       } else {
         this.add
-          .rectangle(segmentX, 220, plateSegmentWidth + 44, 382, COLORS.architecture, 0.5)
+          .rectangle(segmentX, 220, segment.width + 36, segment.type === 'reveal' ? 416 : 388, COLORS.architecture, segment.alpha * 0.76)
           .setStrokeStyle(2, COLORS.rust, 0.25)
-          .setDepth(-13);
+          .setDepth(-13.2 + index * 0.03);
       }
 
-      if (this.textures.exists(ASSET_KEYS.chamber02ForegroundHornArch) && i % 2 === 1) {
+      if (this.textures.exists(ASSET_KEYS.chamber02ForegroundHornArch) && segment.type !== 'opening') {
         this.add
-          .image(segmentX + 32, 276, ASSET_KEYS.chamber02ForegroundHornArch)
-          .setDisplaySize(230, 226)
+          .image(segmentX + (segment.type === 'reveal' ? 46 : 22), 272, ASSET_KEYS.chamber02ForegroundHornArch)
+          .setDisplaySize(segment.type === 'reveal' ? 270 : 214, segment.type === 'reveal' ? 280 : 220)
           .setTint(0xb39f89)
-          .setAlpha(0.16)
-          .setDepth(-11);
+          .setAlpha(segment.type === 'reveal' ? 0.22 : 0.16)
+          .setDepth(-11.2);
       }
-    }
+      this.add.ellipse(segmentX, WORLD.floorY - 24, segment.width * 0.78, 56, 0x070605, 0.14 + index * 0.01).setDepth(-9.95);
+    });
 
     const floorStripHeight = 116;
     if (this.textures.exists(ASSET_KEYS.chamber02FloorStrip)) {
@@ -449,31 +503,33 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   createTollKeeperEncounter() {
-    CHAMBER02_TOLL_KEEPER_SPAWNS.forEach((spawn) => {
-      const tollKeeper = this.createSkitterEnemy(spawn.x, spawn.y, {
-        ...CHAMBER02_TOLL_KEEPER_CONFIG,
-        awakenPlayerX: spawn.awakenPlayerX,
-        wakeDelayMs: spawn.wakeDelayMs,
-        patrolDistance: spawn.patrolDistance ?? CHAMBER02_TOLL_KEEPER_CONFIG.patrolDistance
-      });
-      tollKeeper.isTollKeeper = true;
-      this.tollKeepers.push(tollKeeper);
-      this.enemies.push(tollKeeper);
-    });
-
     return this.tollKeepers;
   }
 
   createEnemyEncounter() {
-    CHAMBER02_ENEMY_SPAWNS.forEach((spawn) => {
-      const enemyConfig = {
-        ...SKITTER,
-        awakenPlayerX: spawn.awakenPlayerX,
-        wakeDelayMs: spawn.wakeDelayMs ?? 500,
-        patrolDistance: spawn.patrolDistance ?? 180
-      };
-      const enemy = this.createSkitterEnemy(spawn.x, spawn.y, enemyConfig);
-      this.enemies.push(enemy);
+    CHAMBER02_ENCOUNTER_POCKETS.forEach((pocket) => {
+      this.add.ellipse(pocket.zoneX, WORLD.floorY - 4, pocket.zoneWidth * 0.56, 72, 0x040303, 0.1).setDepth(-6.02);
+      pocket.spawns.forEach((spawn) => {
+        const enemyConfig = spawn.type === 'tollKeeper'
+          ? {
+            ...CHAMBER02_TOLL_KEEPER_CONFIG,
+            awakenPlayerX: spawn.awakenPlayerX,
+            wakeDelayMs: spawn.wakeDelayMs,
+            patrolDistance: spawn.patrolDistance ?? CHAMBER02_TOLL_KEEPER_CONFIG.patrolDistance
+          }
+          : {
+            ...SKITTER,
+            awakenPlayerX: spawn.awakenPlayerX,
+            wakeDelayMs: spawn.wakeDelayMs ?? 500,
+            patrolDistance: spawn.patrolDistance ?? 180
+          };
+        const enemy = this.createSkitterEnemy(spawn.x, PLAYER.startY, enemyConfig);
+        if (spawn.type === 'tollKeeper') {
+          enemy.isTollKeeper = true;
+          this.tollKeepers.push(enemy);
+        }
+        this.enemies.push(enemy);
+      });
     });
 
     return this.enemies;
@@ -515,7 +571,7 @@ export class Chamber02Scene extends Phaser.Scene {
       return;
     }
 
-    if (this.isLoreTransitionActive || this.isExitGateTransitionActive) {
+    if (this.isLoreTransitionActive || this.isExitGateTransitionActive || this.bossPitTransitionActive) {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body.setVelocity(0, 0));
@@ -536,6 +592,8 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
+    this.refreshBossPitAltarPresence();
+    this.tryBeginBossPitTransition(mobileInput);
     this.refreshExitGateState();
     this.refreshExitGateZonePresence();
     this.refreshExitThresholdZonePresence();
@@ -670,6 +728,66 @@ export class Chamber02Scene extends Phaser.Scene {
       this.add.rectangle(entry.x, baseY - 34, 10, 54, COLORS.rust, 0.78).setAngle(4).setDepth(-4.83);
       this.add.ellipse(entry.x, baseY - 42, 16, 10, COLORS.sickly, 0.36).setDepth(-4.8);
     }
+  }
+
+  createBossPitAltar() {
+    const altar = CHAMBER02_BOSS_PIT_ALTAR;
+    this.add.ellipse(altar.x, altar.y + 26, 220, 54, COLORS.oil, 0.34).setDepth(-5.08);
+    if (this.textures.exists(ASSET_KEYS.bossPit01AltarSuper)) {
+      this.bossPitAltarSprite = this.add.image(altar.x, altar.y, ASSET_KEYS.bossPit01AltarSuper)
+        .setDisplaySize(altar.width, altar.height)
+        .setAlpha(0.44)
+        .setTint(0xc6b79f)
+        .setDepth(-4.96);
+    } else {
+      this.bossPitAltarSprite = this.add.ellipse(altar.x, altar.y + 8, 164, 150, COLORS.bone, 0.32).setDepth(-4.96);
+    }
+    this.bossPitAltarAura = this.add.ellipse(altar.x, altar.y - 4, 170, 152, COLORS.sickly, 0.05).setDepth(-4.92);
+    this.bossPitAltarZone = this.add.zone(altar.x, WORLD.floorY - 74, altar.zoneWidth, altar.zoneHeight).setOrigin(0.5);
+    this.physics.add.existing(this.bossPitAltarZone, true);
+    this.updateBossPitAltarVisualState();
+  }
+
+  updateBossPitAltarVisualState() {
+    const isComplete = this.hasCompletedBossPitLoop;
+    this.bossPitAltarSprite?.setAlpha(isComplete ? 0.22 : 0.44);
+    this.bossPitAltarAura?.setAlpha(isComplete ? 0.02 : 0.08);
+  }
+
+  refreshBossPitAltarPresence() {
+    this.currentBossPitAltar = null;
+    if (this.hasCompletedBossPitLoop || !this.bossPitAltarZone || this.bossPitTransitionActive || this.isLoreTransitionActive) {
+      return;
+    }
+    this.physics.overlap(this.player.sprite, this.bossPitAltarZone, () => {
+      this.currentBossPitAltar = this.bossPitAltarZone;
+    });
+  }
+
+  tryBeginBossPitTransition(mobileInput) {
+    if (!this.currentBossPitAltar || this.hasCompletedBossPitLoop || this.bossPitTransitionActive || this.isLoreTransitionActive) {
+      return;
+    }
+    const interactPressed =
+      Phaser.Input.Keyboard.JustDown(this.keyInteract) ||
+      Phaser.Input.Keyboard.JustDown(this.keyEnter) ||
+      mobileInput.interactPressed;
+    if (!interactPressed) {
+      return;
+    }
+
+    this.bossPitTransitionActive = true;
+    this.mobileControls.setMode('dialogue');
+    this.player.body.setVelocity(0, 0);
+    this.audioDirector?.stopAmbientLoop();
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.start('Chamber02BossPitScene', {
+        returnSceneKey: this.scene.key,
+        returnPlayerX: 1110,
+        returnPlayerY: PLAYER.startY
+      });
+    });
+    this.cameras.main.fadeOut(460, 0, 0, 0);
   }
 
   refreshLoreZonePresence() {
