@@ -240,6 +240,7 @@ export class Player {
 
   updateVisuals(time) {
     this.applyFacingVisual();
+    this.applyAirborneVisual();
     this.updateWeaponAttachment();
 
     if (this.usingConceptSprite) {
@@ -266,6 +267,25 @@ export class Player {
     }
 
     this.sprite.setFlipX(this.facing < 0);
+  }
+
+  applyAirborneVisual() {
+    if (!this.usingConceptSprite) {
+      return;
+    }
+
+    const inAttackCommit = this.attackPhase === 'startup' || this.attackPhase === 'active' || this.attackPhase === 'recovery';
+    if (inAttackCommit || this.body.blocked.down) {
+      this.sprite.setAngle(0);
+      return;
+    }
+
+    const facing = this.facing >= 0 ? 1 : -1;
+    const airborneVisualConfig = this.config.airborneVisual ?? {};
+    const jumpTilt = airborneVisualConfig.jumpTiltDeg ?? 6;
+    const fallTilt = airborneVisualConfig.fallTiltDeg ?? 9;
+    const airborneTilt = this.body.velocity.y < 0 ? jumpTilt : fallTilt;
+    this.sprite.setAngle(airborneTilt * facing);
   }
 
   createWeaponSprite(x, y) {
@@ -383,8 +403,15 @@ export class Player {
     }
 
     const facing = this.facing >= 0 ? 1 : -1;
-    this.weaponSprite.setPosition(this.sprite.x + this.weaponPoseState.offsetX * facing, this.sprite.y + this.weaponPoseState.offsetY);
-    this.weaponSprite.setRotation(Phaser.Math.DegToRad(this.weaponPoseState.rotationDeg * facing));
+    const inAttackCommit = this.attackPhase === 'startup' || this.attackPhase === 'active' || this.attackPhase === 'recovery';
+    const airborneAttackPoseAdjust =
+      inAttackCommit && !this.body.blocked.down ? this.config.weaponVisual?.airborneAttackPoseAdjust : null;
+    const adjustedOffsetX = this.weaponPoseState.offsetX + (airborneAttackPoseAdjust?.offsetX ?? 0);
+    const adjustedOffsetY = this.weaponPoseState.offsetY + (airborneAttackPoseAdjust?.offsetY ?? 0);
+    const adjustedRotationDeg = this.weaponPoseState.rotationDeg + (airborneAttackPoseAdjust?.rotationDeg ?? 0);
+
+    this.weaponSprite.setPosition(this.sprite.x + adjustedOffsetX * facing, this.sprite.y + adjustedOffsetY);
+    this.weaponSprite.setRotation(Phaser.Math.DegToRad(adjustedRotationDeg * facing));
     this.weaponSprite.setDepth((this.sprite.depth ?? 6) + this.weaponPoseState.depthOffset);
   }
 
