@@ -1069,6 +1069,7 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
+    console.info('[Chamber01->Chamber02] gate transition requested');
     this.isGateTransitionActive = true;
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
@@ -1078,11 +1079,17 @@ export class Chamber01Scene extends Phaser.Scene {
     this.audioDirector?.stopAmbientLoop({ fadeOut: false });
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      console.info('[Chamber01->Chamber02] fade out complete, starting Chamber02Scene');
       this.audioDirector?.shutdown();
-      this.scene.start('Chamber02Scene', {
-        enteredFrom: 'chamber01-ritual-threshold-gate',
-        progressionSource: 'blind-cantor-banished'
-      });
+      try {
+        this.scene.start('Chamber02Scene', {
+          enteredFrom: 'chamber01-ritual-threshold-gate',
+          progressionSource: 'blind-cantor-banished'
+        });
+      } catch (error) {
+        console.error("[Chamber01->Chamber02] scene.start('Chamber02Scene') failed", error);
+        this.isGateTransitionActive = false;
+      }
     });
 
     this.cameras.main.fadeOut(640, 0, 0, 0);

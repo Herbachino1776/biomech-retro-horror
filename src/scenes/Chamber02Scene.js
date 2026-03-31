@@ -157,94 +157,121 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   create() {
-    this.physics.world.gravity.y = WORLD.gravityY;
-    this.cameras.main.setBounds(0, 0, CHAMBER02_WORLD_WIDTH, WORLD.height);
-    this.physics.world.setBounds(0, 0, CHAMBER02_WORLD_WIDTH, WORLD.height);
+    console.info('[Chamber02Scene] create start', this.transitionContext);
+    let startupStep = 'init-world';
+    try {
+      this.physics.world.gravity.y = WORLD.gravityY;
+      this.cameras.main.setBounds(0, 0, CHAMBER02_WORLD_WIDTH, WORLD.height);
+      this.physics.world.setBounds(0, 0, CHAMBER02_WORLD_WIDTH, WORLD.height);
 
-    this.cameras.main.setBackgroundColor('#070707');
-    this.cameras.main.fadeIn(700, 0, 0, 0);
+      this.cameras.main.setBackgroundColor('#070707');
+      this.cameras.main.fadeIn(700, 0, 0, 0);
 
-    this.platforms = this.physics.add.staticGroup();
-    this.currentBossPitAltar = null;
-    this.currentExitGateZone = null;
-    this.currentExitThresholdZone = null;
-    this.isExitGateTransitionActive = false;
-    this.isHandingOffToChamber03 = false;
-    this.isRestartingRun = false;
-    this.exitGateUnlockAudioTimer = null;
-    this.exitGatePromptText = null;
-    this.chamber03StartHasRun = false;
-    this.bossPitTransitionActive = false;
+      this.platforms = this.physics.add.staticGroup();
+      this.currentBossPitAltar = null;
+      this.currentExitGateZone = null;
+      this.currentExitThresholdZone = null;
+      this.isExitGateTransitionActive = false;
+      this.isHandingOffToChamber03 = false;
+      this.isRestartingRun = false;
+      this.exitGateUnlockAudioTimer = null;
+      this.exitGatePromptText = null;
+      this.bossPitPromptText = null;
+      this.chamber03StartHasRun = false;
+      this.bossPitTransitionActive = false;
 
-    this.renderProcessionalBackdrop();
-    this.createPlatforms();
-    this.createBossPitAltar();
+      startupStep = 'render-backdrop';
+      this.renderProcessionalBackdrop();
+      startupStep = 'create-platforms';
+      this.createPlatforms();
+      startupStep = 'create-boss-pit-altar';
+      this.createBossPitAltar();
 
-    this.audioDirector = new AudioDirector(this);
-    this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01);
+      startupStep = 'audio';
+      this.audioDirector = new AudioDirector(this);
+      this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01);
 
-    const spawnX = this.transitionContext?.returnFromBossPit ? this.transitionContext.returnPlayerX ?? 1110 : 150;
-    const spawnY = this.transitionContext?.returnFromBossPit ? this.transitionContext.returnPlayerY ?? PLAYER.startY : 360;
-    this.player = new Player(this, spawnX, spawnY, PLAYER);
-    const entryIntegrity = applyChamberEntryRestore(this.transitionContext);
-    this.player.health = entryIntegrity.current;
-    this.player.maxHealth = entryIntegrity.max;
-    this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
-    this.physics.add.collider(this.player.sprite, this.platforms);
+      startupStep = 'create-player';
+      const spawnX = this.transitionContext?.returnFromBossPit ? this.transitionContext.returnPlayerX ?? 1110 : 150;
+      const spawnY = this.transitionContext?.returnFromBossPit ? this.transitionContext.returnPlayerY ?? PLAYER.startY : 360;
+      this.player = new Player(this, spawnX, spawnY, PLAYER);
+      const entryIntegrity = applyChamberEntryRestore(this.transitionContext);
+      this.player.health = entryIntegrity.current;
+      this.player.maxHealth = entryIntegrity.max;
+      this.applyGameplayReadabilitySupport(this.player.sprite, { fill: 0xd8cfbb, alpha: 0.18, scale: 1.1 });
+      this.physics.add.collider(this.player.sprite, this.platforms);
 
-    this.enemies = [];
-    this.tollKeepers = [];
-    this.createEnemyEncounter();
+      startupStep = 'create-enemies';
+      this.enemies = [];
+      this.tollKeepers = [];
+      this.createEnemyEncounter();
 
-    this.hud = new HudOverlay(this);
-    this.mobileControls = new MobileControls(this);
-    this.setupMobileUiCamera();
+      startupStep = 'create-ui';
+      this.hud = new HudOverlay(this);
+      this.mobileControls = new MobileControls(this);
+      this.setupMobileUiCamera();
 
-    this.restartText = this.add
-      .text(this.scale.width / 2, 90, '', {
+      this.restartText = this.add
+        .text(this.scale.width / 2, 90, '', {
+          fontFamily: 'monospace',
+          fontSize: '22px',
+          color: '#d2c2ac',
+          align: 'center'
+        })
+        .setScrollFactor(0)
+        .setDepth(35)
+        .setOrigin(0.5)
+        .setVisible(false);
+      this.uiCamera?.ignore(this.restartText);
+
+      this.cursors = this.input.keyboard.createCursorKeys();
+      this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+      this.keyInteract = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+      this.keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+      this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+
+      startupStep = 'camera-layout';
+      this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
+
+      this.directionalCameraBias = createDirectionalCameraBias({
+        camera: this.cameras.main,
+        player: this.player,
+        desktopBaseOffsetX: -140,
+        portraitBaseOffsetX: -120,
+        desktopLookAheadX: 56,
+        portraitLookAheadX: 24
+      });
+      this.scale.on('resize', this.applyResponsiveLayout, this);
+      this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
+        this.scale.off('resize', this.applyResponsiveLayout, this);
+        this.exitGateUnlockAudioTimer?.remove(false);
+        this.exitGateUnlockAudioTimer = null;
+        console.log('[Chamber02Scene] shutdown event fired');
+        this.audioDirector?.shutdown();
+        this.cleanupSceneUi();
+      });
+
+      this.applyResponsiveLayout();
+      this.directionalCameraBias?.update();
+      this.hud.update(this.player.health, this.player.maxHealth);
+      if (this.transitionContext?.returnFromBossPit) {
+        this.hasCompletedBossPitLoop = true;
+        bossPitRunState.markChamber02BossPitCompleted();
+      }
+      console.info('[Chamber02Scene] create complete');
+    } catch (error) {
+      console.error(`[Chamber02Scene] create failed during ${startupStep}`, error);
+      this.cameras.main?.setBackgroundColor('#210707');
+      this.add.text(this.scale.width / 2, this.scale.height / 2, 'CHAMBER 02 BOOT FAILURE\nSee console logs', {
         fontFamily: 'monospace',
-        fontSize: '22px',
-        color: '#d2c2ac',
+        fontSize: '20px',
+        color: '#ffb9b9',
         align: 'center'
       })
-      .setScrollFactor(0)
-      .setDepth(35)
-      .setOrigin(0.5)
-      .setVisible(false);
-    this.uiCamera?.ignore(this.restartText);
-
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
-    this.keyInteract = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-    this.keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-    this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-
-    this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -140, 0);
-
-    this.directionalCameraBias = createDirectionalCameraBias({
-      camera: this.cameras.main,
-      player: this.player,
-      desktopBaseOffsetX: -140,
-      portraitBaseOffsetX: -120,
-      desktopLookAheadX: 56,
-      portraitLookAheadX: 24
-    });
-    this.scale.on('resize', this.applyResponsiveLayout, this);
-    this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.scale.off('resize', this.applyResponsiveLayout, this);
-      this.exitGateUnlockAudioTimer?.remove(false);
-      this.exitGateUnlockAudioTimer = null;
-      console.log('[Chamber02Scene] shutdown event fired');
-      this.audioDirector?.shutdown();
-      this.cleanupSceneUi();
-    });
-
-    this.applyResponsiveLayout();
-    this.directionalCameraBias?.update();
-    this.hud.update(this.player.health, this.player.maxHealth);
-    if (this.transitionContext?.returnFromBossPit) {
-      this.hasCompletedBossPitLoop = true;
-      bossPitRunState.markChamber02BossPitCompleted();
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(100);
+      throw error;
     }
   }
 
@@ -484,6 +511,40 @@ export class Chamber02Scene extends Phaser.Scene {
     return this.tollKeepers;
   }
 
+  createBossPitAltar() {
+    const altar = this.add
+      .ellipse(CHAMBER02_BOSS_PIT_ALTAR.x, CHAMBER02_BOSS_PIT_ALTAR.y - 10, CHAMBER02_BOSS_PIT_ALTAR.width, CHAMBER02_BOSS_PIT_ALTAR.height, COLORS.sickly, 0.16)
+      .setDepth(-5.1);
+    this.add
+      .ellipse(CHAMBER02_BOSS_PIT_ALTAR.x, WORLD.floorY + 8, CHAMBER02_BOSS_PIT_ALTAR.width + 84, 40, 0x030303, 0.34)
+      .setDepth(-5.05);
+
+    const zone = this.add
+      .zone(
+        CHAMBER02_BOSS_PIT_ALTAR.x,
+        CHAMBER02_BOSS_PIT_ALTAR.y,
+        CHAMBER02_BOSS_PIT_ALTAR.zoneWidth,
+        CHAMBER02_BOSS_PIT_ALTAR.zoneHeight
+      )
+      .setOrigin(0.5);
+    this.physics.add.existing(zone, true);
+
+    this.bossPitPromptText = this.add
+      .text(CHAMBER02_BOSS_PIT_ALTAR.x, CHAMBER02_BOSS_PIT_ALTAR.y + CHAMBER02_BOSS_PIT_ALTAR.promptOffsetY, 'Press [E] Descend', {
+        fontFamily: 'monospace',
+        fontSize: '18px',
+        color: '#d6c5ac',
+        backgroundColor: '#14100d'
+      })
+      .setPadding(8, 4, 8, 4)
+      .setOrigin(0.5)
+      .setDepth(16)
+      .setVisible(false);
+
+    this.currentBossPitAltar = null;
+    this.bossPitAltar = { altar, zone };
+  }
+
   createEnemyEncounter() {
     CHAMBER02_ENCOUNTER_POCKETS.forEach((pocket) => {
       this.add.ellipse(pocket.zoneX, WORLD.floorY - 4, pocket.zoneWidth * 0.56, 72, 0x040303, 0.1).setDepth(-6.02);
@@ -523,6 +584,76 @@ export class Chamber02Scene extends Phaser.Scene {
       this.handleEnemyContactPlayer(playerSprite, enemySprite, enemy);
     });
     return enemy;
+  }
+
+  refreshBossPitAltarPresence() {
+    this.currentBossPitAltar = null;
+    this.bossPitPromptText?.setVisible(false);
+
+    if (!this.bossPitAltar?.zone || this.hasCompletedBossPitLoop || this.bossPitTransitionActive || this.isExitGateTransitionActive) {
+      return;
+    }
+
+    this.physics.overlap(this.player.sprite, this.bossPitAltar.zone, () => {
+      this.currentBossPitAltar = this.bossPitAltar;
+    });
+
+    if (this.currentBossPitAltar) {
+      this.bossPitPromptText?.setVisible(true);
+    }
+  }
+
+  tryBeginBossPitTransition(mobileInput) {
+    if (!this.currentBossPitAltar || this.hasCompletedBossPitLoop || this.bossPitTransitionActive || this.isExitGateTransitionActive) {
+      return;
+    }
+
+    const interactPressed = Phaser.Input.Keyboard.JustDown(this.keyInteract)
+      || Phaser.Input.Keyboard.JustDown(this.keyEnter)
+      || mobileInput.interactPressed;
+    if (!interactPressed) {
+      return;
+    }
+
+    this.beginBossPitTransition();
+  }
+
+  beginBossPitTransition() {
+    if (this.bossPitTransitionActive || this.hasCompletedBossPitLoop) {
+      return;
+    }
+
+    this.bossPitTransitionActive = true;
+    console.info('[Chamber02Scene] starting Chamber02BossPitScene transition');
+    this.mobileControls.setMode('init');
+    this.currentBossPitAltar = null;
+    this.bossPitPromptText?.setVisible(false);
+    this.player.body.setVelocity(0, 0);
+    this.player.body.setEnable(false);
+    this.player.attackHitbox?.body?.setEnable(false);
+    this.enemies.forEach((enemy) => {
+      enemy.body?.setVelocity(0, 0);
+      enemy.body?.setEnable(false);
+      enemy.attackHitbox?.body?.setEnable(false);
+    });
+    this.audioDirector?.stopAmbientLoop({ fadeOut: false });
+    this.sound.play(ASSET_KEYS.loreExit, { volume: 0.78 });
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      console.info("[Chamber02Scene] calling scene.start('Chamber02BossPitScene')");
+      try {
+        this.scene.start('Chamber02BossPitScene', {
+          fromScene: this.scene.key,
+          altarX: CHAMBER02_BOSS_PIT_ALTAR.x,
+          altarY: CHAMBER02_BOSS_PIT_ALTAR.y
+        });
+      } catch (error) {
+        console.error("[Chamber02Scene] scene.start('Chamber02BossPitScene') failed", error);
+        this.bossPitTransitionActive = false;
+      }
+    });
+
+    this.cameras.main.fadeOut(420, 0, 0, 0);
   }
 
   update(time) {
@@ -791,6 +922,7 @@ export class Chamber02Scene extends Phaser.Scene {
   cleanupSceneUi() {
     this.restartText?.setVisible(false);
     this.exitGatePromptText?.setVisible(false);
+    this.bossPitPromptText?.setVisible(false);
     this.mobileControls?.setMode('init');
     this.hud?.setVisible(false);
   }
