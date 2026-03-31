@@ -183,6 +183,9 @@ export class HalfSkullMiniboss {
       return false;
     }
 
+    const interruptedTelegraph = this.attackState === 'windup' && time < this.attackCommitAt;
+    const wasGrounded = Boolean(this.body?.blocked?.down || this.body?.touching?.down);
+
     this.active = true;
     this.clearAttackState();
     this.health -= amount;
@@ -190,7 +193,11 @@ export class HalfSkullMiniboss {
     this.hitPulseUntil = time + this.config.hitPulseMs;
     this.hurtUntil = time + this.config.hurtRecoverMs;
     this.body.setVelocityX(-this.direction * this.config.hurtRecoilVelocityX);
-    this.body.setVelocityY(this.config.hurtRecoilVelocityY);
+    if (interruptedTelegraph && wasGrounded) {
+      this.body.setVelocityY(0);
+    } else {
+      this.body.setVelocityY(this.config.hurtRecoilVelocityY);
+    }
     this.scene.audioDirector?.playEnemyHurt(this.config.audioProfile ?? 'miniboss');
 
     if (this.health <= 0) {
@@ -340,7 +347,6 @@ export class HalfSkullMiniboss {
     }
 
     this.sprite.setScale(scaleX, scaleY);
-    this.syncVisualToBodyFloor();
     this.sprite.setAngle(angle);
     if (this.usingTexture) {
       this.sprite.setTint(tint);
@@ -348,14 +354,5 @@ export class HalfSkullMiniboss {
       this.sprite.setFillStyle(telegraphing ? 0xd6bb7a : takingHit ? 0xd8bdaa : COLORS.bone, telegraphing ? 0.96 : 0.94);
     }
 
-  }
-
-  syncVisualToBodyFloor() {
-    if (!this.body || !this.sprite?.active) {
-      return;
-    }
-
-    const groundedY = this.body.bottom - this.sprite.displayHeight * (1 - this.sprite.originY);
-    this.sprite.setY(groundedY);
   }
 }
