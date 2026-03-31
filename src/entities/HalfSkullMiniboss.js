@@ -122,13 +122,6 @@ export class HalfSkullMiniboss {
           this.scene.audioDirector?.playEnemyAttack(this.config.audioProfile ?? 'miniboss');
         }
         this.body.setVelocityX(this.direction * this.config.attackSpeed);
-        const attackRiseClamp = this.config.maxAttackRiseVelocity ?? -10;
-        const attackFallClamp = this.config.maxAttackFallVelocity ?? 120;
-        const attackLiftVelocity = Phaser.Math.Clamp(this.config.attackLiftVelocity ?? 0, attackRiseClamp, attackFallClamp);
-        const groundedAttackLiftVelocity = Math.max(0, attackLiftVelocity);
-        if (groundedAttackLiftVelocity !== 0) {
-          this.body.setVelocityY(groundedAttackLiftVelocity);
-        }
       }
       return;
     }

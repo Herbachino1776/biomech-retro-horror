@@ -293,7 +293,6 @@ export class SkitterServitor {
     this.nextAttackAllowedAt = time + this.config.attackRecoveryMs + this.config.attackCooldownMs;
     this.enterState('attack', time, this.config.attackActiveMs);
     this.body.setVelocityX(this.direction * (this.config.speed + this.config.lungeSpeedBonus));
-    this.body.setVelocityY(0);
 
     if (!this.attackAudioLocked) {
       this.attackAudioLocked = true;

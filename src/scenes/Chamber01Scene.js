@@ -50,7 +50,6 @@ const BLIND_CANTOR = {
   idleAdvanceSpeed: 20,
   windupDriftSpeed: 16,
   attackSpeed: 212,
-  attackLiftVelocity: 0,
   hitPulseMs: 330,
   hurtRecoverMs: 240,
   hurtRecoilVelocityX: 120,
