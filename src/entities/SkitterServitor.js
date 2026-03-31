@@ -295,8 +295,9 @@ export class SkitterServitor {
     const attackRiseClamp = this.config.maxAttackRiseVelocity ?? -8;
     const attackFallClamp = this.config.maxAttackFallVelocity ?? 120;
     const attackLiftVelocity = Phaser.Math.Clamp(this.config.lungeJumpVelocity ?? 0, attackRiseClamp, attackFallClamp);
-    if (attackLiftVelocity !== 0) {
-      this.body.setVelocityY(attackLiftVelocity);
+    const groundedAttackLiftVelocity = Math.max(0, attackLiftVelocity);
+    if (groundedAttackLiftVelocity !== 0) {
+      this.body.setVelocityY(groundedAttackLiftVelocity);
     }
 
     if (!this.attackAudioLocked) {
