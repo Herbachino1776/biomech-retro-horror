@@ -1382,7 +1382,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       scaleX *= 0.98;
       scaleY *= 1.04;
       angle = this.bossCombat.facing * 9;
-      tint = 0xd7efaa;
+      tint = 0xe2c9b4;
     } else if (hitPulsing) {
       const pulse = 1 + Math.sin(time / 42) * 0.024;
       scaleX *= pulse;
@@ -1476,6 +1476,9 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
     this.cameras.main.ignore(mobileUiElements);
     this.uiCamera.ignore(nonMobileObjects);
+    if (this.restartText) {
+      this.uiCamera.ignore(this.restartText);
+    }
   }
 
   applyResponsiveLayout() {

@@ -681,6 +681,9 @@ export class Sector03Chamber02BossChamberScene extends Phaser.Scene {
     const nonMobileObjects = this.children.list.filter((element) => !mobileUiSet.has(element));
     this.cameras.main.ignore(mobileUiElements);
     this.uiCamera.ignore(nonMobileObjects);
+    if (this.restartText) {
+      this.uiCamera.ignore(this.restartText);
+    }
   }
 
   applyResponsiveLayout() {

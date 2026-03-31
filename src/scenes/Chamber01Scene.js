@@ -1114,6 +1114,9 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.cameras.main.ignore(mobileUiElements);
     this.uiCamera.ignore(nonMobileObjects);
+    if (this.restartText) {
+      this.uiCamera.ignore(this.restartText);
+    }
   }
 
   applyResponsiveLayout() {
