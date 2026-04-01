@@ -131,6 +131,9 @@ export class Chamber02BossPitScene extends Phaser.Scene {
 
   init(data) {
     this.transitionContext = data ?? {};
+    this.startupFailure = null;
+    this.startupDiagnosticsText = null;
+    this.startupStep = 'init';
     this.isRestartingRun = false;
     this.returnTransitionActive = false;
     this.victorySequenceActive = false;
@@ -147,14 +150,60 @@ export class Chamber02BossPitScene extends Phaser.Scene {
   }
 
   create() {
-    this.createWorld();
-    this.createAudio();
-    this.createBackdrop();
-    this.createPlayerAndCombat();
-    this.createUiAndInput();
-    this.majorEncounterResolution = new MajorEncounterResolution(this);
-    this.configureCameraAndLayout();
-    this.cameras.main.fadeIn(460, 0, 0, 0);
+    console.info('[Chamber02BossPitScene] create start', this.transitionContext);
+    try {
+      this.startupStep = 'create-world';
+      this.createWorld();
+      this.startupStep = 'create-audio';
+      this.createAudio();
+      this.startupStep = 'create-backdrop';
+      this.createBackdrop();
+      this.startupStep = 'create-player-and-combat';
+      this.createPlayerAndCombat();
+      this.startupStep = 'create-ui-and-input';
+      this.createUiAndInput();
+      this.startupStep = 'major-encounter-resolution';
+      this.majorEncounterResolution = new MajorEncounterResolution(this);
+      this.startupStep = 'configure-camera-and-layout';
+      this.configureCameraAndLayout();
+      this.cameras.main.fadeIn(460, 0, 0, 0);
+      console.info('[Chamber02BossPitScene] create complete');
+    } catch (error) {
+      this.handleStartupFailure(error);
+    }
+  }
+
+  handleStartupFailure(error) {
+    const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    this.startupFailure = { step: this.startupStep, message };
+    console.error('[Chamber02BossPitScene] startup failed', {
+      step: this.startupStep,
+      transitionContext: this.transitionContext,
+      error
+    });
+
+    this.cameras.main.setBackgroundColor('#150507');
+    this.cameras.main.fadeIn(0, 0, 0, 0);
+    this.startupDiagnosticsText = this.add.text(24, 24,
+      `CHAMBER02 BOSS PIT BOOT FAILURE\nSTEP: ${this.startupStep}\n${message}\n\nPress [R] / [E] to return`,
+      {
+        fontFamily: 'monospace',
+        fontSize: '18px',
+        color: '#f2c5c5',
+        lineSpacing: 8,
+        wordWrap: { width: Math.max(280, this.scale.width - 48), useAdvancedWrap: true }
+      }
+    )
+      .setDepth(500)
+      .setScrollFactor(0);
+
+    const keyboard = this.input?.keyboard;
+    if (keyboard) {
+      this.keyRestart = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+      this.keyInteract = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+      this.keyEnter = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+    }
+    this.mobileControls?.setMode?.('dead');
   }
 
   createWorld() {
@@ -209,6 +258,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.restartText = this.add.text(this.scale.width / 2, 90, '', {
       fontFamily: 'monospace', fontSize: '22px', color: '#d2c2ac', align: 'center'
     }).setScrollFactor(0).setDepth(35).setOrigin(0.5).setVisible(false);
+    this.uiCamera?.ignore(this.restartText);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
@@ -244,6 +294,27 @@ export class Chamber02BossPitScene extends Phaser.Scene {
   }
 
   update(time) {
+    if (this.startupFailure) {
+      const mobileInput = this.mobileControls?.getInputState?.() ?? {};
+      const returnPressed = Boolean(
+        (this.keyRestart && Phaser.Input.Keyboard.JustDown(this.keyRestart))
+        || (this.keyInteract && Phaser.Input.Keyboard.JustDown(this.keyInteract))
+        || (this.keyEnter && Phaser.Input.Keyboard.JustDown(this.keyEnter))
+        || mobileInput.interactPressed
+      );
+      if (returnPressed && !this.returnTransitionActive) {
+        this.returnTransitionActive = true;
+        this.scene.start(BOSS_PIT_RETURN.returnSceneKey, {
+          fromScene: this.scene.key,
+          returnFromBossPit: false,
+          bossPitBootFailed: true,
+          bossPitFailureStep: this.startupFailure.step,
+          bossPitFailureMessage: this.startupFailure.message
+        });
+      }
+      return;
+    }
+
     const mobileInput = this.mobileControls.getInputState();
     if (this.player.isDead) {
       this.mobileControls.setMode('dead');
