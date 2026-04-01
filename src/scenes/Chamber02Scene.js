@@ -109,10 +109,10 @@ const CHAMBER02_ENCOUNTER_POCKETS = [
 
 
 const CHAMBER02_BOSS_PIT_ALTAR = {
-  x: 1970,
+  x: 620,
   y: 402,
-  width: 176,
-  height: 176,
+  width: 198,
+  height: 198,
   zoneWidth: 196,
   zoneHeight: 216,
   promptOffsetY: -168
@@ -324,10 +324,10 @@ export class Chamber02Scene extends Phaser.Scene {
     }
 
     this.sanctumAura = this.add
-      .ellipse(1930, 404, 500, 96, COLORS.sickly, 0.12)
+      .ellipse(CHAMBER02_BOSS_PIT_ALTAR.x, 404, 500, 96, COLORS.sickly, 0.12)
       .setDepth(-9);
 
-    this.ambientVeil = this.add.ellipse(1970, 286, 660, 340, COLORS.sickly, 0.03).setDepth(-7.5).setScale(1, 1);
+    this.ambientVeil = this.add.ellipse(CHAMBER02_BOSS_PIT_ALTAR.x, 286, 660, 340, COLORS.sickly, 0.03).setDepth(-7.5).setScale(1, 1);
   }
 
   createPlatforms() {
@@ -512,9 +512,18 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   createBossPitAltar() {
-    const altar = this.add
-      .ellipse(CHAMBER02_BOSS_PIT_ALTAR.x, CHAMBER02_BOSS_PIT_ALTAR.y - 10, CHAMBER02_BOSS_PIT_ALTAR.width, CHAMBER02_BOSS_PIT_ALTAR.height, COLORS.sickly, 0.16)
-      .setDepth(-5.1);
+    const altarTextureKey = this.textures.exists(ASSET_KEYS.bossPit02AltarTrap)
+      ? ASSET_KEYS.bossPit02AltarTrap
+      : null;
+    const altar = altarTextureKey
+      ? this.add.image(CHAMBER02_BOSS_PIT_ALTAR.x, CHAMBER02_BOSS_PIT_ALTAR.y, altarTextureKey)
+        .setDisplaySize(CHAMBER02_BOSS_PIT_ALTAR.width, CHAMBER02_BOSS_PIT_ALTAR.height)
+        .setTint(0xd8c4ad)
+        .setAlpha(0.88)
+        .setDepth(-5.1)
+      : this.add
+        .ellipse(CHAMBER02_BOSS_PIT_ALTAR.x, CHAMBER02_BOSS_PIT_ALTAR.y - 10, CHAMBER02_BOSS_PIT_ALTAR.width, CHAMBER02_BOSS_PIT_ALTAR.height, COLORS.sickly, 0.16)
+        .setDepth(-5.1);
     this.add
       .ellipse(CHAMBER02_BOSS_PIT_ALTAR.x, WORLD.floorY + 8, CHAMBER02_BOSS_PIT_ALTAR.width + 84, 40, 0x030303, 0.34)
       .setDepth(-5.05);
