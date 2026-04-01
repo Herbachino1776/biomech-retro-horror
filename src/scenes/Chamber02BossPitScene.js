@@ -132,6 +132,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
   init(data) {
     this.transitionContext = data ?? {};
     this.startupFailure = null;
+    this.startupFailureBackdrop = null;
     this.startupDiagnosticsText = null;
     this.startupStep = 'init';
     this.isRestartingRun = false;
@@ -181,6 +182,14 @@ export class Chamber02BossPitScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor('#150507');
     this.cameras.main.fadeIn(0, 0, 0, 0);
+    this.startupFailureBackdrop = this.add.rectangle(
+      this.scale.width / 2,
+      this.scale.height / 2,
+      this.scale.width,
+      this.scale.height,
+      0x150507,
+      0.94
+    ).setDepth(499).setScrollFactor(0);
     this.startupDiagnosticsText = this.add.text(24, 24,
       `CHAMBER02 BOSS PIT BOOT FAILURE\nSTEP: ${this.startupStep}\n${message}\n\nPress [R] / [E] to return`,
       {
