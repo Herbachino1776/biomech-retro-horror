@@ -30,7 +30,7 @@ const BOSS_PIT_BOOTSTRAP = {
 const BOSS_PIT_RETURN = {
   returnSceneKey: 'Chamber02Scene',
   returnXOffset: 56,
-  returnYOffset: 0
+  returnYOffset: -42
 };
 
 const BOSS_PIT_ALTARS = {
@@ -58,30 +58,72 @@ const BOSS_PIT_VICTORY = {
   postExplosionDespawnDelayMs: 560
 };
 
+const BOSS_PIT_ARRIVAL = {
+  lockDurationMs: 920,
+  impactAtMs: 420,
+  shakeDurationMs: 220,
+  shakeIntensity: 0.0056
+};
+
+const PIT_DIFFICULTY_PRESETS = {
+  easy: {
+    health: 6,
+    contactDamage: 1,
+    contactDamageCooldownMs: 1500,
+    attackCooldownMs: 3860,
+    attackTelegraphMs: 960,
+    attackRecoveryMs: 840,
+    approachSpeed: 36,
+    idleAdvanceSpeed: 14,
+    attackSpeed: 172,
+    attackLiftVelocity: -108,
+    hurtRecoverMs: 250,
+    hurtRecoilVelocityX: 76,
+    hurtRecoilVelocityY: -48,
+    groundBurst: {
+      cooldownMs: 8600,
+      windupMs: 1340,
+      activeMs: 120,
+      recoveryMs: 1020
+    },
+    projectile: {
+      cooldownMs: 6000,
+      windupMs: 1020,
+      recoveryMs: 980,
+      speed: 208,
+      lifetimeMs: 1700
+    }
+  }
+};
+
+const BOSS_PIT_DIFFICULTY_TIER = 'easy';
+const BOSS_PIT_SELECTED_DIFFICULTY = PIT_DIFFICULTY_PRESETS[BOSS_PIT_DIFFICULTY_TIER];
+
 const BOSS_PIT_BOSS = {
   name: 'THE STARVED PROPHET OF ASH',
   subtitle: 'Ash Prophecy Litigator',
+  difficultyTier: BOSS_PIT_DIFFICULTY_TIER,
   spawnX: 960,
   spawnY: WORLD.floorY - 2,
   activationX: 760,
   textureKey: ASSET_KEYS.bossPit02StarvedProphetOfAsh,
-  health: 8,
-  contactDamage: 2,
-  contactDamageCooldownMs: 1200,
-  attackCooldownMs: 3120,
-  attackTelegraphMs: 700,
-  attackRecoveryMs: 660,
+  health: BOSS_PIT_SELECTED_DIFFICULTY.health,
+  contactDamage: BOSS_PIT_SELECTED_DIFFICULTY.contactDamage,
+  contactDamageCooldownMs: BOSS_PIT_SELECTED_DIFFICULTY.contactDamageCooldownMs,
+  attackCooldownMs: BOSS_PIT_SELECTED_DIFFICULTY.attackCooldownMs,
+  attackTelegraphMs: BOSS_PIT_SELECTED_DIFFICULTY.attackTelegraphMs,
+  attackRecoveryMs: BOSS_PIT_SELECTED_DIFFICULTY.attackRecoveryMs,
   attackRange: 194,
   approachRange: 324,
-  approachSpeed: 42,
-  idleAdvanceSpeed: 17,
+  approachSpeed: BOSS_PIT_SELECTED_DIFFICULTY.approachSpeed,
+  idleAdvanceSpeed: BOSS_PIT_SELECTED_DIFFICULTY.idleAdvanceSpeed,
   windupDriftSpeed: 9,
-  attackSpeed: 192,
-  attackLiftVelocity: -120,
+  attackSpeed: BOSS_PIT_SELECTED_DIFFICULTY.attackSpeed,
+  attackLiftVelocity: BOSS_PIT_SELECTED_DIFFICULTY.attackLiftVelocity,
   hitPulseMs: 260,
-  hurtRecoverMs: 210,
-  hurtRecoilVelocityX: 92,
-  hurtRecoilVelocityY: -56,
+  hurtRecoverMs: BOSS_PIT_SELECTED_DIFFICULTY.hurtRecoverMs,
+  hurtRecoilVelocityX: BOSS_PIT_SELECTED_DIFFICULTY.hurtRecoilVelocityX,
+  hurtRecoilVelocityY: BOSS_PIT_SELECTED_DIFFICULTY.hurtRecoilVelocityY,
   body: { width: 92, height: 122, offsetX: 88, offsetY: 152 },
   audioProfile: 'miniboss',
   poise: { max: 5, recoverDelayMs: 1900, recoverPerSecond: 1.1, staggerDurationMs: 2300, finisherRange: 148 },
@@ -95,10 +137,10 @@ const BOSS_PIT_BOSS = {
   },
   groundBurst: {
     enabled: true,
-    cooldownMs: 6900,
-    windupMs: 1080,
-    activeMs: 140,
-    recoveryMs: 860,
+    cooldownMs: BOSS_PIT_SELECTED_DIFFICULTY.groundBurst.cooldownMs,
+    windupMs: BOSS_PIT_SELECTED_DIFFICULTY.groundBurst.windupMs,
+    activeMs: BOSS_PIT_SELECTED_DIFFICULTY.groundBurst.activeMs,
+    recoveryMs: BOSS_PIT_SELECTED_DIFFICULTY.groundBurst.recoveryMs,
     minRange: 120,
     maxRange: 390,
     radius: 128,
@@ -107,17 +149,17 @@ const BOSS_PIT_BOSS = {
   },
   projectile: {
     textureKey: ASSET_KEYS.sector02PressureShardProjectile,
-    cooldownMs: 4600,
-    windupMs: 760,
-    recoveryMs: 860,
+    cooldownMs: BOSS_PIT_SELECTED_DIFFICULTY.projectile.cooldownMs,
+    windupMs: BOSS_PIT_SELECTED_DIFFICULTY.projectile.windupMs,
+    recoveryMs: BOSS_PIT_SELECTED_DIFFICULTY.projectile.recoveryMs,
     minRange: 220,
     maxRange: 500,
     verticalTolerance: 156,
     spawnOffsetX: 76,
     spawnOffsetY: -108,
-    speed: 238,
+    speed: BOSS_PIT_SELECTED_DIFFICULTY.projectile.speed,
     damage: 1,
-    lifetimeMs: 1900,
+    lifetimeMs: BOSS_PIT_SELECTED_DIFFICULTY.projectile.lifetimeMs,
     rotationSpeed: 380,
     telegraphRadiusX: 84,
     telegraphRadiusY: 28
@@ -148,6 +190,10 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.exitAltar = null;
     this.currentExitAltar = null;
     this.resolutionLockActive = false;
+    this.arrivalSequenceActive = false;
+    this.arrivalImpactTriggered = false;
+    this.arrivalImpactAt = 0;
+    this.arrivalReleaseAt = 0;
   }
 
   create() {
@@ -167,6 +213,8 @@ export class Chamber02BossPitScene extends Phaser.Scene {
       this.majorEncounterResolution = new MajorEncounterResolution(this);
       this.startupStep = 'configure-camera-and-layout';
       this.configureCameraAndLayout();
+      this.startupStep = 'arrival-beat';
+      this.beginArrivalBeat();
       this.cameras.main.fadeIn(460, 0, 0, 0);
       this.startupStep = 'ready';
       console.info('[Chamber02BossPitScene] create complete');
@@ -299,6 +347,34 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.hud.update(this.player.health, this.player.maxHealth);
   }
 
+  beginArrivalBeat() {
+    this.arrivalSequenceActive = true;
+    this.arrivalImpactTriggered = false;
+    this.arrivalImpactAt = this.time.now + BOSS_PIT_ARRIVAL.impactAtMs;
+    this.arrivalReleaseAt = this.time.now + BOSS_PIT_ARRIVAL.lockDurationMs;
+    this.player.body.setVelocity(0, 0);
+    this.player.attackHitbox?.body?.setEnable(false);
+    this.mobileControls?.setMode('dialogue');
+  }
+
+  runArrivalBeat(time) {
+    this.player.body.setVelocity(0, 0);
+    this.boss?.body?.setVelocity?.(0, 0);
+    this.setEnemyProjectilesPaused(true);
+
+    if (!this.arrivalImpactTriggered && time >= this.arrivalImpactAt) {
+      this.arrivalImpactTriggered = true;
+      this.cameras.main.shake(BOSS_PIT_ARRIVAL.shakeDurationMs, BOSS_PIT_ARRIVAL.shakeIntensity, true);
+      this.audioDirector?.playEnemyAttack(BOSS_PIT_BOSS.audioProfile ?? 'miniboss');
+    }
+
+    if (time >= this.arrivalReleaseAt) {
+      this.arrivalSequenceActive = false;
+      this.player.attackHitbox?.body?.setEnable(true);
+      this.mobileControls?.setMode('gameplay');
+    }
+  }
+
   update(time) {
     if (this.startupFailure) {
       const mobileInput = this.mobileControls?.getInputState?.() ?? {};
@@ -339,6 +415,14 @@ export class Chamber02BossPitScene extends Phaser.Scene {
       this.player.body.setVelocity(0, 0);
       this.boss?.body?.setVelocity?.(0, 0);
       this.setEnemyProjectilesPaused(true);
+      return;
+    }
+    if (this.arrivalSequenceActive) {
+      this.mobileControls.setMode('dialogue');
+      this.runArrivalBeat(time);
+      this.refreshBossBar(time);
+      this.directionalCameraBias?.update();
+      this.hud.update(this.player.health, this.player.maxHealth);
       return;
     }
     if (this.victorySequenceActive || this.resolutionLockActive) {

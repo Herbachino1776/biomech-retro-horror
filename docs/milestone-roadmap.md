@@ -59,6 +59,7 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 - Add additional trap-altar-to-boss-pit routes with deterministic return behavior.
 - Increase elite-domain identity in opened room segments.
 - Preserve all established run-state and progression invariants.
+- Canonicalize Sector 1 Chamber 2 boss pit as the reliability-first polish reference before cross-pit abstraction.
 
 **Current-reality notes inside Milestone 8:**
 - Chamber 1 has been rebuilt toward later-chamber standards.
@@ -72,6 +73,15 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 3. larger opened-up room background reveal
 4. elite / miniboss domain inside that opened-up room
 5. terminal threshold / seal / endcap
+
+**Boss-pit canonicalization checkpoint (before abstraction):**
+- Lock Chamber02 immediate entry reliability.
+- Add arrival-side intimidation beat inside `Chamber02BossPitScene`.
+- Keep S1C2 pit on easy-tier tuning.
+- Preserve textless modern death/payoff package.
+- Ensure super-altar return to Chamber02 feels grounded.
+- Defer shared helper abstraction to a later milestone once this pattern is trusted.
+- Optional later polish lane: ladder/physical descent prop treatment.
 
 ## Milestone 9 — Sector 3 Pacing / Density / Readability Polish
 **Purpose:** tune Sector 3 for oppressive pacing clarity and combat readability under higher density.

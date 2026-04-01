@@ -43,6 +43,24 @@ Milestone 7 is **advanced/largely established** and no longer the main active bu
 - Practical priority is Sector 3 consistency, chamber quality alignment, and boss-pit expansion while preserving existing Sector 1/2 contracts.
 - Milestone 7 follow-up remains available as targeted polish/support work, not primary sequencing.
 
+### Canonical Boss-Pit Polish Anchor (Current)
+- **Sector 1 Chamber 2 (`Chamber02BossPitScene`) is the canonical pit-under-polish anchor.**
+- Reliability-first contract is now explicit: keep immediate `Chamber02Scene -> Chamber02BossPitScene` entry stable and avoid fragile source-scene cinematic handoff choreography.
+- Polish should be added on the **arrival side** inside pit scenes first (arrival lock + intimidation sting + clean control return), then generalized later once trusted.
+- S1C2 pit tuning is intentionally **easy-tier** to match early-game pacing.
+- Textless modern death payoff package remains the canonical S1C2 pit resolution.
+- Super-altar return should feel grounded (no clunky black-screen hiding tricks / no awkward midair return feel).
+
+### Boss-Pit Abstraction (Deferred on Purpose)
+- Do **not** abstract the pit system until the Chamber02 canonical pattern is trusted in play.
+- Future milestone should cover:
+  - shared pit entry helper
+  - shared pit return helper
+  - shared arrival sting / arrival beat helper
+  - shared textless payoff package helper
+  - per-pit difficulty tiers/config plumbing
+- Optional later prop polish: add a ladder/physical-descent prop where appropriate.
+
 ## Authoring Doctrine to Follow During Milestone 8
 Chambers should be authored with this default rhythm:
 1. opening setpiece / lore altar segment
