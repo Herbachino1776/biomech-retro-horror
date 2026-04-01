@@ -59,17 +59,13 @@ const BOSS_PIT_VICTORY = {
 };
 
 const BOSS_PIT_ARRIVAL = {
-  lockDurationMs: 2280,
-  impactAtMs: 420,
-  shakeDurationMs: 1760,
+  lockDurationMs: 2000,
+  impactAtMs: 80,
+  shakeDurationMs: 2000,
   shakeIntensity: 0.0094,
-  intimidationZoomMultiplier: 1.24,
-  intimidationZoomInDurationMs: 280,
-  framingPanDurationMs: 420,
-  framingPanOffsetX: 316,
-  framingPanOffsetY: -28,
-  framingHoldMs: 520,
-  zoomReturnDurationMs: 440
+  intimidationZoomMultiplier: 1.72,
+  intimidationZoomInDurationMs: 220,
+  zoomReturnDurationMs: 480
 };
 
 const BOSS_PIT_DEATH_CAMERA = {
@@ -212,9 +208,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.arrivalReleaseAt = 0;
     this.hasBossRevealTriggered = false;
     this.hasBossBarBeenRevealed = false;
-    this.arrivalFrameTarget = null;
-    this.arrivalPanBackAt = 0;
-    this.arrivalPanBackTriggered = false;
+    this.bossDeathPayoffLocation = null;
     this.deathCameraFocusTween = null;
     this.deathCameraRestoreTween = null;
   }
@@ -375,8 +369,6 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.arrivalImpactTriggered = false;
     this.arrivalImpactAt = this.time.now + BOSS_PIT_ARRIVAL.impactAtMs;
     this.arrivalReleaseAt = this.time.now + BOSS_PIT_ARRIVAL.lockDurationMs;
-    this.arrivalPanBackAt = 0;
-    this.arrivalPanBackTriggered = false;
     this.player.body.setVelocity(0, 0);
     this.player.attackHitbox?.body?.setEnable(false);
     this.mobileControls?.setMode('dialogue');
@@ -389,27 +381,10 @@ export class Chamber02BossPitScene extends Phaser.Scene {
 
     if (!this.arrivalImpactTriggered && time >= this.arrivalImpactAt) {
       this.arrivalImpactTriggered = true;
-      const worldView = this.cameras.main.worldView;
-      const viewHalfWidth = Math.max(1, worldView.width * 0.5);
-      this.arrivalFrameTarget = {
-        x: Phaser.Math.Clamp(
-          this.player.sprite.x + BOSS_PIT_ARRIVAL.framingPanOffsetX,
-          viewHalfWidth,
-          BOSS_PIT_BOOTSTRAP.worldWidth - viewHalfWidth
-        ),
-        y: this.player.sprite.y + BOSS_PIT_ARRIVAL.framingPanOffsetY
-      };
-      this.arrivalPanBackAt = time + BOSS_PIT_ARRIVAL.framingPanDurationMs + BOSS_PIT_ARRIVAL.framingHoldMs;
       this.cameras.main.shake(BOSS_PIT_ARRIVAL.shakeDurationMs, BOSS_PIT_ARRIVAL.shakeIntensity, true);
       this.tweens.killTweensOf(this.cameras.main);
-      this.cameras.main.stopFollow();
-      this.cameras.main.pan(
-        this.arrivalFrameTarget.x,
-        this.arrivalFrameTarget.y,
-        BOSS_PIT_ARRIVAL.framingPanDurationMs,
-        'Sine.easeInOut',
-        true
-      );
+      this.cameras.main.centerOn(this.player.sprite.x, this.player.sprite.y);
+      this.cameras.main.startFollow(this.player.sprite, true, 1, 1, 0, 0);
       this.tweens.add({
         targets: this.cameras.main,
         zoom: this.getGameplayZoom() * BOSS_PIT_ARRIVAL.intimidationZoomMultiplier,
@@ -417,22 +392,6 @@ export class Chamber02BossPitScene extends Phaser.Scene {
         ease: 'Sine.easeOut'
       });
       this.audioDirector?.playEnemyAttack(BOSS_PIT_BOSS.audioProfile ?? 'miniboss');
-    }
-
-    if (
-      this.arrivalImpactTriggered
-      && !this.arrivalPanBackTriggered
-      && this.arrivalPanBackAt > 0
-      && time >= this.arrivalPanBackAt
-    ) {
-      this.arrivalPanBackTriggered = true;
-      this.cameras.main.pan(
-        this.player.sprite.x,
-        this.player.sprite.y,
-        360,
-        'Sine.easeInOut',
-        true
-      );
     }
 
     if (time >= this.arrivalReleaseAt) {
@@ -669,6 +628,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
 
     const floorBottomY = WORLD.floorY + 2;
     const groundedY = floorBottomY - this.boss.sprite.displayHeight * (1 - this.boss.sprite.originY);
+    const payoffX = this.boss.sprite.x;
     this.tweens.killTweensOf(this.boss.sprite);
     this.boss.sprite
       .setAlpha(1)
@@ -678,7 +638,10 @@ export class Chamber02BossPitScene extends Phaser.Scene {
         this.boss.baseScaleY * this.boss.config.presentation.scaleY
       )
       .setAngle(0)
+      .setX(payoffX)
       .setY(groundedY);
+    this.boss.body?.setVelocity?.(0, 0);
+    this.bossDeathPayoffLocation = { x: payoffX, y: groundedY };
   }
 
   startBossExplosionFade() {
@@ -701,8 +664,9 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     }
 
     this.stopVictoryGoreFountain();
+    const remainsX = this.bossDeathPayoffLocation?.x ?? this.boss.sprite.x;
     spawnEnemyCorpseRemains(this, {
-      x: this.boss.sprite.x,
+      x: remainsX,
       groundY: WORLD.floorY + 2,
       depth: this.boss.sprite.depth,
       size: 'large'
