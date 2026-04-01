@@ -30,7 +30,7 @@ const BOSS_PIT_BOOTSTRAP = {
 const BOSS_PIT_RETURN = {
   returnSceneKey: 'Chamber02Scene',
   returnXOffset: 56,
-  returnYOffset: -42
+  returnYOffset: -34
 };
 
 const BOSS_PIT_ALTARS = {
@@ -59,39 +59,42 @@ const BOSS_PIT_VICTORY = {
 };
 
 const BOSS_PIT_ARRIVAL = {
-  lockDurationMs: 920,
+  lockDurationMs: 2280,
   impactAtMs: 420,
-  shakeDurationMs: 220,
-  shakeIntensity: 0.0056
+  shakeDurationMs: 1760,
+  shakeIntensity: 0.0094,
+  intimidationZoomMultiplier: 1.1,
+  intimidationZoomInDurationMs: 240,
+  zoomReturnDurationMs: 420
 };
 
 const PIT_DIFFICULTY_PRESETS = {
   easy: {
-    health: 6,
+    health: 5,
     contactDamage: 1,
-    contactDamageCooldownMs: 1500,
-    attackCooldownMs: 3860,
-    attackTelegraphMs: 960,
-    attackRecoveryMs: 840,
-    approachSpeed: 36,
-    idleAdvanceSpeed: 14,
-    attackSpeed: 172,
-    attackLiftVelocity: -108,
-    hurtRecoverMs: 250,
-    hurtRecoilVelocityX: 76,
+    contactDamageCooldownMs: 1800,
+    attackCooldownMs: 4320,
+    attackTelegraphMs: 1120,
+    attackRecoveryMs: 920,
+    approachSpeed: 32,
+    idleAdvanceSpeed: 12,
+    attackSpeed: 162,
+    attackLiftVelocity: -100,
+    hurtRecoverMs: 290,
+    hurtRecoilVelocityX: 70,
     hurtRecoilVelocityY: -48,
     groundBurst: {
-      cooldownMs: 8600,
-      windupMs: 1340,
+      cooldownMs: 9800,
+      windupMs: 1480,
       activeMs: 120,
-      recoveryMs: 1020
+      recoveryMs: 1120
     },
     projectile: {
-      cooldownMs: 6000,
-      windupMs: 1020,
-      recoveryMs: 980,
-      speed: 208,
-      lifetimeMs: 1700
+      cooldownMs: 7200,
+      windupMs: 1180,
+      recoveryMs: 1040,
+      speed: 196,
+      lifetimeMs: 1600
     }
   }
 };
@@ -105,7 +108,6 @@ const BOSS_PIT_BOSS = {
   difficultyTier: BOSS_PIT_DIFFICULTY_TIER,
   spawnX: 960,
   spawnY: WORLD.floorY - 2,
-  activationX: 760,
   textureKey: ASSET_KEYS.bossPit02StarvedProphetOfAsh,
   health: BOSS_PIT_SELECTED_DIFFICULTY.health,
   contactDamage: BOSS_PIT_SELECTED_DIFFICULTY.contactDamage,
@@ -127,6 +129,7 @@ const BOSS_PIT_BOSS = {
   body: { width: 92, height: 122, offsetX: 88, offsetY: 152 },
   audioProfile: 'miniboss',
   poise: { max: 5, recoverDelayMs: 1900, recoverPerSecond: 1.1, staggerDurationMs: 2300, finisherRange: 148 },
+  revealViewportPadding: 72,
   presentation: {
     display: { width: 352, height: 372 },
     origin: { x: 0.52, y: 0.986 },
@@ -194,6 +197,8 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.arrivalImpactTriggered = false;
     this.arrivalImpactAt = 0;
     this.arrivalReleaseAt = 0;
+    this.hasBossRevealTriggered = false;
+    this.hasBossBarBeenRevealed = false;
   }
 
   create() {
@@ -365,11 +370,25 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     if (!this.arrivalImpactTriggered && time >= this.arrivalImpactAt) {
       this.arrivalImpactTriggered = true;
       this.cameras.main.shake(BOSS_PIT_ARRIVAL.shakeDurationMs, BOSS_PIT_ARRIVAL.shakeIntensity, true);
+      this.tweens.killTweensOf(this.cameras.main);
+      this.tweens.add({
+        targets: this.cameras.main,
+        zoom: this.getGameplayZoom() * BOSS_PIT_ARRIVAL.intimidationZoomMultiplier,
+        duration: BOSS_PIT_ARRIVAL.intimidationZoomInDurationMs,
+        ease: 'Sine.easeOut'
+      });
       this.audioDirector?.playEnemyAttack(BOSS_PIT_BOSS.audioProfile ?? 'miniboss');
     }
 
     if (time >= this.arrivalReleaseAt) {
       this.arrivalSequenceActive = false;
+      this.tweens.killTweensOf(this.cameras.main);
+      this.tweens.add({
+        targets: this.cameras.main,
+        zoom: this.getGameplayZoom(),
+        duration: BOSS_PIT_ARRIVAL.zoomReturnDurationMs,
+        ease: 'Sine.easeInOut'
+      });
       this.player.attackHitbox?.body?.setEnable(true);
       this.mobileControls?.setMode('gameplay');
     }
@@ -448,9 +467,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     };
 
     this.player.update(time, input);
-    if (!this.boss.dead && !this.boss.active && this.player.sprite.x >= BOSS_PIT_BOSS.activationX) {
-      this.boss.setActive(true);
-    }
+    this.tryTriggerBossReveal();
     this.boss.update(time, this.player.sprite);
     this.refreshExitAltarPresence();
     this.tryUseExitAltar(mobileInput);
@@ -787,8 +804,12 @@ export class Chamber02BossPitScene extends Phaser.Scene {
   }
 
   refreshBossBar(time) {
+    if (!this.hasBossBarBeenRevealed && this.hasBossRevealTriggered) {
+      this.hasBossBarBeenRevealed = true;
+    }
+
     this.hud.setBossBarState({
-      visible: !this.boss.dead,
+      visible: this.hasBossBarBeenRevealed && !this.boss.dead,
       name: BOSS_PIT_BOSS.name,
       subtitle: BOSS_PIT_BOSS.subtitle,
       current: this.boss.health,
@@ -796,6 +817,36 @@ export class Chamber02BossPitScene extends Phaser.Scene {
       telegraph: this.boss.getTelegraphProgress(time),
       wounded: time < this.boss.hurtUntil
     });
+  }
+
+  tryTriggerBossReveal() {
+    if (this.hasBossRevealTriggered || this.arrivalSequenceActive || this.boss.dead || this.boss.active) {
+      return;
+    }
+    if (!this.isBossRevealEligible()) {
+      return;
+    }
+
+    this.hasBossRevealTriggered = true;
+    this.boss.setActive(true);
+  }
+
+  isBossRevealEligible() {
+    if (!this.boss?.sprite?.active) {
+      return false;
+    }
+
+    const worldView = this.cameras.main.worldView;
+    const padding = BOSS_PIT_BOSS.revealViewportPadding ?? 72;
+    const revealRect = new Phaser.Geom.Rectangle(
+      worldView.x + padding,
+      worldView.y + padding,
+      Math.max(1, worldView.width - padding * 2),
+      Math.max(1, worldView.height - padding * 2)
+    );
+    const bossX = this.boss.sprite.x;
+    const bossY = this.boss.sprite.body?.center?.y ?? this.boss.sprite.y;
+    return Phaser.Geom.Rectangle.Contains(revealRect, bossX, bossY);
   }
 
   setEnemyProjectilesPaused(paused) {
@@ -957,5 +1008,12 @@ export class Chamber02BossPitScene extends Phaser.Scene {
 
     this.restartText.setPosition(width / 2, Math.max(76, height * 0.2));
     this.mobileControls.layout();
+  }
+
+  getGameplayZoom() {
+    const width = this.scale.width;
+    const height = this.scale.height;
+    const isPortraitMobile = this.mobileControls.enabled && height >= width;
+    return isPortraitMobile ? PORTRAIT_LAYOUT.portraitZoom : PORTRAIT_LAYOUT.desktopZoom;
   }
 }
