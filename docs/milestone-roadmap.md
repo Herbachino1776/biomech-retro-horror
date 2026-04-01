@@ -83,6 +83,10 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 - Defer shared helper abstraction to a later milestone once this pattern is trusted.
 - Optional later polish lane: ladder/physical descent prop treatment.
 
+**Checkpoint note (current):**
+- Chamber02 canonical pass is now the trusted reference for immediate-entry reliability + pit-side arrival intimidation + reveal-gated fight start + easy-tier tuning + grounded return.
+- Cross-pit abstraction remains intentionally deferred until this reference pattern is validated across additional pits.
+
 ## Milestone 9 — Sector 3 Pacing / Density / Readability Polish
 **Purpose:** tune Sector 3 for oppressive pacing clarity and combat readability under higher density.
 

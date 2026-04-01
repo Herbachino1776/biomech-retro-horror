@@ -50,6 +50,7 @@ Milestone 7 is **advanced/largely established** and no longer the main active bu
 - S1C2 pit tuning is intentionally **easy-tier** to match early-game pacing.
 - Textless modern death payoff package remains the canonical S1C2 pit resolution.
 - Super-altar return should feel grounded (no clunky black-screen hiding tricks / no awkward midair return feel).
+- Canonicalization checkpoint now includes: arrival-side shake/zoom intimidation beat in `Chamber02BossPitScene`, reveal-gated AI + boss bar activation, and grounded super-altar return placement.
 
 ### Boss-Pit Abstraction (Deferred on Purpose)
 - Do **not** abstract the pit system until the Chamber02 canonical pattern is trusted in play.
