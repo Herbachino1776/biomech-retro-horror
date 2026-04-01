@@ -70,6 +70,14 @@ Guidance:
 - Sector 3 is expected to heavily expand trap altars and boss pits.
 - Boss/miniboss/pit-boss payoff treatment is locked to modern stronger doctrine (zoom + shake + elongated ceremonial finish + stronger gore + escalated remains).
 
+### Current Canonical Pit-Polish Anchor
+- Treat **Sector 1 Chamber 2 (`Chamber02BossPitScene`)** as the first canonical pit-under-polish reference.
+- Keep Chamber02 source-scene entry reliable (`Chamber02Scene -> Chamber02BossPitScene` immediate handoff); do not reintroduce fragile source-scene cinematic descent logic.
+- Add/iterate polish on the pit-arrival side first (short lock, impact shake, heavy boss intimidation audio, clean control return).
+- Keep S1C2 pit intentionally easier than later pits via per-pit difficulty tiering.
+- Keep textless death payoff package and clean super-altar return grounding.
+- Defer cross-scene boss-pit abstraction until this canonical pattern is trusted.
+
 ## Current Build/Platform Baseline
 - Phaser 3 + Vite.
 - GitHub Pages project-site base path: `/biomech-retro-horror/`.
