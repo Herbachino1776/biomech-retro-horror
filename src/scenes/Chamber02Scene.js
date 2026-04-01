@@ -625,7 +625,10 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.bossPitTransitionActive = true;
     console.info('[Chamber02Scene] starting Chamber02BossPitScene transition');
+    this.mobileControls.setMode('dialogue');
+    this.hud?.setVisible(false);
     this.mobileControls.setMode('init');
+    this.uiCamera?.setVisible(false);
     this.currentBossPitAltar = null;
     this.bossPitPromptText?.setVisible(false);
     this.player.body.setVelocity(0, 0);
@@ -636,12 +639,12 @@ export class Chamber02Scene extends Phaser.Scene {
       enemy.body?.setEnable(false);
       enemy.attackHitbox?.body?.setEnable(false);
     });
-    this.audioDirector?.stopAmbientLoop({ fadeOut: false });
-    this.sound.play(ASSET_KEYS.loreExit, { volume: 0.78 });
+    this.audioDirector?.stopAmbientLoop();
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       console.info("[Chamber02Scene] calling scene.start('Chamber02BossPitScene')");
       try {
+        this.audioDirector?.shutdown();
         this.scene.start('Chamber02BossPitScene', {
           fromScene: this.scene.key,
           altarX: CHAMBER02_BOSS_PIT_ALTAR.x,
@@ -653,6 +656,13 @@ export class Chamber02Scene extends Phaser.Scene {
       }
     });
 
+    this.tweens.add({
+      targets: this.player.sprite,
+      y: this.player.sprite.y + 38,
+      duration: 260,
+      ease: 'Sine.easeIn'
+    });
+    this.cameras.main.shake(250, 0.004, true);
     this.cameras.main.fadeOut(420, 0, 0, 0);
   }
 
