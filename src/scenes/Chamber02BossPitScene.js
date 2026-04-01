@@ -167,6 +167,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
       this.startupStep = 'configure-camera-and-layout';
       this.configureCameraAndLayout();
       this.cameras.main.fadeIn(460, 0, 0, 0);
+      this.startupStep = 'ready';
       console.info('[Chamber02BossPitScene] create complete');
     } catch (error) {
       this.handleStartupFailure(error);
@@ -176,11 +177,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
   handleStartupFailure(error) {
     const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
     this.startupFailure = { step: this.startupStep, message };
-    console.error('[Chamber02BossPitScene] startup failed', {
-      step: this.startupStep,
-      transitionContext: this.transitionContext,
-      error
-    });
+    console.error(`[Chamber02BossPitScene] startup failed at ${this.startupStep}: ${message}`, error);
 
     this.cameras.main.setBackgroundColor('#150507');
     this.cameras.main.fadeIn(0, 0, 0, 0);
