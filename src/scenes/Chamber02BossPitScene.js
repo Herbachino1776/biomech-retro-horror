@@ -63,9 +63,22 @@ const BOSS_PIT_ARRIVAL = {
   impactAtMs: 420,
   shakeDurationMs: 1760,
   shakeIntensity: 0.0094,
-  intimidationZoomMultiplier: 1.1,
-  intimidationZoomInDurationMs: 240,
-  zoomReturnDurationMs: 420
+  intimidationZoomMultiplier: 1.24,
+  intimidationZoomInDurationMs: 280,
+  framingPanDurationMs: 420,
+  framingPanOffsetX: 316,
+  framingPanOffsetY: -28,
+  framingHoldMs: 520,
+  zoomReturnDurationMs: 440
+};
+
+const BOSS_PIT_DEATH_CAMERA = {
+  focusLerp: { x: 0.12, y: 0.12 },
+  focusOffsetX: -12,
+  focusOffsetY: -24,
+  zoomScale: 1.2,
+  zoomInDurationMs: 250,
+  zoomOutDurationMs: 280
 };
 
 const PIT_DIFFICULTY_PRESETS = {
@@ -199,6 +212,11 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.arrivalReleaseAt = 0;
     this.hasBossRevealTriggered = false;
     this.hasBossBarBeenRevealed = false;
+    this.arrivalFrameTarget = null;
+    this.arrivalPanBackAt = 0;
+    this.arrivalPanBackTriggered = false;
+    this.deathCameraFocusTween = null;
+    this.deathCameraRestoreTween = null;
   }
 
   create() {
@@ -357,6 +375,8 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.arrivalImpactTriggered = false;
     this.arrivalImpactAt = this.time.now + BOSS_PIT_ARRIVAL.impactAtMs;
     this.arrivalReleaseAt = this.time.now + BOSS_PIT_ARRIVAL.lockDurationMs;
+    this.arrivalPanBackAt = 0;
+    this.arrivalPanBackTriggered = false;
     this.player.body.setVelocity(0, 0);
     this.player.attackHitbox?.body?.setEnable(false);
     this.mobileControls?.setMode('dialogue');
@@ -369,8 +389,27 @@ export class Chamber02BossPitScene extends Phaser.Scene {
 
     if (!this.arrivalImpactTriggered && time >= this.arrivalImpactAt) {
       this.arrivalImpactTriggered = true;
+      const worldView = this.cameras.main.worldView;
+      const viewHalfWidth = Math.max(1, worldView.width * 0.5);
+      this.arrivalFrameTarget = {
+        x: Phaser.Math.Clamp(
+          this.player.sprite.x + BOSS_PIT_ARRIVAL.framingPanOffsetX,
+          viewHalfWidth,
+          BOSS_PIT_BOOTSTRAP.worldWidth - viewHalfWidth
+        ),
+        y: this.player.sprite.y + BOSS_PIT_ARRIVAL.framingPanOffsetY
+      };
+      this.arrivalPanBackAt = time + BOSS_PIT_ARRIVAL.framingPanDurationMs + BOSS_PIT_ARRIVAL.framingHoldMs;
       this.cameras.main.shake(BOSS_PIT_ARRIVAL.shakeDurationMs, BOSS_PIT_ARRIVAL.shakeIntensity, true);
       this.tweens.killTweensOf(this.cameras.main);
+      this.cameras.main.stopFollow();
+      this.cameras.main.pan(
+        this.arrivalFrameTarget.x,
+        this.arrivalFrameTarget.y,
+        BOSS_PIT_ARRIVAL.framingPanDurationMs,
+        'Sine.easeInOut',
+        true
+      );
       this.tweens.add({
         targets: this.cameras.main,
         zoom: this.getGameplayZoom() * BOSS_PIT_ARRIVAL.intimidationZoomMultiplier,
@@ -380,9 +419,33 @@ export class Chamber02BossPitScene extends Phaser.Scene {
       this.audioDirector?.playEnemyAttack(BOSS_PIT_BOSS.audioProfile ?? 'miniboss');
     }
 
+    if (
+      this.arrivalImpactTriggered
+      && !this.arrivalPanBackTriggered
+      && this.arrivalPanBackAt > 0
+      && time >= this.arrivalPanBackAt
+    ) {
+      this.arrivalPanBackTriggered = true;
+      this.cameras.main.pan(
+        this.player.sprite.x,
+        this.player.sprite.y,
+        360,
+        'Sine.easeInOut',
+        true
+      );
+    }
+
     if (time >= this.arrivalReleaseAt) {
       this.arrivalSequenceActive = false;
       this.tweens.killTweensOf(this.cameras.main);
+      this.cameras.main.startFollow(
+        this.player.sprite,
+        true,
+        BOSS_PIT_BOOTSTRAP.cameraLerp.x,
+        BOSS_PIT_BOOTSTRAP.cameraLerp.y,
+        BOSS_PIT_BOOTSTRAP.desktopFollowOffsetX,
+        0
+      );
       this.tweens.add({
         targets: this.cameras.main,
         zoom: this.getGameplayZoom(),
@@ -538,6 +601,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
         this.victorySequenceActive = true;
         bossPitRunState.markChamber02BossPitCompleted();
         this.stabilizeBossCorpseForPayoff();
+        this.focusCameraOnBossDeathPayoff();
         this.cameras.main.shake(BOSS_PIT_VICTORY.preExplosionShakeMs, BOSS_PIT_VICTORY.preExplosionShakeIntensity, true);
         this.startVictoryGoreFountain();
       },
@@ -655,7 +719,55 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.player.body.setVelocity(0, 0);
     this.player.attackHitbox?.body?.setEnable(true);
     this.mobileControls.setMode('gameplay');
+    this.restoreCameraAfterBossDeathPayoff();
     this.unlockExitAltar();
+  }
+
+  focusCameraOnBossDeathPayoff() {
+    if (!this.boss?.sprite?.active) {
+      return;
+    }
+
+    this.deathCameraFocusTween?.remove();
+    this.deathCameraRestoreTween?.remove();
+    this.cameras.main.startFollow(
+      this.boss.sprite,
+      true,
+      BOSS_PIT_DEATH_CAMERA.focusLerp.x,
+      BOSS_PIT_DEATH_CAMERA.focusLerp.y,
+      BOSS_PIT_DEATH_CAMERA.focusOffsetX,
+      BOSS_PIT_DEATH_CAMERA.focusOffsetY
+    );
+
+    this.deathCameraFocusTween = this.tweens.add({
+      targets: this.cameras.main,
+      zoom: this.cameras.main.zoom * BOSS_PIT_DEATH_CAMERA.zoomScale,
+      duration: BOSS_PIT_DEATH_CAMERA.zoomInDurationMs,
+      ease: 'Sine.easeOut'
+    });
+  }
+
+  restoreCameraAfterBossDeathPayoff() {
+    this.deathCameraFocusTween?.remove();
+    this.deathCameraRestoreTween?.remove();
+    this.cameras.main.startFollow(
+      this.player.sprite,
+      true,
+      BOSS_PIT_BOOTSTRAP.cameraLerp.x,
+      BOSS_PIT_BOOTSTRAP.cameraLerp.y,
+      BOSS_PIT_BOOTSTRAP.desktopFollowOffsetX,
+      0
+    );
+
+    this.deathCameraRestoreTween = this.tweens.add({
+      targets: this.cameras.main,
+      zoom: this.getGameplayZoom(),
+      duration: BOSS_PIT_DEATH_CAMERA.zoomOutDurationMs,
+      ease: 'Sine.easeInOut',
+      onComplete: () => {
+        this.applyResponsiveLayout();
+      }
+    });
   }
 
   startVictoryGoreFountain() {
