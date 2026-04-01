@@ -835,7 +835,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
       return;
     }
 
-    this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height, false, 'Sector02Chamber02BossPitMobileUiCamera');
+    this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height, false, 'Chamber02BossPitMobileUiCamera');
     const mobileUiElements = this.mobileControls.getUiElements();
     const mobileUiSet = new Set(mobileUiElements);
     const nonMobileObjects = this.children.list.filter((element) => !mobileUiSet.has(element));

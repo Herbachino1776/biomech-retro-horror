@@ -254,7 +254,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   beginDevChamber() {
-    this.beginScene('Sector03Chamber01Scene');
+    this.beginScene('Chamber02BossPitScene');
   }
 
   beginScene(targetSceneKey) {

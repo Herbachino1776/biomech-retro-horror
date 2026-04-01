@@ -180,7 +180,6 @@ export class Chamber02Scene extends Phaser.Scene {
       this.bossPitTransitionActive = false;
       this.isSceneEntryReadyForTransitions = false;
       this.sceneEntryFadeInActive = false;
-      this.bossPitTransitionFailSafeTimer = null;
 
       this.sceneEntryFadeInActive = true;
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
@@ -255,8 +254,6 @@ export class Chamber02Scene extends Phaser.Scene {
         this.scale.off('resize', this.applyResponsiveLayout, this);
         this.exitGateUnlockAudioTimer?.remove(false);
         this.exitGateUnlockAudioTimer = null;
-        this.bossPitTransitionFailSafeTimer?.remove(false);
-        this.bossPitTransitionFailSafeTimer = null;
         console.log('[Chamber02Scene] shutdown event fired');
         this.audioDirector?.shutdown();
         this.cleanupSceneUi();
@@ -657,21 +654,6 @@ export class Chamber02Scene extends Phaser.Scene {
     console.info('[Chamber02Scene] starting Chamber02BossPitScene transition');
 
     const camera = this.cameras.main;
-    const restoreFromTransitionFailure = (error, stage) => {
-      console.error(`[Chamber02Scene] boss-pit transition failed at ${stage}`, error);
-      this.bossPitTransitionFailSafeTimer?.remove(false);
-      this.bossPitTransitionFailSafeTimer = null;
-      this.bossPitTransitionActive = false;
-      this.currentBossPitAltar = null;
-      camera.resetFX();
-      camera.setAlpha(1);
-      camera.fadeIn(120, 0, 0, 0);
-      this.uiCamera?.setVisible(true);
-      this.hud?.setVisible(true);
-      this.mobileControls?.setMode('gameplay');
-      this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber02Loop01);
-    };
-
     this.currentBossPitAltar = null;
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
@@ -685,43 +667,25 @@ export class Chamber02Scene extends Phaser.Scene {
     camera.resetFX();
 
     const onFadeOutComplete = () => {
-      this.bossPitTransitionFailSafeTimer?.remove(false);
-      this.bossPitTransitionFailSafeTimer = null;
       console.info("[Chamber02Scene] calling scene.start('Chamber02BossPitScene')");
-      try {
-        this.cleanupSceneUi();
-        this.audioDirector?.shutdown();
-        this.scene.start('Chamber02BossPitScene', {
-          fromScene: this.scene.key,
-          altarX: CHAMBER02_BOSS_PIT_ALTAR.x,
-          altarY: CHAMBER02_BOSS_PIT_ALTAR.y
-        });
-      } catch (error) {
-        restoreFromTransitionFailure(error, 'scene-start');
-      }
+      this.cleanupSceneUi();
+      this.audioDirector?.shutdown();
+      this.scene.start('Chamber02BossPitScene', {
+        fromScene: this.scene.key,
+        altarX: CHAMBER02_BOSS_PIT_ALTAR.x,
+        altarY: CHAMBER02_BOSS_PIT_ALTAR.y
+      });
     };
 
     camera.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, onFadeOutComplete);
-    this.bossPitTransitionFailSafeTimer = this.time.delayedCall(1300, () => {
-      if (this.bossPitTransitionActive && this.scene.isActive()) {
-        camera.off(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, onFadeOutComplete);
-        restoreFromTransitionFailure(new Error('Boss-pit fade-out completion timeout'), 'fade-out-timeout');
-      }
+    this.tweens.add({
+      targets: this.player.sprite,
+      y: this.player.sprite.y + 38,
+      duration: 260,
+      ease: 'Sine.easeIn'
     });
-
-    try {
-      this.tweens.add({
-        targets: this.player.sprite,
-        y: this.player.sprite.y + 38,
-        duration: 260,
-        ease: 'Sine.easeIn'
-      });
-      camera.shake(250, 0.004, true);
-      camera.fadeOut(420, 0, 0, 0);
-    } catch (error) {
-      camera.off(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, onFadeOutComplete);
-      restoreFromTransitionFailure(error, 'camera-effects');
-    }
+    camera.shake(250, 0.004, true);
+    camera.fadeOut(420, 0, 0, 0);
   }
 
   update(time) {
