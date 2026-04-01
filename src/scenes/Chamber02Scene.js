@@ -625,25 +625,20 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.bossPitTransitionActive = true;
     console.info('[Chamber02Scene] starting Chamber02BossPitScene transition');
+    this.currentBossPitAltar = null;
     this.mobileControls.setMode('dialogue');
+    this.player.body.setVelocity(0, 0);
+    this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+    this.audioDirector?.stopAmbientLoop();
     this.hud?.setVisible(false);
     this.mobileControls.setMode('init');
     this.uiCamera?.setVisible(false);
-    this.currentBossPitAltar = null;
     this.bossPitPromptText?.setVisible(false);
-    this.player.body.setVelocity(0, 0);
-    this.player.body.setEnable(false);
-    this.player.attackHitbox?.body?.setEnable(false);
-    this.enemies.forEach((enemy) => {
-      enemy.body?.setVelocity(0, 0);
-      enemy.body?.setEnable(false);
-      enemy.attackHitbox?.body?.setEnable(false);
-    });
-    this.audioDirector?.stopAmbientLoop();
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       console.info("[Chamber02Scene] calling scene.start('Chamber02BossPitScene')");
       try {
+        this.cleanupSceneUi();
         this.audioDirector?.shutdown();
         this.scene.start('Chamber02BossPitScene', {
           fromScene: this.scene.key,
