@@ -642,6 +642,7 @@ export class Chamber02Scene extends Phaser.Scene {
       return;
     }
 
+    console.info('[Chamber02Scene] boss pit altar interaction accepted');
     this.beginBossPitTransition();
   }
 
@@ -651,6 +652,7 @@ export class Chamber02Scene extends Phaser.Scene {
     }
 
     this.bossPitTransitionActive = true;
+    this.bossPitTransitionCompleted = false;
     console.info('[Chamber02Scene] starting Chamber02BossPitScene transition');
 
     const camera = this.cameras.main;
@@ -667,14 +669,19 @@ export class Chamber02Scene extends Phaser.Scene {
     camera.resetFX();
 
     const onFadeOutComplete = () => {
+      console.info('[Chamber02Scene] boss pit fade-out callback fired');
+      this.bossPitTransitionCompleted = true;
       console.info("[Chamber02Scene] calling scene.start('Chamber02BossPitScene')");
-      this.cleanupSceneUi();
-      this.audioDirector?.shutdown();
-      this.scene.start('Chamber02BossPitScene', {
-        fromScene: this.scene.key,
-        altarX: CHAMBER02_BOSS_PIT_ALTAR.x,
-        altarY: CHAMBER02_BOSS_PIT_ALTAR.y
-      });
+      try {
+        this.scene.start('Chamber02BossPitScene', {
+          fromScene: this.scene.key,
+          altarX: CHAMBER02_BOSS_PIT_ALTAR.x,
+          altarY: CHAMBER02_BOSS_PIT_ALTAR.y
+        });
+      } catch (error) {
+        console.error("[Chamber02Scene] scene.start('Chamber02BossPitScene') failed", error);
+        this.recoverBossPitTransitionFailure();
+      }
     };
 
     camera.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, onFadeOutComplete);
@@ -684,8 +691,27 @@ export class Chamber02Scene extends Phaser.Scene {
       duration: 260,
       ease: 'Sine.easeIn'
     });
+    console.info('[Chamber02Scene] boss pit sink tween started');
     camera.shake(250, 0.004, true);
+    console.info('[Chamber02Scene] boss pit fade-out started');
     camera.fadeOut(420, 0, 0, 0);
+
+    this.time.delayedCall(1100, () => {
+      if (!this.bossPitTransitionCompleted) {
+        console.warn('[Chamber02Scene] boss pit handoff watchdog fired before scene.start completion');
+        this.recoverBossPitTransitionFailure();
+      }
+    });
+  }
+
+  recoverBossPitTransitionFailure() {
+    this.bossPitTransitionActive = false;
+    this.bossPitTransitionCompleted = false;
+    this.cameras.main.resetFX();
+    this.cameras.main.fadeIn(180, 0, 0, 0);
+    this.uiCamera?.setVisible(true);
+    this.hud?.setVisible(true);
+    this.mobileControls?.setMode('gameplay');
   }
 
   update(time) {
