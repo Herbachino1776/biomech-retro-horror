@@ -201,7 +201,7 @@ export const CHAMBER01_MINIBOSS = {
   idleAdvanceSpeed: 12,
   windupDriftSpeed: 10,
   attackSpeed: 174,
-  attackLiftVelocity: -150,
+  attackLiftVelocity: 0,
   hitPulseMs: 280,
   hurtRecoverMs: 220,
   hurtRecoilVelocityX: 92,

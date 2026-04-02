@@ -120,7 +120,12 @@ export class HalfSkullMiniboss {
           this.scene.audioDirector?.playEnemyAttack(this.config.audioProfile ?? 'miniboss');
         }
         this.body.setVelocityX(this.direction * this.config.attackSpeed);
-        this.body.setVelocityY(this.config.attackLiftVelocity);
+        const attackLiftVelocity = Number(this.config.attackLiftVelocity ?? 0);
+        if (this.isGrounded() && attackLiftVelocity < 0) {
+          this.body.setVelocityY(0);
+        } else {
+          this.body.setVelocityY(attackLiftVelocity);
+        }
       }
       return;
     }
@@ -145,6 +150,10 @@ export class HalfSkullMiniboss {
       this.attackCommitAt = time + this.config.attackTelegraphMs;
       this.body.setVelocityX(this.direction * this.config.windupDriftSpeed);
     }
+  }
+
+  isGrounded() {
+    return Boolean(this.body?.blocked?.down || this.body?.touching?.down);
   }
 
   clearAttackState() {
@@ -184,7 +193,7 @@ export class HalfSkullMiniboss {
     }
 
     const interruptedTelegraph = this.attackState === 'windup' && time < this.attackCommitAt;
-    const wasGrounded = Boolean(this.body?.blocked?.down || this.body?.touching?.down);
+    const wasGrounded = this.isGrounded();
 
     this.active = true;
     this.clearAttackState();
@@ -302,6 +311,7 @@ export class HalfSkullMiniboss {
     const takingHit = time < this.lastDamageFlashTime + 220;
     const hitPulsing = time < this.hitPulseUntil;
     const hurtRecovering = time < this.hurtUntil;
+    const grounded = this.isGrounded();
 
     if (this.dead) {
       if (this.usingTexture) {
@@ -331,7 +341,8 @@ export class HalfSkullMiniboss {
     } else if (takingHit || hurtRecovering) {
       const recoilPulse = takingHit ? 1.03 : 1 + Math.sin(time / 42) * 0.02;
       scaleX *= 1.01;
-      scaleY *= recoilPulse * 0.98;
+      const hurtScaleY = recoilPulse * 0.98;
+      scaleY *= grounded ? Math.max(1, hurtScaleY) : hurtScaleY;
       angle = this.direction * (takingHit ? 8 : 4);
       tint = takingHit ? 0xe4cdbb : 0xc4ab98;
     } else if (this.poiseBroken) {

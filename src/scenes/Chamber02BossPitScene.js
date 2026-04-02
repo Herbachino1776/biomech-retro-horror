@@ -89,7 +89,7 @@ const PIT_DIFFICULTY_PRESETS = {
     approachSpeed: 32,
     idleAdvanceSpeed: 12,
     attackSpeed: 162,
-    attackLiftVelocity: -100,
+    attackLiftVelocity: 0,
     hurtRecoverMs: 290,
     hurtRecoilVelocityX: 70,
     hurtRecoilVelocityY: -48,
@@ -111,6 +111,8 @@ const PIT_DIFFICULTY_PRESETS = {
 
 const BOSS_PIT_DIFFICULTY_TIER = 'easy';
 const BOSS_PIT_SELECTED_DIFFICULTY = PIT_DIFFICULTY_PRESETS[BOSS_PIT_DIFFICULTY_TIER];
+
+const BOSS_PIT_FLOOR_PLANE_Y = WORLD.floorY + 28 - BOSS_PIT_BOOTSTRAP.floorColliderHeight / 2;
 
 const BOSS_PIT_BOSS = {
   name: 'THE STARVED PROPHET OF ASH',
@@ -790,7 +792,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     const remainsX = this.bossDeathPayoffLocation?.x ?? this.boss.sprite.x;
     const remainsGroundY = this.bossDeathPayoffLocation?.groundY
       ?? this.boss.sprite.body?.bottom
-      ?? WORLD.floorY + 2;
+      ?? BOSS_PIT_FLOOR_PLANE_Y + 2;
     spawnEnemyCorpseRemains(this, {
       x: remainsX,
       groundY: remainsGroundY,
