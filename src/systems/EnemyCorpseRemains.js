@@ -79,6 +79,8 @@ const REMAINS_CAP_PER_SCENE = 90;
 const LEGACY_GROUND_Y_TO_FLOOR_PLANE_OFFSET_Y = 28;
 const REMAINS_SETTLE_LOWERING_PX = 6;
 const BLOOD_POOL_UNDERLAY_OFFSET_Y = 8;
+const REMAINS_DEPTH_OFFSET_FROM_SOURCE = 0.1;
+const REMAINS_PLAYER_LAYER_CLEARANCE = 0.1;
 
 const BLOOD_POOL_PROFILES = {
   small: { width: 66, height: 20, growMs: 760 },
@@ -105,6 +107,18 @@ function capSceneRemains(scene, cap = REMAINS_CAP_PER_SCENE) {
   }
 }
 
+function resolveRemainsDepth(scene, requestedDepth) {
+  const sourceDepth = Number.isFinite(requestedDepth) ? requestedDepth : 6;
+  let resolvedDepth = sourceDepth - REMAINS_DEPTH_OFFSET_FROM_SOURCE;
+  const playerDepth = scene?.player?.sprite?.depth;
+
+  if (Number.isFinite(playerDepth)) {
+    resolvedDepth = Math.min(resolvedDepth, playerDepth - REMAINS_PLAYER_LAYER_CLEARANCE);
+  }
+
+  return resolvedDepth;
+}
+
 export function spawnEnemyCorpseRemains(scene, {
   x = 0,
   y = 0,
@@ -124,7 +138,8 @@ export function spawnEnemyCorpseRemains(scene, {
   const pieceCount = Phaser.Math.Between(profile.pieceCountRange[0], profile.pieceCountRange[1]);
   const resolvedFloorPlaneY = floorPlaneY ?? (groundY ?? y) + LEGACY_GROUND_Y_TO_FLOOR_PLANE_OFFSET_Y;
   const groundedPlaneY = resolvedFloorPlaneY;
-  const container = scene.add.container(x, groundedPlaneY).setDepth(depth - 0.1);
+  const containerDepth = resolveRemainsDepth(scene, depth);
+  const container = scene.add.container(x, groundedPlaneY).setDepth(containerDepth);
   ignoreRuntimeWorldObjectFromUiCamera(scene, container);
 
   const bloodShadow = scene.add
