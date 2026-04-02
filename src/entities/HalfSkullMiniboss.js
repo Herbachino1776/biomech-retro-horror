@@ -365,9 +365,5 @@ export class HalfSkullMiniboss {
       this.sprite.setFillStyle(telegraphing ? 0xd6bb7a : takingHit ? 0xd8bdaa : COLORS.bone, telegraphing ? 0.96 : 0.94);
     }
 
-    if (grounded && this.body?.enable !== false) {
-      const groundedY = this.body.bottom - this.sprite.displayHeight * (1 - this.sprite.originY);
-      this.sprite.setY(groundedY);
-    }
   }
 }
