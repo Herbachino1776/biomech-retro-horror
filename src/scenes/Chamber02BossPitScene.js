@@ -63,6 +63,7 @@ const BOSS_PIT_ARRIVAL = {
   impactDelayAfterFadeInMs: 48,
   shakeDurationMs: 2000,
   shakeIntensity: 0.0094,
+  intimidationGrowlVolume: 0.364,
   intimidationZoomMultiplier: 1.72,
   intimidationZoomInDurationMs: 220,
   zoomReturnDurationMs: 480
@@ -209,6 +210,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.arrivalImpactTriggered = false;
     this.arrivalImpactAt = 0;
     this.arrivalReleaseAt = 0;
+    this.arrivalIntimidationSound = null;
     this.hasBossRevealTriggered = false;
     this.hasBossBarBeenRevealed = false;
     this.bossDeathPayoffLocation = null;
@@ -345,6 +347,13 @@ export class Chamber02BossPitScene extends Phaser.Scene {
 
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
+      if (this.arrivalIntimidationSound) {
+        if (this.arrivalIntimidationSound.isPlaying) {
+          this.arrivalIntimidationSound.stop();
+        }
+        this.arrivalIntimidationSound.destroy();
+        this.arrivalIntimidationSound = null;
+      }
       this.audioDirector?.shutdown();
       this.enemyProjectiles.forEach((projectile) => projectile.destroy());
       this.boss?.destroyCombatTelegraphs?.();
@@ -428,6 +437,47 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.arrivalReleaseAt = Number.POSITIVE_INFINITY;
   }
 
+  resolveArrivalIntimidationGrowlKey() {
+    const audioCache = this.cache?.audio;
+    if (!audioCache) {
+      return null;
+    }
+
+    if (audioCache.exists(ASSET_KEYS.minibossAttack)) {
+      return ASSET_KEYS.minibossAttack;
+    }
+    if (audioCache.exists(ASSET_KEYS.minibossAttackFallback)) {
+      return ASSET_KEYS.minibossAttackFallback;
+    }
+
+    return null;
+  }
+
+  playArrivalIntimidationGrowl() {
+    const key = this.resolveArrivalIntimidationGrowlKey();
+    if (!key || !this.sound || this.sound.mute) {
+      return;
+    }
+
+    if (this.arrivalIntimidationSound) {
+      if (this.arrivalIntimidationSound.isPlaying) {
+        this.arrivalIntimidationSound.stop();
+      }
+      this.arrivalIntimidationSound.destroy();
+      this.arrivalIntimidationSound = null;
+    }
+
+    const sound = this.sound.add(key, { volume: BOSS_PIT_ARRIVAL.intimidationGrowlVolume });
+    this.arrivalIntimidationSound = sound;
+    sound.once('complete', () => {
+      sound.destroy();
+      if (this.arrivalIntimidationSound === sound) {
+        this.arrivalIntimidationSound = null;
+      }
+    });
+    sound.play();
+  }
+
   runArrivalBeat(time) {
     this.player.body.setVelocity(0, 0);
     this.boss?.body?.setVelocity?.(0, 0);
@@ -445,7 +495,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
         duration: BOSS_PIT_ARRIVAL.intimidationZoomInDurationMs,
         ease: 'Sine.easeOut'
       });
-      this.audioDirector?.playEnemyAttack(BOSS_PIT_BOSS.audioProfile ?? 'miniboss');
+      this.playArrivalIntimidationGrowl();
     }
 
     if (time >= this.arrivalReleaseAt) {
