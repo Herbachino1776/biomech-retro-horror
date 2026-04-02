@@ -203,6 +203,8 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.currentExitAltar = null;
     this.resolutionLockActive = false;
     this.arrivalSequenceActive = false;
+    this.arrivalWaitingForLanding = false;
+    this.arrivalFadeInComplete = false;
     this.arrivalWaitingForFadeIn = false;
     this.arrivalImpactTriggered = false;
     this.arrivalImpactAt = 0;
@@ -234,7 +236,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
       this.startupStep = 'arrival-beat';
       this.beginArrivalBeat();
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
-        this.armArrivalImpactAfterFadeIn();
+        this.handleArrivalFadeInComplete();
       });
       this.cameras.main.fadeIn(460, 0, 0, 0);
       this.startupStep = 'ready';
@@ -369,7 +371,9 @@ export class Chamber02BossPitScene extends Phaser.Scene {
   }
 
   beginArrivalBeat() {
-    this.arrivalSequenceActive = true;
+    this.arrivalWaitingForLanding = true;
+    this.arrivalSequenceActive = false;
+    this.arrivalFadeInComplete = false;
     this.arrivalWaitingForFadeIn = true;
     this.arrivalImpactTriggered = false;
     this.arrivalImpactAt = Number.POSITIVE_INFINITY;
@@ -377,9 +381,14 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.cameras.main.stopFollow();
     this.cameras.main.setFollowOffset(0, 0);
     this.cameras.main.centerOn(this.player.sprite.x, this.player.sprite.y);
-    this.player.body.setVelocity(0, 0);
     this.player.attackHitbox?.body?.setEnable(false);
     this.mobileControls?.setMode('dialogue');
+    this.setEnemyProjectilesPaused(true);
+  }
+
+  handleArrivalFadeInComplete() {
+    this.arrivalFadeInComplete = true;
+    this.armArrivalImpactAfterFadeIn();
   }
 
   armArrivalImpactAfterFadeIn() {
@@ -389,6 +398,34 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.arrivalWaitingForFadeIn = false;
     this.arrivalImpactAt = this.time.now + BOSS_PIT_ARRIVAL.impactDelayAfterFadeInMs;
     this.arrivalReleaseAt = this.arrivalImpactAt + BOSS_PIT_ARRIVAL.lockDurationMs;
+  }
+
+  isPlayerGroundedForArrival() {
+    const body = this.player?.body;
+    if (!body?.enable) {
+      return false;
+    }
+    const touchingGround = Boolean(body.blocked?.down || body.touching?.down);
+    const stableVerticalVelocity = Math.abs(body.velocity?.y ?? 0) <= 18;
+    return touchingGround && stableVerticalVelocity;
+  }
+
+  startArrivalSequenceAfterLanding(time) {
+    this.arrivalWaitingForLanding = false;
+    this.arrivalSequenceActive = true;
+    this.arrivalImpactTriggered = false;
+    this.player.body.setVelocity(0, 0);
+    this.boss?.body?.setVelocity?.(0, 0);
+    if (this.arrivalFadeInComplete) {
+      this.arrivalWaitingForFadeIn = false;
+      this.arrivalImpactAt = time + BOSS_PIT_ARRIVAL.impactDelayAfterFadeInMs;
+      this.arrivalReleaseAt = this.arrivalImpactAt + BOSS_PIT_ARRIVAL.lockDurationMs;
+      return;
+    }
+
+    this.arrivalWaitingForFadeIn = true;
+    this.arrivalImpactAt = Number.POSITIVE_INFINITY;
+    this.arrivalReleaseAt = Number.POSITIVE_INFINITY;
   }
 
   runArrivalBeat(time) {
@@ -479,6 +516,21 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     if (this.arrivalSequenceActive) {
       this.mobileControls.setMode('dialogue');
       this.runArrivalBeat(time);
+      this.refreshBossBar(time);
+      this.hud.update(this.player.health, this.player.maxHealth);
+      return;
+    }
+    if (this.arrivalWaitingForLanding) {
+      this.mobileControls.setMode('dialogue');
+      this.setEnemyProjectilesPaused(true);
+      this.cameras.main.stopFollow();
+      this.cameras.main.setFollowOffset(0, 0);
+      this.player.body.setVelocityX(0);
+      this.boss?.body?.setVelocity?.(0, 0);
+      this.cameras.main.centerOn(this.player.sprite.x, this.player.sprite.y);
+      if (this.isPlayerGroundedForArrival()) {
+        this.startArrivalSequenceAfterLanding(time);
+      }
       this.refreshBossBar(time);
       this.hud.update(this.player.health, this.player.maxHealth);
       return;
