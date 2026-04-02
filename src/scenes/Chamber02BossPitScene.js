@@ -60,7 +60,7 @@ const BOSS_PIT_VICTORY = {
 
 const BOSS_PIT_ARRIVAL = {
   lockDurationMs: 2000,
-  impactAtMs: 80,
+  impactDelayAfterFadeInMs: 48,
   shakeDurationMs: 2000,
   shakeIntensity: 0.0094,
   intimidationZoomMultiplier: 1.72,
@@ -203,6 +203,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.currentExitAltar = null;
     this.resolutionLockActive = false;
     this.arrivalSequenceActive = false;
+    this.arrivalWaitingForFadeIn = false;
     this.arrivalImpactTriggered = false;
     this.arrivalImpactAt = 0;
     this.arrivalReleaseAt = 0;
@@ -232,6 +233,9 @@ export class Chamber02BossPitScene extends Phaser.Scene {
       this.configureCameraAndLayout();
       this.startupStep = 'arrival-beat';
       this.beginArrivalBeat();
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
+        this.armArrivalImpactAfterFadeIn();
+      });
       this.cameras.main.fadeIn(460, 0, 0, 0);
       this.startupStep = 'ready';
       console.info('[Chamber02BossPitScene] create complete');
@@ -366,25 +370,38 @@ export class Chamber02BossPitScene extends Phaser.Scene {
 
   beginArrivalBeat() {
     this.arrivalSequenceActive = true;
+    this.arrivalWaitingForFadeIn = true;
     this.arrivalImpactTriggered = false;
-    this.arrivalImpactAt = this.time.now + BOSS_PIT_ARRIVAL.impactAtMs;
-    this.arrivalReleaseAt = this.time.now + BOSS_PIT_ARRIVAL.lockDurationMs;
+    this.arrivalImpactAt = Number.POSITIVE_INFINITY;
+    this.arrivalReleaseAt = Number.POSITIVE_INFINITY;
+    this.cameras.main.stopFollow();
+    this.cameras.main.setFollowOffset(0, 0);
+    this.cameras.main.centerOn(this.player.sprite.x, this.player.sprite.y);
     this.player.body.setVelocity(0, 0);
     this.player.attackHitbox?.body?.setEnable(false);
     this.mobileControls?.setMode('dialogue');
+  }
+
+  armArrivalImpactAfterFadeIn() {
+    if (!this.arrivalSequenceActive || this.arrivalImpactTriggered) {
+      return;
+    }
+    this.arrivalWaitingForFadeIn = false;
+    this.arrivalImpactAt = this.time.now + BOSS_PIT_ARRIVAL.impactDelayAfterFadeInMs;
+    this.arrivalReleaseAt = this.arrivalImpactAt + BOSS_PIT_ARRIVAL.lockDurationMs;
   }
 
   runArrivalBeat(time) {
     this.player.body.setVelocity(0, 0);
     this.boss?.body?.setVelocity?.(0, 0);
     this.setEnemyProjectilesPaused(true);
+    this.cameras.main.centerOn(this.player.sprite.x, this.player.sprite.y);
 
     if (!this.arrivalImpactTriggered && time >= this.arrivalImpactAt) {
       this.arrivalImpactTriggered = true;
       this.cameras.main.shake(BOSS_PIT_ARRIVAL.shakeDurationMs, BOSS_PIT_ARRIVAL.shakeIntensity, true);
       this.tweens.killTweensOf(this.cameras.main);
       this.cameras.main.centerOn(this.player.sprite.x, this.player.sprite.y);
-      this.cameras.main.startFollow(this.player.sprite, true, 1, 1, 0, 0);
       this.tweens.add({
         targets: this.cameras.main,
         zoom: this.getGameplayZoom() * BOSS_PIT_ARRIVAL.intimidationZoomMultiplier,
@@ -396,6 +413,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
 
     if (time >= this.arrivalReleaseAt) {
       this.arrivalSequenceActive = false;
+      this.arrivalWaitingForFadeIn = false;
       this.tweens.killTweensOf(this.cameras.main);
       this.cameras.main.startFollow(
         this.player.sprite,
@@ -462,7 +480,6 @@ export class Chamber02BossPitScene extends Phaser.Scene {
       this.mobileControls.setMode('dialogue');
       this.runArrivalBeat(time);
       this.refreshBossBar(time);
-      this.directionalCameraBias?.update();
       this.hud.update(this.player.health, this.player.maxHealth);
       return;
     }
