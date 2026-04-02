@@ -76,7 +76,7 @@ const REMAINS_PROFILES = {
 };
 
 const REMAINS_CAP_PER_SCENE = 90;
-const REMAINS_FLOOR_PLANE_OFFSET_Y = 28;
+const LEGACY_GROUND_Y_TO_FLOOR_PLANE_OFFSET_Y = 28;
 const REMAINS_SETTLE_LOWERING_PX = 6;
 const BLOOD_POOL_UNDERLAY_OFFSET_Y = 8;
 
@@ -122,7 +122,8 @@ export function spawnEnemyCorpseRemains(scene, {
   const profile = REMAINS_PROFILES[size] ?? REMAINS_PROFILES.small;
   const bloodPoolProfile = BLOOD_POOL_PROFILES[size] ?? BLOOD_POOL_PROFILES.small;
   const pieceCount = Phaser.Math.Between(profile.pieceCountRange[0], profile.pieceCountRange[1]);
-  const groundedPlaneY = (floorPlaneY ?? groundY ?? y) + REMAINS_FLOOR_PLANE_OFFSET_Y;
+  const resolvedFloorPlaneY = floorPlaneY ?? (groundY ?? y) + LEGACY_GROUND_Y_TO_FLOOR_PLANE_OFFSET_Y;
+  const groundedPlaneY = resolvedFloorPlaneY;
   const container = scene.add.container(x, groundedPlaneY).setDepth(depth - 0.1);
   ignoreRuntimeWorldObjectFromUiCamera(scene, container);
 
