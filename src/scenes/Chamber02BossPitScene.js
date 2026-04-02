@@ -745,22 +745,26 @@ export class Chamber02BossPitScene extends Phaser.Scene {
       return;
     }
 
-    const floorBottomY = WORLD.floorY + 2;
-    const groundedY = floorBottomY - this.boss.sprite.displayHeight * (1 - this.boss.sprite.originY);
     const payoffX = this.boss.sprite.x;
+    const payoffY = this.boss.sprite.y;
+    const payoffGroundY = this.boss.sprite.body?.bottom
+      ?? payoffY + this.boss.sprite.displayHeight * (1 - this.boss.sprite.originY);
+
     this.tweens.killTweensOf(this.boss.sprite);
+    this.boss.body?.setVelocity?.(0, 0);
+    this.boss.body?.setAcceleration?.(0, 0);
+
     this.boss.sprite
       .setAlpha(1)
       .setVisible(true)
-      .setScale(
-        this.boss.baseScaleX * this.boss.config.presentation.scaleX,
-        this.boss.baseScaleY * this.boss.config.presentation.scaleY
-      )
-      .setAngle(0)
       .setX(payoffX)
-      .setY(groundedY);
-    this.boss.body?.setVelocity?.(0, 0);
-    this.bossDeathPayoffLocation = { x: payoffX, y: groundedY };
+      .setY(payoffY);
+
+    this.bossDeathPayoffLocation = {
+      x: payoffX,
+      y: payoffY,
+      groundY: payoffGroundY
+    };
   }
 
   startBossExplosionFade() {
@@ -784,9 +788,12 @@ export class Chamber02BossPitScene extends Phaser.Scene {
 
     this.stopVictoryGoreFountain();
     const remainsX = this.bossDeathPayoffLocation?.x ?? this.boss.sprite.x;
+    const remainsGroundY = this.bossDeathPayoffLocation?.groundY
+      ?? this.boss.sprite.body?.bottom
+      ?? WORLD.floorY + 2;
     spawnEnemyCorpseRemains(this, {
       x: remainsX,
-      groundY: WORLD.floorY + 2,
+      groundY: remainsGroundY,
       depth: this.boss.sprite.depth,
       size: 'large'
     });
