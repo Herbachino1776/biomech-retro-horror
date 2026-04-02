@@ -22,6 +22,7 @@ const BOSS_PIT_BOOTSTRAP = {
   spawnX: 392,
   spawnY: PLAYER.startY,
   floorColliderHeight: 72,
+  floorColliderCenterYOffset: 28,
   cameraLerp: { x: 0.08, y: 0.08 },
   portraitFollowOffsetX: -112,
   desktopFollowOffsetX: -128
@@ -112,14 +113,15 @@ const PIT_DIFFICULTY_PRESETS = {
 const BOSS_PIT_DIFFICULTY_TIER = 'easy';
 const BOSS_PIT_SELECTED_DIFFICULTY = PIT_DIFFICULTY_PRESETS[BOSS_PIT_DIFFICULTY_TIER];
 
-const BOSS_PIT_FLOOR_PLANE_Y = WORLD.floorY + 28 - BOSS_PIT_BOOTSTRAP.floorColliderHeight / 2;
+const BOSS_PIT_FLOOR_PLANE_Y =
+  WORLD.floorY + BOSS_PIT_BOOTSTRAP.floorColliderCenterYOffset - BOSS_PIT_BOOTSTRAP.floorColliderHeight / 2;
 
 const BOSS_PIT_BOSS = {
   name: 'THE STARVED PROPHET OF ASH',
   subtitle: 'Ash Prophecy Litigator',
   difficultyTier: BOSS_PIT_DIFFICULTY_TIER,
   spawnX: 960,
-  spawnY: WORLD.floorY - 2,
+  spawnY: BOSS_PIT_FLOOR_PLANE_Y,
   textureKey: ASSET_KEYS.bossPit02StarvedProphetOfAsh,
   health: BOSS_PIT_SELECTED_DIFFICULTY.health,
   contactDamage: BOSS_PIT_SELECTED_DIFFICULTY.contactDamage,
@@ -293,7 +295,12 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, BOSS_PIT_BOOTSTRAP.worldWidth, WORLD.height);
     this.cameras.main.setBackgroundColor('#030304');
     this.platforms = this.physics.add.staticGroup();
-    this.createInvisiblePlatform(BOSS_PIT_BOOTSTRAP.worldWidth / 2, WORLD.floorY + 28, BOSS_PIT_BOOTSTRAP.worldWidth, BOSS_PIT_BOOTSTRAP.floorColliderHeight);
+    this.createInvisiblePlatform(
+      BOSS_PIT_BOOTSTRAP.worldWidth / 2,
+      WORLD.floorY + BOSS_PIT_BOOTSTRAP.floorColliderCenterYOffset,
+      BOSS_PIT_BOOTSTRAP.worldWidth,
+      BOSS_PIT_BOOTSTRAP.floorColliderHeight
+    );
   }
 
   createAudio() {
@@ -748,9 +755,8 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     }
 
     const payoffX = this.boss.sprite.x;
-    const payoffY = this.boss.sprite.y;
-    const payoffGroundY = this.boss.sprite.body?.bottom
-      ?? payoffY + this.boss.sprite.displayHeight * (1 - this.boss.sprite.originY);
+    const payoffGroundY = BOSS_PIT_FLOOR_PLANE_Y;
+    const payoffY = payoffGroundY - this.boss.sprite.displayHeight * (1 - this.boss.sprite.originY);
 
     this.tweens.killTweensOf(this.boss.sprite);
     this.boss.body?.setVelocity?.(0, 0);
@@ -791,11 +797,10 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     this.stopVictoryGoreFountain();
     const remainsX = this.bossDeathPayoffLocation?.x ?? this.boss.sprite.x;
     const remainsGroundY = this.bossDeathPayoffLocation?.groundY
-      ?? this.boss.sprite.body?.bottom
-      ?? BOSS_PIT_FLOOR_PLANE_Y + 2;
+      ?? BOSS_PIT_FLOOR_PLANE_Y;
     spawnEnemyCorpseRemains(this, {
       x: remainsX,
-      groundY: remainsGroundY,
+      floorPlaneY: remainsGroundY,
       depth: this.boss.sprite.depth,
       size: 'large'
     });

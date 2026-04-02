@@ -26,6 +26,7 @@ const CHAMBER = {
   sceneKey: 'Chamber01Scene',
   width: WORLD.width,
   floorColliderHeight: 72,
+  floorColliderCenterYOffset: 28,
   spawnX: PLAYER.startX,
   spawnY: PLAYER.startY,
   cameraLerp: { x: 0.08, y: 0.08 },
@@ -33,6 +34,8 @@ const CHAMBER = {
   desktopFollowOffsetX: -148,
   gateX: WORLD.width - 82
 };
+
+const CHAMBER_FLOOR_PLANE_Y = WORLD.floorY + CHAMBER.floorColliderCenterYOffset - CHAMBER.floorColliderHeight / 2;
 
 const BLIND_CANTOR = {
   encounterId: 'chamber01-blind-cantor-major-encounter',
@@ -56,7 +59,7 @@ const BLIND_CANTOR = {
   hurtRecoilVelocityX: 120,
   hurtRecoilVelocityY: -64,
   spawnX: 1980,
-  spawnY: WORLD.floorY,
+  spawnY: CHAMBER_FLOOR_PLANE_Y,
   activationX: 1640,
   arenaStartX: 1600,
   body: { width: 90, height: 134, offsetX: 98, offsetY: 78 },
@@ -221,7 +224,12 @@ export class Chamber01Scene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(COLORS.backdrop);
 
     this.platforms = this.physics.add.staticGroup();
-    this.createInvisiblePlatform(CHAMBER.width / 2, WORLD.floorY + 28, CHAMBER.width, CHAMBER.floorColliderHeight);
+    this.createInvisiblePlatform(
+      CHAMBER.width / 2,
+      WORLD.floorY + CHAMBER.floorColliderCenterYOffset,
+      CHAMBER.width,
+      CHAMBER.floorColliderHeight
+    );
   }
 
   createBackdrop() {
@@ -768,7 +776,7 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    const floorBottomY = WORLD.floorY + 2;
+    const floorBottomY = CHAMBER_FLOOR_PLANE_Y;
     const groundedY = floorBottomY - this.boss.sprite.displayHeight * (1 - this.boss.sprite.originY);
     this.tweens.killTweensOf(this.boss.sprite);
     this.boss.sprite
@@ -801,7 +809,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.stopBossVictoryGoreFountain();
     spawnEnemyCorpseRemains(this, {
       x: this.boss.sprite.x,
-      groundY: WORLD.floorY + 2,
+      floorPlaneY: CHAMBER_FLOOR_PLANE_Y,
       depth: this.boss.sprite.depth,
       size: 'sector3Boss'
     });
