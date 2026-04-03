@@ -802,7 +802,7 @@ export class Chamber02BossPitScene extends Phaser.Scene {
       x: remainsX,
       floorPlaneY: remainsGroundY,
       depth: this.boss.sprite.depth,
-      size: 'large'
+      size: 'bossPitBoss'
     });
     this.boss.sprite.setVisible(false).setAlpha(0);
     this.boss.setActive(false);
