@@ -92,6 +92,18 @@ const BLOOD_POOL_UNDERLAY_OFFSET_Y = 8;
 const REMAINS_DEPTH_OFFSET_FROM_SOURCE = 0.1;
 const REMAINS_PLAYER_LAYER_CLEARANCE = 0.1;
 
+function resolveGameplayForegroundDepth(scene) {
+  const playerBodyDepth = scene?.player?.sprite?.depth;
+  const playerWeaponDepth = scene?.player?.weaponSprite?.depth;
+  const foregroundDepths = [playerBodyDepth, playerWeaponDepth].filter((value) => Number.isFinite(value));
+
+  if (!foregroundDepths.length) {
+    return null;
+  }
+
+  return Math.min(...foregroundDepths);
+}
+
 const BLOOD_POOL_PROFILES = {
   small: { width: 66, height: 20, growMs: 760 },
   medium: { width: 88, height: 24, growMs: 840 },
@@ -133,10 +145,10 @@ function capSceneRemains(scene, cap = REMAINS_CAP_PER_SCENE) {
 function resolveRemainsDepth(scene, requestedDepth) {
   const sourceDepth = Number.isFinite(requestedDepth) ? requestedDepth : 6;
   let resolvedDepth = sourceDepth - REMAINS_DEPTH_OFFSET_FROM_SOURCE;
-  const playerDepth = scene?.player?.sprite?.depth;
+  const gameplayForegroundDepth = resolveGameplayForegroundDepth(scene);
 
-  if (Number.isFinite(playerDepth)) {
-    resolvedDepth = Math.min(resolvedDepth, playerDepth - REMAINS_PLAYER_LAYER_CLEARANCE);
+  if (Number.isFinite(gameplayForegroundDepth)) {
+    resolvedDepth = Math.min(resolvedDepth, gameplayForegroundDepth - REMAINS_PLAYER_LAYER_CLEARANCE);
   }
 
   return resolvedDepth;

@@ -79,6 +79,10 @@ const BOSS_PIT_DEATH_CAMERA = {
   zoomOutDurationMs: 280
 };
 
+const BOSS_PIT_PAYOFF_POSE = {
+  maxUpwardSnapPx: 8
+};
+
 const PIT_DIFFICULTY_PRESETS = {
   easy: {
     health: 5,
@@ -756,7 +760,9 @@ export class Chamber02BossPitScene extends Phaser.Scene {
 
     const payoffX = this.boss.sprite.x;
     const payoffGroundY = BOSS_PIT_FLOOR_PLANE_Y;
-    const payoffY = payoffGroundY - this.boss.sprite.displayHeight * (1 - this.boss.sprite.originY);
+    const groundedPayoffY = payoffGroundY - this.boss.sprite.displayHeight * (1 - this.boss.sprite.originY);
+    const maxRaisedY = this.boss.sprite.y - BOSS_PIT_PAYOFF_POSE.maxUpwardSnapPx;
+    const payoffY = Math.max(groundedPayoffY, maxRaisedY);
 
     this.tweens.killTweensOf(this.boss.sprite);
     this.boss.body?.setVelocity?.(0, 0);
