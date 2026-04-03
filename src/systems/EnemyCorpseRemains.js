@@ -72,6 +72,16 @@ const REMAINS_PROFILES = {
     settleDropY: [0, 5],
     settleSinkIntoFloorPx: [6, 11],
     settleDurationMs: [200, 340]
+  },
+  bossPitBoss: {
+    pieceCountRange: [9, 13],
+    maxDisplaySidePx: [62, 92],
+    spawnRadiusX: 34,
+    settleRadiusX: 78,
+    spawnDropY: [26, 40],
+    settleDropY: [1, 6],
+    settleSinkIntoFloorPx: [8, 13],
+    settleDurationMs: [210, 350]
   }
 };
 
@@ -89,7 +99,20 @@ const BLOOD_POOL_PROFILES = {
   elite: { width: 122, height: 34, growMs: 980 },
   sector3Basic: { width: 78, height: 24, growMs: 820 },
   sector3Elite: { width: 152, height: 46, growMs: 1040 },
-  sector3Boss: { width: 188, height: 56, growMs: 1120 }
+  sector3Boss: { width: 188, height: 56, growMs: 1120 },
+  bossPitBoss: {
+    width: 214,
+    height: 64,
+    growMs: 1180,
+    shadowColor: 0x140304,
+    shadowAlpha: 0.48,
+    poolColor: 0x4a060d,
+    poolAlpha: 0.72,
+    strokeColor: 0x210104,
+    strokeAlpha: 0.62,
+    coreColor: 0x6a0b12,
+    coreAlpha: 0.44
+  }
 };
 
 function ensureStore(scene) {
@@ -139,18 +162,26 @@ export function spawnEnemyCorpseRemains(scene, {
   const resolvedFloorPlaneY = floorPlaneY ?? (groundY ?? y) + LEGACY_GROUND_Y_TO_FLOOR_PLANE_OFFSET_Y;
   const groundedPlaneY = resolvedFloorPlaneY;
   const containerDepth = resolveRemainsDepth(scene, depth);
+  const bloodShadowColor = bloodPoolProfile.shadowColor ?? 0x18080a;
+  const bloodShadowAlpha = bloodPoolProfile.shadowAlpha ?? 0.34;
+  const bloodPoolColor = bloodPoolProfile.poolColor ?? 0x64171d;
+  const bloodPoolAlpha = bloodPoolProfile.poolAlpha ?? 0.56;
+  const bloodStrokeColor = bloodPoolProfile.strokeColor ?? 0x2b0b0e;
+  const bloodStrokeAlpha = bloodPoolProfile.strokeAlpha ?? 0.4;
+  const bloodCoreColor = bloodPoolProfile.coreColor ?? 0x7e2125;
+  const bloodCoreAlpha = bloodPoolProfile.coreAlpha ?? 0.3;
   const container = scene.add.container(x, groundedPlaneY).setDepth(containerDepth);
   ignoreRuntimeWorldObjectFromUiCamera(scene, container);
 
   const bloodShadow = scene.add
-    .ellipse(0, BLOOD_POOL_UNDERLAY_OFFSET_Y, bloodPoolProfile.width * 1.04, bloodPoolProfile.height * 1.18, 0x18080a, 0.34)
+    .ellipse(0, BLOOD_POOL_UNDERLAY_OFFSET_Y, bloodPoolProfile.width * 1.04, bloodPoolProfile.height * 1.18, bloodShadowColor, bloodShadowAlpha)
     .setScale(0.42, 0.4);
   const bloodPool = scene.add
-    .ellipse(0, BLOOD_POOL_UNDERLAY_OFFSET_Y + -3, bloodPoolProfile.width, bloodPoolProfile.height, 0x64171d, 0.56)
-    .setStrokeStyle(1, 0x2b0b0e, 0.4)
+    .ellipse(0, BLOOD_POOL_UNDERLAY_OFFSET_Y + -3, bloodPoolProfile.width, bloodPoolProfile.height, bloodPoolColor, bloodPoolAlpha)
+    .setStrokeStyle(1, bloodStrokeColor, bloodStrokeAlpha)
     .setScale(0.36, 0.34);
   const bloodCore = scene.add
-    .ellipse(-2, BLOOD_POOL_UNDERLAY_OFFSET_Y + -4, bloodPoolProfile.width * 0.58, bloodPoolProfile.height * 0.62, 0x7e2125, 0.3)
+    .ellipse(-2, BLOOD_POOL_UNDERLAY_OFFSET_Y + -4, bloodPoolProfile.width * 0.58, bloodPoolProfile.height * 0.62, bloodCoreColor, bloodCoreAlpha)
     .setScale(0.32, 0.3);
   container.add([bloodShadow, bloodPool, bloodCore]);
 
@@ -158,7 +189,7 @@ export function spawnEnemyCorpseRemains(scene, {
     targets: bloodShadow,
     scaleX: 1,
     scaleY: 1,
-    alpha: 0.34,
+    alpha: bloodShadowAlpha,
     duration: bloodPoolProfile.growMs,
     ease: 'Sine.easeOut'
   });
@@ -166,7 +197,7 @@ export function spawnEnemyCorpseRemains(scene, {
     targets: bloodPool,
     scaleX: 1,
     scaleY: 1,
-    alpha: 0.56,
+    alpha: bloodPoolAlpha,
     duration: bloodPoolProfile.growMs + 60,
     ease: 'Sine.easeOut'
   });
@@ -174,7 +205,7 @@ export function spawnEnemyCorpseRemains(scene, {
     targets: bloodCore,
     scaleX: 1,
     scaleY: 1,
-    alpha: 0.3,
+    alpha: bloodCoreAlpha,
     duration: bloodPoolProfile.growMs + 120,
     ease: 'Sine.easeOut'
   });
