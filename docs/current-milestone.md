@@ -4,7 +4,8 @@
 - **Milestone 5 (Sector 1 Content Expansion) is closed** in first-pass terms.
 - **Milestone 6 (Sector 2 / The Black Aqueduct) is functionally established** as a full prototype arc.
 - **Milestone 7 (Combat Sidequest + wrap quality lanes) is largely established and meaningfully advanced.**
-- **Milestone 8 (Sector 3 Buildout + Boss-Pit Expansion) is active in later-stage execution.**
+- **Milestone 8 (Sector 3 Buildout + Boss-Pit Expansion) is established and no longer the only active content lane.**
+- **Milestone 9 (Sector 4 Chamber 1 Buildout) is now active in execution.**
 
 ## What Is Working in the Current Build
 - Sector 1 progression is live: Chamber 01 -> Chamber 02 -> Chamber 03 -> separate boss arena finale.
@@ -15,10 +16,10 @@
 - Vessel run economy foundations are active: chamber-entry partial restore + major-encounter max-cap reward behavior.
 - Projectile/AOE/boss readability systems are active in live Sector 2 encounters.
 - Sector 3 Chamber 1 (**Gallery of Failed Measures**) has been rebuilt toward the later authored-chamber standard.
-- Half-Skull was removed from Sector 3 Chamber 1.
-- Chamber 1 now uses a provisional replacement boss based on `art/raw/sector03/chamber02/enemy_chamber02_blind_cantor_basic_01.png`.
-- Chamber 1 boss flow now follows modern full treatment: zoom + shake + elongated ceremonial finish + stronger gore payoff + escalated boss remains.
 - Sector 3 Chamber 3 has already been substantially built out from its uploaded art pack.
+- **Sector 4 Chamber 1 is in active content buildout (live lane, not placeholder-only planning).**
+- **S3 -> S4 handoff work has been addressed enough that Sector 4 is now practical to build against as current content.**
+- **Sector 4 Chamber 1 has received shell/shrine/enemy passes as part of active authoring.**
 
 ## Milestone 7 Status (Truthful Snapshot)
 Milestone 7 is **advanced/largely established** and no longer the main active build lane.
@@ -39,30 +40,26 @@ Milestone 7 is **advanced/largely established** and no longer the main active bu
 - 7I Sponge vs Satisfaction Balance
 
 ## Active Build Lane Now
-- Milestone 8 is in a later-stage build/polish-consistency phase rather than early bootstrap.
-- Practical priority is Sector 3 consistency, chamber quality alignment, and boss-pit expansion while preserving existing Sector 1/2 contracts.
+- **Sector 4 Chamber 1 (Milestone 9 lane) is the practical active content build lane.**
+- Milestone 8 remains established and still relevant for Sector 3 consistency/polish carryover and boss-pit expansion continuity.
 - Milestone 7 follow-up remains available as targeted polish/support work, not primary sequencing.
 
-### Canonical Boss-Pit Polish Anchor (Current)
-- **Sector 1 Chamber 2 (`Chamber02BossPitScene`) is the canonical pit-under-polish anchor.**
-- Reliability-first contract is now explicit: keep immediate `Chamber02Scene -> Chamber02BossPitScene` entry stable and avoid fragile source-scene cinematic handoff choreography.
-- Polish should be added on the **arrival side** inside pit scenes first (arrival lock + intimidation sting + clean control return), then generalized later once trusted.
-- S1C2 pit tuning is intentionally **easy-tier** to match early-game pacing.
-- Textless modern death payoff package remains the canonical S1C2 pit resolution.
-- Super-altar return should feel grounded (no clunky black-screen hiding tricks / no awkward midair return feel).
-- Canonicalization checkpoint now includes: arrival-side shake/zoom intimidation beat in `Chamber02BossPitScene`, reveal-gated AI + boss bar activation, and grounded super-altar return placement.
+## Recently Locked Technical/Readability Outcomes
+- The global sprite shimmer/sparkle issue is treated as a **renderer/camera stability problem that was solved at system level**, not as an art-only defect.
+- The enemy feet-hidden-under-black-control-bar issue has been solved in a meaningful way and is no longer accepted behavior.
+- Enemy grounding/scale correction is now recognized as a **global cleanup lane**:
+  - many enemies in Sector 2 and beyond still sit slightly too low
+  - many enemies are also still slightly too small
+  - this remains a dedicated future milestone lane (not a one-off chamber tweak)
 
-### Boss-Pit Abstraction (Deferred on Purpose)
-- Do **not** abstract the pit system until the Chamber02 canonical pattern is trusted in play.
-- Future milestone should cover:
-  - shared pit entry helper
-  - shared pit return helper
-  - shared arrival sting / arrival beat helper
-  - shared textless payoff package helper
-  - per-pit difficulty tiers/config plumbing
-- Optional later prop polish: add a ladder/physical-descent prop where appropriate.
+## Boss Package Direction (Now a Real Future Lane)
+- Boss pit / boss encounter abstraction has advanced enough to support explicit future sequencing.
+- Planned order is now:
+  1. polish the abstracted boss package itself
+  2. retrofit/reimplement boss encounters across the game to that package
+- This is preserved as its own later milestone lane and should not be folded into ad-hoc chamber edits.
 
-## Authoring Doctrine to Follow During Milestone 8
+## Authoring Doctrine to Follow During Active Sector Buildouts
 Chambers should be authored with this default rhythm:
 1. opening setpiece / lore altar segment
 2. corridor wall-module run with basic enemy pockets
@@ -76,8 +73,11 @@ Meaning:
 - background segmentation and encounter tiering should visibly reinforce each other
 
 ## Planned Later Milestone Items (Deferred)
-- **Polish Chamber 1** is a later polish item, not current mainline milestone focus.
+- **Polish Chamber 1** remains a later polish item, not current mainline milestone focus.
 - Sector 3 chamber-to-chamber consistency polish remains a later-stage shaping lane.
+- Global enemy grounding + scale normalization remains a dedicated future milestone lane.
+- Boss package polish + global boss retrofit remains a dedicated future milestone lane.
+- BRUTALITY MODE remains a later complex milestone (see `docs/future-features.md`).
 
 ## Planned Future Lane (Deferred)
 Character animation is an intentional future production lane, but it is **not active focus now**.
@@ -89,6 +89,6 @@ Character animation is an intentional future production lane, but it is **not ac
 ## Do Not Change Casually
 - Base-path deployment contract (`/biomech-retro-horror/` in production, `/` in local dev).
 - Mobile controls and desktop keyboard parity.
-- Scene registration + handoff wiring between Sector 2 chambers, boss-pit return flow, and Sector 3 Chamber 1.
+- Scene registration + handoff wiring between sectors/chambers and boss-pit return flow.
 - Lore cutscene scene isolation from chamber viewport matte/blackout layers.
 - Projectile/AOE damage contracts and shared enemy presentation logic.

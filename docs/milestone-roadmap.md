@@ -3,31 +3,31 @@
 Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first trajectory.
 
 ## Milestone 0 — Project Foundation
-**Purpose:** establish runnable project skeleton and constraints.  
+**Purpose:** establish runnable project skeleton and constraints.
 **Status:** completed.
 
 ## Milestone 1 — Playable Mobile Vertical Slice
-**Purpose:** lock a playable Chamber 01 loop for iPhone portrait + desktop keyboard.  
+**Purpose:** lock a playable Chamber 01 loop for iPhone portrait + desktop keyboard.
 **Status:** completed.
 
 ## Milestone 2 — Slice Art Cohesion + Lore Pattern Consolidation
-**Purpose:** harden readability and formalize lore-screen flow patterns.  
+**Purpose:** harden readability and formalize lore-screen flow patterns.
 **Status:** completed.
 
 ## Milestone 3 — Encounter Expansion + Combat Readability
-**Purpose:** deepen encounter readability and pacing in shipped sectors.  
+**Purpose:** deepen encounter readability and pacing in shipped sectors.
 **Status:** completed.
 
 ## Milestone 4 — Audio Identity Pass
-**Purpose:** establish oppressive baseline audio identity across gameplay/lore states.  
+**Purpose:** establish oppressive baseline audio identity across gameplay/lore states.
 **Status:** completed.
 
 ## Milestone 5 — Content Expansion (Sector 1)
-**Purpose:** complete Chamber 03 + sector finale contract for Sector 1.  
+**Purpose:** complete Chamber 03 + sector finale contract for Sector 1.
 **Status:** completed and closed in first-pass terms.
 
 ## Milestone 6 — Bucket 2 Expansion (Sector 2: The Black Aqueduct / Pressure Gospel)
-**Purpose:** build and prove the next sector arc beyond Sector 1.  
+**Purpose:** build and prove the next sector arc beyond Sector 1.
 **Status:** substantially complete in prototype form.
 
 ## Milestone 7 — Combat Sidequest Integration + Sector 2 Hardening
@@ -50,64 +50,78 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 **Status:** advanced/largely established (no longer the main build lane).
 
 ## Milestone 8 — Sector 3 Buildout + Boss-Pit Expansion (Coupled)
-**Purpose:** build Sector 3 (**The Cradle of Refusal**) as an escalation sector while expanding boss pits as core structural rhythm.
+**Purpose:** establish Sector 3 (**The Cradle of Refusal**) as an escalation sector while expanding boss pits as core structural rhythm.
 
-**Current immediate path inside Milestone 8:**
-- Treat Sector 3 as late buildout, not early bootstrap.
-- Keep Sector 3 Chamber 1 (**Gallery of Failed Measures**) aligned to newer authored-chamber quality.
-- Expand/align chamber content with deliberate encounter-tier/background-tier synergy.
-- Add additional trap-altar-to-boss-pit routes with deterministic return behavior.
-- Increase elite-domain identity in opened room segments.
-- Preserve all established run-state and progression invariants.
-- Canonicalize Sector 1 Chamber 2 boss pit as the reliability-first polish reference before cross-pit abstraction.
+**Current-reality notes:**
+- Sector 3 Chamber 1 rebuilt to later authored-chamber standards.
+- Chamber 1 boss flow already uses modern full boss treatment.
+- Sector 3 Chamber 3 is substantially built from uploaded art pack.
 
-**Current-reality notes inside Milestone 8:**
-- Chamber 1 has been rebuilt toward later-chamber standards.
-- Half-Skull was removed from Chamber 1 and replaced provisionally using `art/raw/sector03/chamber02/enemy_chamber02_blind_cantor_basic_01.png`.
-- Chamber 1 boss flow now uses modern full boss treatment (zoom, shake, elongated ceremonial finish, stronger gore payoff, escalated remains).
-- Chamber 3 is substantially built from uploaded art pack and now part of consistency/polish shaping.
+**Status:** established/active-support lane (not the only primary lane).
 
-**Canonical chamber-authoring rhythm for new chambers:**
-1. opening setpiece / lore altar segment
-2. corridor wall-module run with basic enemy pockets
-3. larger opened-up room background reveal
-4. elite / miniboss domain inside that opened-up room
-5. terminal threshold / seal / endcap
+## Milestone 9 — Sector 4 Chamber 1 Buildout (Active)
+**Purpose:** bring Sector 4 online as the next live authored lane after Sector 3 handoff stabilization.
 
-**Boss-pit canonicalization checkpoint (before abstraction):**
-- Lock Chamber02 immediate entry reliability.
-- Add arrival-side intimidation beat inside `Chamber02BossPitScene`.
-- Keep S1C2 pit on easy-tier tuning.
-- Preserve textless modern death/payoff package.
-- Ensure super-altar return to Chamber02 feels grounded.
-- Defer shared helper abstraction to a later milestone once this pattern is trusted.
-- Optional later polish lane: ladder/physical descent prop treatment.
+**Current-reality notes:**
+- S3 -> S4 handoff work has been addressed.
+- Sector 4 is now a live content lane, not a placeholder-only future idea.
+- Sector 4 Chamber 1 has received shell/shrine/enemy passes.
 
-**Checkpoint note (current):**
-- Chamber02 canonical pass is now the trusted reference for immediate-entry reliability + pit-side arrival intimidation + reveal-gated fight start + easy-tier tuning + grounded return.
-- Cross-pit abstraction remains intentionally deferred until this reference pattern is validated across additional pits.
+**Status:** active now.
 
-## Milestone 9 — Sector 3 Pacing / Density / Readability Polish
-**Purpose:** tune Sector 3 for oppressive pacing clarity and combat readability under higher density.
+## Milestone 10 — Global Enemy Grounding + Scale Normalization
+**Purpose:** normalize enemy floor contact and size readability across chambers/sectors.
+
+**Scope / Includes:**
+- treat enemy grounding/scale as shared/global presentation lane, not per-room bug patching
+- complete normalization pass for Sector 2 and later sectors where enemies still sit low
+- raise undersized enemies to target readability where needed
+- preserve UI readability guarantees (including no feet-hidden-under-control-bar regressions)
+
+**Status:** planned later milestone.
+
+## Milestone 11 — Boss Package Polish + Global Boss Retrofit
+**Purpose:** stabilize and polish abstracted boss package before full-game encounter retrofit.
+
+**Required sequence:**
+1. polish/harden abstracted boss package first
+2. retrofit/reimplement each boss encounter to the package
+
+**Scope / Includes:**
+- preserve modern full boss death/payoff doctrine across all converted fights
+- unify encounter lifecycle hooks and completion semantics
+- reduce per-scene bespoke boss logic where package coverage is intended
+
+**Status:** planned later milestone.
+
+## Milestone 12 — Boss-Pack Content Production Lane
+**Purpose:** produce and integrate planned boss-pack content systematically.
+
+**Current approved planning direction:**
+- user plans roughly a dozen boss concepts spanning boss-pit, miniboss, and full-boss use
+- user likely plans one background image per boss
+- paired boss/background assets are intended for `art/raw/bosspit` content flow
+
+**Status:** planned later milestone (content production + integration pipeline).
+
+## Milestone 13 — Sector 3/4 Pacing, Density, and Readability Polish
+**Purpose:** tune oppressive pacing clarity and combat readability under heavier encounter density.
 
 **Scope / Includes:**
 - pacing and downtime/combat beat refinement
 - lore/combat cadence balancing
 - readability cleanup under dense altar + pit + encounter flows
-- mobile/desktop parity polish under full Sector 3 load
-- Chamber 1 polish and consistency cleanup as a specific late-polish sub-item (not active mainline while Milestone 8 execution continues)
+- chamber-level polish carryover where needed
 
-## Milestone 10 — Global Boss/Chamber Refinement + Uniformity
-**Purpose:** bring boss/chamber quality, readability, and reward signaling to consistent cross-sector standards.
+**Status:** planned later milestone.
 
-**Scope / Includes:**
-- boss telegraph and fairness uniformity pass
-- chamber-end ritual consistency pass
-- reward messaging and run-growth clarity pass
-- retrofitted cleanup for earlier chambers where needed
-- lock all bosses/minibosses/pit bosses to the modern boss-pit-standard death/payoff family (zoom + shake + elongated ceremonial finish + stronger gore + escalated remains)
+## Milestone 14 — BRUTALITY MODE (Deferred Complex Feature)
+**Purpose:** add an earned temporary power-state loop without breaking oppressive baseline pacing.
 
-## Milestone 11 — Character/Action Animation Lane (Deferred, Explicit)
+**Status:** deferred later milestone (explicitly not next small task).
+See `docs/future-features.md` for design summary.
+
+## Milestone 15 — Character/Action Animation Lane (Deferred, Explicit)
 **Purpose:** evolve presentation language from static-sprite-heavy baseline to authored character action performance.
 
 **Planned sequencing:**
@@ -118,4 +132,4 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 - add Rite animation language
 - expand weapon-set breadth and broader combat/performance animation vocabulary
 
-**Status:** planned and intentionally deferred; not active until Sector 3 buildout lane stabilizes.
+**Status:** planned and intentionally deferred.

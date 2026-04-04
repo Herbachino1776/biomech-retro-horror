@@ -9,33 +9,21 @@ Plain-language snapshot of milestone state.
 - **Milestone 4 — Audio identity pass:** completed.
 - **Milestone 5 — Sector 1 content expansion (Chamber 03 + separate boss arena):** completed/closed in first pass.
 - **Milestone 6 — Sector 2 expansion (The Black Aqueduct / Pressure Gospel):** functionally in place in prototype form (Chambers 1–3 + Sorrow Engine payoff).
-
-- **Milestone 7 — Combat-sidequest integration + Sector 2 hardening:** advanced/largely established.
-  - **Established so far:**
-    - Vessel run economy baseline (start, chamber restore, major encounter max-cap growth behavior)
-    - stronger gore/payoff combat feedback
-    - projectile + AOE combat kit in shipped rooms
-    - boss/miniboss readability + stagger/finisher groundwork
-    - first trap-altar -> boss-pit prototype in Sector 2 Chamber 2
-    - shared major-encounter resolution and boss-death doctrine hardening
-    - chamber-end ritual/cinematic motion groundwork
-  - **Still available as targeted follow-up:**
-    - 7C Enemy Pursuit + Encounter Chemistry
-    - 7H Chamber-End Rituals + Cinematic Lore Motion
-    - 7I Sponge vs Satisfaction Balance
-
-- **Milestone 8 — Sector 3 buildout + boss-pit expansion (coupled):** active in practice.
-  - practical meaning: Sector 3 (The Cradle of Refusal) is now in later-stage build + consistency shaping, with boss pits treated as core run-structure encounters rather than detached side content.
-  - current grounding:
-    - Chamber 1 rebuilt toward later authored-chamber quality
-    - Half-Skull removed from Chamber 1
-    - Chamber 1 provisional replacement boss based on `art/raw/sector03/chamber02/enemy_chamber02_blind_cantor_basic_01.png`
-    - Chamber 1 boss flow now uses modern full boss treatment (zoom + shake + elongated ceremonial finish + stronger gore payoff + escalated remains)
-    - Chamber 3 substantially built from uploaded art pack
-
-- **Milestone 9+ — polish and expansion lanes:**
-  - **Polish Chamber 1** (later polish lane; not current mainline)
-  - Sector 3 pacing/density/readability polish
-  - global boss/chamber refinement + uniformity
+- **Milestone 7 — Combat-sidequest integration + Sector 2 hardening:** advanced/largely established (follow-up 7C/7H/7I remains optional targeted polish).
+- **Milestone 8 — Sector 3 buildout + boss-pit expansion:** established and still relevant, but no longer the only active content lane.
+- **Milestone 9 — Sector 4 Chamber 1 buildout:** active now.
+  - S3 -> S4 handoff has been addressed.
+  - Sector 4 is now live lane content work, not placeholder-only planning.
+  - S4C1 shell/shrine/enemy passes have occurred.
+- **Milestone 10 — Global enemy grounding + scale normalization:** planned later milestone.
+  - Includes fixing remaining Sector 2+ enemies that still sit slightly low and/or read too small.
+  - Includes preserving the solved feet-under-control-bar issue as a no-regression expectation.
+- **Milestone 11 — Boss package polish + global boss retrofit:** planned later milestone.
+  - Sequence: polish package first, then retrofit all boss encounters.
+- **Milestone 12 — Boss-pack content production lane:** planned later milestone.
+  - Direction: roughly a dozen boss concepts, each likely paired with a dedicated background in `art/raw/bosspit`.
+- **Milestone 13+ — deferred expansion/polish lanes:**
+  - Sector 3/4 pacing-density-readability polish
+  - BRUTALITY MODE (later complex milestone)
   - deferred player weapon/attack polish + broader weapon-set expansion + alternate attack families (smash/thrust/swipe/upswing)
-  - explicit later character/action animation lane (planned, deferred)
+  - explicit later character/action animation lane

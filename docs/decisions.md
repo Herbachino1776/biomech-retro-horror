@@ -25,9 +25,8 @@ Concise record of technical/design decisions currently in force.
 - Sector 3 identity is **The Cradle of Refusal**.
 - Sector 3 Chamber 1 playable backbone scene is **Gallery of Failed Measures**.
 - Sector 3 Chamber 1 was rebuilt toward newer authored-chamber standards.
-- Half-Skull is removed from Chamber 1.
-- Chamber 1 provisional replacement boss uses `art/raw/sector03/chamber02/enemy_chamber02_blind_cantor_basic_01.png` as the source asset.
 - Sector 3 Chamber 3 is substantially built from its uploaded art pack.
+- Sector 4 Chamber 1 is now an active authored-content lane (not placeholder-only future planning).
 
 ## Chamber Scale + Finale Doctrine
 - Chamber-03-level scale/consequence is the benchmark for future chambers.
@@ -54,38 +53,46 @@ This means:
 - Dense/obscure lore framing must be balanced with violent combat payoff, memorable encounter personality, and satisfying repeat-run combat feel.
 - Shared major-encounter resolution flow is approved reusable infrastructure for chamber/boss endings.
 
-## Boss Pit Doctrine (Canonical)
+## Rendering Stability Doctrine
+- Global sprite shimmer/sparkle incidents are treated first as renderer/camera stability faults, not art-only defects.
+- Maintain camera/zoom alignment discipline and shared render stability before requesting asset redraws for shimmer-class issues.
+
+## Enemy Presentation Doctrine
+- Shared enemy presentation logic must be treated as shared infrastructure.
+- Do not “fix grounding” chamber-by-chamber when the regression source is shared presentation logic.
+- Enemy feet-hidden-under-black-control-bar regressions are treated as real readability failures and must be fixed meaningfully.
+- Enemy grounding/scale correction is now an approved global future lane: many Sector 2+ enemies still sit slightly low and/or read slightly too small.
+
+## Boss Pit + Boss Package Doctrine
 - Boss pits are now part of core structural game identity, not detached optional flavor.
 - Boss pits are one-time per run.
 - Boss pit completion/reward state resets on death/fresh run.
 - Boss pits must grant meaningful Vessel growth rewards when cleared.
 - Boss pits should preserve clean entry/exit contracts and deterministic return behavior.
-- Sector 3 is expected to be boss-pit-heavy by design, with higher trap-altar density than earlier sectors.
 - Boss/miniboss/pit-boss death/payoff treatment is locked to the modern stronger family:
   - camera zoom
   - camera shake
   - elongated ceremonial finish
   - stronger gore payoff
   - escalated boss remains
+- Boss package abstraction has advanced enough to justify a formal later lane.
+- Required sequencing is locked: polish abstracted boss package first, then retrofit/reimplement boss encounters globally.
+- Boss-pack production direction is approved as future lane: roughly a dozen boss concepts and likely one dedicated background per boss in `art/raw/bosspit`.
 
 ## Lore Presentation Doctrine
 - Lore is a primary identity system.
 - Preferred delivery remains discrete cinematic ritual transitions (`LoreScreenScene` / `LoreCutsceneScene`) instead of generic always-on dialogue UI.
 - Lore-scene failures that match chamber viewport shape should be diagnosed as scene-layer leakage before changing lore art/layout.
 
-## Shared Logic Stability Doctrine
-- Shared enemy presentation logic must be treated as shared infrastructure.
-- Do not “fix grounding” chamber-by-chamber when the regression source is shared presentation logic.
-- Diagnose root cause first; avoid parallel local patches that fragment behavior.
-
 ## Milestone Flow Doctrine
 - Milestone 5 is closed.
 - Milestone 6 moved beyond foothold status and now represents a full Sector 2 prototype arc.
 - Milestone 7 is largely established; remaining 7C/7H/7I are targeted follow-up lanes, not default primary sequencing.
-- Milestone 8 is active in later-stage execution (Sector 3 consistency/polish shaping, not early bootstrap).
-- Post-7 direction remains coupled: Sector 3 buildout + boss-pit expansion.
-- Global boss refinement/uniformity is planned as a later polish milestone (not dropped).
-- Chamber 1 polish is a later polish milestone item (not active mainline).
+- Milestone 8 is established and still active-support, but no longer sole active lane.
+- Milestone 9 (Sector 4 Chamber 1 buildout) is active in practice.
+- Global enemy grounding/scale normalization is preserved as its own future milestone lane.
+- Boss package polish + global retrofit is preserved as its own future milestone lane.
+- BRUTALITY MODE is an explicitly deferred later complex milestone.
 
 ## Future Character Animation Doctrine (Deferred Lane)
 - Animated characters are a real planned future production focus.
