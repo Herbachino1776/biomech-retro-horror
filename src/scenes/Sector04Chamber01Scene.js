@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import { Player } from '../entities/Player.js';
+import { SkitterServitor } from '../entities/SkitterServitor.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
-import { PLAYER, WORLD } from '../data/milestone1Config.js';
+import { PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { createDirectionalCameraBias } from '../systems/DirectionalCameraBias.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
@@ -31,6 +32,112 @@ const SEGMENTS = [
   { key: ASSET_KEYS.sector04Chamber01BackgroundThreshold, x: 5800, y: 212, width: 900, height: 470, tint: 0xcdbca8, alpha: 0.74 }
 ];
 
+const ENEMIES = {
+  bellHerder: {
+    ...SKITTER,
+    textureKey: ASSET_KEYS.sector04Chamber01EnemyBasicBellHerder,
+    speed: 58,
+    aggroRange: 258,
+    patrolDistance: 120,
+    presentation: { alpha: 0.98, display: { width: 182, height: 150 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    corpseRemainsProfile: 'sector3Basic'
+  },
+  branchHusk: {
+    ...SKITTER,
+    textureKey: ASSET_KEYS.sector04Chamber01EnemyBasicBranchHusk,
+    speed: 56,
+    aggroRange: 252,
+    patrolDistance: 114,
+    presentation: { alpha: 0.98, display: { width: 184, height: 152 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    corpseRemainsProfile: 'sector3Basic'
+  },
+  shearAttendant: {
+    ...SKITTER,
+    textureKey: ASSET_KEYS.sector04Chamber01EnemyBasicShearAttendant,
+    speed: 60,
+    aggroRange: 266,
+    patrolDistance: 122,
+    presentation: { alpha: 0.98, display: { width: 186, height: 154 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    corpseRemainsProfile: 'sector3Basic'
+  },
+  reductionSaint: {
+    ...SKITTER,
+    textureKey: ASSET_KEYS.sector04Chamber01EnemyEliteReductionSaint,
+    health: 8,
+    speed: 46,
+    aggroRange: 296,
+    patrolDistance: 92,
+    body: { width: 74, height: 44, offsetX: 28, offsetY: 90 },
+    presentation: { alpha: 0.98, display: { width: 296, height: 228 }, origin: { x: 0.52, y: 0.975 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.46 } },
+    corpseRemainsProfile: 'sector3Elite'
+  }
+};
+
+const ENCOUNTER_POCKETS = [
+  {
+    id: 'corridor-purging-line',
+    label: 'PURGING LINE',
+    zoneX: 1540,
+    zoneY: WORLD.floorY - 72,
+    zoneWidth: 660,
+    zoneHeight: 226,
+    enemies: [
+      { type: 'bellHerder', x: 1300 },
+      { type: 'branchHusk', x: 1500, wakeDelayMs: 50 },
+      { type: 'shearAttendant', x: 1710, wakeDelayMs: 110 }
+    ]
+  },
+  {
+    id: 'corridor-wall-reduction',
+    label: 'WALL REDUCTION',
+    zoneX: 2350,
+    zoneY: WORLD.floorY - 74,
+    zoneWidth: 760,
+    zoneHeight: 236,
+    enemies: [
+      { type: 'branchHusk', x: 2080 },
+      { type: 'bellHerder', x: 2310, wakeDelayMs: 44 },
+      { type: 'shearAttendant', x: 2510, wakeDelayMs: 96 },
+      { type: 'bellHerder', x: 2680, wakeDelayMs: 146 }
+    ]
+  },
+  {
+    id: 'opened-chamber-reduction-reveal',
+    label: 'REDUCTION REVEAL',
+    zoneX: 3260,
+    zoneY: WORLD.floorY - 76,
+    zoneWidth: 1020,
+    zoneHeight: 244,
+    enemies: [
+      { type: 'shearAttendant', x: 2890 },
+      { type: 'branchHusk', x: 3100, wakeDelayMs: 56 },
+      { type: 'reductionSaint', x: 3340, wakeDelayMs: 126 },
+      { type: 'bellHerder', x: 3540, wakeDelayMs: 178 }
+    ]
+  },
+  {
+    id: 'threshold-lead-up',
+    label: 'THRESHOLD LEAD-UP',
+    zoneX: 5060,
+    zoneY: WORLD.floorY - 74,
+    zoneWidth: 740,
+    zoneHeight: 236,
+    enemies: [
+      { type: 'branchHusk', x: 4820 },
+      { type: 'bellHerder', x: 5020, wakeDelayMs: 44 },
+      { type: 'shearAttendant', x: 5220, wakeDelayMs: 100 }
+    ]
+  }
+];
+
+const LORE_ANCHOR = {
+  x: 670,
+  y: WORLD.floorY - 78,
+  width: 214,
+  height: 210,
+  cutsceneId: 'sector04-chamber01-litany-of-reduction'
+};
+
 export class Sector04Chamber01Scene extends Phaser.Scene {
   constructor() {
     super(CHAMBER.sceneKey);
@@ -39,6 +146,11 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
   init(data) {
     this.transitionContext = data ?? {};
     this.isRestartingRun = false;
+    this.isLoreTransitionActive = false;
+    this.hasCompletedLoreBeat = false;
+    this.enemies = [];
+    this.encounterPockets = [];
+    this.currentLoreZone = null;
   }
 
   create() {
@@ -47,6 +159,8 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     this.audioDirector.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.104 });
     this.createBackdrop();
     this.createPlayer();
+    this.createEncounterPockets();
+    this.createLoreAnchor();
     this.createUi();
     this.configureLayout();
     this.cameras.main.fadeIn(600, 0, 0, 0);
@@ -97,6 +211,56 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     this.physics.add.collider(this.player.sprite, this.terminalBarrier);
   }
 
+  createEncounterPockets() {
+    this.encounterPockets = ENCOUNTER_POCKETS.map((pocketConfig) => {
+      const zone = this.add.zone(pocketConfig.zoneX, pocketConfig.zoneY, pocketConfig.zoneWidth, pocketConfig.zoneHeight).setOrigin(0.5);
+      this.physics.add.existing(zone, true);
+      const markerShadow = this.add.ellipse(pocketConfig.zoneX, WORLD.floorY - 4, pocketConfig.zoneWidth * 0.62, 78, 0x040302, 0.09).setDepth(-5.84);
+
+      const enemies = pocketConfig.enemies.map((enemyConfig) => {
+        const baseConfig = ENEMIES[enemyConfig.type];
+        const enemy = new SkitterServitor(this, enemyConfig.x, PLAYER.startY, baseConfig);
+        enemy.awakened = false;
+        enemy.pocketWakeAtTime = null;
+
+        this.physics.add.collider(enemy.sprite, this.platforms);
+        this.physics.add.collider(enemy.sprite, this.terminalBarrier);
+        this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (attackZone, enemySprite) => {
+          if (!this.player.attackActive || enemy.dead || enemy.lastAttackHitId === this.player.attackId || !(enemySprite === enemy.sprite || enemySprite?.gameObject === enemy.sprite)) {
+            return;
+          }
+          enemy.lastAttackHitId = this.player.attackId;
+          const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
+          enemy.setHitReactionDirection(knockDirection);
+          enemy.takeDamage(1, this.time.now);
+          this.audioDirector?.playPlayerHit();
+        });
+        this.physics.add.overlap(this.player.sprite, enemy.sprite, (_p, enemySprite) => {
+          if (enemy.dead || !(enemySprite === enemy.sprite || enemySprite?.gameObject === enemy.sprite) || !enemy.canDealContactDamage(this.time.now)) {
+            return;
+          }
+          const tookDamage = this.player.receiveDamage(SKITTER.contactDamage, this.time.now);
+          if (tookDamage) {
+            const knockDirection = Math.sign(this.player.sprite.x - enemy.sprite.x) || 1;
+            this.player.body.setVelocityX(knockDirection * 220);
+            this.player.body.setVelocityY(-220);
+          }
+        });
+
+        this.enemies.push(enemy);
+        return enemy;
+      });
+
+      return { ...pocketConfig, zone, markerShadow, enemies, activated: false, resolved: false };
+    });
+  }
+
+  createLoreAnchor() {
+    const zone = this.add.zone(LORE_ANCHOR.x, LORE_ANCHOR.y, LORE_ANCHOR.width, LORE_ANCHOR.height).setOrigin(0.5);
+    this.physics.add.existing(zone, true);
+    this.loreAnchor = { zone };
+  }
+
   createUi() {
     this.hud = new HudOverlay(this);
     this.mobileControls = new MobileControls(this);
@@ -109,12 +273,16 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+    this.keyInteract = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    this.keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     this.keyRestart = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
       this.audioDirector?.shutdown();
+      this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
     });
+    this.game.events.on('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
   }
 
   configureLayout() {
@@ -141,10 +309,18 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     if (this.player.isDead) {
       this.mobileControls.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
+      this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
       if ((Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) && !this.isRestartingRun) {
         this.isRestartingRun = true;
         restartRunFromDeath(this);
       }
+      return;
+    }
+
+    if (this.isLoreTransitionActive) {
+      this.mobileControls.setMode('dialogue');
+      this.player.body.setVelocity(0, 0);
+      this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
       return;
     }
 
@@ -159,8 +335,114 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     };
 
     this.player.update(time, input);
+    this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
+    this.updateEncounterPockets(time);
+    this.refreshLoreZonePresence();
+    this.tryBeginLoreSequence(mobileInput);
     this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
+  }
+
+  updateEncounterPockets(time) {
+    this.encounterPockets.forEach((pocket) => {
+      let inside = false;
+      this.physics.overlap(this.player.sprite, pocket.zone, () => { inside = true; });
+
+      if (inside && !pocket.activated) {
+        pocket.activated = true;
+        pocket.enemies.forEach((enemy, index) => {
+          if (!enemy.dead) {
+            enemy.pocketWakeAtTime = time + (enemy.config.wakeDelayMs ?? 0) + index * 52;
+          }
+        });
+      }
+
+      pocket.enemies.forEach((enemy) => {
+        if (!enemy.dead && !enemy.awakened && enemy.pocketWakeAtTime !== null && time >= enemy.pocketWakeAtTime) {
+          enemy.awakened = true;
+          enemy.pocketWakeAtTime = null;
+        }
+      });
+
+      if (pocket.activated && pocket.enemies.every((enemy) => enemy.dead)) {
+        pocket.resolved = true;
+        pocket.markerShadow.setAlpha(0.03);
+      }
+    });
+  }
+
+  refreshLoreZonePresence() {
+    this.currentLoreZone = null;
+    if (!this.loreAnchor || this.isLoreTransitionActive || this.hasCompletedLoreBeat) {
+      return;
+    }
+
+    this.physics.overlap(this.player.sprite, this.loreAnchor.zone, () => {
+      this.currentLoreZone = this.loreAnchor;
+    });
+  }
+
+  tryBeginLoreSequence(mobileInput) {
+    if (!this.currentLoreZone) {
+      return;
+    }
+    const interactPressed = Phaser.Input.Keyboard.JustDown(this.keyInteract) || Phaser.Input.Keyboard.JustDown(this.keyEnter) || mobileInput.interactPressed;
+    if (!interactPressed) {
+      return;
+    }
+
+    this.beginLoreSequence();
+  }
+
+  beginLoreSequence() {
+    if (this.isLoreTransitionActive) {
+      return;
+    }
+
+    this.isLoreTransitionActive = true;
+    this.currentLoreZone = null;
+    this.mobileControls.setMode('dialogue');
+    this.player.body.setVelocity(0, 0);
+    this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+    this.audioDirector?.stopAmbientLoop();
+    this.hud?.setVisible(false);
+    this.mobileControls.setMode('init');
+    this.uiCamera?.setVisible(false);
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.setGameplaySceneVisibility(false);
+      this.scene.pause();
+      this.scene.launch('LoreCutsceneScene', {
+        cutsceneId: LORE_ANCHOR.cutsceneId,
+        returnSceneKey: this.scene.key
+      });
+    });
+
+    this.cameras.main.fadeOut(420, 0, 0, 0);
+  }
+
+  handleLoreCutsceneComplete({ cutsceneId } = {}) {
+    if (cutsceneId !== LORE_ANCHOR.cutsceneId) {
+      return;
+    }
+
+    this.hasCompletedLoreBeat = true;
+    this.resumeFromLore();
+  }
+
+  resumeFromLore() {
+    this.isLoreTransitionActive = false;
+    this.setGameplaySceneVisibility(true);
+    this.applyResponsiveLayout();
+    this.mobileControls.setMode('gameplay');
+    this.hud?.setVisible(true);
+    this.uiCamera?.setVisible(true);
+    this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.104 });
+    this.cameras.main.fadeIn(500, 0, 0, 0);
+  }
+
+  setGameplaySceneVisibility(isVisible) {
+    this.scene.setVisible(isVisible, this.scene.key);
   }
 
   createInvisiblePlatform(x, y, width, height) {

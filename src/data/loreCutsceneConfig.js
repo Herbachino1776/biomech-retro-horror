@@ -248,8 +248,36 @@ export const LORE_CUTSCENES = {
         shakeDuration: 3200
       }
     }
-  }
-,
+  },
+  'sector04-chamber01-litany-of-reduction': {
+    id: 'sector04-chamber01-litany-of-reduction',
+    imageKey: ASSET_KEYS.sector04Chamber01LoreImage,
+    title: 'SECTOR 04 // LITANY OF REDUCTION',
+    body: [
+      'The shrine records a city that stayed alive by reducing every vow to measurable waste.',
+      'Bell-herders count the remainder, branch-husks carry it, and shear attendants cut away anything that still remembers mercy.',
+      'Beyond this terrace, continuation is granted only to shapes that survive subtraction.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xb9aa95,
+      titleColor: '#a7b98f',
+      bodyColor: '#d9ccb8',
+      promptColor: '#90a878',
+      imageTint: 0xd7cab6,
+      imageAlpha: 0.95,
+      backgroundColor: '#000000',
+      motion: {
+        panX: 12,
+        panY: -8,
+        zoom: 1.034,
+        duration: 9200,
+        shakeX: 2,
+        shakeY: 2,
+        shakeDuration: 3200
+      }
+    }
+  },
   'sector03-chamber03-gate-of-refusal': {
     id: 'sector03-chamber03-gate-of-refusal',
     imageKey: ASSET_KEYS.sector03Chamber03LoreImage,
