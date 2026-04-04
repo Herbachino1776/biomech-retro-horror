@@ -6,6 +6,7 @@ class BossPitRunState {
   resetForFreshRun() {
     this.completed = {
       chamber02: false,
+      chamber02HollowSky: false,
       sector02Chamber02: false,
       sector03Chamber01: false,
       sector03Chamber02Pit02: false,
@@ -13,6 +14,7 @@ class BossPitRunState {
     };
     this.rewardGranted = {
       chamber02: false,
+      chamber02HollowSky: false,
       sector02Chamber02: false,
       sector03Chamber01: false,
       sector03Chamber02Pit02: false,
@@ -52,6 +54,22 @@ class BossPitRunState {
 
   markChamber02BossPitRewardGranted() {
     this.rewardGranted.chamber02 = true;
+  }
+
+  hasChamber02HollowSkyBossPitCompleted() {
+    return this.completed.chamber02HollowSky;
+  }
+
+  hasChamber02HollowSkyBossPitRewardGranted() {
+    return this.rewardGranted.chamber02HollowSky;
+  }
+
+  markChamber02HollowSkyBossPitCompleted() {
+    this.completed.chamber02HollowSky = true;
+  }
+
+  markChamber02HollowSkyBossPitRewardGranted() {
+    this.rewardGranted.chamber02HollowSky = true;
   }
 
   hasSector03Chamber01BossPitCompleted() {
