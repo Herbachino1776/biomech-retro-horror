@@ -36,9 +36,9 @@ const BOSS_PIT_RETURN = {
 
 const BOSS_PIT_ALTARS = {
   presentation: [
-    { id: 'west-watch-altar', x: 430, y: WORLD.floorY - 102, width: 174, height: 174, tint: 0x8a8378, alpha: 0.32 },
-    { id: 'east-watch-altar', x: 1110, y: WORLD.floorY - 102, width: 174, height: 174, tint: 0x8f8579, alpha: 0.34 },
-    { id: 'return-altar', x: 1530, y: WORLD.floorY - 102, width: 208, height: 208, tint: 0xb7ad9d, alpha: 0.44 }
+    { id: 'west-watch-altar', x: 430, y: WORLD.floorY - 102, width: 174, height: 174, tint: 0xffffff, alpha: 0.96 },
+    { id: 'east-watch-altar', x: 1110, y: WORLD.floorY - 102, width: 174, height: 174, tint: 0xffffff, alpha: 0.96 },
+    { id: 'return-altar', x: 1530, y: WORLD.floorY - 102, width: 208, height: 208, tint: 0xf1e4cd, alpha: 0.84 }
   ],
   returnAltarId: 'return-altar',
   interaction: {
@@ -1134,13 +1134,13 @@ export class Chamber02BossPitScene extends Phaser.Scene {
     }
 
     if (this.hasUnlockedExitAltar) {
-      this.exitAltar.sprite?.setAlpha(0.94).setTint(0xd7cab2);
-      this.exitAltar.aura?.setAlpha(0.22).setFillStyle(0xc2b37f, 0.24);
+      this.exitAltar.sprite?.setAlpha(0.98).setTint(0xffffff);
+      this.exitAltar.aura?.setAlpha(0.24).setFillStyle(0xd2c28a, 0.26);
       return;
     }
 
-    this.exitAltar.sprite?.setAlpha(0.44).setTint(0x8f8579);
-    this.exitAltar.aura?.setAlpha(0.04).setFillStyle(0x6f6559, 0.04);
+    this.exitAltar.sprite?.setAlpha(0.84).setTint(0xf1e4cd);
+    this.exitAltar.aura?.setAlpha(0.1).setFillStyle(0x8a7e6d, 0.1);
   }
 
   refreshExitAltarPresence() {
