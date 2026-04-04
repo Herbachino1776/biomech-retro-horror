@@ -108,15 +108,40 @@ const CHAMBER02_ENCOUNTER_POCKETS = [
 ];
 
 
-const CHAMBER02_BOSS_PIT_ALTAR = {
-  x: 620,
-  y: 402,
-  width: 198,
-  height: 198,
-  zoneWidth: 196,
-  zoneHeight: 216,
-  promptOffsetY: -168
-};
+const CHAMBER02_BOSS_PIT_ALTARS = [
+  {
+    id: 'chamber02-bosspit-ash',
+    sceneKey: 'Chamber02BossPitScene',
+    completionKey: 'ash',
+    x: 620,
+    y: 402,
+    width: 198,
+    height: 198,
+    zoneWidth: 196,
+    zoneHeight: 216,
+    promptOffsetY: -168,
+    textureKey: ASSET_KEYS.bossPit02AltarTrap,
+    tint: 0xd8c4ad,
+    auraWidth: 500,
+    auraHeight: 96
+  },
+  {
+    id: 'chamber02-bosspit-hollow-sky',
+    sceneKey: 'Chamber02BossPitHollowSkyScene',
+    completionKey: 'hollowSky',
+    x: 2350,
+    y: 402,
+    width: 198,
+    height: 198,
+    zoneWidth: 196,
+    zoneHeight: 216,
+    promptOffsetY: -168,
+    textureKey: ASSET_KEYS.bossPit01AltarTrap,
+    tint: 0xdcc7b0,
+    auraWidth: 520,
+    auraHeight: 100
+  }
+];
 
 const CHAMBER02_SEGMENTS = [
   { type: 'opening', x: 420, width: 780, tint: 0xc1b199, alpha: 0.72 },
@@ -153,7 +178,8 @@ export class Chamber02Scene extends Phaser.Scene {
 
   init(data) {
     this.transitionContext = data ?? {};
-    this.hasCompletedBossPitLoop = Boolean(this.transitionContext?.returnFromBossPit) || bossPitRunState.hasChamber02BossPitCompleted();
+    this.hasCompletedBossPitAshLoop = bossPitRunState.hasChamber02BossPitCompleted();
+    this.hasCompletedBossPitHollowSkyLoop = bossPitRunState.hasChamber02HollowSkyBossPitCompleted();
   }
 
   create() {
@@ -176,6 +202,7 @@ export class Chamber02Scene extends Phaser.Scene {
       this.exitGateUnlockAudioTimer = null;
       this.exitGatePromptText = null;
       this.bossPitPromptText = null;
+      this.bossPitAltars = [];
       this.chamber03StartHasRun = false;
       this.bossPitTransitionActive = false;
       this.isSceneEntryReadyForTransitions = false;
@@ -192,8 +219,8 @@ export class Chamber02Scene extends Phaser.Scene {
       this.renderProcessionalBackdrop();
       startupStep = 'create-platforms';
       this.createPlatforms();
-      startupStep = 'create-boss-pit-altar';
-      this.createBossPitAltar();
+      startupStep = 'create-boss-pit-altars';
+      this.createBossPitAltars();
 
       startupStep = 'audio';
       this.audioDirector = new AudioDirector(this);
@@ -263,8 +290,14 @@ export class Chamber02Scene extends Phaser.Scene {
       this.directionalCameraBias?.update();
       this.hud.update(this.player.health, this.player.maxHealth);
       if (this.transitionContext?.returnFromBossPit) {
-        this.hasCompletedBossPitLoop = true;
-        bossPitRunState.markChamber02BossPitCompleted();
+        const returnedFromHollowSky = this.transitionContext?.fromScene === 'Chamber02BossPitHollowSkyScene';
+        if (returnedFromHollowSky) {
+          this.hasCompletedBossPitHollowSkyLoop = true;
+          bossPitRunState.markChamber02HollowSkyBossPitCompleted();
+        } else {
+          this.hasCompletedBossPitAshLoop = true;
+          bossPitRunState.markChamber02BossPitCompleted();
+        }
       }
       console.info('[Chamber02Scene] create complete');
     } catch (error) {
@@ -331,11 +364,14 @@ export class Chamber02Scene extends Phaser.Scene {
         .setDepth(-10);
     }
 
-    this.sanctumAura = this.add
-      .ellipse(CHAMBER02_BOSS_PIT_ALTAR.x, 404, 500, 96, COLORS.sickly, 0.12)
-      .setDepth(-9);
+    this.sanctumAuras = CHAMBER02_BOSS_PIT_ALTARS.map((altarConfig, index) => this.add
+      .ellipse(altarConfig.x, 404, altarConfig.auraWidth, altarConfig.auraHeight, COLORS.sickly, index === 0 ? 0.12 : 0.09)
+      .setDepth(-9));
 
-    this.ambientVeil = this.add.ellipse(CHAMBER02_BOSS_PIT_ALTAR.x, 286, 660, 340, COLORS.sickly, 0.03).setDepth(-7.5).setScale(1, 1);
+    this.ambientVeils = CHAMBER02_BOSS_PIT_ALTARS.map((altarConfig, index) => this.add
+      .ellipse(altarConfig.x, 286, 660, 340, COLORS.sickly, index === 0 ? 0.03 : 0.026)
+      .setDepth(-7.5)
+      .setScale(1, 1));
   }
 
   createPlatforms() {
@@ -519,35 +555,44 @@ export class Chamber02Scene extends Phaser.Scene {
     return this.tollKeepers;
   }
 
-  createBossPitAltar() {
-    const altarTextureKey = this.textures.exists(ASSET_KEYS.bossPit02AltarTrap)
-      ? ASSET_KEYS.bossPit02AltarTrap
-      : null;
-    const altar = altarTextureKey
-      ? this.add.image(CHAMBER02_BOSS_PIT_ALTAR.x, CHAMBER02_BOSS_PIT_ALTAR.y, altarTextureKey)
-        .setDisplaySize(CHAMBER02_BOSS_PIT_ALTAR.width, CHAMBER02_BOSS_PIT_ALTAR.height)
-        .setTint(0xd8c4ad)
-        .setAlpha(0.88)
-        .setDepth(-5.1)
-      : this.add
-        .ellipse(CHAMBER02_BOSS_PIT_ALTAR.x, CHAMBER02_BOSS_PIT_ALTAR.y - 10, CHAMBER02_BOSS_PIT_ALTAR.width, CHAMBER02_BOSS_PIT_ALTAR.height, COLORS.sickly, 0.16)
-        .setDepth(-5.1);
-    this.add
-      .ellipse(CHAMBER02_BOSS_PIT_ALTAR.x, WORLD.floorY + 8, CHAMBER02_BOSS_PIT_ALTAR.width + 84, 40, 0x030303, 0.34)
-      .setDepth(-5.05);
+  createBossPitAltars() {
+    this.bossPitAltars = CHAMBER02_BOSS_PIT_ALTARS.map((altarConfig) => {
+      const altarTextureKey = this.textures.exists(altarConfig.textureKey)
+        ? altarConfig.textureKey
+        : null;
+      const altar = altarTextureKey
+        ? this.add.image(altarConfig.x, altarConfig.y, altarTextureKey)
+          .setDisplaySize(altarConfig.width, altarConfig.height)
+          .setTint(altarConfig.tint)
+          .setAlpha(0.88)
+          .setDepth(-5.1)
+        : this.add
+          .ellipse(altarConfig.x, altarConfig.y - 10, altarConfig.width, altarConfig.height, COLORS.sickly, 0.16)
+          .setDepth(-5.1);
 
-    const zone = this.add
-      .zone(
-        CHAMBER02_BOSS_PIT_ALTAR.x,
-        CHAMBER02_BOSS_PIT_ALTAR.y,
-        CHAMBER02_BOSS_PIT_ALTAR.zoneWidth,
-        CHAMBER02_BOSS_PIT_ALTAR.zoneHeight
-      )
-      .setOrigin(0.5);
-    this.physics.add.existing(zone, true);
+      this.add
+        .ellipse(altarConfig.x, WORLD.floorY + 8, altarConfig.width + 84, 40, 0x030303, 0.34)
+        .setDepth(-5.05);
+
+      const zone = this.add
+        .zone(
+          altarConfig.x,
+          altarConfig.y,
+          altarConfig.zoneWidth,
+          altarConfig.zoneHeight
+        )
+        .setOrigin(0.5);
+      this.physics.add.existing(zone, true);
+
+      return {
+        ...altarConfig,
+        altar,
+        zone
+      };
+    });
 
     this.bossPitPromptText = this.add
-      .text(CHAMBER02_BOSS_PIT_ALTAR.x, CHAMBER02_BOSS_PIT_ALTAR.y + CHAMBER02_BOSS_PIT_ALTAR.promptOffsetY, 'Press [E] Descend', {
+      .text(0, 0, 'Press [E] Descend', {
         fontFamily: 'monospace',
         fontSize: '18px',
         color: '#d6c5ac',
@@ -559,9 +604,15 @@ export class Chamber02Scene extends Phaser.Scene {
       .setVisible(false);
 
     this.currentBossPitAltar = null;
-    this.bossPitAltar = { altar, zone };
   }
 
+  isBossPitAltarCompleted(altarConfig) {
+    if (altarConfig?.completionKey === 'hollowSky') {
+      return this.hasCompletedBossPitHollowSkyLoop;
+    }
+
+    return this.hasCompletedBossPitAshLoop;
+  }
   createEnemyEncounter() {
     CHAMBER02_ENCOUNTER_POCKETS.forEach((pocket) => {
       this.add.ellipse(pocket.zoneX, WORLD.floorY - 4, pocket.zoneWidth * 0.56, 72, 0x040303, 0.1).setDepth(-6.02);
@@ -607,8 +658,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.currentBossPitAltar = null;
     this.bossPitPromptText?.setVisible(false);
 
-    if (!this.bossPitAltar?.zone
-      || this.hasCompletedBossPitLoop
+    if (!this.bossPitAltars?.length
       || this.bossPitTransitionActive
       || this.isExitGateTransitionActive
       || !this.isSceneEntryReadyForTransitions
@@ -616,18 +666,26 @@ export class Chamber02Scene extends Phaser.Scene {
       return;
     }
 
-    this.physics.overlap(this.player.sprite, this.bossPitAltar.zone, () => {
-      this.currentBossPitAltar = this.bossPitAltar;
+    this.bossPitAltars.forEach((altarConfig) => {
+      if (!altarConfig?.zone || this.isBossPitAltarCompleted(altarConfig)) {
+        return;
+      }
+
+      this.physics.overlap(this.player.sprite, altarConfig.zone, () => {
+        this.currentBossPitAltar = altarConfig;
+      });
     });
 
     if (this.currentBossPitAltar) {
-      this.bossPitPromptText?.setVisible(true);
+      this.bossPitPromptText
+        ?.setPosition(this.currentBossPitAltar.x, this.currentBossPitAltar.y + this.currentBossPitAltar.promptOffsetY)
+        .setVisible(true);
     }
   }
 
   tryBeginBossPitTransition(mobileInput) {
     if (!this.currentBossPitAltar
-      || this.hasCompletedBossPitLoop
+      || this.isBossPitAltarCompleted(this.currentBossPitAltar)
       || this.bossPitTransitionActive
       || this.isExitGateTransitionActive
       || !this.isSceneEntryReadyForTransitions
@@ -647,12 +705,16 @@ export class Chamber02Scene extends Phaser.Scene {
   }
 
   beginBossPitTransition() {
-    if (this.bossPitTransitionActive || this.hasCompletedBossPitLoop || !this.isSceneEntryReadyForTransitions) {
+    if (!this.currentBossPitAltar
+      || this.bossPitTransitionActive
+      || this.isBossPitAltarCompleted(this.currentBossPitAltar)
+      || !this.isSceneEntryReadyForTransitions) {
       return;
     }
 
+    const targetAltar = this.currentBossPitAltar;
     this.bossPitTransitionActive = true;
-    console.info('[Chamber02Scene] starting immediate Chamber02BossPitScene transition');
+    console.info(`[Chamber02Scene] starting immediate ${targetAltar.sceneKey} transition`);
     this.currentBossPitAltar = null;
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
@@ -663,15 +725,15 @@ export class Chamber02Scene extends Phaser.Scene {
     this.mobileControls.setMode('init');
     this.uiCamera?.setVisible(false);
     this.bossPitPromptText?.setVisible(false);
-    console.info("[Chamber02Scene] immediate scene.start('Chamber02BossPitScene') about to run");
+    console.info(`[Chamber02Scene] immediate scene.start('${targetAltar.sceneKey}') about to run`);
     try {
-      this.scene.start('Chamber02BossPitScene', {
+      this.scene.start(targetAltar.sceneKey, {
         fromScene: this.scene.key,
-        altarX: CHAMBER02_BOSS_PIT_ALTAR.x,
-        altarY: CHAMBER02_BOSS_PIT_ALTAR.y
+        altarX: targetAltar.x,
+        altarY: targetAltar.y
       });
     } catch (error) {
-      console.error("[Chamber02Scene] immediate scene.start('Chamber02BossPitScene') failed", error);
+      console.error(`[Chamber02Scene] immediate scene.start('${targetAltar.sceneKey}') failed`, error);
       this.bossPitTransitionActive = false;
       this.player.body.setEnable(true);
       this.uiCamera?.setVisible(true);

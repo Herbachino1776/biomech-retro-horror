@@ -6,6 +6,7 @@ import { Chamber01Scene } from './scenes/Chamber01Scene.js';
 import { LoreScreenScene } from './scenes/LoreScreenScene.js';
 import { Chamber02Scene } from './scenes/Chamber02Scene.js';
 import { Chamber02BossPitScene } from './scenes/Chamber02BossPitScene.js';
+import { Chamber02BossPitHollowSkyScene } from './scenes/Chamber02BossPitHollowSkyScene.js';
 import { Chamber03Scene } from './scenes/Chamber03Scene.js';
 import { Chamber03BossArenaScene } from './scenes/Chamber03BossArenaScene.js';
 import { LoreCutsceneScene } from './scenes/LoreCutsceneScene.js';
@@ -31,6 +32,7 @@ const config = {
     LoreScreenScene,
     Chamber02Scene,
     Chamber02BossPitScene,
+    Chamber02BossPitHollowSkyScene,
     Chamber03Scene,
     Chamber03BossArenaScene,
     LoreCutsceneScene,
