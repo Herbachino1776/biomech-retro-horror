@@ -265,7 +265,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   beginDevChamber() {
-    this.beginScene('Sector03Chamber03Scene');
+    this.beginScene('Sector04Chamber01Scene');
   }
 
   beginScene(targetSceneKey) {
@@ -289,7 +289,7 @@ export class BootScene extends Phaser.Scene {
       this.hasStarted = true;
       const bootTargetScene = DEBUG_BOOT_OVERRIDES.startScene
         ?? targetSceneKey
-        ?? (DEBUG_BOOT_OVERRIDES.skipTitleAndBootSceneDirect ? 'Sector03Chamber03Scene' : 'Chamber01Scene');
+        ?? (DEBUG_BOOT_OVERRIDES.skipTitleAndBootSceneDirect ? 'Sector04Chamber01Scene' : 'Chamber01Scene');
       this.scene.start(bootTargetScene);
     });
   }
