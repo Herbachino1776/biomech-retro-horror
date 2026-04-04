@@ -635,12 +635,12 @@ export class Sector03Chamber03BossChamberScene extends Phaser.Scene {
     this.returnTransitionActive = true;
     this.audioDirector?.stopAmbientLoop({ fadeOut: false });
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.start('SectorCompleteScene', {
+      this.scene.start('Sector04Chamber01Scene', {
         fromScene: this.scene.key,
+        enteredFrom: 'sector03-chamber03-final-altar',
+        progressionSource: 'gate-of-refusal-final-altar',
         fromGate: 'gate-of-refusal-final-altar',
-        sectorLabel: 'SECTOR III',
-        title: 'SECTOR III CHAMBER III COMPLETE',
-        body: 'The Gate of Refusal yields. The super altar records the first refusal as broken.'
+        sectorLabel: 'SECTOR IV'
       });
     });
     this.cameras.main.fadeOut(420, 0, 0, 0);
