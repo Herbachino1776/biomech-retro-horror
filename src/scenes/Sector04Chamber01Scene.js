@@ -32,7 +32,7 @@ const SEGMENTS = [
   { key: ASSET_KEYS.sector04Chamber01BackgroundThreshold, x: 5800, y: 212, width: 900, height: 470, tint: 0xcdbca8, alpha: 0.74 }
 ];
 
-const S4C1_ENEMY_SPAWN_Y = PLAYER.startY - 24;
+const S4C1_ENEMY_SPAWN_Y = PLAYER.startY - 10;
 
 const ENEMIES = {
   bellHerder: {
@@ -41,8 +41,8 @@ const ENEMIES = {
     speed: 58,
     aggroRange: 258,
     patrolDistance: 120,
-    body: { width: 64, height: 46, offsetX: 12, offsetY: 2 },
-    presentation: { alpha: 0.98, display: { width: 214, height: 176 }, origin: { x: 0.52, y: 0.94 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    body: { width: 58, height: 34, offsetX: 14, offsetY: 22 },
+    presentation: { alpha: 0.98, display: { width: 214, height: 176 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
     corpseRemainsProfile: 'sector3Basic'
   },
   branchHusk: {
@@ -51,8 +51,8 @@ const ENEMIES = {
     speed: 56,
     aggroRange: 252,
     patrolDistance: 114,
-    body: { width: 66, height: 46, offsetX: 12, offsetY: 2 },
-    presentation: { alpha: 0.98, display: { width: 216, height: 178 }, origin: { x: 0.52, y: 0.94 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    body: { width: 60, height: 34, offsetX: 14, offsetY: 22 },
+    presentation: { alpha: 0.98, display: { width: 216, height: 178 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
     corpseRemainsProfile: 'sector3Basic'
   },
   shearAttendant: {
@@ -61,8 +61,8 @@ const ENEMIES = {
     speed: 60,
     aggroRange: 266,
     patrolDistance: 122,
-    body: { width: 66, height: 48, offsetX: 12, offsetY: 0 },
-    presentation: { alpha: 0.98, display: { width: 218, height: 180 }, origin: { x: 0.52, y: 0.94 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
+    body: { width: 60, height: 36, offsetX: 14, offsetY: 22 },
+    presentation: { alpha: 0.98, display: { width: 218, height: 180 }, origin: { x: 0.52, y: 0.95 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.44 } },
     corpseRemainsProfile: 'sector3Basic'
   },
   reductionSaint: {
@@ -72,8 +72,8 @@ const ENEMIES = {
     speed: 46,
     aggroRange: 296,
     patrolDistance: 92,
-    body: { width: 94, height: 74, offsetX: 30, offsetY: 62 },
-    presentation: { alpha: 1, display: { width: 338, height: 268 }, origin: { x: 0.52, y: 0.97 }, tint: 0xd8c6ae, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.52 } },
+    body: { width: 86, height: 52, offsetX: 34, offsetY: 108 },
+    presentation: { alpha: 1, display: { width: 338, height: 268 }, origin: { x: 0.52, y: 0.975 }, stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.52 } },
     corpseRemainsProfile: 'sector3Elite'
   }
 };
