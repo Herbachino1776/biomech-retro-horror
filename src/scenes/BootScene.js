@@ -140,6 +140,12 @@ export class BootScene extends Phaser.Scene {
     this.load.image(ASSET_KEYS.sector03Chamber03EnemyBasicSealedArchetype, ASSET_URLS[ASSET_KEYS.sector03Chamber03EnemyBasicSealedArchetype]);
     this.load.image(ASSET_KEYS.sector03Chamber03EnemyEliteNonentryArchon, ASSET_URLS[ASSET_KEYS.sector03Chamber03EnemyEliteNonentryArchon]);
     this.load.image(ASSET_KEYS.sector03Chamber03BossFirstRefused, ASSET_URLS[ASSET_KEYS.sector03Chamber03BossFirstRefused]);
+    this.load.image(ASSET_KEYS.sector04Chamber01BackgroundEntryTerrace, ASSET_URLS[ASSET_KEYS.sector04Chamber01BackgroundEntryTerrace]);
+    this.load.image(ASSET_KEYS.sector04Chamber01BackgroundWallModule01, ASSET_URLS[ASSET_KEYS.sector04Chamber01BackgroundWallModule01]);
+    this.load.image(ASSET_KEYS.sector04Chamber01BackgroundWallModule02, ASSET_URLS[ASSET_KEYS.sector04Chamber01BackgroundWallModule02]);
+    this.load.image(ASSET_KEYS.sector04Chamber01BackgroundReductionDisplay, ASSET_URLS[ASSET_KEYS.sector04Chamber01BackgroundReductionDisplay]);
+    this.load.image(ASSET_KEYS.sector04Chamber01BackgroundThreshold, ASSET_URLS[ASSET_KEYS.sector04Chamber01BackgroundThreshold]);
+    this.load.image(ASSET_KEYS.sector04Chamber01AltarLoreShrine, ASSET_URLS[ASSET_KEYS.sector04Chamber01AltarLoreShrine]);
     this.load.image(ASSET_KEYS.sector02PressureShardProjectile, ASSET_URLS[ASSET_KEYS.sector02PressureShardProjectile]);
     this.load.image(ASSET_KEYS.bossPit01BackgroundHornGate, ASSET_URLS[ASSET_KEYS.bossPit01BackgroundHornGate]);
     this.load.image(ASSET_KEYS.bossPit01TheHornGateWitness, ASSET_URLS[ASSET_KEYS.bossPit01TheHornGateWitness]);
@@ -254,7 +260,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   beginDevChamber() {
-    this.beginScene('Chamber02BossPitScene');
+    this.beginScene('Sector03Chamber03Scene');
   }
 
   beginScene(targetSceneKey) {
@@ -278,7 +284,7 @@ export class BootScene extends Phaser.Scene {
       this.hasStarted = true;
       const bootTargetScene = DEBUG_BOOT_OVERRIDES.startScene
         ?? targetSceneKey
-        ?? (DEBUG_BOOT_OVERRIDES.skipTitleAndBootSceneDirect ? 'Sector03Chamber01Scene' : 'Chamber01Scene');
+        ?? (DEBUG_BOOT_OVERRIDES.skipTitleAndBootSceneDirect ? 'Sector03Chamber03Scene' : 'Chamber01Scene');
       this.scene.start(bootTargetScene);
     });
   }

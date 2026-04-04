@@ -104,6 +104,12 @@ import sector03Chamber03EnemyBasicRefusalWardenUrl from '../../art/raw/sector03/
 import sector03Chamber03EnemyBasicSealedArchetypeUrl from '../../art/raw/sector03/chamber03/enemy_chamber03_sealed_archetype_basic_01.png';
 import sector03Chamber03EnemyEliteNonentryArchonUrl from '../../art/raw/sector03/chamber03/elite_chamber03_nonentry_archon_01.png';
 import sector03Chamber03BossFirstRefusedUrl from '../../art/raw/sector03/chamber03/boss_chamber03_first_refused_main_01.png';
+import sector04Chamber01BackgroundEntryTerraceUrl from '../../art/raw/sector04/chamber01_bg_entry_terrace_01.png';
+import sector04Chamber01BackgroundWallModule01Url from '../../art/raw/sector04/chamber01_bg_wall_module_01.png';
+import sector04Chamber01BackgroundWallModule02Url from '../../art/raw/sector04/chamber01_bg_wall_module_02.png';
+import sector04Chamber01BackgroundReductionDisplayUrl from '../../art/raw/sector04/chamber01_bg_reduction_display_01.png';
+import sector04Chamber01BackgroundThresholdUrl from '../../art/raw/sector04/chamber01_bg_threshold_01.png';
+import sector04Chamber01AltarLoreShrineUrl from '../../art/raw/sector04/chamber01_altar_lore_shrine_01.png';
 import sector02PressureShardProjectileUrl from '../../art/raw/sector02/chamber02/projectile_sector02_pressure_shard_01_alpha.png';
 import bossPit01BackgroundHornGateUrl from '../../art/raw/bosspit/boss_pit_01_bg_horn_gate_of_witness.png';
 import bossPit01TheHornGateWitnessUrl from '../../art/raw/bosspit/boss_pit_01_the_horn_gate_witness_alpha.png';
@@ -257,6 +263,12 @@ export const ASSET_URLS = {
   [ASSET_KEYS.sector03Chamber03EnemyBasicSealedArchetype]: sector03Chamber03EnemyBasicSealedArchetypeUrl,
   [ASSET_KEYS.sector03Chamber03EnemyEliteNonentryArchon]: sector03Chamber03EnemyEliteNonentryArchonUrl,
   [ASSET_KEYS.sector03Chamber03BossFirstRefused]: sector03Chamber03BossFirstRefusedUrl,
+  [ASSET_KEYS.sector04Chamber01BackgroundEntryTerrace]: sector04Chamber01BackgroundEntryTerraceUrl,
+  [ASSET_KEYS.sector04Chamber01BackgroundWallModule01]: sector04Chamber01BackgroundWallModule01Url,
+  [ASSET_KEYS.sector04Chamber01BackgroundWallModule02]: sector04Chamber01BackgroundWallModule02Url,
+  [ASSET_KEYS.sector04Chamber01BackgroundReductionDisplay]: sector04Chamber01BackgroundReductionDisplayUrl,
+  [ASSET_KEYS.sector04Chamber01BackgroundThreshold]: sector04Chamber01BackgroundThresholdUrl,
+  [ASSET_KEYS.sector04Chamber01AltarLoreShrine]: sector04Chamber01AltarLoreShrineUrl,
   [ASSET_KEYS.sector02PressureShardProjectile]: sector02PressureShardProjectileUrl,
   [ASSET_KEYS.bossPit01BackgroundHornGate]: bossPit01BackgroundHornGateUrl,
   [ASSET_KEYS.bossPit01TheHornGateWitness]: bossPit01TheHornGateWitnessUrl,
