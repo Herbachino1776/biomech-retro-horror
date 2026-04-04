@@ -110,6 +110,11 @@ import sector04Chamber01BackgroundWallModule02Url from '../../art/raw/sector04/c
 import sector04Chamber01BackgroundReductionDisplayUrl from '../../art/raw/sector04/chamber01_bg_reduction_display_01.png';
 import sector04Chamber01BackgroundThresholdUrl from '../../art/raw/sector04/chamber01_bg_threshold_01.png';
 import sector04Chamber01AltarLoreShrineUrl from '../../art/raw/sector04/chamber01_altar_lore_shrine_01.png';
+import sector04Chamber01LoreImageUrl from '../../art/raw/sector04/chamber01_lore_01.png';
+import sector04Chamber01EnemyBasicBellHerderUrl from '../../art/raw/sector04/enemy_chamber01_bell_herder_basic_01.png';
+import sector04Chamber01EnemyBasicBranchHuskUrl from '../../art/raw/sector04/enemy_chamber01_branch_husk_basic_01.png';
+import sector04Chamber01EnemyBasicShearAttendantUrl from '../../art/raw/sector04/enemy_chamber01_shear_attendant_basic_01.png';
+import sector04Chamber01EnemyEliteReductionSaintUrl from '../../art/raw/sector04/elite_chamber01_reduction_saint_01.png';
 import sector02PressureShardProjectileUrl from '../../art/raw/sector02/chamber02/projectile_sector02_pressure_shard_01_alpha.png';
 import bossPit01BackgroundHornGateUrl from '../../art/raw/bosspit/boss_pit_01_bg_horn_gate_of_witness.png';
 import bossPit01TheHornGateWitnessUrl from '../../art/raw/bosspit/boss_pit_01_the_horn_gate_witness_alpha.png';
@@ -269,6 +274,11 @@ export const ASSET_URLS = {
   [ASSET_KEYS.sector04Chamber01BackgroundReductionDisplay]: sector04Chamber01BackgroundReductionDisplayUrl,
   [ASSET_KEYS.sector04Chamber01BackgroundThreshold]: sector04Chamber01BackgroundThresholdUrl,
   [ASSET_KEYS.sector04Chamber01AltarLoreShrine]: sector04Chamber01AltarLoreShrineUrl,
+  [ASSET_KEYS.sector04Chamber01LoreImage]: sector04Chamber01LoreImageUrl,
+  [ASSET_KEYS.sector04Chamber01EnemyBasicBellHerder]: sector04Chamber01EnemyBasicBellHerderUrl,
+  [ASSET_KEYS.sector04Chamber01EnemyBasicBranchHusk]: sector04Chamber01EnemyBasicBranchHuskUrl,
+  [ASSET_KEYS.sector04Chamber01EnemyBasicShearAttendant]: sector04Chamber01EnemyBasicShearAttendantUrl,
+  [ASSET_KEYS.sector04Chamber01EnemyEliteReductionSaint]: sector04Chamber01EnemyEliteReductionSaintUrl,
   [ASSET_KEYS.sector02PressureShardProjectile]: sector02PressureShardProjectileUrl,
   [ASSET_KEYS.bossPit01BackgroundHornGate]: bossPit01BackgroundHornGateUrl,
   [ASSET_KEYS.bossPit01TheHornGateWitness]: bossPit01TheHornGateWitnessUrl,

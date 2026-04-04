@@ -146,6 +146,11 @@ export class BootScene extends Phaser.Scene {
     this.load.image(ASSET_KEYS.sector04Chamber01BackgroundReductionDisplay, ASSET_URLS[ASSET_KEYS.sector04Chamber01BackgroundReductionDisplay]);
     this.load.image(ASSET_KEYS.sector04Chamber01BackgroundThreshold, ASSET_URLS[ASSET_KEYS.sector04Chamber01BackgroundThreshold]);
     this.load.image(ASSET_KEYS.sector04Chamber01AltarLoreShrine, ASSET_URLS[ASSET_KEYS.sector04Chamber01AltarLoreShrine]);
+    this.load.image(ASSET_KEYS.sector04Chamber01LoreImage, ASSET_URLS[ASSET_KEYS.sector04Chamber01LoreImage]);
+    this.load.image(ASSET_KEYS.sector04Chamber01EnemyBasicBellHerder, ASSET_URLS[ASSET_KEYS.sector04Chamber01EnemyBasicBellHerder]);
+    this.load.image(ASSET_KEYS.sector04Chamber01EnemyBasicBranchHusk, ASSET_URLS[ASSET_KEYS.sector04Chamber01EnemyBasicBranchHusk]);
+    this.load.image(ASSET_KEYS.sector04Chamber01EnemyBasicShearAttendant, ASSET_URLS[ASSET_KEYS.sector04Chamber01EnemyBasicShearAttendant]);
+    this.load.image(ASSET_KEYS.sector04Chamber01EnemyEliteReductionSaint, ASSET_URLS[ASSET_KEYS.sector04Chamber01EnemyEliteReductionSaint]);
     this.load.image(ASSET_KEYS.sector02PressureShardProjectile, ASSET_URLS[ASSET_KEYS.sector02PressureShardProjectile]);
     this.load.image(ASSET_KEYS.bossPit01BackgroundHornGate, ASSET_URLS[ASSET_KEYS.bossPit01BackgroundHornGate]);
     this.load.image(ASSET_KEYS.bossPit01TheHornGateWitness, ASSET_URLS[ASSET_KEYS.bossPit01TheHornGateWitness]);
