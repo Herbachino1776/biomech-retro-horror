@@ -3,7 +3,8 @@ export const PORTRAIT_LAYOUT = {
   worldBandMin: 400,
   worldBandMax: 660,
   minControlBand: 136,
-  portraitZoom: 1.04,
+  // Keep gameplay zoom integer-aligned to reduce motion shimmer on sprite edges.
+  portraitZoom: 1,
   portraitFollowOffsetY: -36,
   // Keep chamber scale monumental on portrait while preserving control usability.
   desktopZoom: 1,

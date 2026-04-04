@@ -12,6 +12,16 @@ export const gameConfig = {
   // Keep renderer clear color neutral-dark so no brown strip appears behind controls.
   backgroundColor: '#070505',
   pixelArt: true,
+  antialias: false,
+  antialiasGL: false,
+  roundPixels: true,
+  render: {
+    pixelArt: true,
+    antialias: false,
+    antialiasGL: false,
+    roundPixels: true,
+    mipmapFilter: 'NEAREST'
+  },
   input: {
     activePointers: 3,
     touch: {
