@@ -69,13 +69,17 @@ export class DirectionalCameraBias {
     this.currentOffsetX = desktopBaseOffsetX;
     this.isTravelingHorizontally = false;
     this.stationaryTimeMs = 0;
+
+    if (this.camera) {
+      this.camera.roundPixels = true;
+    }
   }
 
   setLayout({ isPortrait, followOffsetY }) {
     this.isPortrait = !!isPortrait;
     this.followOffsetY = followOffsetY;
     this.currentOffsetX = Phaser.Math.Linear(this.currentOffsetX, this.getTargetOffsetX(), 0.55);
-    this.camera.setFollowOffset(this.currentOffsetX, this.followOffsetY);
+    this.camera.setFollowOffset(Math.round(this.currentOffsetX), Math.round(this.followOffsetY));
   }
 
   update() {
@@ -125,7 +129,7 @@ export class DirectionalCameraBias {
 
     const targetOffsetX = this.getTargetOffsetX();
     this.currentOffsetX = Phaser.Math.Linear(this.currentOffsetX, targetOffsetX, offsetLerp);
-    this.camera.setFollowOffset(this.currentOffsetX, this.followOffsetY);
+    this.camera.setFollowOffset(Math.round(this.currentOffsetX), Math.round(this.followOffsetY));
   }
 
   getTargetOffsetX() {
