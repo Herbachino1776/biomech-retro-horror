@@ -149,6 +149,8 @@ const BOSS_PIT_ALTAR = {
   y: WORLD.floorY - 104,
   zoneWidth: 214,
   zoneHeight: 210,
+  promptOffsetY: -172,
+  interactPrompt: 'TRAP ALTAR // DESCEND INTO BOSS PIT\nPress [E] / [Enter]',
   sceneKey: 'Sector04Chamber01BossPitReliquaryStalkerScene'
 };
 
@@ -218,12 +220,20 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
         .setDepth(-6.1);
     }
 
+    this.add.ellipse(BOSS_PIT_ALTAR.x, WORLD.floorY - 2, 258, 168, 0x1a1412, this.hasCompletedBossPitLoop ? 0.2 : 0.34).setDepth(-6.11);
+    this.add.ellipse(BOSS_PIT_ALTAR.x, WORLD.floorY + 6, 196, 102, 0x060504, this.hasCompletedBossPitLoop ? 0.34 : 0.54).setDepth(-6.1);
+    this.add.ellipse(BOSS_PIT_ALTAR.x, WORLD.floorY + 8, 132, 52, 0x020201, this.hasCompletedBossPitLoop ? 0.26 : 0.44).setDepth(-6.09);
+    this.add.rectangle(BOSS_PIT_ALTAR.x - 56, WORLD.floorY - 22, 74, 12, 0x33261f, this.hasCompletedBossPitLoop ? 0.22 : 0.38).setDepth(-6.08).setAngle(-12);
+    this.add.rectangle(BOSS_PIT_ALTAR.x + 56, WORLD.floorY - 22, 74, 12, 0x33261f, this.hasCompletedBossPitLoop ? 0.22 : 0.38).setDepth(-6.08).setAngle(12);
+
     if (this.textures.exists(ASSET_KEYS.bossPit05AltarTrap)) {
       this.add.image(BOSS_PIT_ALTAR.x, BOSS_PIT_ALTAR.y, ASSET_KEYS.bossPit05AltarTrap)
         .setDisplaySize(206, 206)
         .setTint(0xd5c4af)
         .setAlpha(this.hasCompletedBossPitLoop ? 0.38 : 0.86)
         .setDepth(-6.09);
+    } else {
+      this.add.ellipse(BOSS_PIT_ALTAR.x, BOSS_PIT_ALTAR.y - 2, 146, 166, 0x7f7063, this.hasCompletedBossPitLoop ? 0.3 : 0.76).setDepth(-6.09);
     }
     this.add.ellipse(BOSS_PIT_ALTAR.x, WORLD.floorY - 4, 176, 150, 0xbda27d, this.hasCompletedBossPitLoop ? 0.04 : 0.09).setDepth(-6.04);
 
@@ -304,7 +314,19 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
   createBossPitAltar() {
     const zone = this.add.zone(BOSS_PIT_ALTAR.x, WORLD.floorY - 78, BOSS_PIT_ALTAR.zoneWidth, BOSS_PIT_ALTAR.zoneHeight).setOrigin(0.5);
     this.physics.add.existing(zone, true);
-    this.bossPitAltar = { zone };
+    const prompt = this.add.text(BOSS_PIT_ALTAR.x, BOSS_PIT_ALTAR.y + BOSS_PIT_ALTAR.promptOffsetY, BOSS_PIT_ALTAR.interactPrompt, {
+      fontFamily: 'monospace',
+      fontSize: '13px',
+      color: '#e4d8c8',
+      align: 'center',
+      stroke: '#130d0b',
+      strokeThickness: 4
+    })
+      .setOrigin(0.5)
+      .setDepth(-4.74)
+      .setAlpha(0.94)
+      .setVisible(false);
+    this.bossPitAltar = { zone, prompt };
   }
 
   createUi() {
@@ -448,12 +470,14 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
   refreshBossPitAltarPresence() {
     this.currentBossPitAltar = null;
     if (!this.bossPitAltar || this.isLoreTransitionActive || this.bossPitTransitionActive || this.hasCompletedBossPitLoop) {
+      this.bossPitAltar?.prompt?.setVisible(false);
       return;
     }
 
     this.physics.overlap(this.player.sprite, this.bossPitAltar.zone, () => {
       this.currentBossPitAltar = this.bossPitAltar;
     });
+    this.bossPitAltar.prompt?.setVisible(Boolean(this.currentBossPitAltar));
   }
 
   tryBeginBossPitTransition(mobileInput) {
@@ -476,6 +500,7 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
 
     this.bossPitTransitionActive = true;
     this.currentBossPitAltar = null;
+    this.bossPitAltar?.prompt?.setVisible(false);
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
     this.player.body.setEnable(false);
