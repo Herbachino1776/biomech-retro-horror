@@ -974,13 +974,25 @@ export function createBossPitSceneClass(config) {
     }
 
     if (this.hasUnlockedExitAltar) {
-      this.exitAltar.sprite?.setAlpha(0.98).setTint(0xffffff);
+      this.applyExitAltarSpriteVisualState(0.98, 0xffffff);
       this.exitAltar.aura?.setAlpha(0.24).setFillStyle(0xd2c28a, 0.26);
       return;
     }
 
-    this.exitAltar.sprite?.setAlpha(0.84).setTint(0xf1e4cd);
+    this.applyExitAltarSpriteVisualState(0.84, 0xf1e4cd);
     this.exitAltar.aura?.setAlpha(0.1).setFillStyle(0x8a7e6d, 0.1);
+  }
+
+  applyExitAltarSpriteVisualState(alpha, tint) {
+    const sprite = this.exitAltar?.sprite;
+    sprite?.setAlpha?.(alpha);
+    if (typeof sprite?.setTint === 'function') {
+      sprite.setTint(tint);
+      return;
+    }
+    if (typeof sprite?.setFillStyle === 'function') {
+      sprite.setFillStyle(tint, alpha);
+    }
   }
 
   refreshExitAltarPresence() {

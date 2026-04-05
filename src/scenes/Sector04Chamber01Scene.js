@@ -226,10 +226,11 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     this.add.rectangle(BOSS_PIT_ALTAR.x - 56, WORLD.floorY - 22, 74, 12, 0x33261f, this.hasCompletedBossPitLoop ? 0.22 : 0.38).setDepth(-6.08).setAngle(-12);
     this.add.rectangle(BOSS_PIT_ALTAR.x + 56, WORLD.floorY - 22, 74, 12, 0x33261f, this.hasCompletedBossPitLoop ? 0.22 : 0.38).setDepth(-6.08).setAngle(12);
 
-    if (this.textures.exists(ASSET_KEYS.bossPit05AltarTrap)) {
-      this.add.image(BOSS_PIT_ALTAR.x, BOSS_PIT_ALTAR.y, ASSET_KEYS.bossPit05AltarTrap)
+    const trapAltarKey = ASSET_KEYS.sector03Chamber02LoreAltar;
+    if (this.textures.exists(trapAltarKey)) {
+      this.add.image(BOSS_PIT_ALTAR.x, BOSS_PIT_ALTAR.y, trapAltarKey)
         .setDisplaySize(206, 206)
-        .setTint(0xd5c4af)
+        .setTint(0xd9cab6)
         .setAlpha(this.hasCompletedBossPitLoop ? 0.38 : 0.86)
         .setDepth(-6.09);
     } else {
