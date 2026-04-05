@@ -19,6 +19,7 @@ const SECTOR03_CHAMBER02_BOSS_PIT_SCENE_KEY = 'Sector03Chamber02BossPitScene';
 const SECTOR03_CHAMBER02_BOSS_CHAMBER_SCENE_KEY = 'Sector03Chamber02BossChamberScene';
 const SECTOR03_CHAMBER03_SCENE_KEY = 'Sector03Chamber03Scene';
 const SECTOR03_CHAMBER03_BOSS_CHAMBER_SCENE_KEY = 'Sector03Chamber03BossChamberScene';
+const SECTOR04_CHAMBER01_BOSS_PIT_RELIQUARY_STALKER_SCENE_KEY = 'Sector04Chamber01BossPitReliquaryStalkerScene';
 const SECTOR_COMPLETE_SCENE_KEY = 'SectorCompleteScene';
 const LORE_SCENE_KEYS = ['LoreScreenScene', 'LoreCutsceneScene'];
 const GAMEPLAY_AMBIENT_KEYS = [ASSET_KEYS.ambientChamber01Loop01, ASSET_KEYS.ambientChamber02Loop01];
@@ -39,6 +40,7 @@ export function restartRunFromDeath(scene) {
     scene.scene.stop(loreSceneKey);
   });
   scene.scene.stop(SECTOR_COMPLETE_SCENE_KEY);
+  scene.scene.stop(SECTOR04_CHAMBER01_BOSS_PIT_RELIQUARY_STALKER_SCENE_KEY);
   scene.scene.stop(SECTOR03_CHAMBER03_BOSS_CHAMBER_SCENE_KEY);
   scene.scene.stop(SECTOR03_CHAMBER03_SCENE_KEY);
   scene.scene.stop(SECTOR03_CHAMBER02_BOSS_CHAMBER_SCENE_KEY);
