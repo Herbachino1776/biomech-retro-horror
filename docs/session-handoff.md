@@ -77,6 +77,7 @@ Still available as targeted follow-up:
 - Required sequencing: polish package first, then retrofit/reimplement boss encounters globally.
 - Future content lane should assume approximately a dozen boss concepts across boss-pit/miniboss/full-boss contexts.
 - Likely art ingestion pattern: one background image per boss into `art/raw/bosspit`.
+- Registered boss-pack inventory and confident/ambiguous pairing notes are tracked in `docs/boss-pack-catalog.md` for future boss-pit/miniboss/full-boss deployment passes.
 
 ## Current Build/Platform Baseline
 - Phaser 3 + Vite.
