@@ -10,7 +10,8 @@ class BossPitRunState {
       sector02Chamber02: false,
       sector03Chamber01: false,
       sector03Chamber02Pit02: false,
-      sector03Chamber02Pit03: false
+      sector03Chamber02Pit03: false,
+      sector04Chamber01ReliquaryStalker: false
     };
     this.rewardGranted = {
       chamber02: false,
@@ -18,7 +19,8 @@ class BossPitRunState {
       sector02Chamber02: false,
       sector03Chamber01: false,
       sector03Chamber02Pit02: false,
-      sector03Chamber02Pit03: false
+      sector03Chamber02Pit03: false,
+      sector04Chamber01ReliquaryStalker: false
     };
     this.sector03Chamber01EncounterState = null;
     this.sector03Chamber02EncounterState = null;
@@ -142,6 +144,22 @@ class BossPitRunState {
     this.sector03Chamber02EncounterState = state
       ? JSON.parse(JSON.stringify(state))
       : null;
+  }
+
+  hasSector04Chamber01ReliquaryStalkerBossPitCompleted() {
+    return this.completed.sector04Chamber01ReliquaryStalker;
+  }
+
+  hasSector04Chamber01ReliquaryStalkerBossPitRewardGranted() {
+    return this.rewardGranted.sector04Chamber01ReliquaryStalker;
+  }
+
+  markSector04Chamber01ReliquaryStalkerBossPitCompleted() {
+    this.completed.sector04Chamber01ReliquaryStalker = true;
+  }
+
+  markSector04Chamber01ReliquaryStalkerBossPitRewardGranted() {
+    this.rewardGranted.sector04Chamber01ReliquaryStalker = true;
   }
 
 }
