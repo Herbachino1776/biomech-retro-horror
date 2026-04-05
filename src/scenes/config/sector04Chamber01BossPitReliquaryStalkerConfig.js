@@ -45,7 +45,7 @@ export const sector04Chamber01BossPitReliquaryStalkerConfig = {
   returnFlow: {
     returnSceneKey: 'Sector04Chamber01Scene',
     returnXOffset: 68,
-    returnYOffset: -20
+    returnYOffset: -4
   },
   altars: {
     presentation: [
