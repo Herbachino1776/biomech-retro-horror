@@ -54,6 +54,7 @@ Milestone 7 is **advanced/largely established** and no longer the main active bu
 
 ## Boss Package Direction (Now a Real Future Lane)
 - Boss pit / boss encounter abstraction has advanced enough to support explicit future sequencing.
+- Boss-pack ingestion/registration coverage has been expanded to include additional `art/raw/bosspit` assets; deployment wiring remains a separate later lane.
 - Planned order is now:
   1. polish the abstracted boss package itself
   2. retrofit/reimplement boss encounters across the game to that package

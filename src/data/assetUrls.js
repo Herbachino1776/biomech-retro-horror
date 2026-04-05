@@ -126,6 +126,32 @@ import bossPit02AltarTrapUrl from '../../art/raw/bosspit/boss_pit_02_altar_bossp
 import bossPit02AltarSuperUrl from '../../art/raw/bosspit/boss_pit_02_altar_super.png';
 import bossPit03BackgroundHollowSkyTheatreUrl from '../../art/raw/bosspit/boss_pit_03_bg_hollow_sky_theatre.png';
 import bossPit03RedMaskHollowSkyUrl from '../../art/raw/bosspit/boss_pit_03_red_mask_hollow_sky_alpha.png';
+import bossPit04BackgroundRuinShepherdBasinUrl from '../../art/raw/bosspit/boss_pit_04_bg_ruin_shepherd_basin.png';
+import bossPit04CyclopsShepherdOfRuinUrl from '../../art/raw/bosspit/boss_pit_04_cyclops_shepherd_of_ruin_alpha.png';
+import bossPit04AltarTrapUrl from '../../art/raw/bosspit/boss_pit_04_altar_bosspit.png';
+import bossPit04AltarSuperUrl from '../../art/raw/bosspit/boss_pit_04_altar_super.png';
+import bossPit05BackgroundClusterThroneVoidCourtUrl from '../../art/raw/bosspit/boss_pit_05_bg_cluster_throne_void_court.png';
+import bossPit05ClusterThroneEyelessHostUrl from '../../art/raw/bosspit/boss_pit_05_cluster_throne_eyeless_host_alpha.png';
+import bossPit05AltarTrapUrl from '../../art/raw/bosspit/boss_pit_05_altar_bosspit.png';
+import bossPit05AltarSuperUrl from '../../art/raw/bosspit/boss_pit_05_altar_super.png';
+import bossPit12BackgroundHourglassReliquaryUrl from '../../art/raw/bosspit/Pit_BG_Hourglass_Reliquary.png';
+import bossPit12HourglassReliquaryUrl from '../../art/raw/bosspit/boss_pit_12_hourglass_reliquary_alpha_mirrored.png';
+import bossPit13BackgroundScorpionSkullCrawlerUrl from '../../art/raw/bosspit/Pit_BG_Scorpion_Skull_Crawler.png';
+import bossPit13ScorpionSkullCrawlerUrl from '../../art/raw/bosspit/boss_pit_13_scorpion_skull_crawler_alpha_mirrored.png';
+import bossPit14BackgroundCosmicMawIdolUrl from '../../art/raw/bosspit/Pit_BG_Cosmic_Maw_Idol.png';
+import bossPit14CosmicMawIdolUrl from '../../art/raw/bosspit/boss_pit_14_cosmic_maw_idol_alpha.png';
+import bossPit15BackgroundCorpseEngineWormUrl from '../../art/raw/bosspit/Pit_BG_Corpse_Engine_Worm.png';
+import bossPit15CorpseEngineWormUrl from '../../art/raw/bosspit/boss_pit_15_corpse_engine_worm_alpha.png';
+import bossPit16BackgroundRamJudicatorUrl from '../../art/raw/bosspit/Pit_BG_Ram_Judicator.png';
+import bossPit16RamJudicatorUrl from '../../art/raw/bosspit/boss_pit_16_ram_judicator_alpha_mirrored.png';
+import bossPit17BackgroundCenserProphetUrl from '../../art/raw/bosspit/Pit_BG_Censer_Prophet.png';
+import bossPit17CenserProphetUrl from '../../art/raw/bosspit/boss_pit_17_censer_prophet_alpha_semiprofile_mirrored.png';
+import bossPit18BackgroundPyreCauldronIdolUrl from '../../art/raw/bosspit/Pit_BG_Pyre_Cauldron_Idol.png';
+import bossPit18PyreCauldronIdolUrl from '../../art/raw/bosspit/boss_pit_18_pyre_cauldron_idol_alpha.png';
+import bossPit19BackgroundReliquaryStalkerUrl from '../../art/raw/bosspit/Pit_BG_Reliquary_Stalker.png';
+import bossPit19ReliquaryStalkerUrl from '../../art/raw/bosspit/boss_pit_19_reliquary_stalker_alpha.png';
+import bossPit20BackgroundHornedMothJudgeUrl from '../../art/raw/bosspit/Pit_BG_Horned_Moth_Judge.png';
+import bossPit20HornedMothJudgeUrl from '../../art/raw/bosspit/boss_pit_20_horned_moth_judge_alpha.png';
 import enemyGoreClusterMeatBone01Url from '../../art/raw/shared/fx/enemy_gore_cluster_meat_bone_01.png';
 import playerWalkPuppetStrip06Url from '../../art/raw/player/player_walk_puppet_strip_06.png';
 import playerIdleBreatheStrip05Url from '../../art/raw/player/player_idle_breathe_strip_05.png';
@@ -290,6 +316,32 @@ export const ASSET_URLS = {
   [ASSET_KEYS.bossPit02AltarSuper]: bossPit02AltarSuperUrl,
   [ASSET_KEYS.bossPit03BackgroundHollowSkyTheatre]: bossPit03BackgroundHollowSkyTheatreUrl,
   [ASSET_KEYS.bossPit03RedMaskHollowSky]: bossPit03RedMaskHollowSkyUrl,
+  [ASSET_KEYS.bossPit04BackgroundRuinShepherdBasin]: bossPit04BackgroundRuinShepherdBasinUrl,
+  [ASSET_KEYS.bossPit04CyclopsShepherdOfRuin]: bossPit04CyclopsShepherdOfRuinUrl,
+  [ASSET_KEYS.bossPit04AltarTrap]: bossPit04AltarTrapUrl,
+  [ASSET_KEYS.bossPit04AltarSuper]: bossPit04AltarSuperUrl,
+  [ASSET_KEYS.bossPit05BackgroundClusterThroneVoidCourt]: bossPit05BackgroundClusterThroneVoidCourtUrl,
+  [ASSET_KEYS.bossPit05ClusterThroneEyelessHost]: bossPit05ClusterThroneEyelessHostUrl,
+  [ASSET_KEYS.bossPit05AltarTrap]: bossPit05AltarTrapUrl,
+  [ASSET_KEYS.bossPit05AltarSuper]: bossPit05AltarSuperUrl,
+  [ASSET_KEYS.bossPit12BackgroundHourglassReliquary]: bossPit12BackgroundHourglassReliquaryUrl,
+  [ASSET_KEYS.bossPit12HourglassReliquary]: bossPit12HourglassReliquaryUrl,
+  [ASSET_KEYS.bossPit13BackgroundScorpionSkullCrawler]: bossPit13BackgroundScorpionSkullCrawlerUrl,
+  [ASSET_KEYS.bossPit13ScorpionSkullCrawler]: bossPit13ScorpionSkullCrawlerUrl,
+  [ASSET_KEYS.bossPit14BackgroundCosmicMawIdol]: bossPit14BackgroundCosmicMawIdolUrl,
+  [ASSET_KEYS.bossPit14CosmicMawIdol]: bossPit14CosmicMawIdolUrl,
+  [ASSET_KEYS.bossPit15BackgroundCorpseEngineWorm]: bossPit15BackgroundCorpseEngineWormUrl,
+  [ASSET_KEYS.bossPit15CorpseEngineWorm]: bossPit15CorpseEngineWormUrl,
+  [ASSET_KEYS.bossPit16BackgroundRamJudicator]: bossPit16BackgroundRamJudicatorUrl,
+  [ASSET_KEYS.bossPit16RamJudicator]: bossPit16RamJudicatorUrl,
+  [ASSET_KEYS.bossPit17BackgroundCenserProphet]: bossPit17BackgroundCenserProphetUrl,
+  [ASSET_KEYS.bossPit17CenserProphet]: bossPit17CenserProphetUrl,
+  [ASSET_KEYS.bossPit18BackgroundPyreCauldronIdol]: bossPit18BackgroundPyreCauldronIdolUrl,
+  [ASSET_KEYS.bossPit18PyreCauldronIdol]: bossPit18PyreCauldronIdolUrl,
+  [ASSET_KEYS.bossPit19BackgroundReliquaryStalker]: bossPit19BackgroundReliquaryStalkerUrl,
+  [ASSET_KEYS.bossPit19ReliquaryStalker]: bossPit19ReliquaryStalkerUrl,
+  [ASSET_KEYS.bossPit20BackgroundHornedMothJudge]: bossPit20BackgroundHornedMothJudgeUrl,
+  [ASSET_KEYS.bossPit20HornedMothJudge]: bossPit20HornedMothJudgeUrl,
   [ASSET_KEYS.enemyGoreClusterMeatBone01]: enemyGoreClusterMeatBone01Url,
   [ASSET_KEYS.player]: playerWalkPuppetStrip06Url,
   [ASSET_KEYS.playerIdle]: playerIdleBreatheStrip05Url,

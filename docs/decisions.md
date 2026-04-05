@@ -78,6 +78,7 @@ This means:
 - Boss package abstraction has advanced enough to justify a formal later lane.
 - Required sequencing is locked: polish abstracted boss package first, then retrofit/reimplement boss encounters globally.
 - Boss-pack production direction is approved as future lane: roughly a dozen boss concepts and likely one dedicated background per boss in `art/raw/bosspit`.
+- Boss-pack ingestion catalog is now maintained in `docs/boss-pack-catalog.md` to keep boss/background naming and pairing discoverable during future deployment passes.
 
 ## Lore Presentation Doctrine
 - Lore is a primary identity system.
