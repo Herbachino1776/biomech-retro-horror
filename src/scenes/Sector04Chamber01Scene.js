@@ -149,8 +149,6 @@ const BOSS_PIT_ALTAR = {
   y: WORLD.floorY - 104,
   zoneWidth: 214,
   zoneHeight: 210,
-  promptOffsetY: -172,
-  interactPrompt: 'TRAP ALTAR // DESCEND INTO BOSS PIT\nPress [E] / [Enter]',
   sceneKey: 'Sector04Chamber01BossPitReliquaryStalkerScene'
 };
 
@@ -315,19 +313,7 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
   createBossPitAltar() {
     const zone = this.add.zone(BOSS_PIT_ALTAR.x, WORLD.floorY - 78, BOSS_PIT_ALTAR.zoneWidth, BOSS_PIT_ALTAR.zoneHeight).setOrigin(0.5);
     this.physics.add.existing(zone, true);
-    const prompt = this.add.text(BOSS_PIT_ALTAR.x, BOSS_PIT_ALTAR.y + BOSS_PIT_ALTAR.promptOffsetY, BOSS_PIT_ALTAR.interactPrompt, {
-      fontFamily: 'monospace',
-      fontSize: '13px',
-      color: '#e4d8c8',
-      align: 'center',
-      stroke: '#130d0b',
-      strokeThickness: 4
-    })
-      .setOrigin(0.5)
-      .setDepth(-4.74)
-      .setAlpha(0.94)
-      .setVisible(false);
-    this.bossPitAltar = { zone, prompt };
+    this.bossPitAltar = { zone };
   }
 
   createUi() {
