@@ -11,7 +11,8 @@ const PLAYER_WALK_MIN_SPEED = 36;
 const PLAYER_IDLE_FPS = 5;
 const PLAYER_IDLE_MAX_SPEED = 20;
 const BRUTALITY_TRANSITION_DURATION_MS = 180;
-const BRUTALITY_HAMMER_DISPLAY_SCALE = 1.9;
+const BRUTALITY_FORM_SCALE_BOOST = 1.15;
+const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
 const DEFAULT_BRUTALITY_MODIFIERS = {
   visualScale: 1.28,
   bodyScale: 1.16,
@@ -63,6 +64,10 @@ export class Player {
     this.baseVisualScale = {
       x: Math.abs(this.sprite.scaleX) || 1,
       y: Math.abs(this.sprite.scaleY) || 1
+    };
+    this.baseVisualSize = {
+      width: this.sprite.displayWidth / this.baseVisualScale.x,
+      height: this.sprite.displayHeight / this.baseVisualScale.y
     };
     this.baseBody = {
       width: config.body.width,
@@ -358,7 +363,11 @@ export class Player {
       active: true
     };
     this.config.moveSpeed = this.baseMoveSpeed * this.brutalityMode.speedMultiplier;
-    this.startBrutalityTransition(this.brutalityMode.visualScale, this.brutalityMode.bodyScale, time);
+    this.startBrutalityTransition(
+      this.brutalityMode.visualScale * BRUTALITY_FORM_SCALE_BOOST,
+      this.brutalityMode.bodyScale * BRUTALITY_FORM_SCALE_BOOST,
+      time
+    );
     this.updateWeaponTexture();
   }
 
@@ -394,7 +403,7 @@ export class Player {
     this.brutalityTransition.fromBodyScale = this.currentBrutalityBodyScale;
     this.brutalityTransition.toVisualScale = targetVisualScale;
     this.brutalityTransition.toBodyScale = targetBodyScale;
-    this.brutalityTransition.floorAnchorY = this.body?.bottom ?? this.sprite.y;
+    this.brutalityTransition.floorAnchorY = this.getCurrentFloorAnchorY();
   }
 
   updateBrutalityTransition(time) {
@@ -416,10 +425,11 @@ export class Player {
   }
 
   applyScaleAndCollision(visualScaleMultiplier = 1, bodyScaleMultiplier = 1, floorAnchorY = null) {
-    const resolvedFloorAnchorY = Number.isFinite(floorAnchorY) ? floorAnchorY : (this.body?.bottom ?? this.sprite.y);
+    const resolvedFloorAnchorY = Number.isFinite(floorAnchorY) ? floorAnchorY : this.getCurrentFloorAnchorY();
     const targetScaleX = this.baseVisualScale.x * visualScaleMultiplier;
     const targetScaleY = this.baseVisualScale.y * visualScaleMultiplier;
     this.sprite.setScale(targetScaleX, targetScaleY);
+    this.setVisualFeetY(resolvedFloorAnchorY);
 
     const scaleX = Math.abs(this.sprite.scaleX) || 1;
     const scaleY = Math.abs(this.sprite.scaleY) || 1;
@@ -428,21 +438,31 @@ export class Player {
     const bodyWidth = (baseBodyWidth * bodyScaleMultiplier) / scaleX;
     const bodyHeight = (baseBodyHeight * bodyScaleMultiplier) / scaleY;
     const widthGrowthWorld = baseBodyWidth * (bodyScaleMultiplier - 1);
-    const heightGrowthWorld = baseBodyHeight * (bodyScaleMultiplier - 1);
     const bodyOffsetX = (this.baseBody.offsetX - widthGrowthWorld * 0.5) / scaleX;
-    const bodyOffsetY = (this.baseBody.offsetY - heightGrowthWorld) / scaleY;
+    const bodyOffsetY = (resolvedFloorAnchorY - this.sprite.y) / scaleY - bodyHeight;
     this.body.setSize(bodyWidth, bodyHeight);
     this.body.setOffset(bodyOffsetX, bodyOffsetY);
     this.body.updateFromGameObject();
 
-    const bottomDelta = resolvedFloorAnchorY - this.body.bottom;
-    if (Math.abs(bottomDelta) > 0.001) {
-      this.sprite.y += bottomDelta;
-      this.body.updateFromGameObject();
-    }
-
     this.currentBrutalityVisualScale = visualScaleMultiplier;
     this.currentBrutalityBodyScale = bodyScaleMultiplier;
+  }
+
+  getCurrentFloorAnchorY() {
+    if (Number.isFinite(this.body?.bottom)) {
+      return this.body.bottom;
+    }
+    return this.getVisualFeetY();
+  }
+
+  getVisualFeetY() {
+    const scaleY = Math.abs(this.sprite.scaleY) || this.baseVisualScale.y || 1;
+    return this.sprite.y + (1 - this.sprite.originY) * this.baseVisualSize.height * scaleY;
+  }
+
+  setVisualFeetY(targetFeetY) {
+    const scaleY = Math.abs(this.sprite.scaleY) || this.baseVisualScale.y || 1;
+    this.sprite.y = targetFeetY - (1 - this.sprite.originY) * this.baseVisualSize.height * scaleY;
   }
 
   getAttackDamage() {
