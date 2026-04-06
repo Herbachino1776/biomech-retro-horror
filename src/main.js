@@ -24,6 +24,7 @@ import { Sector03Chamber03Scene } from './scenes/Sector03Chamber03Scene.js';
 import { Sector03Chamber03BossChamberScene } from './scenes/Sector03Chamber03BossChamberScene.js';
 import { Sector04Chamber01Scene } from './scenes/Sector04Chamber01Scene.js';
 import { Sector04Chamber01BossPitReliquaryStalkerScene } from './scenes/Sector04Chamber01BossPitReliquaryStalkerScene.js';
+import { Sector04Chamber02Scene } from './scenes/Sector04Chamber02Scene.js';
 
 const config = {
   ...gameConfig,
@@ -51,7 +52,8 @@ const config = {
     Sector03Chamber03Scene,
     Sector03Chamber03BossChamberScene,
     Sector04Chamber01Scene,
-    Sector04Chamber01BossPitReliquaryStalkerScene
+    Sector04Chamber01BossPitReliquaryStalkerScene,
+    Sector04Chamber02Scene
   ],
   physics: {
     default: 'arcade',

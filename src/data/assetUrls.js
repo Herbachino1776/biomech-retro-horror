@@ -115,6 +115,19 @@ import sector04Chamber01EnemyBasicBellHerderUrl from '../../art/raw/sector04/ene
 import sector04Chamber01EnemyBasicBranchHuskUrl from '../../art/raw/sector04/enemy_chamber01_branch_husk_basic_01.png';
 import sector04Chamber01EnemyBasicShearAttendantUrl from '../../art/raw/sector04/enemy_chamber01_shear_attendant_basic_01.png';
 import sector04Chamber01EnemyEliteReductionSaintUrl from '../../art/raw/sector04/elite_chamber01_reduction_saint_01.png';
+import sector04Chamber02BackgroundEntryUrl from '../../art/raw/sector04/chamber02/sector04_chamber02_bg_entry_01.png';
+import sector04Chamber02BackgroundWallModule01Url from '../../art/raw/sector04/chamber02/sector04_chamber02_bg_wall_module_01.png';
+import sector04Chamber02BackgroundWallModule02Url from '../../art/raw/sector04/chamber02/sector04_chamber02_bg_wall_module_02.png';
+import sector04Chamber02BackgroundOpeningUrl from '../../art/raw/sector04/chamber02/sector04_chamber02_bg_opening_01.png';
+import sector04Chamber02BackgroundThresholdUrl from '../../art/raw/sector04/chamber02/sector04_chamber02_bg_threshold_01.png';
+import sector04Chamber02BackgroundBossDaisUrl from '../../art/raw/sector04/chamber02/sector04_chamber02_bg_boss_dais_01.png';
+import sector04Chamber02AltarLoreUrl from '../../art/raw/sector04/chamber02/sector04_chamber02_altar_lore_01.png';
+import sector04Chamber02AltarReturnUrl from '../../art/raw/sector04/chamber02/sector04_chamber02_altar_return_01.png';
+import sector04Chamber02EnemyBasic01Url from '../../art/raw/sector04/chamber02/sector04_chamber02_enemy_basic_01.png';
+import sector04Chamber02EnemyBasic02Url from '../../art/raw/sector04/chamber02/sector04_chamber02_enemy_basic_02.png';
+import sector04Chamber02EnemyEliteUrl from '../../art/raw/sector04/chamber02/sector04_chamber02_enemy_elite_01.png';
+import sector04Chamber02PropGateUrl from '../../art/raw/sector04/chamber02/sector04_chamber02_prop_gate_01.png';
+import sector04Chamber02PropThresholdDoorUrl from '../../art/raw/sector04/chamber02/sector04_chamber02_prop_threshold_door_01.png';
 import sector02PressureShardProjectileUrl from '../../art/raw/sector02/chamber02/projectile_sector02_pressure_shard_01_alpha.png';
 import bossPit01BackgroundHornGateUrl from '../../art/raw/bosspit/boss_pit_01_bg_horn_gate_of_witness.png';
 import bossPit01TheHornGateWitnessUrl from '../../art/raw/bosspit/boss_pit_01_the_horn_gate_witness_alpha.png';
@@ -305,6 +318,19 @@ export const ASSET_URLS = {
   [ASSET_KEYS.sector04Chamber01EnemyBasicBranchHusk]: sector04Chamber01EnemyBasicBranchHuskUrl,
   [ASSET_KEYS.sector04Chamber01EnemyBasicShearAttendant]: sector04Chamber01EnemyBasicShearAttendantUrl,
   [ASSET_KEYS.sector04Chamber01EnemyEliteReductionSaint]: sector04Chamber01EnemyEliteReductionSaintUrl,
+  [ASSET_KEYS.sector04Chamber02BackgroundEntry]: sector04Chamber02BackgroundEntryUrl,
+  [ASSET_KEYS.sector04Chamber02BackgroundWallModule01]: sector04Chamber02BackgroundWallModule01Url,
+  [ASSET_KEYS.sector04Chamber02BackgroundWallModule02]: sector04Chamber02BackgroundWallModule02Url,
+  [ASSET_KEYS.sector04Chamber02BackgroundOpening]: sector04Chamber02BackgroundOpeningUrl,
+  [ASSET_KEYS.sector04Chamber02BackgroundThreshold]: sector04Chamber02BackgroundThresholdUrl,
+  [ASSET_KEYS.sector04Chamber02BackgroundBossDais]: sector04Chamber02BackgroundBossDaisUrl,
+  [ASSET_KEYS.sector04Chamber02AltarLore]: sector04Chamber02AltarLoreUrl,
+  [ASSET_KEYS.sector04Chamber02AltarReturn]: sector04Chamber02AltarReturnUrl,
+  [ASSET_KEYS.sector04Chamber02EnemyBasic01]: sector04Chamber02EnemyBasic01Url,
+  [ASSET_KEYS.sector04Chamber02EnemyBasic02]: sector04Chamber02EnemyBasic02Url,
+  [ASSET_KEYS.sector04Chamber02EnemyElite]: sector04Chamber02EnemyEliteUrl,
+  [ASSET_KEYS.sector04Chamber02PropGate]: sector04Chamber02PropGateUrl,
+  [ASSET_KEYS.sector04Chamber02PropThresholdDoor]: sector04Chamber02PropThresholdDoorUrl,
   [ASSET_KEYS.sector02PressureShardProjectile]: sector02PressureShardProjectileUrl,
   [ASSET_KEYS.bossPit01BackgroundHornGate]: bossPit01BackgroundHornGateUrl,
   [ASSET_KEYS.bossPit01TheHornGateWitness]: bossPit01TheHornGateWitnessUrl,
