@@ -203,8 +203,8 @@ const FORWARD_GATE = {
 
 const BRUTALITY_MODE = {
   player: {
-    visualScale: 1.18,
-    bodyScale: 1.12,
+    visualScale: 1.36,
+    bodyScale: 1.29,
     speedMultiplier: 1.12,
     reachMultiplier: 1.2,
     damageMultiplier: 2
@@ -660,8 +660,8 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
       if (enemy.dead) {
         triggerBrutalityBasicChunkBurst(this, {
           x: enemy.sprite.x,
-          y: (enemy.body?.bottom ?? enemy.sprite.y) - 18,
-          depth: enemy.sprite.depth + 0.2
+          y: (enemy.body?.center?.y ?? enemy.sprite.y) - 10,
+          depth: enemy.sprite.depth + 0.12
         });
         this.cameras.main.shake(86, 0.005, true);
       }

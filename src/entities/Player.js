@@ -10,6 +10,8 @@ const PLAYER_WALK_FPS = 8;
 const PLAYER_WALK_MIN_SPEED = 36;
 const PLAYER_IDLE_FPS = 5;
 const PLAYER_IDLE_MAX_SPEED = 20;
+const BRUTALITY_TRANSITION_DURATION_MS = 180;
+const BRUTALITY_HAMMER_DISPLAY_SCALE = 1.9;
 const DEFAULT_BRUTALITY_MODIFIERS = {
   visualScale: 1.28,
   bodyScale: 1.16,
@@ -89,6 +91,24 @@ export class Player {
       active: false,
       ...DEFAULT_BRUTALITY_MODIFIERS
     };
+    this.currentBrutalityVisualScale = 1;
+    this.currentBrutalityBodyScale = 1;
+    this.brutalityTransition = {
+      active: false,
+      startedAt: 0,
+      durationMs: BRUTALITY_TRANSITION_DURATION_MS,
+      fromVisualScale: 1,
+      fromBodyScale: 1,
+      toVisualScale: 1,
+      toBodyScale: 1,
+      floorAnchorY: null
+    };
+
+    const weaponDisplay = this.config.weaponVisual?.display ?? { width: 72, height: 72 };
+    this.baseWeaponDisplay = {
+      width: weaponDisplay.width,
+      height: weaponDisplay.height
+    };
     this.weaponSprite = this.createWeaponSprite(x, y + visualYOffset);
     const restingPose = this.config.weaponVisual?.restingPose;
     this.weaponPoseState = restingPose
@@ -103,6 +123,8 @@ export class Player {
   }
 
   update(time, input) {
+    this.updateBrutalityTransition(time);
+
     if (this.isDead) {
       this.body.setVelocityX(0);
       return;
@@ -314,11 +336,10 @@ export class Player {
       return null;
     }
 
-    const display = this.config.weaponVisual?.display ?? { width: 72, height: 72 };
     return this.scene.add
       .image(x, y, textureKey)
       .setOrigin(0.5, 0.58)
-      .setDisplaySize(display.width, display.height)
+      .setDisplaySize(this.baseWeaponDisplay.width, this.baseWeaponDisplay.height)
       .setDepth((this.sprite.depth ?? 6) - 1);
   }
 
@@ -329,7 +350,7 @@ export class Player {
     return ASSET_KEYS.playerWeaponHammer01;
   }
 
-  applyBrutalityMode(modifiers = {}) {
+  applyBrutalityMode(modifiers = {}, time = this.scene.time.now) {
     const nextModifiers = { ...DEFAULT_BRUTALITY_MODIFIERS, ...modifiers };
     this.brutalityMode = {
       ...this.brutalityMode,
@@ -337,14 +358,14 @@ export class Player {
       active: true
     };
     this.config.moveSpeed = this.baseMoveSpeed * this.brutalityMode.speedMultiplier;
-    this.applyScaleAndCollision(this.brutalityMode.visualScale, this.brutalityMode.bodyScale);
+    this.startBrutalityTransition(this.brutalityMode.visualScale, this.brutalityMode.bodyScale, time);
     this.updateWeaponTexture();
   }
 
-  clearBrutalityMode() {
+  clearBrutalityMode(time = this.scene.time.now) {
     this.brutalityMode.active = false;
     this.config.moveSpeed = this.baseMoveSpeed;
-    this.applyScaleAndCollision(1, 1);
+    this.startBrutalityTransition(1, 1, time);
     this.updateWeaponTexture();
   }
 
@@ -353,10 +374,49 @@ export class Player {
       return;
     }
     this.weaponSprite.setTexture(this.resolveWeaponTextureKey());
+    this.applyWeaponDisplaySize();
   }
 
-  applyScaleAndCollision(visualScaleMultiplier = 1, bodyScaleMultiplier = 1) {
-    const floorAnchorY = this.body?.bottom ?? this.sprite.y;
+  applyWeaponDisplaySize() {
+    if (!this.weaponSprite) {
+      return;
+    }
+
+    const usingBrutalityHammer = this.brutalityMode?.active && this.weaponSprite.texture?.key === ASSET_KEYS.playerWeaponHammerOfBanishment01;
+    const displayScale = usingBrutalityHammer ? BRUTALITY_HAMMER_DISPLAY_SCALE : 1;
+    this.weaponSprite.setDisplaySize(this.baseWeaponDisplay.width * displayScale, this.baseWeaponDisplay.height * displayScale);
+  }
+
+  startBrutalityTransition(targetVisualScale = 1, targetBodyScale = 1, time = this.scene.time.now) {
+    this.brutalityTransition.active = true;
+    this.brutalityTransition.startedAt = time;
+    this.brutalityTransition.fromVisualScale = this.currentBrutalityVisualScale;
+    this.brutalityTransition.fromBodyScale = this.currentBrutalityBodyScale;
+    this.brutalityTransition.toVisualScale = targetVisualScale;
+    this.brutalityTransition.toBodyScale = targetBodyScale;
+    this.brutalityTransition.floorAnchorY = this.body?.bottom ?? this.sprite.y;
+  }
+
+  updateBrutalityTransition(time) {
+    if (!this.brutalityTransition.active) {
+      return;
+    }
+
+    const durationMs = Math.max(1, this.brutalityTransition.durationMs ?? BRUTALITY_TRANSITION_DURATION_MS);
+    const rawT = Phaser.Math.Clamp((time - this.brutalityTransition.startedAt) / durationMs, 0, 1);
+    const easedT = Phaser.Math.Easing.Cubic.Out(rawT);
+    const visualScale = Phaser.Math.Linear(this.brutalityTransition.fromVisualScale, this.brutalityTransition.toVisualScale, easedT);
+    const bodyScale = Phaser.Math.Linear(this.brutalityTransition.fromBodyScale, this.brutalityTransition.toBodyScale, easedT);
+    this.applyScaleAndCollision(visualScale, bodyScale, this.brutalityTransition.floorAnchorY);
+
+    if (rawT >= 1) {
+      this.brutalityTransition.active = false;
+      this.brutalityTransition.floorAnchorY = null;
+    }
+  }
+
+  applyScaleAndCollision(visualScaleMultiplier = 1, bodyScaleMultiplier = 1, floorAnchorY = null) {
+    const resolvedFloorAnchorY = Number.isFinite(floorAnchorY) ? floorAnchorY : (this.body?.bottom ?? this.sprite.y);
     const targetScaleX = this.baseVisualScale.x * visualScaleMultiplier;
     const targetScaleY = this.baseVisualScale.y * visualScaleMultiplier;
     this.sprite.setScale(targetScaleX, targetScaleY);
@@ -375,11 +435,14 @@ export class Player {
     this.body.setOffset(bodyOffsetX, bodyOffsetY);
     this.body.updateFromGameObject();
 
-    const bottomDelta = floorAnchorY - this.body.bottom;
+    const bottomDelta = resolvedFloorAnchorY - this.body.bottom;
     if (Math.abs(bottomDelta) > 0.001) {
       this.sprite.y += bottomDelta;
       this.body.updateFromGameObject();
     }
+
+    this.currentBrutalityVisualScale = visualScaleMultiplier;
+    this.currentBrutalityBodyScale = bodyScaleMultiplier;
   }
 
   getAttackDamage() {
