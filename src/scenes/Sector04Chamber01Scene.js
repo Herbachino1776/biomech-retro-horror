@@ -397,6 +397,8 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
 
   createEndBossEncounter() {
     this.endBoss = new SkitterServitor(this, CHAMBER_END_BOSS.spawnX, CHAMBER_END_BOSS.spawnY, CHAMBER_END_BOSS.config);
+    this.endBoss.maxHealth ??= this.endBoss.config?.health ?? this.endBoss.health;
+    this.endBoss.hurtUntil ??= -Infinity;
     this.endBoss.setActive(false);
     this.endBoss.awakened = false;
     this.endBoss.sprite.setDepth(6.2);
@@ -649,7 +651,9 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     }
     const tookDamage = this.player.receiveDamage(CHAMBER_END_BOSS.config.contactDamage ?? 2, this.time.now);
     if (tookDamage) {
-      this.endBoss.recordContactDamage(this.time.now);
+      if (typeof this.endBoss.recordContactDamage === 'function') {
+        this.endBoss.recordContactDamage(this.time.now);
+      }
       const knockDirection = Math.sign(this.player.sprite.x - this.endBoss.sprite.x) || 1;
       this.player.body.setVelocityX(knockDirection * 236);
       this.player.body.setVelocityY(-224);
@@ -676,15 +680,38 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     }
 
     const shouldShow = !this.endBoss.dead && (this.endBoss.active || this.player.sprite.x >= CHAMBER_END_BOSS.activationX - 120);
+    const maxHealth = this.endBoss.maxHealth ?? this.endBoss.config?.health ?? Math.max(1, this.endBoss.health ?? 1);
+    const telegraph = typeof this.endBoss.getTelegraphProgress === 'function'
+      ? this.endBoss.getTelegraphProgress(time)
+      : this.getSkitterTelegraphProgress(this.endBoss, time);
+    const wounded = Number.isFinite(this.endBoss.hurtUntil)
+      ? time < this.endBoss.hurtUntil
+      : this.getSkitterWoundedState(this.endBoss, time);
     this.hud.setBossBarState({
       visible: shouldShow,
       name: CHAMBER_END_BOSS.name,
       subtitle: CHAMBER_END_BOSS.subtitle,
       current: this.endBoss.health,
-      max: this.endBoss.maxHealth,
-      telegraph: this.endBoss.getTelegraphProgress(time),
-      wounded: time < this.endBoss.hurtUntil
+      max: maxHealth,
+      telegraph,
+      wounded
     });
+  }
+
+  getSkitterTelegraphProgress(enemy, time) {
+    if (!enemy || enemy.dead || enemy.combatState !== 'windup') {
+      return 0;
+    }
+    const windupMs = Math.max(1, enemy.config?.windupMs ?? 1);
+    return Phaser.Math.Clamp((time - (enemy.stateStartedAt ?? time)) / windupMs, 0, 1);
+  }
+
+  getSkitterWoundedState(enemy, time) {
+    if (!enemy || enemy.dead) {
+      return false;
+    }
+    const lastHitAt = enemy.lastDamageFlashTime ?? -Infinity;
+    return time < lastHitAt + 220;
   }
 
   unlockForwardPath() {
