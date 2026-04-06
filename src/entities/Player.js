@@ -11,8 +11,8 @@ const PLAYER_WALK_MIN_SPEED = 36;
 const PLAYER_IDLE_FPS = 5;
 const PLAYER_IDLE_MAX_SPEED = 20;
 const DEFAULT_BRUTALITY_MODIFIERS = {
-  visualScale: 1.12,
-  bodyScale: 1.06,
+  visualScale: 1.28,
+  bodyScale: 1.16,
   speedMultiplier: 1.12,
   reachMultiplier: 1.2,
   damageMultiplier: 2
@@ -356,7 +356,7 @@ export class Player {
   }
 
   applyScaleAndCollision(visualScaleMultiplier = 1, bodyScaleMultiplier = 1) {
-    const wasBottom = this.body?.bottom ?? this.sprite.y;
+    const floorAnchorY = this.body?.bottom ?? this.sprite.y;
     const targetScaleX = this.baseVisualScale.x * visualScaleMultiplier;
     const targetScaleY = this.baseVisualScale.y * visualScaleMultiplier;
     this.sprite.setScale(targetScaleX, targetScaleY);
@@ -373,10 +373,13 @@ export class Player {
     const bodyOffsetY = (this.baseBody.offsetY - heightGrowthWorld) / scaleY;
     this.body.setSize(bodyWidth, bodyHeight);
     this.body.setOffset(bodyOffsetX, bodyOffsetY);
-
-    const nowBottom = this.body?.bottom ?? this.sprite.y;
-    this.sprite.y += (wasBottom - nowBottom);
     this.body.updateFromGameObject();
+
+    const bottomDelta = floorAnchorY - this.body.bottom;
+    if (Math.abs(bottomDelta) > 0.001) {
+      this.sprite.y += bottomDelta;
+      this.body.updateFromGameObject();
+    }
   }
 
   getAttackDamage() {
