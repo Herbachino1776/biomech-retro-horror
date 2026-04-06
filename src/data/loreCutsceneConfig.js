@@ -278,6 +278,35 @@ export const LORE_CUTSCENES = {
       }
     }
   },
+  'sector04-chamber02-return-ledger': {
+    id: 'sector04-chamber02-return-ledger',
+    imageKey: ASSET_KEYS.sector04Chamber02AltarLore,
+    title: 'SECTOR 04 // RETURN LEDGER',
+    body: [
+      'The shrine records each vessel that walked this hall and each part demanded in return.',
+      'Cord-bearers drag the paid remains toward the opening while anchor clerks mark every subtraction in wet iron.',
+      'Only the unburied debt reaches the threshold; the rest is archived inside the processional walls.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    style: {
+      frameColor: 0xb9aa95,
+      titleColor: '#a7b98f',
+      bodyColor: '#d9ccb8',
+      promptColor: '#90a878',
+      imageTint: 0xd7cab6,
+      imageAlpha: 0.95,
+      backgroundColor: '#000000',
+      motion: {
+        panX: 10,
+        panY: -6,
+        zoom: 1.032,
+        duration: 9200,
+        shakeX: 2,
+        shakeY: 2,
+        shakeDuration: 3200
+      }
+    }
+  },
   'sector03-chamber03-gate-of-refusal': {
     id: 'sector03-chamber03-gate-of-refusal',
     imageKey: ASSET_KEYS.sector03Chamber03LoreImage,
