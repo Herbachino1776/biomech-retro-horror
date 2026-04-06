@@ -61,24 +61,12 @@ export class Player {
     this.body.setCollideWorldBounds(true);
     this.body.setGravityY(0);
 
-    this.baseVisualScale = {
-      x: Math.abs(this.sprite.scaleX) || 1,
-      y: Math.abs(this.sprite.scaleY) || 1
-    };
-    this.baseVisualSize = {
-      width: this.sprite.displayWidth / this.baseVisualScale.x,
-      height: this.sprite.displayHeight / this.baseVisualScale.y
-    };
-    this.baseBody = {
-      width: config.body.width,
-      height: config.body.height,
-      offsetX: config.body.offsetX,
-      offsetY: config.body.offsetY
-    };
-    this.body.setSize(this.baseBody.width, this.baseBody.height);
-    this.body.setOffset(this.baseBody.offsetX, this.baseBody.offsetY);
+    const scaleX = Math.abs(this.sprite.scaleX) || 1;
+    const scaleY = Math.abs(this.sprite.scaleY) || 1;
+    this.body.setSize(config.body.width / scaleX, config.body.height / scaleY);
+    this.body.setOffset(config.body.offsetX / scaleX, config.body.offsetY / scaleY);
     this.body.updateFromGameObject();
-    this.captureSpawnBaseline();
+    this.captureBrutalityBaseline();
 
     const attackHitboxConfig = this.config.attackHitbox ?? {};
     this.attackHitbox = scene.add.zone(
@@ -109,7 +97,8 @@ export class Player {
       fromBodyScale: 1,
       toVisualScale: 1,
       toBodyScale: 1,
-      floorAnchorY: null
+      floorAnchorY: null,
+      bodyBottomMinusVisualFeetDelta: null
     };
 
     const weaponDisplay = this.config.weaponVisual?.display ?? { width: 72, height: 72 };
@@ -407,6 +396,7 @@ export class Player {
     this.brutalityTransition.toVisualScale = targetVisualScale;
     this.brutalityTransition.toBodyScale = targetBodyScale;
     this.brutalityTransition.floorAnchorY = this.getVisualFeetAnchorY();
+    this.brutalityTransition.bodyBottomMinusVisualFeetDelta = this.brutalityBaseline?.bodyBottomMinusVisualFeetDelta ?? 0;
   }
 
   updateBrutalityTransition(time) {
@@ -419,7 +409,12 @@ export class Player {
     const easedT = Phaser.Math.Easing.Cubic.Out(rawT);
     const visualScale = Phaser.Math.Linear(this.brutalityTransition.fromVisualScale, this.brutalityTransition.toVisualScale, easedT);
     const bodyScale = Phaser.Math.Linear(this.brutalityTransition.fromBodyScale, this.brutalityTransition.toBodyScale, easedT);
-    this.applyScaleAndCollision(visualScale, bodyScale, this.brutalityTransition.floorAnchorY);
+    this.applyBrutalityTransform(
+      visualScale,
+      bodyScale,
+      this.brutalityTransition.floorAnchorY,
+      this.brutalityTransition.bodyBottomMinusVisualFeetDelta
+    );
 
     if (rawT >= 1) {
       this.brutalityTransition.active = false;
@@ -427,16 +422,19 @@ export class Player {
     }
   }
 
-  applyScaleAndCollision(visualScaleMultiplier = 1, bodyScaleMultiplier = 1, floorAnchorY = null) {
-    const base = this.spawnBaseline;
+  applyBrutalityTransform(visualScaleMultiplier = 1, bodyScaleMultiplier = 1, floorAnchorY = null, bodyBottomMinusVisualFeetDelta = null) {
+    const base = this.brutalityBaseline;
     if (!base) {
       return;
     }
 
     const resolvedVisualFeetAnchorY = Number.isFinite(floorAnchorY) ? floorAnchorY : base.visualFeetY;
+    const resolvedBodyBottomDelta = Number.isFinite(bodyBottomMinusVisualFeetDelta)
+      ? bodyBottomMinusVisualFeetDelta
+      : base.bodyBottomMinusVisualFeetDelta;
     const targetDisplayWidth = base.displayWidth * visualScaleMultiplier;
     const targetDisplayHeight = base.displayHeight * visualScaleMultiplier;
-    const targetBodyBottomY = resolvedVisualFeetAnchorY + base.bodyBottomMinusVisualFeetDelta;
+    const targetBodyBottomY = resolvedVisualFeetAnchorY + resolvedBodyBottomDelta;
     this.sprite.setDisplaySize(targetDisplayWidth, targetDisplayHeight);
     this.setVisualFeetY(resolvedVisualFeetAnchorY);
 
@@ -457,18 +455,18 @@ export class Player {
     this.currentBrutalityBodyScale = bodyScaleMultiplier;
   }
 
-  captureSpawnBaseline() {
+  captureBrutalityBaseline() {
     const visualFeetY = this.getVisualFeetY();
     const bodyBottomY = this.body.bottom;
-    this.spawnBaseline = Object.freeze({
+    this.brutalityBaseline = Object.freeze({
       spriteX: this.sprite.x,
       spriteY: this.sprite.y,
       displayWidth: this.sprite.displayWidth,
       displayHeight: this.sprite.displayHeight,
-      bodyWidth: this.baseBody.width,
-      bodyHeight: this.baseBody.height,
-      bodyOffsetX: this.baseBody.offsetX,
-      bodyOffsetY: this.baseBody.offsetY,
+      bodyWidth: this.body.width,
+      bodyHeight: this.body.height,
+      bodyOffsetX: this.body.offset.x,
+      bodyOffsetY: this.body.offset.y,
       bodyWorldWidth: this.body.width,
       bodyWorldHeight: this.body.height,
       bodyCenterXMinusSpriteX: this.body.center.x - this.sprite.x,
@@ -479,17 +477,15 @@ export class Player {
   }
 
   getVisualFeetAnchorY() {
-    return Number.isFinite(this.spawnBaseline?.visualFeetY) ? this.spawnBaseline.visualFeetY : this.getVisualFeetY();
+    return Number.isFinite(this.brutalityBaseline?.visualFeetY) ? this.brutalityBaseline.visualFeetY : this.getVisualFeetY();
   }
 
   getVisualFeetY() {
-    const scaleY = Math.abs(this.sprite.scaleY) || this.baseVisualScale.y || 1;
-    return this.sprite.y + (1 - this.sprite.originY) * this.baseVisualSize.height * scaleY;
+    return this.sprite.y + (1 - this.sprite.originY) * this.sprite.displayHeight;
   }
 
   setVisualFeetY(targetFeetY) {
-    const scaleY = Math.abs(this.sprite.scaleY) || this.baseVisualScale.y || 1;
-    this.sprite.y = targetFeetY - (1 - this.sprite.originY) * this.baseVisualSize.height * scaleY;
+    this.sprite.y = targetFeetY - (1 - this.sprite.originY) * this.sprite.displayHeight;
   }
 
   getAttackDamage() {
