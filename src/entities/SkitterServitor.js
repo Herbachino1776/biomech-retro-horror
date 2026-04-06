@@ -33,6 +33,7 @@ export class SkitterServitor {
     this.wasAwakenedLastUpdate = this.awakened;
     this.wakeRushUntil = -Infinity;
     this.deathRemainsSpawned = false;
+    this.active = true;
     this.poiseConfig = {
       max: Math.max(1, config.poise?.max ?? 0),
       recoverDelayMs: Math.max(0, config.poise?.recoverDelayMs ?? 1400),
@@ -99,7 +100,24 @@ export class SkitterServitor {
       .setVisible(true);
   }
 
+  setActive(isActive = true) {
+    this.active = Boolean(isActive);
+    this.sprite.setActive(this.active).setVisible(this.active);
+    this.body.enable = this.active;
+    if (!this.active) {
+      this.body.setVelocity(0, 0);
+      this.contactDamageWindowUntil = -Infinity;
+    }
+    this.eyeGlow?.setVisible(this.active && !this.dead);
+    return this;
+  }
+
   update(time, playerX) {
+    if (!this.active) {
+      this.body.setVelocity(0, 0);
+      return;
+    }
+
     this.updatePoiseState(time);
     this.updateVisuals(time);
 
