@@ -75,6 +75,7 @@ export class Player {
       offsetX: config.body.offsetX,
       offsetY: config.body.offsetY
     };
+    // Locked normal-mode baseline captured from untouched spawn/body setup.
     this.baseGrounding = {
       visualFeetY: null,
       bodyBottomY: null,
@@ -83,9 +84,7 @@ export class Player {
     this.body.setSize(this.baseBody.width, this.baseBody.height);
     this.body.setOffset(this.baseBody.offsetX, this.baseBody.offsetY);
     this.body.updateFromGameObject();
-    this.baseGrounding.visualFeetY = this.getVisualFeetY();
-    this.baseGrounding.bodyBottomY = this.body.bottom;
-    this.baseGrounding.bodyBottomMinusVisualFeetDelta = this.baseGrounding.bodyBottomY - this.baseGrounding.visualFeetY;
+    this.captureUntouchedGroundingBaseline();
 
     const attackHitboxConfig = this.config.attackHitbox ?? {};
     this.attackHitbox = scene.add.zone(
@@ -460,6 +459,14 @@ export class Player {
 
     this.currentBrutalityVisualScale = visualScaleMultiplier;
     this.currentBrutalityBodyScale = bodyScaleMultiplier;
+  }
+
+  captureUntouchedGroundingBaseline() {
+    const visualFeetY = this.getVisualFeetY();
+    const bodyBottomY = this.body.bottom;
+    this.baseGrounding.visualFeetY = visualFeetY;
+    this.baseGrounding.bodyBottomY = bodyBottomY;
+    this.baseGrounding.bodyBottomMinusVisualFeetDelta = bodyBottomY - visualFeetY;
   }
 
   getVisualFeetAnchorY() {
