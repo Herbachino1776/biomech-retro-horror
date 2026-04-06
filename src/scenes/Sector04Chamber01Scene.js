@@ -9,8 +9,9 @@ import { PLAYER, SKITTER, WORLD } from '../data/milestone1Config.js';
 import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { createDirectionalCameraBias } from '../systems/DirectionalCameraBias.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
-import { applyChamberEntryRestore } from '../systems/VesselRunEconomy.js';
+import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 import { bossPitRunState } from '../systems/BossPitRunState.js';
+import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
 
 const CHAMBER = {
   sceneKey: 'Sector04Chamber01Scene',
@@ -152,6 +153,50 @@ const BOSS_PIT_ALTAR = {
   sceneKey: 'Sector04Chamber01BossPitReliquaryStalkerScene'
 };
 
+const CHAMBER_END_BOSS = {
+  name: 'HORNED MOTH JUDGE',
+  subtitle: 'Reduction Threshold Adjudicator',
+  activationX: 5380,
+  spawnX: 5650,
+  spawnY: S4C1_ENEMY_SPAWN_Y,
+  rewardKey: 'sector04-chamber01-threshold-horned-moth-judge',
+  config: {
+    ...SKITTER,
+    textureKey: ASSET_KEYS.bossPit20HornedMothJudge,
+    health: 12,
+    speed: 52,
+    aggroRange: 320,
+    patrolDistance: 92,
+    contactDamage: 2,
+    body: { width: 112, height: 108, offsetX: 88, offsetY: 132 },
+    presentation: {
+      alpha: 0.99,
+      display: { width: 332, height: 338 },
+      origin: { x: 0.56, y: 0.985 },
+      stateAlpha: { windup: 1, attack: 1, hurt: 1, dead: 0.5 }
+    },
+    corpseRemainsProfile: 'sector3Elite',
+    audioProfile: 'miniboss'
+  }
+};
+
+const FORWARD_GATE = {
+  gateX: 5928,
+  doorX: 6088,
+  y: WORLD.floorY - 126,
+  width: 214,
+  height: 214,
+  barrierX: 6160,
+  barrierY: WORLD.floorY - 70,
+  barrierWidth: 92,
+  barrierHeight: 232,
+  thresholdX: 6008,
+  thresholdY: WORLD.floorY - 76,
+  thresholdWidth: 214,
+  thresholdHeight: 220,
+  promptOffsetY: -158
+};
+
 export class Sector04Chamber01Scene extends Phaser.Scene {
   constructor() {
     super(CHAMBER.sceneKey);
@@ -169,6 +214,14 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     this.encounterPockets = [];
     this.currentLoreZone = null;
     this.currentBossPitAltar = null;
+    this.integrityRewardTracker = new Set();
+    this.hasUnlockedForwardPath = false;
+    this.hasTriggeredForwardContract = false;
+    this.currentForwardThreshold = null;
+    this.hasEnteredForwardThreshold = false;
+    this.forwardThresholdAwaitingFreshInteract = false;
+    this.resolutionLockActive = false;
+    this.endBoss = null;
 
     if (this.transitionContext?.returnFromBossPit) {
       this.hasCompletedBossPitLoop = true;
@@ -183,9 +236,12 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     this.createBackdrop();
     this.createPlayer();
     this.createEncounterPockets();
+    this.createEndBossEncounter();
     this.createLoreAnchor();
     this.createBossPitAltar();
     this.createUi();
+    this.majorEncounterResolution = new MajorEncounterResolution(this);
+    this.createForwardThreshold();
     this.configureLayout();
     this.cameras.main.fadeIn(600, 0, 0, 0);
   }
@@ -236,7 +292,34 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     }
     this.add.ellipse(BOSS_PIT_ALTAR.x, WORLD.floorY - 4, 176, 150, 0xbda27d, this.hasCompletedBossPitLoop ? 0.04 : 0.09).setDepth(-6.04);
 
-    this.terminalBarrier = this.add.rectangle(6120, WORLD.floorY - 70, 92, 232, 0x140e0a, 0.42).setDepth(-4.86);
+    this.add.ellipse(FORWARD_GATE.thresholdX, WORLD.floorY + 4, 284, 40, 0x050403, 0.34).setDepth(-5.82);
+    if (this.textures.exists(ASSET_KEYS.sector04Chamber02PropGate)) {
+      this.add.image(FORWARD_GATE.gateX, FORWARD_GATE.y, ASSET_KEYS.sector04Chamber02PropGate)
+        .setDisplaySize(FORWARD_GATE.width, FORWARD_GATE.height)
+        .setTint(0xcab79f)
+        .setAlpha(0.84)
+        .setDepth(-5.9);
+    }
+    if (this.textures.exists(ASSET_KEYS.sector04Chamber02PropThresholdDoor)) {
+      this.forwardGateVisual = this.add.image(FORWARD_GATE.doorX, FORWARD_GATE.y, ASSET_KEYS.sector04Chamber02PropThresholdDoor)
+        .setDisplaySize(FORWARD_GATE.width, FORWARD_GATE.height)
+        .setTint(0x8f816f)
+        .setAlpha(0.62)
+        .setDepth(-5.89);
+    } else {
+      this.forwardGateVisual = this.add.ellipse(FORWARD_GATE.doorX, FORWARD_GATE.y + 14, 178, 212, 0x2f241d, 0.74)
+        .setStrokeStyle(3, 0xa89780, 0.56)
+        .setDepth(-5.89);
+    }
+
+    this.terminalBarrier = this.add.rectangle(
+      FORWARD_GATE.barrierX,
+      FORWARD_GATE.barrierY,
+      FORWARD_GATE.barrierWidth,
+      FORWARD_GATE.barrierHeight,
+      0x140e0a,
+      0.42
+    ).setDepth(-4.86);
     this.physics.add.existing(this.terminalBarrier, true);
 
     this.add.rectangle(CHAMBER.worldWidth / 2, WORLD.floorY - 14, CHAMBER.worldWidth, 96, 0x1a1411, 0.95).setDepth(-6.3);
@@ -304,6 +387,17 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     });
   }
 
+  createEndBossEncounter() {
+    this.endBoss = new SkitterServitor(this, CHAMBER_END_BOSS.spawnX, CHAMBER_END_BOSS.spawnY, CHAMBER_END_BOSS.config);
+    this.endBoss.setActive(false);
+    this.endBoss.awakened = false;
+    this.endBoss.sprite.setDepth(6.2);
+    this.physics.add.collider(this.endBoss.sprite, this.platforms);
+    this.physics.add.collider(this.endBoss.sprite, this.terminalBarrier);
+    this.physics.add.overlap(this.player.attackHitbox, this.endBoss.sprite, () => this.handlePlayerHitEndBoss());
+    this.physics.add.overlap(this.player.sprite, this.endBoss.sprite, () => this.handleEndBossContactPlayer());
+  }
+
   createLoreAnchor() {
     const zone = this.add.zone(LORE_ANCHOR.x, LORE_ANCHOR.y, LORE_ANCHOR.width, LORE_ANCHOR.height).setOrigin(0.5);
     this.physics.add.existing(zone, true);
@@ -359,12 +453,36 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     this.hud.update(this.player.health, this.player.maxHealth);
   }
 
+  createForwardThreshold() {
+    this.forwardThresholdZone = this.add.zone(
+      FORWARD_GATE.thresholdX,
+      FORWARD_GATE.thresholdY,
+      FORWARD_GATE.thresholdWidth,
+      FORWARD_GATE.thresholdHeight
+    ).setOrigin(0.5);
+    this.physics.add.existing(this.forwardThresholdZone, true);
+    this.forwardPrompt = this.add.text(
+      FORWARD_GATE.thresholdX,
+      FORWARD_GATE.thresholdY + FORWARD_GATE.promptOffsetY,
+      'REDUCTION THRESHOLD SEALED',
+      {
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        color: '#e0d8c8',
+        align: 'center',
+        stroke: '#120c0a',
+        strokeThickness: 4
+      }
+    ).setOrigin(0.5).setDepth(-4.58).setAlpha(0.92).setVisible(false);
+  }
+
   update(time) {
     const mobileInput = this.mobileControls.getInputState();
     if (this.player.isDead) {
       this.mobileControls.setMode('dead');
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+      this.endBoss?.body?.setVelocity(0, 0);
       if ((Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) && !this.isRestartingRun) {
         this.isRestartingRun = true;
         restartRunFromDeath(this);
@@ -372,10 +490,11 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    if (this.isLoreTransitionActive || this.bossPitTransitionActive) {
+    if (this.isLoreTransitionActive || this.bossPitTransitionActive || this.resolutionLockActive) {
       this.mobileControls.setMode('dialogue');
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
+      this.endBoss?.body?.setVelocity(0, 0);
       return;
     }
 
@@ -391,11 +510,15 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
 
     this.player.update(time, input);
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
+    this.updateEndBossState(time);
     this.updateEncounterPockets(time);
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
     this.refreshBossPitAltarPresence();
     this.tryBeginBossPitTransition(mobileInput);
+    this.refreshForwardThresholdPresence();
+    this.tryAdvanceForwardThreshold(mobileInput);
+    this.refreshEndBossBar(time);
     this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
   }
@@ -478,6 +601,153 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     }
 
     this.beginBossPitTransition();
+  }
+
+  handlePlayerHitEndBoss() {
+    if (!this.player.attackActive || this.endBoss?.dead || this.resolutionLockActive || this.hasUnlockedForwardPath) {
+      return;
+    }
+    if (this.endBoss.lastAttackHitId === this.player.attackId) {
+      return;
+    }
+
+    this.endBoss.lastAttackHitId = this.player.attackId;
+    this.endBoss.takeDamage(1, this.time.now);
+    this.audioDirector?.playPlayerHit();
+
+    if (!this.endBoss.dead) {
+      return;
+    }
+
+    this.majorEncounterResolution?.begin({
+      encounterId: 'sector04-chamber01-end-boss',
+      freezePlayer: true,
+      disablePlayerAttack: true,
+      setResolutionLock: (locked) => {
+        this.resolutionLockActive = locked;
+      },
+      onStart: () => {
+        grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, CHAMBER_END_BOSS.rewardKey);
+        this.cameras.main.shake(620, 0.008, true);
+        this.audioDirector?.playBanishmentSting();
+      },
+      stages: [{ atMs: 420, run: () => this.unlockForwardPath() }]
+    });
+  }
+
+  handleEndBossContactPlayer() {
+    if (this.endBoss?.dead || this.resolutionLockActive || !this.endBoss?.active || !this.endBoss.canDealContactDamage(this.time.now)) {
+      return;
+    }
+    const tookDamage = this.player.receiveDamage(CHAMBER_END_BOSS.config.contactDamage ?? 2, this.time.now);
+    if (tookDamage) {
+      this.endBoss.recordContactDamage(this.time.now);
+      const knockDirection = Math.sign(this.player.sprite.x - this.endBoss.sprite.x) || 1;
+      this.player.body.setVelocityX(knockDirection * 236);
+      this.player.body.setVelocityY(-224);
+    }
+  }
+
+  updateEndBossState(time) {
+    if (!this.endBoss || this.endBoss.dead || this.hasUnlockedForwardPath) {
+      return;
+    }
+
+    if (!this.endBoss.active && this.player.sprite.x >= CHAMBER_END_BOSS.activationX) {
+      this.endBoss.setActive(true);
+    }
+
+    if (this.endBoss.active) {
+      this.endBoss.update(time, this.player.sprite.x);
+    }
+  }
+
+  refreshEndBossBar(time) {
+    if (!this.endBoss) {
+      return;
+    }
+
+    const shouldShow = !this.endBoss.dead && (this.endBoss.active || this.player.sprite.x >= CHAMBER_END_BOSS.activationX - 120);
+    this.hud.setBossBarState({
+      visible: shouldShow,
+      name: CHAMBER_END_BOSS.name,
+      subtitle: CHAMBER_END_BOSS.subtitle,
+      current: this.endBoss.health,
+      max: this.endBoss.maxHealth,
+      telegraph: this.endBoss.getTelegraphProgress(time),
+      wounded: time < this.endBoss.hurtUntil
+    });
+  }
+
+  unlockForwardPath() {
+    this.hasUnlockedForwardPath = true;
+    this.forwardGateVisual?.setTint(0xd7c7b1).setAlpha(0.9);
+    this.terminalBarrier?.setAlpha(0.08).setFillStyle(0x8ca284, 0.08);
+    if (this.terminalBarrier?.body) {
+      this.terminalBarrier.body.enable = false;
+      this.terminalBarrier.body.updateFromGameObject?.();
+    }
+    this.forwardPrompt?.setVisible(false);
+  }
+
+  refreshForwardThresholdPresence() {
+    const wasInsideThreshold = this.hasEnteredForwardThreshold;
+    this.currentForwardThreshold = null;
+    if (!this.forwardThresholdZone) {
+      this.hasEnteredForwardThreshold = false;
+      this.forwardThresholdAwaitingFreshInteract = false;
+      return;
+    }
+
+    this.physics.overlap(this.player.sprite, this.forwardThresholdZone, () => {
+      this.currentForwardThreshold = this.forwardThresholdZone;
+    });
+    this.hasEnteredForwardThreshold = Boolean(this.currentForwardThreshold);
+
+    if (!this.hasEnteredForwardThreshold) {
+      this.forwardThresholdAwaitingFreshInteract = false;
+    } else if (!wasInsideThreshold) {
+      this.forwardThresholdAwaitingFreshInteract = true;
+    }
+
+    const promptVisible = Boolean(this.currentForwardThreshold) || (this.hasUnlockedForwardPath && !this.hasTriggeredForwardContract);
+    const promptText = this.hasUnlockedForwardPath
+      ? this.hasTriggeredForwardContract
+        ? 'THRESHOLD STABILIZED\nENTER THE NEXT CHAMBER'
+        : 'JUDGE NULLIFIED\nPRESS RITE / [E] TO DESCEND'
+      : 'REDUCTION THRESHOLD SEALED';
+    this.forwardPrompt?.setVisible(promptVisible).setText(promptText);
+  }
+
+  tryAdvanceForwardThreshold(mobileInput) {
+    if (!this.hasUnlockedForwardPath || !this.currentForwardThreshold || this.hasTriggeredForwardContract) {
+      return;
+    }
+
+    const interactHeld = this.keyInteract?.isDown || this.keyEnter?.isDown || mobileInput.interactHeld;
+    if (this.forwardThresholdAwaitingFreshInteract) {
+      if (interactHeld) {
+        return;
+      }
+      this.forwardThresholdAwaitingFreshInteract = false;
+    }
+
+    const interactPressed = Phaser.Input.Keyboard.JustDown(this.keyInteract) || Phaser.Input.Keyboard.JustDown(this.keyEnter) || mobileInput.interactPressed;
+    if (!interactPressed) {
+      return;
+    }
+
+    this.hasTriggeredForwardContract = true;
+    this.forwardPrompt?.setVisible(false);
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.audioDirector?.shutdown();
+      this.scene.start('Sector04Chamber02Scene', {
+        fromScene: this.scene.key,
+        fromGate: 'sector04-chamber01-threshold',
+        progressionSource: 'sector04-chamber01-end-boss-threshold'
+      });
+    });
+    this.cameras.main.fadeOut(320, 0, 0, 0);
   }
 
   beginBossPitTransition() {
