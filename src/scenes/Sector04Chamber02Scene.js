@@ -10,6 +10,8 @@ import { PORTRAIT_LAYOUT } from '../data/layoutConfig.js';
 import { createDirectionalCameraBias } from '../systems/DirectionalCameraBias.js';
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { applyChamberEntryRestore } from '../systems/VesselRunEconomy.js';
+import { BrutalityModeState } from '../systems/BrutalityModeState.js';
+import { triggerBrutalityBasicChunkBurst } from '../systems/BrutalityChunkBurst.js';
 
 const CHAMBER = {
   sceneKey: 'Sector04Chamber02Scene',
@@ -59,6 +61,7 @@ const ENEMIES = {
   },
   anchorElite: {
     ...SKITTER,
+    isElite: true,
     textureKey: ASSET_KEYS.sector04Chamber02EnemyElite,
     health: 8,
     speed: 46,
@@ -163,6 +166,20 @@ const THRESHOLD_PROPS = {
   barrierHeight: 232
 };
 
+const BRUTALITY_MODE = {
+  player: {
+    visualScale: 1.18,
+    bodyScale: 1.12,
+    speedMultiplier: 1.12,
+    reachMultiplier: 1.2,
+    damageMultiplier: 2
+  },
+  enemyAggression: {
+    speedMultiplier: 1.24,
+    aggroRangeMultiplier: 1.28
+  }
+};
+
 export class Sector04Chamber02Scene extends Phaser.Scene {
   constructor() {
     super(CHAMBER.sceneKey);
@@ -176,6 +193,7 @@ export class Sector04Chamber02Scene extends Phaser.Scene {
     this.currentLoreZone = null;
     this.enemies = [];
     this.encounterPockets = [];
+    this.brutalityMode = null;
   }
 
   create() {
@@ -185,6 +203,7 @@ export class Sector04Chamber02Scene extends Phaser.Scene {
     this.createBackdrop();
     this.createPlayer();
     this.createEncounterPockets();
+    this.setupBrutalityMode();
     this.createLoreAnchor();
     this.createUi();
     this.configureLayout();
@@ -289,14 +308,7 @@ export class Sector04Chamber02Scene extends Phaser.Scene {
         this.physics.add.collider(enemy.sprite, this.platforms);
         this.physics.add.collider(enemy.sprite, this.terminalBarrier);
         this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (_attackZone, enemySprite) => {
-          if (!this.player.attackActive || enemy.dead || enemy.lastAttackHitId === this.player.attackId || !(enemySprite === enemy.sprite || enemySprite?.gameObject === enemy.sprite)) {
-            return;
-          }
-          enemy.lastAttackHitId = this.player.attackId;
-          const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
-          enemy.setHitReactionDirection(knockDirection);
-          enemy.takeDamage(1, this.time.now);
-          this.audioDirector?.playPlayerHit();
+          this.handlePlayerHitEnemy(_attackZone, enemySprite, enemy);
         });
         this.physics.add.overlap(this.player.sprite, enemy.sprite, (_p, enemySprite) => {
           if (enemy.dead || !(enemySprite === enemy.sprite || enemySprite?.gameObject === enemy.sprite) || !enemy.canDealContactDamage(this.time.now)) {
@@ -368,6 +380,7 @@ export class Sector04Chamber02Scene extends Phaser.Scene {
   }
 
   update(time) {
+    this.brutalityMode?.update(time);
     const mobileInput = this.mobileControls.getInputState();
     if (this.player.isDead) {
       this.mobileControls.setMode('dead');
@@ -399,6 +412,7 @@ export class Sector04Chamber02Scene extends Phaser.Scene {
 
     this.player.update(time, input);
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
+    this.syncBrutalityAggression();
     this.updateEncounterPockets(time);
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
@@ -455,6 +469,61 @@ export class Sector04Chamber02Scene extends Phaser.Scene {
     }
 
     this.beginLoreSequence();
+  }
+
+  setupBrutalityMode() {
+    this.brutalityMode = new BrutalityModeState(this, {
+      onActivated: () => {
+        this.player.applyBrutalityMode(BRUTALITY_MODE.player);
+        this.audioDirector?.playEnemyAttack('miniboss');
+        this.syncBrutalityAggression();
+      },
+      onEnded: () => {
+        this.player.clearBrutalityMode();
+        this.enemies.forEach((enemy) => enemy.setBrutalityAggression(false));
+      }
+    });
+  }
+
+  handlePlayerHitEnemy(_attackZone, enemySprite, enemy) {
+    if (!this.player.attackActive || enemy.dead || enemy.lastAttackHitId === this.player.attackId || !(enemySprite === enemy.sprite || enemySprite?.gameObject === enemy.sprite)) {
+      return;
+    }
+
+    enemy.lastAttackHitId = this.player.attackId;
+    const now = this.time.now;
+    const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
+    enemy.setHitReactionDirection(knockDirection);
+
+    const isBasicEnemy = !enemy.config?.isElite;
+    const brutalityActive = this.brutalityMode?.isActive?.() ?? false;
+    if (brutalityActive && isBasicEnemy) {
+      enemy.takeDamage(Math.max(enemy.health, 1), now, { skipDefaultDeathFx: true });
+      if (enemy.dead) {
+        triggerBrutalityBasicChunkBurst(this, {
+          x: enemy.sprite.x,
+          y: (enemy.body?.bottom ?? enemy.sprite.y) - 18,
+          depth: enemy.sprite.depth + 0.2
+        });
+        this.cameras.main.shake(86, 0.005, true);
+      }
+    } else {
+      enemy.takeDamage(this.player.getAttackDamage(), now);
+    }
+
+    this.audioDirector?.playPlayerHit();
+    if (!enemy.dead) {
+      return;
+    }
+
+    if (isBasicEnemy) {
+      this.brutalityMode?.registerBasicKill(now);
+    }
+  }
+
+  syncBrutalityAggression() {
+    const brutalityActive = this.brutalityMode?.isActive?.() ?? false;
+    this.enemies.forEach((enemy) => enemy.setBrutalityAggression(brutalityActive, BRUTALITY_MODE.enemyAggression));
   }
 
   beginLoreSequence() {

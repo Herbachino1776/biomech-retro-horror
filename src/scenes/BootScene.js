@@ -181,6 +181,7 @@ export class BootScene extends Phaser.Scene {
     this.load.image(ASSET_KEYS.bossPit19ReliquaryStalker, ASSET_URLS[ASSET_KEYS.bossPit19ReliquaryStalker]);
     this.load.image(ASSET_KEYS.bossPit20HornedMothJudge, ASSET_URLS[ASSET_KEYS.bossPit20HornedMothJudge]);
     this.load.image(ASSET_KEYS.enemyGoreClusterMeatBone01, ASSET_URLS[ASSET_KEYS.enemyGoreClusterMeatBone01]);
+    this.load.image(ASSET_KEYS.brutalityBasicChunkBurst01, ASSET_URLS[ASSET_KEYS.brutalityBasicChunkBurst01]);
     this.load.spritesheet(ASSET_KEYS.player, ASSET_URLS[ASSET_KEYS.player], {
       frameWidth: 658,
       frameHeight: 1300,
@@ -192,6 +193,7 @@ export class BootScene extends Phaser.Scene {
       endFrame: 4
     });
     this.load.image(ASSET_KEYS.playerWeaponHammer01, ASSET_URLS[ASSET_KEYS.playerWeaponHammer01]);
+    this.load.image(ASSET_KEYS.playerWeaponHammerOfBanishment01, ASSET_URLS[ASSET_KEYS.playerWeaponHammerOfBanishment01]);
     this.load.image(ASSET_KEYS.skitter, ASSET_URLS[ASSET_KEYS.skitter]);
     this.load.image(ASSET_KEYS.sentinel, ASSET_URLS[ASSET_KEYS.sentinel]);
     this.load.image(ASSET_KEYS.laughingEngine, ASSET_URLS[ASSET_KEYS.laughingEngine]);

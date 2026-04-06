@@ -10,6 +10,13 @@ const PLAYER_WALK_FPS = 8;
 const PLAYER_WALK_MIN_SPEED = 36;
 const PLAYER_IDLE_FPS = 5;
 const PLAYER_IDLE_MAX_SPEED = 20;
+const DEFAULT_BRUTALITY_MODIFIERS = {
+  visualScale: 1.18,
+  bodyScale: 1.12,
+  speedMultiplier: 1.12,
+  reachMultiplier: 1.2,
+  damageMultiplier: 2
+};
 
 export class Player {
   constructor(scene, x, y, config) {
@@ -69,6 +76,12 @@ export class Player {
     this.attackHitbox.body.enable = false;
 
     this.weaponSwingTween = null;
+    this.baseMoveSpeed = this.config.moveSpeed;
+    this.baseAttackHitbox = { ...(this.config.attackHitbox ?? {}) };
+    this.brutalityMode = {
+      active: false,
+      ...DEFAULT_BRUTALITY_MODIFIERS
+    };
     this.weaponSprite = this.createWeaponSprite(x, y + visualYOffset);
     const restingPose = this.config.weaponVisual?.restingPose;
     this.weaponPoseState = restingPose
@@ -289,16 +302,75 @@ export class Player {
   }
 
   createWeaponSprite(x, y) {
-    if (!this.scene.textures.exists(ASSET_KEYS.playerWeaponHammer01)) {
+    const textureKey = this.resolveWeaponTextureKey();
+    if (!this.scene.textures.exists(textureKey)) {
       return null;
     }
 
     const display = this.config.weaponVisual?.display ?? { width: 72, height: 72 };
     return this.scene.add
-      .image(x, y, ASSET_KEYS.playerWeaponHammer01)
+      .image(x, y, textureKey)
       .setOrigin(0.5, 0.58)
       .setDisplaySize(display.width, display.height)
       .setDepth((this.sprite.depth ?? 6) - 1);
+  }
+
+  resolveWeaponTextureKey() {
+    if (this.brutalityMode?.active && this.scene.textures.exists(ASSET_KEYS.playerWeaponHammerOfBanishment01)) {
+      return ASSET_KEYS.playerWeaponHammerOfBanishment01;
+    }
+    return ASSET_KEYS.playerWeaponHammer01;
+  }
+
+  applyBrutalityMode(modifiers = {}) {
+    const nextModifiers = { ...DEFAULT_BRUTALITY_MODIFIERS, ...modifiers };
+    this.brutalityMode = {
+      ...this.brutalityMode,
+      ...nextModifiers,
+      active: true
+    };
+    this.config.moveSpeed = this.baseMoveSpeed * this.brutalityMode.speedMultiplier;
+    this.applyScaleAndCollision(this.brutalityMode.visualScale, this.brutalityMode.bodyScale);
+    this.updateWeaponTexture();
+  }
+
+  clearBrutalityMode() {
+    this.brutalityMode.active = false;
+    this.config.moveSpeed = this.baseMoveSpeed;
+    this.applyScaleAndCollision(1, 1);
+    this.updateWeaponTexture();
+  }
+
+  updateWeaponTexture() {
+    if (!this.weaponSprite) {
+      return;
+    }
+    this.weaponSprite.setTexture(this.resolveWeaponTextureKey());
+  }
+
+  applyScaleAndCollision(visualScaleMultiplier = 1, bodyScaleMultiplier = 1) {
+    const wasBottom = this.body?.bottom ?? this.sprite.y;
+    this.sprite.setScale(visualScaleMultiplier);
+
+    const scaleX = Math.abs(this.sprite.scaleX) || 1;
+    const scaleY = Math.abs(this.sprite.scaleY) || 1;
+    const bodyWidth = (this.config.body.width * bodyScaleMultiplier) / scaleX;
+    const bodyHeight = (this.config.body.height * bodyScaleMultiplier) / scaleY;
+    const bodyOffsetX = (this.config.body.offsetX / scaleX) - ((bodyWidth - (this.config.body.width / scaleX)) * 0.5);
+    const bodyOffsetY = (this.config.body.offsetY / scaleY) - ((bodyHeight - (this.config.body.height / scaleY)) * 0.5);
+    this.body.setSize(bodyWidth, bodyHeight);
+    this.body.setOffset(bodyOffsetX, bodyOffsetY);
+
+    const nowBottom = this.body?.bottom ?? this.sprite.y;
+    this.sprite.y += (wasBottom - nowBottom);
+    this.body.updateFromGameObject();
+  }
+
+  getAttackDamage() {
+    if (!this.brutalityMode.active) {
+      return 1;
+    }
+    return Math.max(1, Math.round(this.brutalityMode.damageMultiplier));
   }
 
   playWeaponSwing() {
@@ -500,9 +572,11 @@ export class Player {
   }
 
   updateAttackHitbox() {
-    const attackHitboxConfig = this.config.attackHitbox ?? {};
+    const attackHitboxConfig = this.baseAttackHitbox;
+    const reachMultiplier = this.brutalityMode.active ? this.brutalityMode.reachMultiplier : 1;
     const strikeY = this.body.center.y + (attackHitboxConfig.yOffset ?? 2);
-    const offsetX = this.facing * (attackHitboxConfig.forwardOffset ?? 42);
+    const offsetX = this.facing * (attackHitboxConfig.forwardOffset ?? 42) * reachMultiplier;
+    this.attackHitbox.body.setSize((attackHitboxConfig.width ?? 50) * reachMultiplier, attackHitboxConfig.height ?? 34);
     this.attackHitbox.setPosition(this.body.center.x + offsetX, strikeY);
     this.attackHitbox.body.updateFromGameObject();
   }

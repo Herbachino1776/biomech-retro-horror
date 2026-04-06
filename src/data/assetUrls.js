@@ -166,9 +166,11 @@ import bossPit19ReliquaryStalkerUrl from '../../art/raw/bosspit/boss_pit_19_reli
 import bossPit20BackgroundHornedMothJudgeUrl from '../../art/raw/bosspit/Pit_BG_Horned_Moth_Judge.png';
 import bossPit20HornedMothJudgeUrl from '../../art/raw/bosspit/boss_pit_20_horned_moth_judge_alpha.png';
 import enemyGoreClusterMeatBone01Url from '../../art/raw/shared/fx/enemy_gore_cluster_meat_bone_01.png';
+import brutalityBasicChunkBurst01Url from '../../art/raw/shared/fx/brutality_basic_chunk_burst_01.png';
 import playerWalkPuppetStrip06Url from '../../art/raw/player/player_walk_puppet_strip_06.png';
 import playerIdleBreatheStrip05Url from '../../art/raw/player/player_idle_breathe_strip_05.png';
 import playerWeaponHammer01Url from '../../art/raw/player/player_weapon_hammer_01.png';
+import playerWeaponHammerOfBanishment01Url from '../../art/raw/player/player_weapon_hammer_of_banishment_01.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
 import sentinelConceptUrl from '../../assets/concepts/sentinel-concept-01.png';
 import laughingEngineConceptUrl from '../../assets/concepts/laughing-engine-concept-01.png';
@@ -369,9 +371,11 @@ export const ASSET_URLS = {
   [ASSET_KEYS.bossPit20BackgroundHornedMothJudge]: bossPit20BackgroundHornedMothJudgeUrl,
   [ASSET_KEYS.bossPit20HornedMothJudge]: bossPit20HornedMothJudgeUrl,
   [ASSET_KEYS.enemyGoreClusterMeatBone01]: enemyGoreClusterMeatBone01Url,
+  [ASSET_KEYS.brutalityBasicChunkBurst01]: brutalityBasicChunkBurst01Url,
   [ASSET_KEYS.player]: playerWalkPuppetStrip06Url,
   [ASSET_KEYS.playerIdle]: playerIdleBreatheStrip05Url,
   [ASSET_KEYS.playerWeaponHammer01]: playerWeaponHammer01Url,
+  [ASSET_KEYS.playerWeaponHammerOfBanishment01]: playerWeaponHammerOfBanishment01Url,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
   [ASSET_KEYS.sentinel]: sentinelConceptUrl,
   [ASSET_KEYS.laughingEngine]: laughingEngineConceptUrl,

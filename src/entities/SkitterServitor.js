@@ -11,15 +11,20 @@ const DEATH_REMAINS_SPAWN_DELAY_MS = 60;
 export class SkitterServitor {
   constructor(scene, x, y, config) {
     this.scene = scene;
-    this.config = config;
-    this.health = config.health;
+    this.config = {
+      ...config,
+      body: { ...(config?.body ?? {}) },
+      poise: { ...(config?.poise ?? {}) },
+      presentation: { ...(config?.presentation ?? {}) }
+    };
+    this.health = this.config.health;
     this.dead = false;
     this.originX = x;
     this.direction = -1;
     this.lastAttackTime = -Infinity;
     this.lastDamageFlashTime = -Infinity;
     this.nextAttackAllowedAt = -Infinity;
-    this.awakened = config.awakenPlayerX === undefined;
+    this.awakened = this.config.awakenPlayerX === undefined;
     this.awakenAtTime = null;
     this.combatState = 'stalk';
     this.stateStartedAt = 0;
@@ -34,20 +39,24 @@ export class SkitterServitor {
     this.wakeRushUntil = -Infinity;
     this.deathRemainsSpawned = false;
     this.active = true;
+    this.brutalityAggression = {
+      speedMultiplier: 1,
+      aggroRangeMultiplier: 1
+    };
     this.poiseConfig = {
-      max: Math.max(1, config.poise?.max ?? 0),
-      recoverDelayMs: Math.max(0, config.poise?.recoverDelayMs ?? 1400),
-      recoverPerSecond: Math.max(0, config.poise?.recoverPerSecond ?? 1.4),
-      staggerDurationMs: Math.max(260, config.poise?.staggerDurationMs ?? 1800),
-      finisherRange: Math.max(68, config.poise?.finisherRange ?? 132)
+      max: Math.max(1, this.config.poise?.max ?? 0),
+      recoverDelayMs: Math.max(0, this.config.poise?.recoverDelayMs ?? 1400),
+      recoverPerSecond: Math.max(0, this.config.poise?.recoverPerSecond ?? 1.4),
+      staggerDurationMs: Math.max(260, this.config.poise?.staggerDurationMs ?? 1800),
+      finisherRange: Math.max(68, this.config.poise?.finisherRange ?? 132)
     };
     this.poise = this.poiseConfig.max;
     this.poiseBroken = false;
     this.lastPoiseDamageAt = -Infinity;
     this.staggerUntil = -Infinity;
 
-    const spriteKey = config.textureKey ?? ASSET_KEYS.skitter;
-    const spritePresentation = config.presentation ?? {};
+    const spriteKey = this.config.textureKey ?? ASSET_KEYS.skitter;
+    const spritePresentation = this.config.presentation ?? {};
     const defaultPresentation = CONCEPT_PRESENTATION.skitter;
     const shouldUseDefaultCrop = spriteKey === ASSET_KEYS.skitter;
     const crop = spritePresentation.crop ?? (shouldUseDefaultCrop ? defaultPresentation.crop : null);
@@ -85,17 +94,24 @@ export class SkitterServitor {
     this.body.setCollideWorldBounds(true);
     const scaleX = Math.abs(this.sprite.scaleX) || 1;
     const scaleY = Math.abs(this.sprite.scaleY) || 1;
-    const tunedBodyWidth = config.body.width * (config.contactBodyWidthScale ?? 0.84);
-    const tunedOffsetX = config.body.offsetX + (config.body.width - tunedBodyWidth) * 0.5;
-    this.body.setSize(tunedBodyWidth / scaleX, config.body.height / scaleY);
-    this.body.setOffset(tunedOffsetX / scaleX, config.body.offsetY / scaleY);
+    const tunedBodyWidth = this.config.body.width * (this.config.contactBodyWidthScale ?? 0.84);
+    const tunedOffsetX = this.config.body.offsetX + (this.config.body.width - tunedBodyWidth) * 0.5;
+    this.body.setSize(tunedBodyWidth / scaleX, this.config.body.height / scaleY);
+    this.body.setOffset(tunedOffsetX / scaleX, this.config.body.offsetY / scaleY);
 
     this.baseScaleX = this.sprite.scaleX || 1;
     this.baseScaleY = this.sprite.scaleY || 1;
     this.baseAlpha = spritePresentation.alpha ?? defaultPresentation.alpha ?? 0.92;
     this.stateAlphas = spritePresentation.stateAlpha ?? {};
     this.eyeGlow = scene.add
-      .ellipse(x, y - (config.eyeGlowYOffset ?? 18), config.eyeGlowWidth ?? 24, config.eyeGlowHeight ?? 12, config.eyeGlowColor ?? 0x6f8c59, 0)
+      .ellipse(
+        x,
+        y - (this.config.eyeGlowYOffset ?? 18),
+        this.config.eyeGlowWidth ?? 24,
+        this.config.eyeGlowHeight ?? 12,
+        this.config.eyeGlowColor ?? 0x6f8c59,
+        0
+      )
       .setDepth(6.4)
       .setVisible(true);
   }
@@ -175,9 +191,10 @@ export class SkitterServitor {
     const dx = playerX - this.sprite.x;
     const absDx = Math.abs(dx);
     const wakeRushActive = time < this.wakeRushUntil;
-    const heatSeekRange = this.config.heatSeekRange ?? this.config.aggroRange * 1.22;
-    const closeEnoughToAggro = absDx < (wakeRushActive ? Math.max(this.config.aggroRange, heatSeekRange) : this.config.aggroRange);
-    const pressureTrackingRange = this.config.pressureTrackingRange ?? this.config.aggroRange * 1.5;
+    const aggroRange = this.getAggroRange();
+    const heatSeekRange = (this.config.heatSeekRange ?? this.config.aggroRange * 1.22) * this.brutalityAggression.aggroRangeMultiplier;
+    const closeEnoughToAggro = absDx < (wakeRushActive ? Math.max(aggroRange, heatSeekRange) : aggroRange);
+    const pressureTrackingRange = (this.config.pressureTrackingRange ?? this.config.aggroRange * 1.5) * this.brutalityAggression.aggroRangeMultiplier;
     const pressureTracking = absDx < pressureTrackingRange;
     const pursuitCommitMs = (this.config.pursuitCommitMs ?? 980) + (wakeRushActive ? (this.config.wakeCommitBonusMs ?? 220) : 0);
     const pursueAfterLosingAggro = time < this.pursuitCommittedUntil;
@@ -205,7 +222,7 @@ export class SkitterServitor {
         if (time >= this.stateEndsAt) {
           this.enterState('recovery', time, this.config.attackRecoveryMs);
           this.contactDamageWindowUntil = time;
-          this.body.setVelocityX(-this.direction * this.config.speed * 0.18);
+          this.body.setVelocityX(-this.direction * this.getSpeed() * 0.18);
         }
         break;
       case 'recovery':
@@ -247,7 +264,7 @@ export class SkitterServitor {
     const lowerBound = this.config.preferredRange - this.config.rangeBand;
     const upperBound = this.config.preferredRange + this.config.rangeBand;
     const wakeRushFactor = time < this.wakeRushUntil ? (this.config.wakeRushSpeedFactor ?? 1.16) : 1;
-    const baseSpeed = this.config.speed * wakeRushFactor;
+    const baseSpeed = this.getSpeed() * wakeRushFactor;
 
     if (absDx < lowerBound) {
       this.body.setVelocityX(-this.direction * baseSpeed * 0.24);
@@ -267,16 +284,16 @@ export class SkitterServitor {
     const reengageRange = this.config.preferredRange * 1.18;
 
     if (absDx < retreatRange) {
-      this.body.setVelocityX(-this.direction * this.config.speed * 0.38);
+      this.body.setVelocityX(-this.direction * this.getSpeed() * 0.38);
       return;
     }
 
     if (absDx > reengageRange) {
-      this.body.setVelocityX(this.direction * this.config.speed * 0.74);
+      this.body.setVelocityX(this.direction * this.getSpeed() * 0.74);
       return;
     }
 
-    this.body.setVelocityX(this.direction * this.config.speed * 0.34);
+    this.body.setVelocityX(this.direction * this.getSpeed() * 0.34);
   }
 
   runPatrol(absDx) {
@@ -291,13 +308,13 @@ export class SkitterServitor {
       this.direction = -1;
     }
 
-    if (farFromHome && absDx > this.config.aggroRange * 1.15) {
+    if (farFromHome && absDx > this.getAggroRange() * 1.15) {
       this.direction = Math.sign(this.originX - this.sprite.x) || this.direction;
-      this.body.setVelocityX(this.direction * this.config.speed * 0.58);
+      this.body.setVelocityX(this.direction * this.getSpeed() * 0.58);
       return;
     }
 
-    this.body.setVelocityX(this.direction * this.config.speed * 0.52);
+    this.body.setVelocityX(this.direction * this.getSpeed() * 0.52);
   }
 
   beginAttack(time) {
@@ -311,7 +328,7 @@ export class SkitterServitor {
     this.contactDamageWindowUntil = time + this.config.attackActiveMs;
     this.nextAttackAllowedAt = time + this.config.attackRecoveryMs + this.config.attackCooldownMs;
     this.enterState('attack', time, this.config.attackActiveMs);
-    this.body.setVelocityX(this.direction * (this.config.speed + this.config.lungeSpeedBonus));
+    this.body.setVelocityX(this.direction * (this.getSpeed() + this.config.lungeSpeedBonus));
     this.body.setVelocityY(this.config.lungeJumpVelocity);
 
     if (!this.attackAudioLocked) {
@@ -340,7 +357,7 @@ export class SkitterServitor {
     return !this.dead && this.body?.enable !== false && this.awakened;
   }
 
-  takeDamage(amount, time = this.scene.time.now) {
+  takeDamage(amount, time = this.scene.time.now, options = {}) {
     if (this.dead) {
       return;
     }
@@ -369,12 +386,14 @@ export class SkitterServitor {
       this.body.enable = false;
       this.eyeGlow.setVisible(false);
       this.setVisualTint(0x1f1714);
-      triggerEnemyDeathRuptureBurst(this.scene, {
-        x: this.sprite.x,
-        y: (this.body?.bottom ?? this.sprite.y) - 16,
-        depth: this.sprite.depth,
-        isElite: Boolean(this.isElite || this.isTollKeeper || this.config.isElite)
-      });
+      if (!options.skipDefaultDeathFx) {
+        triggerEnemyDeathRuptureBurst(this.scene, {
+          x: this.sprite.x,
+          y: (this.body?.bottom ?? this.sprite.y) - 16,
+          depth: this.sprite.depth,
+          isElite: Boolean(this.isElite || this.isTollKeeper || this.config.isElite)
+        });
+      }
       this.scene.tweens.add({
         targets: this.sprite,
         alpha: 0,
@@ -565,6 +584,25 @@ export class SkitterServitor {
 
   getCombatState() {
     return this.combatState;
+  }
+
+  getSpeed() {
+    return this.config.speed * this.brutalityAggression.speedMultiplier;
+  }
+
+  getAggroRange() {
+    return this.config.aggroRange * this.brutalityAggression.aggroRangeMultiplier;
+  }
+
+  setBrutalityAggression(active, config = {}) {
+    if (active) {
+      this.brutalityAggression.speedMultiplier = config.speedMultiplier ?? 1;
+      this.brutalityAggression.aggroRangeMultiplier = config.aggroRangeMultiplier ?? 1;
+      return;
+    }
+
+    this.brutalityAggression.speedMultiplier = 1;
+    this.brutalityAggression.aggroRangeMultiplier = 1;
   }
 
   setVisualTint(color) {
