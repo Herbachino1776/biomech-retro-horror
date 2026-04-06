@@ -11,8 +11,8 @@ const PLAYER_WALK_MIN_SPEED = 36;
 const PLAYER_IDLE_FPS = 5;
 const PLAYER_IDLE_MAX_SPEED = 20;
 const DEFAULT_BRUTALITY_MODIFIERS = {
-  visualScale: 1.18,
-  bodyScale: 1.12,
+  visualScale: 1.12,
+  bodyScale: 1.06,
   speedMultiplier: 1.12,
   reachMultiplier: 1.2,
   damageMultiplier: 2
@@ -58,10 +58,17 @@ export class Player {
     this.body.setCollideWorldBounds(true);
     this.body.setGravityY(0);
 
-    const scaleX = Math.abs(this.sprite.scaleX) || 1;
-    const scaleY = Math.abs(this.sprite.scaleY) || 1;
-    this.body.setSize(config.body.width / scaleX, config.body.height / scaleY);
-    this.body.setOffset(config.body.offsetX / scaleX, config.body.offsetY / scaleY);
+    this.baseVisualScale = {
+      x: Math.abs(this.sprite.scaleX) || 1,
+      y: Math.abs(this.sprite.scaleY) || 1
+    };
+    this.baseBody = {
+      width: config.body.width,
+      height: config.body.height,
+      offsetX: config.body.offsetX,
+      offsetY: config.body.offsetY
+    };
+    this.applyScaleAndCollision(1, 1);
 
     const attackHitboxConfig = this.config.attackHitbox ?? {};
     this.attackHitbox = scene.add.zone(
@@ -350,14 +357,20 @@ export class Player {
 
   applyScaleAndCollision(visualScaleMultiplier = 1, bodyScaleMultiplier = 1) {
     const wasBottom = this.body?.bottom ?? this.sprite.y;
-    this.sprite.setScale(visualScaleMultiplier);
+    const targetScaleX = this.baseVisualScale.x * visualScaleMultiplier;
+    const targetScaleY = this.baseVisualScale.y * visualScaleMultiplier;
+    this.sprite.setScale(targetScaleX, targetScaleY);
 
     const scaleX = Math.abs(this.sprite.scaleX) || 1;
     const scaleY = Math.abs(this.sprite.scaleY) || 1;
-    const bodyWidth = (this.config.body.width * bodyScaleMultiplier) / scaleX;
-    const bodyHeight = (this.config.body.height * bodyScaleMultiplier) / scaleY;
-    const bodyOffsetX = (this.config.body.offsetX / scaleX) - ((bodyWidth - (this.config.body.width / scaleX)) * 0.5);
-    const bodyOffsetY = (this.config.body.offsetY / scaleY) - ((bodyHeight - (this.config.body.height / scaleY)) * 0.5);
+    const baseBodyWidth = this.baseBody.width;
+    const baseBodyHeight = this.baseBody.height;
+    const bodyWidth = (baseBodyWidth * bodyScaleMultiplier) / scaleX;
+    const bodyHeight = (baseBodyHeight * bodyScaleMultiplier) / scaleY;
+    const widthGrowthWorld = baseBodyWidth * (bodyScaleMultiplier - 1);
+    const heightGrowthWorld = baseBodyHeight * (bodyScaleMultiplier - 1);
+    const bodyOffsetX = (this.baseBody.offsetX - widthGrowthWorld * 0.5) / scaleX;
+    const bodyOffsetY = (this.baseBody.offsetY - heightGrowthWorld) / scaleY;
     this.body.setSize(bodyWidth, bodyHeight);
     this.body.setOffset(bodyOffsetX, bodyOffsetY);
 
