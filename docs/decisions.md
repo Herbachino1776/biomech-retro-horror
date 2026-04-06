@@ -27,6 +27,7 @@ Concise record of technical/design decisions currently in force.
 - Sector 3 Chamber 1 was rebuilt toward newer authored-chamber standards.
 - Sector 3 Chamber 3 is substantially built from its uploaded art pack.
 - Sector 4 Chamber 1 is now an active authored-content lane (not placeholder-only future planning).
+- Sector 4 Chamber 2 shell/buildout prep is now an active secondary lane (while Chamber 1 remains primary).
 
 ## Chamber Scale + Finale Doctrine
 - Chamber-03-level scale/consequence is the benchmark for future chambers.
@@ -63,6 +64,12 @@ This means:
 - Enemy feet-hidden-under-black-control-bar regressions are treated as real readability failures and must be fixed meaningfully.
 - Enemy grounding/scale correction is now an approved global future lane: many Sector 2+ enemies still sit slightly low and/or read slightly too small.
 
+## Enemy Class Contract Doctrine (In Force)
+- Enemy families are now treated as real first-class planning/runtime categories: standard enemies, elites, minibosses, and bosses.
+- Standard-enemy contracts and boss-family contracts must not be mixed casually.
+- Shared grounding/scale/spawnY/body-alignment cleanup should be handled as shared infrastructure, not chamber-by-chamber patches.
+- Enemy class unification/abstraction work should use pilot migration first, then broader rollout after validation.
+
 ## Boss Pit + Boss Package Doctrine
 - Boss pits are now part of core structural game identity, not detached optional flavor.
 - Boss pits are one-time per run.
@@ -79,6 +86,7 @@ This means:
 - Required sequencing is locked: polish abstracted boss package first, then retrofit/reimplement boss encounters globally.
 - Boss-pack production direction is approved as future lane: roughly a dozen boss concepts and likely one dedicated background per boss in `art/raw/bosspit`.
 - Boss-pack ingestion catalog is now maintained in `docs/boss-pack-catalog.md` to keep boss/background naming and pairing discoverable during future deployment passes.
+- Boss package retrofit lane remains distinct from enemy-class unification lane.
 
 ## Lore Presentation Doctrine
 - Lore is a primary identity system.
@@ -91,7 +99,7 @@ This means:
 - Milestone 7 is largely established; remaining 7C/7H/7I are targeted follow-up lanes, not default primary sequencing.
 - Milestone 8 is established and still active-support, but no longer sole active lane.
 - Milestone 9 (Sector 4 Chamber 1 buildout) is active in practice.
-- Global enemy grounding/scale normalization is preserved as its own future milestone lane.
+- Enemy class unification + grounding/scale normalization is preserved as its own future milestone lane.
 - Boss package polish + global retrofit is preserved as its own future milestone lane.
 - BRUTALITY MODE is an explicitly deferred later complex milestone.
 

@@ -6,6 +6,7 @@
 - **Milestone 7 (Combat Sidequest + wrap quality lanes) is largely established and meaningfully advanced.**
 - **Milestone 8 (Sector 3 Buildout + Boss-Pit Expansion) is established and no longer the only active content lane.**
 - **Milestone 9 (Sector 4 Chamber 1 Buildout) is now active in execution.**
+- **Sector 4 Chamber 2 shell/buildout prep is now a real adjacent lane (early structure, not full active replacement for S4C1).**
 
 ## What Is Working in the Current Build
 - Sector 1 progression is live: Chamber 01 -> Chamber 02 -> Chamber 03 -> separate boss arena finale.
@@ -20,6 +21,7 @@
 - **Sector 4 Chamber 1 is in active content buildout (live lane, not placeholder-only planning).**
 - **S3 -> S4 handoff work has been addressed enough that Sector 4 is now practical to build against as current content.**
 - **Sector 4 Chamber 1 has received shell/shrine/enemy passes as part of active authoring.**
+- **Sector 4 Chamber 2 shell/buildout groundwork exists as an active-support lane while S4C1 remains primary.**
 
 ## Milestone 7 Status (Truthful Snapshot)
 Milestone 7 is **advanced/largely established** and no longer the main active build lane.
@@ -41,16 +43,28 @@ Milestone 7 is **advanced/largely established** and no longer the main active bu
 
 ## Active Build Lane Now
 - **Sector 4 Chamber 1 (Milestone 9 lane) is the practical active content build lane.**
+- **Sector 4 Chamber 2 shell/buildout remains a real secondary support lane, not a pure placeholder note.**
 - Milestone 8 remains established and still relevant for Sector 3 consistency/polish carryover and boss-pit expansion continuity.
 - Milestone 7 follow-up remains available as targeted polish/support work, not primary sequencing.
 
 ## Recently Locked Technical/Readability Outcomes
 - The global sprite shimmer/sparkle issue is treated as a **renderer/camera stability problem that was solved at system level**, not as an art-only defect.
 - The enemy feet-hidden-under-black-control-bar issue has been solved in a meaningful way and is no longer accepted behavior.
-- Enemy grounding/scale correction is now recognized as a **global cleanup lane**:
-  - many enemies in Sector 2 and beyond still sit slightly too low
-  - many enemies are also still slightly too small
-  - this remains a dedicated future milestone lane (not a one-off chamber tweak)
+- Enemy grounding/scale correction is now recognized as a **global cleanup lane**, and recent enemy authoring confirms this must be handled alongside class-contract cleanup:
+  - multiple enemy-class families are now live in practice (standard, elite, miniboss, boss)
+  - many enemies in Sector 2 and beyond still sit slightly too low and/or read slightly too small
+  - this is now planned as a dedicated future enemy-class unification + grounding/scale milestone (not a one-off chamber tweak)
+
+## Enemy Class Direction (Planned Future Lane, Not Active)
+- A distinct future lane is reserved for **Enemy Class Unification + Grounding/Scale Normalization**.
+- This lane exists because current content now includes multiple practical enemy families and we have already seen regressions from mixing contracts across those families.
+- Planned scope includes:
+  1. family audit across live standard enemy / elite / miniboss / boss types
+  2. explicit contract boundaries between standard-enemy and boss-family logic
+  3. shared grounding/scale/spawnY/body-alignment normalization
+  4. reusable combat-module cleanup where appropriate
+  5. pilot migration before broader rollout
+- This lane is **not** the same milestone as global boss-package retrofit.
 
 ## Boss Package Direction (Now a Real Future Lane)
 - Boss pit / boss encounter abstraction has advanced enough to support explicit future sequencing.
@@ -76,7 +90,7 @@ Meaning:
 ## Planned Later Milestone Items (Deferred)
 - **Polish Chamber 1** remains a later polish item, not current mainline milestone focus.
 - Sector 3 chamber-to-chamber consistency polish remains a later-stage shaping lane.
-- Global enemy grounding + scale normalization remains a dedicated future milestone lane.
+- Enemy class unification + grounding/scale normalization remains a dedicated future milestone lane.
 - Boss package polish + global boss retrofit remains a dedicated future milestone lane.
 - BRUTALITY MODE remains a later complex milestone (see `docs/future-features.md`).
 

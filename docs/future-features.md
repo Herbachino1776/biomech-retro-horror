@@ -34,18 +34,26 @@ It should be tackled only after current sector build lanes and global readabilit
 
 ---
 
-## Global Enemy Grounding + Scale Normalization
+## Enemy Class Unification + Grounding/Scale Normalization
 **Status:** `planned` / `later milestone`
 
 ### Why this exists
-Enemy grounding/scale correction has proven to be a shared/global readability concern.
-Many enemies in Sector 2 and later content still sit slightly low and/or read slightly too small.
+Enemy authoring has reached a point where multiple families are now live in practice (standard, elite, miniboss, boss).
+We already hit regressions from mixing class contracts, and grounding/scale issues remain shared/global readability concerns.
 
 ### Scope
+- audit all live enemy families and where each class contract is currently applied
+- define/lock standard vs elite vs miniboss vs boss contract boundaries
 - perform cross-chamber baseline pass on enemy floor contact
 - normalize enemy scale targets for gameplay readability
+- normalize shared spawnY/body alignment conventions where needed
+- clean/polish reusable combat modules where this reduces family-contract drift
+- run pilot migration before broad rollout
 - preserve no-regression behavior for the solved feet-hidden-under-control-bar issue
 - avoid ad-hoc room-only patches when shared presentation logic is the real source
+
+### Separation note
+This milestone is separate from the global boss-package retrofit lane.
 
 ---
 
