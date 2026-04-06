@@ -38,6 +38,7 @@ export class SkitterServitor {
     this.wasAwakenedLastUpdate = this.awakened;
     this.wakeRushUntil = -Infinity;
     this.deathRemainsSpawned = false;
+    this.deathRemainsSpawnPoint = null;
     this.active = true;
     this.brutalityAggression = {
       speedMultiplier: 1,
@@ -386,6 +387,7 @@ export class SkitterServitor {
       this.body.enable = false;
       this.eyeGlow.setVisible(false);
       this.setVisualTint(0x1f1714);
+      this.deathRemainsSpawnPoint = this.resolveDeathRemainsSpawnPoint();
       if (!options.skipDefaultDeathFx) {
         triggerEnemyDeathRuptureBurst(this.scene, {
           x: this.sprite.x,
@@ -407,12 +409,12 @@ export class SkitterServitor {
           return;
         }
         this.deathRemainsSpawned = true;
-        const floorPlaneY = this.scene?.player?.sprite?.body?.bottom ?? WORLD.floorY + 2;
         const remainsSize = this.config.corpseRemainsProfile
           ?? (this.isElite || this.isTollKeeper || this.config.isElite ? 'elite' : 'small');
+        const remainsSpawnPoint = this.resolveDeathRemainsSpawnPoint();
         spawnEnemyCorpseRemains(this.scene, {
-          x: this.sprite.x,
-          groundY: floorPlaneY,
+          x: remainsSpawnPoint.x,
+          groundY: remainsSpawnPoint.groundY,
           depth: this.sprite.depth,
           size: remainsSize
         });
@@ -432,6 +434,22 @@ export class SkitterServitor {
     this.enterState('hurt', time, this.config.hurtLockMs);
     this.body.setVelocityX(this.hurtPushDirection * this.config.recoilVelocityX);
     this.body.setVelocityY(this.config.recoilVelocityY);
+  }
+
+  resolveDeathRemainsSpawnPoint() {
+    if (this.deathRemainsSpawnPoint) {
+      return this.deathRemainsSpawnPoint;
+    }
+
+    this.deathRemainsSpawnPoint = {
+      x: this.sprite.x,
+      groundY: this.scene?.player?.sprite?.body?.bottom ?? WORLD.floorY + 2
+    };
+    return this.deathRemainsSpawnPoint;
+  }
+
+  getDeathRemainsSpawnPoint() {
+    return this.resolveDeathRemainsSpawnPoint();
   }
 
   applyPoiseDamage(amount = 1, time = this.scene.time.now) {
