@@ -17,11 +17,15 @@ Plain-language snapshot of milestone state.
   - S4C1 shell/shrine/enemy passes have occurred.
   - S4C2 shell/buildout prep exists as a real adjacent lane (secondary to S4C1).
 - **Milestone 10 — BRUTALITY MODE combat-state integration:** active-planned / next-active combat-design lane.
-  - Rapid-kill streak trigger in a short window.
-  - Temporary 10–15 second power state with enlarged player form + temporary upgraded weapon.
-  - Basic enemies become one-hit explosive kills; elites become roughly three-hit blood/guts explosive kills during mode.
-  - Includes alternate gore packages and temporary audiovisual/gameplay changes.
-  - Chamber authoring must support streak-building fodder clusters, elite cashout placements, and readable rhythm/breathing room.
+  - Auto-trigger only: 2 basic-enemy kills within 5 seconds (basics-only counting, no manual activation, no visible meter/UI yet).
+  - Fixed 20-second window, kills do not extend it, getting hit does not cancel/reset it, max 2 activations per chamber.
+  - While active: streak counting pauses; when mode ends: streak counting restarts from zero.
+  - Player state: larger sprite + larger collision body, increased reach, slight speed boost, stronger damage, temporary Hammer of Banishment swap.
+  - Enemy state: temporary aggression override (speed + aggro range + pressure) with clean reset to normal on mode end.
+  - Kill/gore rules: basics die instantly with dedicated brutality gore package; elites die in exactly 3 brutality hits with separate elite brutality gore package.
+  - Feedback v1: audio-only activation cue (loud aggressive elite-attack-style sound), quick kill shake, no on-screen indicator yet.
+  - Deferred FX lane remains separate: viewport chunk impacts, viewport blood splatter, broader screen FX escalation.
+  - Chamber authoring must support streak-building cluster opportunities, elite cashout placement, meat-grinder density, and readable breathing room.
   - Separate from enemy-class unification and separate from global boss-package retrofit.
 - **Milestone 11 — Sector 3/4 pacing-density-readability polish:** planned later milestone.
 - **Milestone 12 — Enemy Class Unification + Grounding/Scale Normalization:** planned later milestone.

@@ -74,18 +74,40 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 **Purpose:** implement BRUTALITY MODE as a meaningful combat-state system that changes encounter authoring, not just player stats.
 
 **Scope / Includes:**
-- rapid-kill streak tracking in a short trigger window
-- activation/deactivation logic with clean entry/exit behavior
-- temporary 10–15 second power-state timer
-- temporary player growth/readability form shift + temporary upgraded weapon state
-- basic enemy one-hit explosive kill behavior during mode
-- elite enemy roughly three-hit blood/guts explosive kill behavior during mode
-- alternate gore packages and temporary audiovisual/gameplay-state changes
-- chamber-authoring implications:
-  - streak-building fodder clusters
-  - elite placements that can cash out the power state
-  - pacing rhythm with breathing room so the state feels earned and usable
-  - avoid random enemy spam as substitute for authored escalation
+- kill-streak trigger/state machine lane (auto-only):
+  - trigger on 2 basic-enemy kills within 5 seconds
+  - only basic enemies count toward activation
+  - no manual activation path
+  - no visible meter/UI in v1
+- duration + chamber usage lane:
+  - fixed 20-second timer
+  - kills do not extend duration
+  - taking damage does not cancel/reset mode
+  - max 2 activations per chamber
+  - streak counting pauses while active and restarts from zero on mode end
+- player transformation + Hammer of Banishment lane:
+  - larger player sprite and larger collision body
+  - increased reach, slight movement-speed boost, stronger damage
+  - temporary weapon swap to Hammer of Banishment
+  - movement tuning to keep larger-body mode fast/predatory, not clumsy
+- enemy aggression override + reset lane:
+  - increased move speed and aggro range
+  - more headlong/meat-grinder pressure during mode
+  - clean reset to normal enemy behavior when mode ends
+- brutality kill/gore rules lane:
+  - basic enemies: instant brutality kills
+  - elites: exactly 3 brutality hits to kill
+  - separate brutality gore packages for basics vs elites
+  - quick screen shake on brutality kills, no gameplay stoppage
+- audio/FX lane:
+  - v1 activation cue is audio-only (loud aggressive elite-attack-style sound)
+  - no on-screen indicator/meter yet
+  - deferred later FX lane: viewport chunk impacts, viewport blood splatter, broader screen FX escalation
+- chamber-authoring implications lane:
+  - basic clusters/pairings should make 2-kill-in-5s activation realistically achievable
+  - elite placement should allow active-state cashout opportunities
+  - density should support meat-grinder feel
+  - preserve readability/breathing room so activation feels earned and usable, not random spam
 
 **Separation guardrails:**
 - this lane is separate from Enemy Class Unification + Grounding/Scale Normalization

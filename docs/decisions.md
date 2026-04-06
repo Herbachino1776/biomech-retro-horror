@@ -56,14 +56,20 @@ This means:
 - BRUTALITY MODE is now treated as a meaningful combat-state system (next-active lane), not a cosmetic buff.
 
 ## BRUTALITY MODE Chamber Doctrine (In Force for Planning)
-- BRUTALITY MODE activation is earned through rapid kills in a short streak window.
-- Target active window is temporary (about 10–15 seconds) with clean entry/exit behavior.
+- BRUTALITY MODE v1 activation is auto-only: 2 basic-enemy kills within 5 seconds.
+- Only basic enemies count toward activation in v1; there is no manual activation path.
+- BRUTALITY MODE v1 active window is fixed at 20 seconds.
+- Kills do not extend duration, and taking damage does not cancel/reset mode.
+- BRUTALITY MODE v1 is capped at 2 activations per chamber.
+- Streak counting pauses during mode and restarts at zero when mode ends.
 - Chamber authoring must support streak-based escalation windows intentionally:
   - fodder/basic cluster placement to enable earned triggers
   - elite spacing/placement that can cash out the active state
   - readable rhythm/breathing room so temporary power is usable
 - Encounter density tuning should support authored escalation opportunities, not random spam.
-- BRUTALITY MODE authoring expectations include temporary form/weapon escalation, alternate gore packages, and temporary audiovisual/gameplay-state shifts.
+- BRUTALITY MODE authoring expectations include temporary form/weapon escalation (Hammer of Banishment), aggression ramps, alternate gore packages, and temporary audiovisual/gameplay-state shifts.
+- Enemy AI/behavior overrides used during BRUTALITY MODE must cleanly revert to normal when mode ends.
+- BRUTALITY MODE is treated as a meaningful combat-state system that influences chamber composition, enemy placement, and encounter pressure, not as a cosmetic buff.
 
 ## Rendering Stability Doctrine
 - Global sprite shimmer/sparkle incidents are treated first as renderer/camera stability faults, not art-only defects.
