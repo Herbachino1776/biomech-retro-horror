@@ -10,6 +10,9 @@ const PLAYER_WALK_FPS = 8;
 const PLAYER_WALK_MIN_SPEED = 36;
 const PLAYER_IDLE_FPS = 5;
 const PLAYER_IDLE_MAX_SPEED = 20;
+const PLAYER_NORMAL_STABLE_FRAME = 0;
+const PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME = 0;
+const PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME = 0;
 const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
 const BRUTALITY_FORM_MULTIPLIERS = Object.freeze({
   displayWidth: 1.42,
@@ -341,15 +344,19 @@ export class Player {
       ...nextModifiers,
       active: true
     };
+    this.stopSpriteAnimation();
+    this.applyBrutalityStableStance();
     this.config.moveSpeed = this.baseMoveSpeed * this.brutalityMode.speedMultiplier;
     this.applyPlayerForm(this.brutalityFormValues);
     this.updateWeaponTexture();
   }
 
   clearBrutalityMode() {
+    this.stopSpriteAnimation();
     this.brutalityMode.active = false;
     this.config.moveSpeed = this.baseMoveSpeed;
     this.applyPlayerForm(this.normalFormValues);
+    this.setNormalStableFrame();
     this.updateWeaponTexture();
   }
 
@@ -561,6 +568,11 @@ export class Player {
   }
 
   updateSpriteAnimationState() {
+    if (this.brutalityMode?.active) {
+      this.applyBrutalityStableStance();
+      return;
+    }
+
     const isGrounded = this.body.blocked.down;
     const horizontalSpeed = Math.abs(this.body.velocity.x);
     const isMovingHorizontally = horizontalSpeed >= PLAYER_WALK_MIN_SPEED;
@@ -584,7 +596,7 @@ export class Player {
       return;
     }
 
-    this.setStaticFrame(0);
+    this.setNormalStableFrame();
   }
 
   registerWalkAnimation() {
@@ -622,6 +634,29 @@ export class Player {
       this.sprite.anims.stop();
     }
     this.sprite.setFrame(frameIndex);
+  }
+
+  stopSpriteAnimation() {
+    if (!this.usingConceptSprite) {
+      return;
+    }
+
+    if (this.sprite.anims.isPlaying) {
+      this.sprite.anims.stop();
+    }
+  }
+
+  setNormalStableFrame() {
+    this.setStaticFrame(PLAYER_NORMAL_STABLE_FRAME);
+  }
+
+  applyBrutalityStableStance() {
+    if (!this.usingConceptSprite) {
+      return;
+    }
+
+    const stableFrame = this.body.blocked.down ? PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME : PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME;
+    this.setStaticFrame(stableFrame);
   }
 
 
