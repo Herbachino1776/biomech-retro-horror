@@ -75,16 +75,10 @@ export class Player {
       offsetX: config.body.offsetX,
       offsetY: config.body.offsetY
     };
-    // Locked normal-mode baseline captured from untouched spawn/body setup.
-    this.baseGrounding = {
-      visualFeetY: null,
-      bodyBottomY: null,
-      bodyBottomMinusVisualFeetDelta: 0
-    };
     this.body.setSize(this.baseBody.width, this.baseBody.height);
     this.body.setOffset(this.baseBody.offsetX, this.baseBody.offsetY);
     this.body.updateFromGameObject();
-    this.captureUntouchedGroundingBaseline();
+    this.captureSpawnBaseline();
 
     const attackHitboxConfig = this.config.attackHitbox ?? {};
     this.attackHitbox = scene.add.zone(
@@ -434,24 +428,26 @@ export class Player {
   }
 
   applyScaleAndCollision(visualScaleMultiplier = 1, bodyScaleMultiplier = 1, floorAnchorY = null) {
-    const resolvedVisualFeetAnchorY = Number.isFinite(floorAnchorY) ? floorAnchorY : this.getVisualFeetAnchorY();
-    const baselineBodyBottomMinusVisualFeetDelta = Number.isFinite(this.baseGrounding?.bodyBottomMinusVisualFeetDelta)
-      ? this.baseGrounding.bodyBottomMinusVisualFeetDelta
-      : this.getCurrentBodyBottomMinusVisualFeetDelta();
-    const targetBodyBottomY = resolvedVisualFeetAnchorY + baselineBodyBottomMinusVisualFeetDelta;
-    const targetScaleX = this.baseVisualScale.x * visualScaleMultiplier;
-    const targetScaleY = this.baseVisualScale.y * visualScaleMultiplier;
-    this.sprite.setScale(targetScaleX, targetScaleY);
+    const base = this.spawnBaseline;
+    if (!base) {
+      return;
+    }
+
+    const resolvedVisualFeetAnchorY = Number.isFinite(floorAnchorY) ? floorAnchorY : base.visualFeetY;
+    const targetDisplayWidth = base.displayWidth * visualScaleMultiplier;
+    const targetDisplayHeight = base.displayHeight * visualScaleMultiplier;
+    const targetBodyBottomY = resolvedVisualFeetAnchorY + base.bodyBottomMinusVisualFeetDelta;
+    this.sprite.setDisplaySize(targetDisplayWidth, targetDisplayHeight);
     this.setVisualFeetY(resolvedVisualFeetAnchorY);
 
     const scaleX = Math.abs(this.sprite.scaleX) || 1;
     const scaleY = Math.abs(this.sprite.scaleY) || 1;
-    const baseBodyWidth = this.baseBody.width;
-    const baseBodyHeight = this.baseBody.height;
-    const bodyWidth = (baseBodyWidth * bodyScaleMultiplier) / scaleX;
-    const bodyHeight = (baseBodyHeight * bodyScaleMultiplier) / scaleY;
-    const widthGrowthWorld = baseBodyWidth * (bodyScaleMultiplier - 1);
-    const bodyOffsetX = (this.baseBody.offsetX - widthGrowthWorld * 0.5) / scaleX;
+    const targetBodyWorldWidth = base.bodyWorldWidth * bodyScaleMultiplier;
+    const targetBodyWorldHeight = base.bodyWorldHeight * bodyScaleMultiplier;
+    const bodyWidth = targetBodyWorldWidth / scaleX;
+    const bodyHeight = targetBodyWorldHeight / scaleY;
+    const bodyCenterX = this.sprite.x + base.bodyCenterXMinusSpriteX;
+    const bodyOffsetX = (bodyCenterX - this.sprite.x) / scaleX - bodyWidth * 0.5;
     const bodyOffsetY = (targetBodyBottomY - this.sprite.y) / scaleY - bodyHeight;
     this.body.setSize(bodyWidth, bodyHeight);
     this.body.setOffset(bodyOffsetX, bodyOffsetY);
@@ -461,23 +457,29 @@ export class Player {
     this.currentBrutalityBodyScale = bodyScaleMultiplier;
   }
 
-  captureUntouchedGroundingBaseline() {
+  captureSpawnBaseline() {
     const visualFeetY = this.getVisualFeetY();
     const bodyBottomY = this.body.bottom;
-    this.baseGrounding.visualFeetY = visualFeetY;
-    this.baseGrounding.bodyBottomY = bodyBottomY;
-    this.baseGrounding.bodyBottomMinusVisualFeetDelta = bodyBottomY - visualFeetY;
+    this.spawnBaseline = Object.freeze({
+      spriteX: this.sprite.x,
+      spriteY: this.sprite.y,
+      displayWidth: this.sprite.displayWidth,
+      displayHeight: this.sprite.displayHeight,
+      bodyWidth: this.baseBody.width,
+      bodyHeight: this.baseBody.height,
+      bodyOffsetX: this.baseBody.offsetX,
+      bodyOffsetY: this.baseBody.offsetY,
+      bodyWorldWidth: this.body.width,
+      bodyWorldHeight: this.body.height,
+      bodyCenterXMinusSpriteX: this.body.center.x - this.sprite.x,
+      visualFeetY,
+      bodyBottomY,
+      bodyBottomMinusVisualFeetDelta: bodyBottomY - visualFeetY
+    });
   }
 
   getVisualFeetAnchorY() {
-    return this.getVisualFeetY();
-  }
-
-  getCurrentBodyBottomMinusVisualFeetDelta() {
-    if (!Number.isFinite(this.body?.bottom)) {
-      return 0;
-    }
-    return this.body.bottom - this.getVisualFeetY();
+    return Number.isFinite(this.spawnBaseline?.visualFeetY) ? this.spawnBaseline.visualFeetY : this.getVisualFeetY();
   }
 
   getVisualFeetY() {
