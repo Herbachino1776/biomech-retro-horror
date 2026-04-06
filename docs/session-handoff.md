@@ -36,12 +36,12 @@ Use this file to start a fresh planning/implementation session from real current
 - Continue Sector 4 Chamber 1 content buildout and quality shaping.
 - Continue Sector 4 Chamber 2 shell/buildout prep as secondary support work.
 - Keep Sector 3 consistency/polish carryover aligned while Sector 4 comes online.
+- Start BRUTALITY MODE as the next-active combat-design lane so upcoming chambers are authored around streak escalation windows.
 
 ### What is deferred (explicit)
 - Enemy Class Unification + Grounding/Scale Normalization milestone (family audit + contract cleanup + shared spawnY/body alignment normalization).
 - Boss package polish -> global boss retrofit sequence.
 - Boss-pack content production lane (roughly a dozen boss concepts + per-boss background planning in `art/raw/bosspit`).
-- BRUTALITY MODE later complex milestone.
 - Character/action animation lane.
 
 ## Milestone Snapshot
@@ -68,6 +68,18 @@ Still available as targeted follow-up:
 ### Milestone 9 (active)
 - Sector 4 Chamber 1 buildout is active and practical now.
 - S3 -> S4 handoff is no longer a placeholder-only future assumption.
+
+### Milestone 10 (next-active combat lane)
+- BRUTALITY MODE is now active-planned as the next combat/chamber-authoring focus.
+- Preserved target behavior:
+  - earned by rapid kills in a short window
+  - temporary 10–15 second power state
+  - enlarged player form + temporary upgraded weapon
+  - one-hit explosive kills on basic enemies
+  - roughly three-hit blood/guts explosive kills on elites
+  - alternate gore packages + temporary audiovisual/gameplay changes
+  - clean entry/exit behavior
+- This milestone changes chamber doctrine (density, placement, pacing windows), not just player stat tuning.
 
 ## Global Cleanup Lanes to Preserve
 - Enemy families are now a real planning/runtime concern (standard enemy vs elite vs miniboss vs boss), not a single interchangeable class.
@@ -101,6 +113,7 @@ Still available as targeted follow-up:
 
 ## Most Likely Next Gameplay Pass After This Handoff
 1. Continue Sector 4 Chamber 1 content buildout.
-2. Keep Milestone 8 carryover consistency aligned while S4 lane advances.
-3. Schedule Enemy Class Unification + Grounding/Scale Normalization milestone planning after immediate S4 authoring stability.
-4. Preserve boss package polish + global retrofit as a dedicated separate milestone, not background drift work.
+2. Begin BRUTALITY MODE implementation planning as the next-active combat/chamber-authoring lane while S4 lane advances.
+3. Keep Milestone 8 carryover consistency aligned during S4 + BRUTALITY sequencing.
+4. Preserve Enemy Class Unification + Grounding/Scale Normalization as a separate milestone after near-term BRUTALITY focus.
+5. Preserve boss package polish + global retrofit as a dedicated separate milestone, not background drift work.

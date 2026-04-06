@@ -12,7 +12,7 @@ It is intentionally additive and should not be used to mark active milestone wor
 ---
 
 ## BRUTALITY MODE
-**Status:** `later milestone`
+**Status:** `planned` / `active-planned near-term lane`
 
 ### Design Summary
 BRUTALITY MODE is a deliberately high-intensity temporary power state earned through rapid kills in a short time window.
@@ -27,10 +27,20 @@ It is meant to punctuate oppressive pacing with controlled spikes, not replace b
 - elite-enemy output: roughly three-hit blood/guts explosive kill cadence
 - gore layer: alternate gore packages while mode is active
 - feedback layer: temporary audiovisual + gameplay-state shift while active
+- mode lifecycle: clean entry/exit behavior so chamber flow stays readable
+
+### Chamber/Encounter Authoring Doctrine Impact
+BRUTALITY MODE is now treated as a near-term combat/chamber-authoring milestone lane.
+Future chambers should intentionally support:
+- streak-building fodder/basic clusters
+- elite placements that can cash out temporary power-state windows
+- kill-density pacing + AI pressure windows that make activation earned
+- readable rhythm and breathing room so the power state can be used well
+- authored escalation windows, not random enemy spam
 
 ### Scheduling Note
-This is intentionally a **later complex milestone**, not the next small task.
-It should be tackled only after current sector build lanes and global readability cleanup lanes are stable.
+This remains a meaningful multi-system milestone (not a tiny side tweak), but it is no longer buried as distant speculation.
+It is now expected to be sequenced as active/next-active combat-design planning while preserving separate enemy-class and boss-retrofit lanes.
 
 ---
 

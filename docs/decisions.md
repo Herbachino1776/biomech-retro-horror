@@ -53,6 +53,17 @@ This means:
 - Keep combat pacing deliberate/readable; avoid accidental drift into arcade-chaos tuning.
 - Dense/obscure lore framing must be balanced with violent combat payoff, memorable encounter personality, and satisfying repeat-run combat feel.
 - Shared major-encounter resolution flow is approved reusable infrastructure for chamber/boss endings.
+- BRUTALITY MODE is now treated as a meaningful combat-state system (next-active lane), not a cosmetic buff.
+
+## BRUTALITY MODE Chamber Doctrine (In Force for Planning)
+- BRUTALITY MODE activation is earned through rapid kills in a short streak window.
+- Target active window is temporary (about 10–15 seconds) with clean entry/exit behavior.
+- Chamber authoring must support streak-based escalation windows intentionally:
+  - fodder/basic cluster placement to enable earned triggers
+  - elite spacing/placement that can cash out the active state
+  - readable rhythm/breathing room so temporary power is usable
+- Encounter density tuning should support authored escalation opportunities, not random spam.
+- BRUTALITY MODE authoring expectations include temporary form/weapon escalation, alternate gore packages, and temporary audiovisual/gameplay-state shifts.
 
 ## Rendering Stability Doctrine
 - Global sprite shimmer/sparkle incidents are treated first as renderer/camera stability faults, not art-only defects.
@@ -99,9 +110,9 @@ This means:
 - Milestone 7 is largely established; remaining 7C/7H/7I are targeted follow-up lanes, not default primary sequencing.
 - Milestone 8 is established and still active-support, but no longer sole active lane.
 - Milestone 9 (Sector 4 Chamber 1 buildout) is active in practice.
+- BRUTALITY MODE is promoted to next-active combat-design milestone planning and is expected to shape chamber encounter doctrine.
 - Enemy class unification + grounding/scale normalization is preserved as its own future milestone lane.
 - Boss package polish + global retrofit is preserved as its own future milestone lane.
-- BRUTALITY MODE is an explicitly deferred later complex milestone.
 
 ## Future Character Animation Doctrine (Deferred Lane)
 - Animated characters are a real planned future production focus.
