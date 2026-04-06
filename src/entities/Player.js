@@ -16,7 +16,7 @@ const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
 const DEFAULT_BRUTALITY_MODIFIERS = {
   visualScale: 1.28,
   bodyScale: 1.16,
-  speedMultiplier: 1.12,
+  speedMultiplier: 1.25,
   reachMultiplier: 1.2,
   damageMultiplier: 2
 };
@@ -75,7 +75,15 @@ export class Player {
       offsetX: config.body.offsetX,
       offsetY: config.body.offsetY
     };
+    this.baseGrounding = {
+      visualFeetY: null,
+      bodyBottomY: null,
+      bodyBottomMinusVisualFeetDelta: 0
+    };
     this.applyScaleAndCollision(1, 1);
+    this.baseGrounding.visualFeetY = this.getVisualFeetY();
+    this.baseGrounding.bodyBottomY = this.body.bottom;
+    this.baseGrounding.bodyBottomMinusVisualFeetDelta = this.baseGrounding.bodyBottomY - this.baseGrounding.visualFeetY;
 
     const attackHitboxConfig = this.config.attackHitbox ?? {};
     this.attackHitbox = scene.add.zone(
@@ -403,7 +411,7 @@ export class Player {
     this.brutalityTransition.fromBodyScale = this.currentBrutalityBodyScale;
     this.brutalityTransition.toVisualScale = targetVisualScale;
     this.brutalityTransition.toBodyScale = targetBodyScale;
-    this.brutalityTransition.floorAnchorY = this.getCurrentFloorAnchorY();
+    this.brutalityTransition.floorAnchorY = this.getVisualFeetAnchorY();
   }
 
   updateBrutalityTransition(time) {
@@ -425,11 +433,15 @@ export class Player {
   }
 
   applyScaleAndCollision(visualScaleMultiplier = 1, bodyScaleMultiplier = 1, floorAnchorY = null) {
-    const resolvedFloorAnchorY = Number.isFinite(floorAnchorY) ? floorAnchorY : this.getCurrentFloorAnchorY();
+    const resolvedVisualFeetAnchorY = Number.isFinite(floorAnchorY) ? floorAnchorY : this.getVisualFeetAnchorY();
+    const baselineBodyBottomMinusVisualFeetDelta = Number.isFinite(this.baseGrounding?.bodyBottomMinusVisualFeetDelta)
+      ? this.baseGrounding.bodyBottomMinusVisualFeetDelta
+      : this.getCurrentBodyBottomMinusVisualFeetDelta();
+    const targetBodyBottomY = resolvedVisualFeetAnchorY + baselineBodyBottomMinusVisualFeetDelta;
     const targetScaleX = this.baseVisualScale.x * visualScaleMultiplier;
     const targetScaleY = this.baseVisualScale.y * visualScaleMultiplier;
     this.sprite.setScale(targetScaleX, targetScaleY);
-    this.setVisualFeetY(resolvedFloorAnchorY);
+    this.setVisualFeetY(resolvedVisualFeetAnchorY);
 
     const scaleX = Math.abs(this.sprite.scaleX) || 1;
     const scaleY = Math.abs(this.sprite.scaleY) || 1;
@@ -439,7 +451,7 @@ export class Player {
     const bodyHeight = (baseBodyHeight * bodyScaleMultiplier) / scaleY;
     const widthGrowthWorld = baseBodyWidth * (bodyScaleMultiplier - 1);
     const bodyOffsetX = (this.baseBody.offsetX - widthGrowthWorld * 0.5) / scaleX;
-    const bodyOffsetY = (resolvedFloorAnchorY - this.sprite.y) / scaleY - bodyHeight;
+    const bodyOffsetY = (targetBodyBottomY - this.sprite.y) / scaleY - bodyHeight;
     this.body.setSize(bodyWidth, bodyHeight);
     this.body.setOffset(bodyOffsetX, bodyOffsetY);
     this.body.updateFromGameObject();
@@ -448,11 +460,15 @@ export class Player {
     this.currentBrutalityBodyScale = bodyScaleMultiplier;
   }
 
-  getCurrentFloorAnchorY() {
-    if (Number.isFinite(this.body?.bottom)) {
-      return this.body.bottom;
-    }
+  getVisualFeetAnchorY() {
     return this.getVisualFeetY();
+  }
+
+  getCurrentBodyBottomMinusVisualFeetDelta() {
+    if (!Number.isFinite(this.body?.bottom)) {
+      return 0;
+    }
+    return this.body.bottom - this.getVisualFeetY();
   }
 
   getVisualFeetY() {
