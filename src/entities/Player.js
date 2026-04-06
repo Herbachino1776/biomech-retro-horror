@@ -80,7 +80,9 @@ export class Player {
       bodyBottomY: null,
       bodyBottomMinusVisualFeetDelta: 0
     };
-    this.applyScaleAndCollision(1, 1);
+    this.body.setSize(this.baseBody.width, this.baseBody.height);
+    this.body.setOffset(this.baseBody.offsetX, this.baseBody.offsetY);
+    this.body.updateFromGameObject();
     this.baseGrounding.visualFeetY = this.getVisualFeetY();
     this.baseGrounding.bodyBottomY = this.body.bottom;
     this.baseGrounding.bodyBottomMinusVisualFeetDelta = this.baseGrounding.bodyBottomY - this.baseGrounding.visualFeetY;
