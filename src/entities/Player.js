@@ -10,12 +10,15 @@ const PLAYER_WALK_FPS = 8;
 const PLAYER_WALK_MIN_SPEED = 36;
 const PLAYER_IDLE_FPS = 5;
 const PLAYER_IDLE_MAX_SPEED = 20;
-const BRUTALITY_TRANSITION_DURATION_MS = 180;
-const BRUTALITY_FORM_SCALE_BOOST = 1.15;
 const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
+const BRUTALITY_FORM_MULTIPLIERS = Object.freeze({
+  displayWidth: 1.42,
+  displayHeight: 1.34,
+  bodyWidth: 1.26,
+  bodyHeight: 1.2,
+  bodyOffsetYLiftRatio: 0.76
+});
 const DEFAULT_BRUTALITY_MODIFIERS = {
-  visualScale: 1.28,
-  bodyScale: 1.16,
   speedMultiplier: 1.25,
   reachMultiplier: 1.2,
   damageMultiplier: 2
@@ -66,7 +69,7 @@ export class Player {
     this.body.setSize(config.body.width / scaleX, config.body.height / scaleY);
     this.body.setOffset(config.body.offsetX / scaleX, config.body.offsetY / scaleY);
     this.body.updateFromGameObject();
-    this.captureBrutalityBaseline();
+    this.initializeBrutalityForms();
 
     const attackHitboxConfig = this.config.attackHitbox ?? {};
     this.attackHitbox = scene.add.zone(
@@ -86,19 +89,6 @@ export class Player {
     this.brutalityMode = {
       active: false,
       ...DEFAULT_BRUTALITY_MODIFIERS
-    };
-    this.currentBrutalityVisualScale = 1;
-    this.currentBrutalityBodyScale = 1;
-    this.brutalityTransition = {
-      active: false,
-      startedAt: 0,
-      durationMs: BRUTALITY_TRANSITION_DURATION_MS,
-      fromVisualScale: 1,
-      fromBodyScale: 1,
-      toVisualScale: 1,
-      toBodyScale: 1,
-      floorAnchorY: null,
-      bodyBottomMinusVisualFeetDelta: null
     };
 
     const weaponDisplay = this.config.weaponVisual?.display ?? { width: 72, height: 72 };
@@ -120,8 +110,6 @@ export class Player {
   }
 
   update(time, input) {
-    this.updateBrutalityTransition(time);
-
     if (this.isDead) {
       this.body.setVelocityX(0);
       return;
@@ -347,7 +335,7 @@ export class Player {
     return ASSET_KEYS.playerWeaponHammer01;
   }
 
-  applyBrutalityMode(modifiers = {}, time = this.scene.time.now) {
+  applyBrutalityMode(modifiers = {}) {
     const nextModifiers = { ...DEFAULT_BRUTALITY_MODIFIERS, ...modifiers };
     this.brutalityMode = {
       ...this.brutalityMode,
@@ -355,18 +343,14 @@ export class Player {
       active: true
     };
     this.config.moveSpeed = this.baseMoveSpeed * this.brutalityMode.speedMultiplier;
-    this.startBrutalityTransition(
-      this.brutalityMode.visualScale * BRUTALITY_FORM_SCALE_BOOST,
-      this.brutalityMode.bodyScale * BRUTALITY_FORM_SCALE_BOOST,
-      time
-    );
+    this.applyPlayerForm(this.brutalityFormValues);
     this.updateWeaponTexture();
   }
 
-  clearBrutalityMode(time = this.scene.time.now) {
+  clearBrutalityMode() {
     this.brutalityMode.active = false;
     this.config.moveSpeed = this.baseMoveSpeed;
-    this.startBrutalityTransition(1, 1, time);
+    this.applyPlayerForm(this.normalFormValues);
     this.updateWeaponTexture();
   }
 
@@ -388,96 +372,62 @@ export class Player {
     this.weaponSprite.setDisplaySize(this.baseWeaponDisplay.width * displayScale, this.baseWeaponDisplay.height * displayScale);
   }
 
-  startBrutalityTransition(targetVisualScale = 1, targetBodyScale = 1, time = this.scene.time.now) {
-    this.brutalityTransition.active = true;
-    this.brutalityTransition.startedAt = time;
-    this.brutalityTransition.fromVisualScale = this.currentBrutalityVisualScale;
-    this.brutalityTransition.fromBodyScale = this.currentBrutalityBodyScale;
-    this.brutalityTransition.toVisualScale = targetVisualScale;
-    this.brutalityTransition.toBodyScale = targetBodyScale;
-    this.brutalityTransition.floorAnchorY = this.getVisualFeetAnchorY();
-    this.brutalityTransition.bodyBottomMinusVisualFeetDelta = this.brutalityBaseline?.bodyBottomMinusVisualFeetDelta ?? 0;
-  }
-
-  updateBrutalityTransition(time) {
-    if (!this.brutalityTransition.active) {
-      return;
-    }
-
-    const durationMs = Math.max(1, this.brutalityTransition.durationMs ?? BRUTALITY_TRANSITION_DURATION_MS);
-    const rawT = Phaser.Math.Clamp((time - this.brutalityTransition.startedAt) / durationMs, 0, 1);
-    const easedT = Phaser.Math.Easing.Cubic.Out(rawT);
-    const visualScale = Phaser.Math.Linear(this.brutalityTransition.fromVisualScale, this.brutalityTransition.toVisualScale, easedT);
-    const bodyScale = Phaser.Math.Linear(this.brutalityTransition.fromBodyScale, this.brutalityTransition.toBodyScale, easedT);
-    this.applyBrutalityTransform(
-      visualScale,
-      bodyScale,
-      this.brutalityTransition.floorAnchorY,
-      this.brutalityTransition.bodyBottomMinusVisualFeetDelta
-    );
-
-    if (rawT >= 1) {
-      this.brutalityTransition.active = false;
-      this.brutalityTransition.floorAnchorY = null;
-    }
-  }
-
-  applyBrutalityTransform(visualScaleMultiplier = 1, bodyScaleMultiplier = 1, floorAnchorY = null, bodyBottomMinusVisualFeetDelta = null) {
-    const base = this.brutalityBaseline;
-    if (!base) {
-      return;
-    }
-
-    const resolvedVisualFeetAnchorY = Number.isFinite(floorAnchorY) ? floorAnchorY : base.visualFeetY;
-    const resolvedBodyBottomDelta = Number.isFinite(bodyBottomMinusVisualFeetDelta)
-      ? bodyBottomMinusVisualFeetDelta
-      : base.bodyBottomMinusVisualFeetDelta;
-    const targetDisplayWidth = base.displayWidth * visualScaleMultiplier;
-    const targetDisplayHeight = base.displayHeight * visualScaleMultiplier;
-    const targetBodyBottomY = resolvedVisualFeetAnchorY + resolvedBodyBottomDelta;
-    this.sprite.setDisplaySize(targetDisplayWidth, targetDisplayHeight);
-    this.setVisualFeetY(resolvedVisualFeetAnchorY);
-
-    const scaleX = Math.abs(this.sprite.scaleX) || 1;
-    const scaleY = Math.abs(this.sprite.scaleY) || 1;
-    const targetBodyWorldWidth = base.bodyWorldWidth * bodyScaleMultiplier;
-    const targetBodyWorldHeight = base.bodyWorldHeight * bodyScaleMultiplier;
-    const bodyWidth = targetBodyWorldWidth / scaleX;
-    const bodyHeight = targetBodyWorldHeight / scaleY;
-    const bodyCenterX = this.sprite.x + base.bodyCenterXMinusSpriteX;
-    const bodyOffsetX = (bodyCenterX - this.sprite.x) / scaleX - bodyWidth * 0.5;
-    const bodyOffsetY = (targetBodyBottomY - this.sprite.y) / scaleY - bodyHeight;
-    this.body.setSize(bodyWidth, bodyHeight);
-    this.body.setOffset(bodyOffsetX, bodyOffsetY);
-    this.body.updateFromGameObject();
-
-    this.currentBrutalityVisualScale = visualScaleMultiplier;
-    this.currentBrutalityBodyScale = bodyScaleMultiplier;
-  }
-
-  captureBrutalityBaseline() {
-    const visualFeetY = this.getVisualFeetY();
-    const bodyBottomY = this.body.bottom;
-    this.brutalityBaseline = Object.freeze({
-      spriteX: this.sprite.x,
-      spriteY: this.sprite.y,
+  initializeBrutalityForms() {
+    const normalFormValues = Object.freeze({
       displayWidth: this.sprite.displayWidth,
       displayHeight: this.sprite.displayHeight,
+      originX: this.sprite.originX,
+      originY: this.sprite.originY,
       bodyWidth: this.body.width,
       bodyHeight: this.body.height,
       bodyOffsetX: this.body.offset.x,
       bodyOffsetY: this.body.offset.y,
-      bodyWorldWidth: this.body.width,
-      bodyWorldHeight: this.body.height,
-      bodyCenterXMinusSpriteX: this.body.center.x - this.sprite.x,
-      visualFeetY,
-      bodyBottomY,
-      bodyBottomMinusVisualFeetDelta: bodyBottomY - visualFeetY
+      visualFeetY: this.getVisualFeetY(),
+      bodyBottomMinusVisualFeetDelta: this.body.bottom - this.getVisualFeetY()
     });
+
+    const brutalityBodyWidth = normalFormValues.bodyWidth * BRUTALITY_FORM_MULTIPLIERS.bodyWidth;
+    const brutalityBodyHeight = normalFormValues.bodyHeight * BRUTALITY_FORM_MULTIPLIERS.bodyHeight;
+    const brutalityFormValues = Object.freeze({
+      displayWidth: normalFormValues.displayWidth * BRUTALITY_FORM_MULTIPLIERS.displayWidth,
+      displayHeight: normalFormValues.displayHeight * BRUTALITY_FORM_MULTIPLIERS.displayHeight,
+      originX: normalFormValues.originX,
+      originY: normalFormValues.originY,
+      bodyWidth: brutalityBodyWidth,
+      bodyHeight: brutalityBodyHeight,
+      bodyOffsetX: normalFormValues.bodyOffsetX - (brutalityBodyWidth - normalFormValues.bodyWidth) * 0.5,
+      bodyOffsetY:
+        normalFormValues.bodyOffsetY - (brutalityBodyHeight - normalFormValues.bodyHeight) * BRUTALITY_FORM_MULTIPLIERS.bodyOffsetYLiftRatio,
+      visualFeetY: normalFormValues.visualFeetY,
+      bodyBottomMinusVisualFeetDelta: normalFormValues.bodyBottomMinusVisualFeetDelta
+    });
+
+    this.normalFormValues = normalFormValues;
+    this.brutalityFormValues = brutalityFormValues;
+    this.currentPlayerForm = 'normal';
   }
 
-  getVisualFeetAnchorY() {
-    return Number.isFinite(this.brutalityBaseline?.visualFeetY) ? this.brutalityBaseline.visualFeetY : this.getVisualFeetY();
+  applyPlayerForm(formValues) {
+    if (!formValues) {
+      return;
+    }
+
+    const plantedFeetY = this.getVisualFeetY();
+    this.sprite.setOrigin(formValues.originX, formValues.originY);
+    this.sprite.setDisplaySize(formValues.displayWidth, formValues.displayHeight);
+    this.setVisualFeetY(plantedFeetY);
+
+    const scaleX = Math.abs(this.sprite.scaleX) || 1;
+    const scaleY = Math.abs(this.sprite.scaleY) || 1;
+    const bodyWidth = formValues.bodyWidth / scaleX;
+    const bodyHeight = formValues.bodyHeight / scaleY;
+    const bodyOffsetX = formValues.bodyOffsetX / scaleX;
+    const desiredBodyBottomY = plantedFeetY + formValues.bodyBottomMinusVisualFeetDelta;
+    const bodyOffsetY = (desiredBodyBottomY - this.sprite.y) / scaleY - bodyHeight;
+    this.body.setSize(bodyWidth, bodyHeight);
+    this.body.setOffset(bodyOffsetX, bodyOffsetY);
+    this.body.updateFromGameObject();
+    this.currentPlayerForm = formValues === this.brutalityFormValues ? 'brutality' : 'normal';
   }
 
   getVisualFeetY() {
