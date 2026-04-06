@@ -72,6 +72,8 @@ export class Player {
     this.body.setOffset(config.body.offsetX / scaleX, config.body.offsetY / scaleY);
     this.body.updateFromGameObject();
     this.initializeBrutalityForms();
+    this.lastGroundedBodyBottom = this.body.bottom;
+    this.brutalityActivationGroundedBottom = null;
 
     const attackHitboxConfig = this.config.attackHitbox ?? {};
     this.attackHitbox = scene.add.zone(
@@ -156,6 +158,7 @@ export class Player {
     this.updateVisuals(time);
     this.updateAttackHitbox();
     this.updateFootsteps(time);
+    this.captureGroundedFloorAnchor();
   }
 
   startAttack(time) {
@@ -347,6 +350,7 @@ export class Player {
     this.stopSpriteAnimation();
     this.applyBrutalityStableStance();
     this.config.moveSpeed = this.baseMoveSpeed * this.brutalityMode.speedMultiplier;
+    this.captureBrutalityActivationGroundedAnchor();
     this.applyPlayerForm(this.brutalityFormValues);
     this.updateWeaponTexture();
   }
@@ -355,7 +359,11 @@ export class Player {
     this.stopSpriteAnimation();
     this.brutalityMode.active = false;
     this.config.moveSpeed = this.baseMoveSpeed;
-    this.applyPlayerForm(this.normalFormValues);
+    const exitGrounded = this.body.blocked.down;
+    const hasCachedActivationAnchor = Number.isFinite(this.brutalityActivationGroundedBottom);
+    const restoreBottomAnchor = exitGrounded && hasCachedActivationAnchor ? this.brutalityActivationGroundedBottom : null;
+    this.applyPlayerForm(this.normalFormValues, { restoreBottomAnchor });
+    this.brutalityActivationGroundedBottom = null;
     this.setNormalStableFrame();
     this.updateWeaponTexture();
   }
@@ -411,12 +419,13 @@ export class Player {
     this.currentPlayerForm = 'normal';
   }
 
-  applyPlayerForm(formValues) {
+  applyPlayerForm(formValues, options = {}) {
     if (!formValues) {
       return;
     }
 
-    const preservedBodyBottom = this.body.bottom;
+    const hasRestoreBottomAnchor = Number.isFinite(options.restoreBottomAnchor);
+    const preservedBodyBottom = hasRestoreBottomAnchor ? options.restoreBottomAnchor : this.body.bottom;
     this.sprite.setOrigin(formValues.originX, formValues.originY);
     this.sprite.setDisplaySize(formValues.displayWidth, formValues.displayHeight);
 
@@ -440,6 +449,28 @@ export class Player {
     }
 
     this.currentPlayerForm = formValues === this.brutalityFormValues ? 'brutality' : 'normal';
+  }
+
+  captureGroundedFloorAnchor() {
+    if (!this.body?.blocked.down) {
+      return;
+    }
+
+    this.lastGroundedBodyBottom = this.body.bottom;
+  }
+
+  captureBrutalityActivationGroundedAnchor() {
+    if (this.body.blocked.down) {
+      this.brutalityActivationGroundedBottom = this.body.bottom;
+      return;
+    }
+
+    if (Number.isFinite(this.lastGroundedBodyBottom)) {
+      this.brutalityActivationGroundedBottom = this.lastGroundedBodyBottom;
+      return;
+    }
+
+    this.brutalityActivationGroundedBottom = null;
   }
 
   getVisualFeetY(sprite, displayHeight, originY) {
