@@ -66,21 +66,40 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 - S3 -> S4 handoff work has been addressed.
 - Sector 4 is now a live content lane, not a placeholder-only future idea.
 - Sector 4 Chamber 1 has received shell/shrine/enemy passes.
+- Sector 4 Chamber 2 shell/buildout prep is now a real adjacent lane (secondary while S4C1 remains primary).
 
 **Status:** active now.
 
-## Milestone 10 — Global Enemy Grounding + Scale Normalization
-**Purpose:** normalize enemy floor contact and size readability across chambers/sectors.
+## Milestone 10 — Sector 3/4 Pacing, Density, and Readability Polish
+**Purpose:** tune oppressive pacing clarity and combat readability under heavier encounter density.
 
 **Scope / Includes:**
-- treat enemy grounding/scale as shared/global presentation lane, not per-room bug patching
-- complete normalization pass for Sector 2 and later sectors where enemies still sit low
-- raise undersized enemies to target readability where needed
-- preserve UI readability guarantees (including no feet-hidden-under-control-bar regressions)
+- pacing and downtime/combat beat refinement
+- lore/combat cadence balancing
+- readability cleanup under dense altar + pit + encounter flows
+- chamber-level polish carryover where needed
 
 **Status:** planned later milestone.
 
-## Milestone 11 — Boss Package Polish + Global Boss Retrofit
+## Milestone 11 — Enemy Class Unification + Grounding/Scale Normalization
+**Purpose:** formalize enemy-family contracts and normalize shared presentation/readability baselines before broader family migration work.
+
+**Why this now exists as a separate lane:**
+- multiple enemy-class families are already live in real authored content
+- standard enemies, elites, minibosses, and bosses are not interchangeable contracts
+- prior regressions showed that contract mixing causes brittle behavior and cleanup churn
+- grounding/scale/feet-contact issues are global shared concerns, not chamber-local patchwork
+
+**Scope / Includes:**
+- full audit of live enemy families and class usage across chambers/sectors
+- explicit standard vs elite vs miniboss vs boss contract definitions
+- shared grounding/scale/spawnY/body-alignment normalization pass
+- reusable combat module cleanup/polish where appropriate
+- pilot migration on selected encounters before broad rollout
+
+**Status:** planned later milestone.
+
+## Milestone 12 — Boss Package Polish + Global Boss Retrofit
 **Purpose:** stabilize and polish abstracted boss package before full-game encounter retrofit.
 
 **Required sequence:**
@@ -94,7 +113,7 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 
 **Status:** planned later milestone.
 
-## Milestone 12 — Boss-Pack Content Production Lane
+## Milestone 13 — Boss-Pack Content Production Lane
 **Purpose:** produce and integrate planned boss-pack content systematically.
 
 **Current approved planning direction:**
@@ -103,17 +122,6 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 - paired boss/background assets are intended for `art/raw/bosspit` content flow
 
 **Status:** planned later milestone (content production + integration pipeline).
-
-## Milestone 13 — Sector 3/4 Pacing, Density, and Readability Polish
-**Purpose:** tune oppressive pacing clarity and combat readability under heavier encounter density.
-
-**Scope / Includes:**
-- pacing and downtime/combat beat refinement
-- lore/combat cadence balancing
-- readability cleanup under dense altar + pit + encounter flows
-- chamber-level polish carryover where needed
-
-**Status:** planned later milestone.
 
 ## Milestone 14 — BRUTALITY MODE (Deferred Complex Feature)
 **Purpose:** add an earned temporary power-state loop without breaking oppressive baseline pacing.

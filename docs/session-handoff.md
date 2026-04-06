@@ -20,6 +20,7 @@ Use this file to start a fresh planning/implementation session from real current
   - Chamber 3 substantially built from uploaded art pack
 - **S3 -> S4 handoff has been addressed enough for live forward authoring.**
 - **Sector 4 Chamber 1 is actively being built and has already received shell/shrine/enemy passes.**
+- **Sector 4 Chamber 2 shell/buildout prep is now a real secondary lane while S4C1 remains primary.**
 
 ## Working / Next / Deferred Snapshot
 
@@ -33,10 +34,11 @@ Use this file to start a fresh planning/implementation session from real current
 
 ### What is next (active)
 - Continue Sector 4 Chamber 1 content buildout and quality shaping.
+- Continue Sector 4 Chamber 2 shell/buildout prep as secondary support work.
 - Keep Sector 3 consistency/polish carryover aligned while Sector 4 comes online.
 
 ### What is deferred (explicit)
-- Global enemy grounding + scale normalization pass across Sector 2 and beyond.
+- Enemy Class Unification + Grounding/Scale Normalization milestone (family audit + contract cleanup + shared spawnY/body alignment normalization).
 - Boss package polish -> global boss retrofit sequence.
 - Boss-pack content production lane (roughly a dozen boss concepts + per-boss background planning in `art/raw/bosspit`).
 - BRUTALITY MODE later complex milestone.
@@ -68,13 +70,15 @@ Still available as targeted follow-up:
 - S3 -> S4 handoff is no longer a placeholder-only future assumption.
 
 ## Global Cleanup Lanes to Preserve
-- Enemy grounding/scale should be treated as a global shared pass, not ad-hoc room patches.
-- Many enemies in Sector 2 and later are still slightly low and slightly small.
+- Enemy families are now a real planning/runtime concern (standard enemy vs elite vs miniboss vs boss), not a single interchangeable class.
+- Enemy contract cleanup and grounding/scale cleanup should be treated together as a shared milestone lane, not ad-hoc room patches.
+- Many enemies in Sector 2 and later are still slightly low and slightly small, and some class contracts remain mixed.
 - Preserve the solved feet/control-bar readability correction as a no-regression baseline.
 
 ## Boss Package + Content Pipeline Notes
 - Boss package abstraction is now mature enough for a true future lane.
 - Required sequencing: polish package first, then retrofit/reimplement boss encounters globally.
+- Keep this lane separate from enemy-class unification/grounding work.
 - Future content lane should assume approximately a dozen boss concepts across boss-pit/miniboss/full-boss contexts.
 - Likely art ingestion pattern: one background image per boss into `art/raw/bosspit`.
 - Registered boss-pack inventory and confident/ambiguous pairing notes are tracked in `docs/boss-pack-catalog.md` for future boss-pit/miniboss/full-boss deployment passes.
@@ -98,5 +102,5 @@ Still available as targeted follow-up:
 ## Most Likely Next Gameplay Pass After This Handoff
 1. Continue Sector 4 Chamber 1 content buildout.
 2. Keep Milestone 8 carryover consistency aligned while S4 lane advances.
-3. Schedule global enemy grounding/scale milestone planning after immediate S4 authoring stability.
-4. Preserve boss package polish + global retrofit as a dedicated milestone, not background drift work.
+3. Schedule Enemy Class Unification + Grounding/Scale Normalization milestone planning after immediate S4 authoring stability.
+4. Preserve boss package polish + global retrofit as a dedicated separate milestone, not background drift work.
