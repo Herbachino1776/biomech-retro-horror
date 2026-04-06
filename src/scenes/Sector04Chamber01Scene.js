@@ -203,7 +203,15 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
   }
 
   init(data) {
-    this.transitionContext = data ?? {};
+    this.transitionContext = {
+      enteredFrom: null,
+      fromScene: null,
+      bossPitCompleted: false,
+      returnFromBossPit: false,
+      returnPlayerX: null,
+      returnPlayerY: null,
+      ...((data && typeof data === 'object') ? data : {})
+    };
     this.isRestartingRun = false;
     this.isLoreTransitionActive = false;
     this.bossPitTransitionActive = false;

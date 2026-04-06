@@ -179,6 +179,7 @@ export class BootScene extends Phaser.Scene {
     this.load.image(ASSET_KEYS.bossPit05AltarSuper, ASSET_URLS[ASSET_KEYS.bossPit05AltarSuper]);
     this.load.image(ASSET_KEYS.bossPit19BackgroundReliquaryStalker, ASSET_URLS[ASSET_KEYS.bossPit19BackgroundReliquaryStalker]);
     this.load.image(ASSET_KEYS.bossPit19ReliquaryStalker, ASSET_URLS[ASSET_KEYS.bossPit19ReliquaryStalker]);
+    this.load.image(ASSET_KEYS.bossPit20HornedMothJudge, ASSET_URLS[ASSET_KEYS.bossPit20HornedMothJudge]);
     this.load.image(ASSET_KEYS.enemyGoreClusterMeatBone01, ASSET_URLS[ASSET_KEYS.enemyGoreClusterMeatBone01]);
     this.load.spritesheet(ASSET_KEYS.player, ASSET_URLS[ASSET_KEYS.player], {
       frameWidth: 658,
