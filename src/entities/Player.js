@@ -381,9 +381,7 @@ export class Player {
       bodyWidth: this.body.width,
       bodyHeight: this.body.height,
       bodyOffsetX: this.body.offset.x,
-      bodyOffsetY: this.body.offset.y,
-      visualFeetY: this.getVisualFeetY(),
-      bodyBottomMinusVisualFeetDelta: this.body.bottom - this.getVisualFeetY()
+      bodyOffsetY: this.body.offset.y
     });
 
     const brutalityBodyWidth = normalFormValues.bodyWidth * BRUTALITY_FORM_MULTIPLIERS.bodyWidth;
@@ -396,10 +394,7 @@ export class Player {
       bodyWidth: brutalityBodyWidth,
       bodyHeight: brutalityBodyHeight,
       bodyOffsetX: normalFormValues.bodyOffsetX - (brutalityBodyWidth - normalFormValues.bodyWidth) * 0.5,
-      bodyOffsetY:
-        normalFormValues.bodyOffsetY - (brutalityBodyHeight - normalFormValues.bodyHeight) * BRUTALITY_FORM_MULTIPLIERS.bodyOffsetYLiftRatio,
-      visualFeetY: normalFormValues.visualFeetY,
-      bodyBottomMinusVisualFeetDelta: normalFormValues.bodyBottomMinusVisualFeetDelta
+      bodyOffsetY: normalFormValues.bodyOffsetY - (brutalityBodyHeight - normalFormValues.bodyHeight) * BRUTALITY_FORM_MULTIPLIERS.bodyOffsetYLiftRatio
     });
 
     this.normalFormValues = normalFormValues;
@@ -412,30 +407,22 @@ export class Player {
       return;
     }
 
-    const plantedFeetY = this.getVisualFeetY();
+    const preservedBodyBottom = this.body.bottom;
     this.sprite.setOrigin(formValues.originX, formValues.originY);
     this.sprite.setDisplaySize(formValues.displayWidth, formValues.displayHeight);
-    this.setVisualFeetY(plantedFeetY);
 
     const scaleX = Math.abs(this.sprite.scaleX) || 1;
     const scaleY = Math.abs(this.sprite.scaleY) || 1;
     const bodyWidth = formValues.bodyWidth / scaleX;
     const bodyHeight = formValues.bodyHeight / scaleY;
     const bodyOffsetX = formValues.bodyOffsetX / scaleX;
-    const desiredBodyBottomY = plantedFeetY + formValues.bodyBottomMinusVisualFeetDelta;
-    const bodyOffsetY = (desiredBodyBottomY - this.sprite.y) / scaleY - bodyHeight;
+    const bodyOffsetY = formValues.bodyOffsetY / scaleY;
     this.body.setSize(bodyWidth, bodyHeight);
     this.body.setOffset(bodyOffsetX, bodyOffsetY);
     this.body.updateFromGameObject();
+    this.sprite.y += preservedBodyBottom - this.body.bottom;
+    this.body.updateFromGameObject();
     this.currentPlayerForm = formValues === this.brutalityFormValues ? 'brutality' : 'normal';
-  }
-
-  getVisualFeetY() {
-    return this.sprite.y + (1 - this.sprite.originY) * this.sprite.displayHeight;
-  }
-
-  setVisualFeetY(targetFeetY) {
-    this.sprite.y = targetFeetY - (1 - this.sprite.originY) * this.sprite.displayHeight;
   }
 
   getAttackDamage() {
