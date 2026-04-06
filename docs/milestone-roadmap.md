@@ -70,7 +70,30 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 
 **Status:** active now.
 
-## Milestone 10 — Sector 3/4 Pacing, Density, and Readability Polish
+## Milestone 10 — BRUTALITY MODE Combat-State Integration (Next-Active Lane)
+**Purpose:** implement BRUTALITY MODE as a meaningful combat-state system that changes encounter authoring, not just player stats.
+
+**Scope / Includes:**
+- rapid-kill streak tracking in a short trigger window
+- activation/deactivation logic with clean entry/exit behavior
+- temporary 10–15 second power-state timer
+- temporary player growth/readability form shift + temporary upgraded weapon state
+- basic enemy one-hit explosive kill behavior during mode
+- elite enemy roughly three-hit blood/guts explosive kill behavior during mode
+- alternate gore packages and temporary audiovisual/gameplay-state changes
+- chamber-authoring implications:
+  - streak-building fodder clusters
+  - elite placements that can cash out the power state
+  - pacing rhythm with breathing room so the state feels earned and usable
+  - avoid random enemy spam as substitute for authored escalation
+
+**Separation guardrails:**
+- this lane is separate from Enemy Class Unification + Grounding/Scale Normalization
+- this lane is separate from Boss Package Polish + Global Boss Retrofit
+
+**Status:** active-planned / next-active combat-design milestone.
+
+## Milestone 11 — Sector 3/4 Pacing, Density, and Readability Polish
 **Purpose:** tune oppressive pacing clarity and combat readability under heavier encounter density.
 
 **Scope / Includes:**
@@ -81,7 +104,7 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 
 **Status:** planned later milestone.
 
-## Milestone 11 — Enemy Class Unification + Grounding/Scale Normalization
+## Milestone 12 — Enemy Class Unification + Grounding/Scale Normalization
 **Purpose:** formalize enemy-family contracts and normalize shared presentation/readability baselines before broader family migration work.
 
 **Why this now exists as a separate lane:**
@@ -99,7 +122,7 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 
 **Status:** planned later milestone.
 
-## Milestone 12 — Boss Package Polish + Global Boss Retrofit
+## Milestone 13 — Boss Package Polish + Global Boss Retrofit
 **Purpose:** stabilize and polish abstracted boss package before full-game encounter retrofit.
 
 **Required sequence:**
@@ -113,7 +136,7 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 
 **Status:** planned later milestone.
 
-## Milestone 13 — Boss-Pack Content Production Lane
+## Milestone 14 — Boss-Pack Content Production Lane
 **Purpose:** produce and integrate planned boss-pack content systematically.
 
 **Current approved planning direction:**
@@ -122,12 +145,6 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 - paired boss/background assets are intended for `art/raw/bosspit` content flow
 
 **Status:** planned later milestone (content production + integration pipeline).
-
-## Milestone 14 — BRUTALITY MODE (Deferred Complex Feature)
-**Purpose:** add an earned temporary power-state loop without breaking oppressive baseline pacing.
-
-**Status:** deferred later milestone (explicitly not next small task).
-See `docs/future-features.md` for design summary.
 
 ## Milestone 15 — Character/Action Animation Lane (Deferred, Explicit)
 **Purpose:** evolve presentation language from static-sprite-heavy baseline to authored character action performance.

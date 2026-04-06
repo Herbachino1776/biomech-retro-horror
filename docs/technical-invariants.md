@@ -63,7 +63,7 @@ Do-not-break checklist for current stability.
 - Scene registration + transition wiring are first checks for any chamber boot/handoff failure.
 
 ## Milestone Direction Invariant
-- Active build lane remains Milestone 8 (Sector 3 buildout + boss-pit expansion).
-- Milestone 8 is in later-stage execution (consistency/polish shaping), not early bootstrap.
-- Chamber 1 polish is a later milestone item, not the active main milestone.
-- Do not casually derail active milestone direction with unrelated system expansion during routine passes.
+- Active content build lane is Milestone 9 (Sector 4 Chamber 1), with Sector 4 Chamber 2 shell/buildout as secondary support.
+- Milestone 8 remains established active-support for Sector 3 consistency/polish shaping.
+- BRUTALITY MODE is promoted as a next-active combat/chamber-authoring lane and should inform near-term encounter pacing doctrine.
+- Preserve separate sequencing for enemy-class unification and boss-package retrofit; do not flatten milestone lanes during routine passes.

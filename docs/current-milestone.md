@@ -46,6 +46,23 @@ Milestone 7 is **advanced/largely established** and no longer the main active bu
 - **Sector 4 Chamber 2 shell/buildout remains a real secondary support lane, not a pure placeholder note.**
 - Milestone 8 remains established and still relevant for Sector 3 consistency/polish carryover and boss-pit expansion continuity.
 - Milestone 7 follow-up remains available as targeted polish/support work, not primary sequencing.
+- **BRUTALITY MODE is promoted to next-active combat-design milestone planning and should now shape near-term encounter authoring doctrine.**
+
+## Next-Active Combat Design Focus (BRUTALITY MODE)
+- BRUTALITY MODE is no longer treated as a buried speculative feature; it is now a next-active combat/chamber-authoring lane.
+- This lane is expected to affect chamber dynamics directly:
+  - basic enemy cluster placement for streak-building windows
+  - elite spacing/placement for power-state cashout moments
+  - kill-density pacing and AI pressure windows
+  - encounter rhythm/breathing room so activation feels earned and usable
+- The feature target remains:
+  - earned rapid-kill trigger inside a short window
+  - temporary **10–15 second** power state
+  - enlarged player form + temporary upgraded weapon
+  - one-hit explosive kills on basic enemies
+  - roughly three-hit blood/guts explosive kills on elites
+  - alternate gore packages plus temporary audiovisual/gameplay-state changes
+  - clean entry/exit behavior so chamber flow remains readable
 
 ## Recently Locked Technical/Readability Outcomes
 - The global sprite shimmer/sparkle issue is treated as a **renderer/camera stability problem that was solved at system level**, not as an art-only defect.
@@ -92,7 +109,6 @@ Meaning:
 - Sector 3 chamber-to-chamber consistency polish remains a later-stage shaping lane.
 - Enemy class unification + grounding/scale normalization remains a dedicated future milestone lane.
 - Boss package polish + global boss retrofit remains a dedicated future milestone lane.
-- BRUTALITY MODE remains a later complex milestone (see `docs/future-features.md`).
 
 ## Planned Future Lane (Deferred)
 Character animation is an intentional future production lane, but it is **not active focus now**.
