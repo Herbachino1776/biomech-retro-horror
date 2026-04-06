@@ -500,13 +500,14 @@ export class Sector04Chamber02Scene extends Phaser.Scene {
     if (brutalityActive && isBasicEnemy) {
       enemy.takeDamage(Math.max(enemy.health, 1), now, { skipDefaultDeathFx: true });
       if (enemy.dead) {
-        const bodyCenterX = enemy.body?.center?.x ?? enemy.sprite.x;
-        const bodyCenterY = enemy.body?.center?.y ?? enemy.sprite.y;
-        const bodyBottom = enemy.body?.bottom ?? bodyCenterY + 24;
+        const remainsSpawnPoint = enemy.getDeathRemainsSpawnPoint?.() ?? {
+          x: enemy.sprite.x,
+          groundY: enemy.body?.bottom ?? this.player?.sprite?.body?.bottom
+        };
         triggerBrutalityBasicChunkBurst(this, {
-          x: bodyCenterX,
-          y: bodyCenterY - 8,
-          floorPlaneY: bodyBottom,
+          x: remainsSpawnPoint.x,
+          y: remainsSpawnPoint.groundY - 16,
+          floorPlaneY: remainsSpawnPoint.groundY,
           depth: enemy.sprite.depth + 0.12
         });
         this.cameras.main.shake(86, 0.005, true);

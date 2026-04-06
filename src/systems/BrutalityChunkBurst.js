@@ -3,7 +3,7 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { ignoreRuntimeWorldObjectFromUiCamera } from '../ui/mobileUiCamera.js';
 
 const BRUTALITY_BURST_PROFILE = Object.freeze({
-  chunkCountRange: [9, 13],
+  chunkCountRange: [18, 26],
   launchX: 38,
   launchLift: [18, 54],
   settleSpreadX: 24,
@@ -48,7 +48,7 @@ export function triggerBrutalityBasicChunkBurst(scene, {
     );
 
     for (let index = 0; index < chunkCount; index += 1) {
-      const targetMaxSide = Phaser.Math.Between(20, 36);
+      const targetMaxSide = Phaser.Math.Between(40, 72);
       const spawnOffsetX = Phaser.Math.Between(-12, 12);
       const spawnOffsetY = Phaser.Math.Between(-34, -10);
       const settleOffsetX = Phaser.Math.Between(
