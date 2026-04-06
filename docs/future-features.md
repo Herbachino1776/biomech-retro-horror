@@ -19,15 +19,22 @@ BRUTALITY MODE is a deliberately high-intensity temporary power state earned thr
 It is meant to punctuate oppressive pacing with controlled spikes, not replace baseline combat tone.
 
 ### Core Behavior Targets
-- trigger condition: rapid kill chain within a short timing window
-- mode duration target: approximately **10–15 seconds**
-- player form changes: enlarged player silhouette/form for mode readability
-- weapon state: temporary upgraded weapon profile during mode
-- basic-enemy output: one-hit explosive kills
-- elite-enemy output: roughly three-hit blood/guts explosive kill cadence
-- gore layer: alternate gore packages while mode is active
-- feedback layer: temporary audiovisual + gameplay-state shift while active
-- mode lifecycle: clean entry/exit behavior so chamber flow stays readable
+- trigger condition (auto-only): **2 basic-enemy kills within 5 seconds**
+- activation counting: only basic enemies count toward trigger
+- activation UX in v1: no manual trigger, no visible meter, no on-screen indicator
+- mode duration: fixed **20 seconds**
+- duration rules: kills do not extend mode; taking damage does not cancel/reset mode
+- chamber cap: max **2 activations per chamber**
+- streak lifecycle: streak counting pauses during mode, then restarts from zero on mode end
+- player form changes: enlarged player silhouette/form and enlarged collision body
+- player combat changes: increased reach, slight speed boost, stronger damage output
+- weapon state: temporary swap to **Hammer of Banishment**
+- enemy behavior: temporary aggression ramp (speed + aggro + pressure), then clean reset on mode end
+- basic-enemy output: instant brutality kills with dedicated basic brutality gore package
+- elite-enemy output: exactly **3 brutality hits** to kill with separate elite brutality gore package
+- kill feedback: quick screen shake on brutality kills with no gameplay stoppage
+- activation cue: audio-only using a loud aggressive elite-attack-style sound
+- deferred FX lane (not implemented in v1): viewport chunk impacts, viewport blood splatter, broader screen FX escalation
 
 ### Chamber/Encounter Authoring Doctrine Impact
 BRUTALITY MODE is now treated as a near-term combat/chamber-authoring milestone lane.

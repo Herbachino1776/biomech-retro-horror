@@ -21,6 +21,7 @@ Use this file to start a fresh planning/implementation session from real current
 - **S3 -> S4 handoff has been addressed enough for live forward authoring.**
 - **Sector 4 Chamber 1 is actively being built and has already received shell/shrine/enemy passes.**
 - **Sector 4 Chamber 2 shell/buildout prep is now a real secondary lane while S4C1 remains primary.**
+- **BRUTALITY MODE is now the next-active combat-design milestone lane and should guide near-term chamber encounter composition.**
 
 ## Working / Next / Deferred Snapshot
 
@@ -72,13 +73,20 @@ Still available as targeted follow-up:
 ### Milestone 10 (next-active combat lane)
 - BRUTALITY MODE is now active-planned as the next combat/chamber-authoring focus.
 - Preserved target behavior:
-  - earned by rapid kills in a short window
-  - temporary 10–15 second power state
-  - enlarged player form + temporary upgraded weapon
-  - one-hit explosive kills on basic enemies
-  - roughly three-hit blood/guts explosive kills on elites
-  - alternate gore packages + temporary audiovisual/gameplay changes
-  - clean entry/exit behavior
+  - auto-trigger only: 2 basic-enemy kills within 5 seconds (basics-only counting, no manual trigger)
+  - no visible meter/UI or on-screen indicator in v1
+  - fixed 20-second mode timer; kills do not extend it
+  - taking damage does not cancel/reset mode
+  - max 2 activations per chamber
+  - streak counting pauses during mode and restarts from zero when mode ends
+  - larger player form + larger collision body + temporary Hammer of Banishment
+  - increased reach, slight speed boost, and stronger damage while active
+  - enemy aggression override during mode (higher speed/aggro/pressure), then clean reset to normal on exit
+  - basic enemies die instantly with dedicated brutality gore package
+  - elites die in exactly 3 brutality hits with separate elite brutality gore package
+  - quick screen shake on brutality kills, with no gameplay stoppage
+  - activation cue is audio-only: loud aggressive elite-attack-style sound
+  - deferred later FX (not current implementation): viewport chunk impacts, viewport blood splatter, broader screen-FX escalation
 - This milestone changes chamber doctrine (density, placement, pacing windows), not just player stat tuning.
 
 ## Global Cleanup Lanes to Preserve

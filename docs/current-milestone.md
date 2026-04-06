@@ -49,20 +49,61 @@ Milestone 7 is **advanced/largely established** and no longer the main active bu
 - **BRUTALITY MODE is promoted to next-active combat-design milestone planning and should now shape near-term encounter authoring doctrine.**
 
 ## Next-Active Combat Design Focus (BRUTALITY MODE)
-- BRUTALITY MODE is no longer treated as a buried speculative feature; it is now a next-active combat/chamber-authoring lane.
-- This lane is expected to affect chamber dynamics directly:
-  - basic enemy cluster placement for streak-building windows
-  - elite spacing/placement for power-state cashout moments
-  - kill-density pacing and AI pressure windows
-  - encounter rhythm/breathing room so activation feels earned and usable
-- The feature target remains:
-  - earned rapid-kill trigger inside a short window
-  - temporary **10–15 second** power state
-  - enlarged player form + temporary upgraded weapon
-  - one-hit explosive kills on basic enemies
-  - roughly three-hit blood/guts explosive kills on elites
-  - alternate gore packages plus temporary audiovisual/gameplay-state changes
-  - clean entry/exit behavior so chamber flow remains readable
+- BRUTALITY MODE is no longer treated as a buried speculative feature; it is now the **next-active combat/chamber-authoring milestone lane** while Sector 4 Chamber 1 remains the active content-build lane.
+- This milestone is expected to reshape chamber dynamics, enemy placement, AI pressure, gore expectations, and encounter rhythm (not just player stat tuning).
+
+### Locked BRUTALITY MODE v1 Spec (Documentation Lock)
+- **Trigger (auto only):**
+  - auto-trigger only
+  - requires **2 basic-enemy kills within 5 seconds**
+  - only basic enemies count toward activation
+  - no manual activation
+  - no visible meter/UI yet
+- **Duration / chamber usage:**
+  - fixed **20-second** timer
+  - kills do not extend duration
+  - getting hit does not cancel/reset mode
+  - maximum **2 activations per chamber**
+  - while active, streak counting is paused
+  - on end, streak counting restarts from zero
+- **Player changes during mode:**
+  - larger player sprite
+  - collision body also grows
+  - increased reach
+  - slight movement-speed boost
+  - stronger damage output
+  - temporary weapon swap to **Hammer of Banishment**
+  - movement tuning must account for larger body so mode stays fast/predatory, not clumsy
+- **Enemy behavior during mode:**
+  - enemies become more aggressive
+  - increased move speed
+  - increased aggro range
+  - stronger headlong/meat-grinder pressure
+  - enemy behavior must reset cleanly to normal when mode ends
+- **Kill behavior / gore:**
+  - basic enemies receive instant brutality kills
+  - basics use a dedicated brutality gore package separate from elites
+  - brutality kill feel should be instant chunks: messy, fast, spectacular
+  - quick screen shake on brutality kills
+  - no gameplay stoppage
+  - elites die in exactly **3 brutality hits**
+  - elites use a distinct brutality gore package separate from basics
+- **Presentation / feedback for v1:**
+  - no visible meter
+  - no on-screen indicator
+  - activation cue is audio-only for now
+  - activation cue should use a loud aggressive elite-attack-style sound
+- **Deferred FX lane (not current implementation):**
+  - chunks slamming the viewport
+  - blood splatter spraying the viewport
+  - broader screen FX escalation
+
+### Chamber Authoring Doctrine Shift (From BRUTALITY MODE)
+Future chamber design should intentionally support:
+- basic-enemy pairings/clusters that make 2 kills in 5 seconds realistically achievable
+- elite placements that let players cash out the active state
+- enough density for a meat-grinder feeling
+- enough readability/breathing room that the mode feels earned and usable, not random spam
 
 ## Recently Locked Technical/Readability Outcomes
 - The global sprite shimmer/sparkle issue is treated as a **renderer/camera stability problem that was solved at system level**, not as an art-only defect.
