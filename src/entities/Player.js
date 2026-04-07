@@ -26,8 +26,8 @@ const BRUTALITY_WEAPON_POSE_ADJUST = Object.freeze({
   rotationDeg: -3
 });
 const BRUTALITY_FORM_MULTIPLIERS = Object.freeze({
-  displayWidth: 1.42,
-  displayHeight: 1.34
+  displayWidth: 1.52,
+  displayHeight: 1.14
 });
 const DEFAULT_BRUTALITY_MODIFIERS = {
   speedMultiplier: 1.25,
