@@ -82,6 +82,7 @@ export class Player {
     this.body.updateFromGameObject();
     this.initializeBrutalityForms();
     this.lastGroundedBodyBottom = this.body.bottom;
+    this.normalGroundedBaselineBottom = this.body.bottom;
     this.brutalityActivationGroundedBottom = null;
 
     const attackHitboxConfig = this.config.attackHitbox ?? {};
@@ -368,8 +369,8 @@ export class Player {
     this.stopSpriteAnimation();
     this.brutalityMode.active = false;
     this.config.moveSpeed = this.baseMoveSpeed;
-    const hasCachedActivationAnchor = Number.isFinite(this.brutalityActivationGroundedBottom);
-    const restoreBottomAnchor = hasCachedActivationAnchor ? this.brutalityActivationGroundedBottom : null;
+    const hasNormalGroundedBaseline = Number.isFinite(this.normalGroundedBaselineBottom);
+    const restoreBottomAnchor = hasNormalGroundedBaseline ? this.normalGroundedBaselineBottom : null;
     this.applyPlayerForm(this.normalFormValues, { restoreBottomAnchor });
     this.snapToNormalGroundedBaseline(restoreBottomAnchor);
     this.brutalityActivationGroundedBottom = null;
@@ -457,6 +458,9 @@ export class Player {
     }
 
     this.lastGroundedBodyBottom = this.body.bottom;
+    if (!this.brutalityMode?.active) {
+      this.normalGroundedBaselineBottom = this.body.bottom;
+    }
   }
 
   captureBrutalityActivationGroundedAnchor() {
@@ -482,6 +486,7 @@ export class Player {
     this.body.updateFromGameObject();
     this.body.setVelocityY(0);
     this.lastGroundedBodyBottom = restoreBottomAnchor;
+    this.normalGroundedBaselineBottom = restoreBottomAnchor;
   }
 
   getAttackDamage() {
