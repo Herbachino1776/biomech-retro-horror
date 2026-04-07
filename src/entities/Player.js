@@ -25,9 +25,7 @@ const BRUTALITY_WEAPON_POSE_ADJUST = Object.freeze({
 });
 const BRUTALITY_FORM_MULTIPLIERS = Object.freeze({
   displayWidth: 1.42,
-  displayHeight: 1.34,
-  bodyWidth: 1.26,
-  bodyHeight: 1.2
+  displayHeight: 1.34
 });
 const DEFAULT_BRUTALITY_MODIFIERS = {
   speedMultiplier: 1.25,
@@ -86,10 +84,14 @@ export class Player {
     this.body.setSize(config.body.width / scaleX, config.body.height / scaleY);
     this.body.setOffset(config.body.offsetX / scaleX, config.body.offsetY / scaleY);
     this.body.updateFromGameObject();
+    this.baseBodyDimensions = Object.freeze({
+      width: config.body.width,
+      height: config.body.height,
+      offsetX: config.body.offsetX,
+      offsetY: config.body.offsetY
+    });
     this.initializeBrutalityForms();
     this.lastGroundedBodyBottom = this.body.bottom;
-    this.normalGroundedBaselineBottom = this.body.bottom;
-    this.brutalityActivationGroundedBottom = null;
 
     const attackHitboxConfig = this.resolveAttackHitboxBaseline(this.config.attackHitbox);
     this.attackHitbox = scene.add.zone(
@@ -366,7 +368,6 @@ export class Player {
     this.stopSpriteAnimation();
     this.applyBrutalityStableStance();
     this.config.moveSpeed = this.baseMoveSpeed * this.brutalityMode.speedMultiplier;
-    this.captureBrutalityActivationGroundedAnchor();
     this.applyPlayerForm(this.brutalityFormValues);
     this.updateWeaponTexture();
     this.updateAttackHitbox();
@@ -376,20 +377,12 @@ export class Player {
     this.stopSpriteAnimation();
     this.brutalityMode.active = false;
     this.config.moveSpeed = this.baseMoveSpeed;
-    const hasBrutalityActivationAnchor = Number.isFinite(this.brutalityActivationGroundedBottom);
-    const hasNormalGroundedBaseline = Number.isFinite(this.normalGroundedBaselineBottom);
-    const restoreBottomAnchor = hasBrutalityActivationAnchor
-      ? this.brutalityActivationGroundedBottom
-      : hasNormalGroundedBaseline
-        ? this.normalGroundedBaselineBottom
-        : null;
-    this.applyPlayerForm(this.normalFormValues, { restoreBottomAnchor });
-    this.snapToNormalGroundedBaseline(restoreBottomAnchor);
-    this.brutalityActivationGroundedBottom = null;
+    this.applyPlayerForm(this.normalFormValues);
     this.setNormalStableFrame();
     this.updateWeaponTexture();
     this.hardResetAttackState();
     this.restoreNormalAttackHitbox();
+    this.updateAttackHitbox();
   }
 
   updateWeaponTexture() {
@@ -415,54 +408,38 @@ export class Player {
       displayWidth: this.sprite.displayWidth,
       displayHeight: this.sprite.displayHeight,
       originX: this.sprite.originX,
-      originY: this.sprite.originY,
-      bodyWidth: this.body.width,
-      bodyHeight: this.body.height,
-      bodyOffsetX: this.body.offset.x,
-      bodyOffsetY: this.body.offset.y
+      originY: this.sprite.originY
     });
 
-    const brutalityBodyWidth = normalFormValues.bodyWidth * BRUTALITY_FORM_MULTIPLIERS.bodyWidth;
-    const brutalityBodyHeight = normalFormValues.bodyHeight * BRUTALITY_FORM_MULTIPLIERS.bodyHeight;
     const brutalityFormValues = Object.freeze({
       displayWidth: normalFormValues.displayWidth * BRUTALITY_FORM_MULTIPLIERS.displayWidth,
       displayHeight: normalFormValues.displayHeight * BRUTALITY_FORM_MULTIPLIERS.displayHeight,
       originX: normalFormValues.originX,
-      originY: normalFormValues.originY,
-      bodyWidth: brutalityBodyWidth,
-      bodyHeight: brutalityBodyHeight,
-      bodyOffsetX: normalFormValues.bodyOffsetX - (brutalityBodyWidth - normalFormValues.bodyWidth) * 0.5,
-      bodyOffsetY: normalFormValues.bodyOffsetY - (brutalityBodyHeight - normalFormValues.bodyHeight)
+      originY: normalFormValues.originY
     });
 
     this.normalFormValues = normalFormValues;
     this.brutalityFormValues = brutalityFormValues;
-    this.currentPlayerForm = 'normal';
   }
 
-  applyPlayerForm(formValues, options = {}) {
+  applyPlayerForm(formValues) {
     if (!formValues) {
       return;
     }
 
-    const hasRestoreBottomAnchor = Number.isFinite(options.restoreBottomAnchor);
-    const preservedBodyBottom = hasRestoreBottomAnchor ? options.restoreBottomAnchor : this.body.bottom;
+    const bodyBottomBeforeTransform = this.body.bottom;
+    const spriteBottomBeforeTransform = this.sprite.getBottomCenter().y;
     this.sprite.setOrigin(formValues.originX, formValues.originY);
     this.sprite.setDisplaySize(formValues.displayWidth, formValues.displayHeight);
-
-    const scaleX = Math.abs(this.sprite.scaleX) || 1;
-    const scaleY = Math.abs(this.sprite.scaleY) || 1;
-    const bodyWidth = formValues.bodyWidth / scaleX;
-    const bodyHeight = formValues.bodyHeight / scaleY;
-    const bodyOffsetX = formValues.bodyOffsetX / scaleX;
-    const bodyOffsetY = formValues.bodyOffsetY / scaleY;
-    this.body.setSize(bodyWidth, bodyHeight);
-    this.body.setOffset(bodyOffsetX, bodyOffsetY);
+    this.syncCollisionBodyToBaseline();
+    const bodyBottomAfterTransform = this.body.bottom;
+    this.sprite.y += bodyBottomBeforeTransform - bodyBottomAfterTransform;
     this.body.updateFromGameObject();
-    this.sprite.y += preservedBodyBottom - this.body.bottom;
+    const spriteBottomAfterTransform = this.sprite.getBottomCenter().y;
+    this.sprite.y += spriteBottomBeforeTransform - spriteBottomAfterTransform;
     this.body.updateFromGameObject();
-
-    this.currentPlayerForm = formValues === this.brutalityFormValues ? 'brutality' : 'normal';
+    this.sprite.y += bodyBottomBeforeTransform - this.body.bottom;
+    this.body.updateFromGameObject();
   }
 
   captureGroundedFloorAnchor() {
@@ -473,29 +450,15 @@ export class Player {
     this.lastGroundedBodyBottom = this.body.bottom;
   }
 
-  captureBrutalityActivationGroundedAnchor() {
-    if (this.body.blocked.down) {
-      this.brutalityActivationGroundedBottom = this.body.bottom;
+  syncCollisionBodyToBaseline() {
+    if (!this.body || !this.baseBodyDimensions) {
       return;
     }
 
-    if (Number.isFinite(this.lastGroundedBodyBottom)) {
-      this.brutalityActivationGroundedBottom = this.lastGroundedBodyBottom;
-      return;
-    }
-
-    this.brutalityActivationGroundedBottom = null;
-  }
-
-  snapToNormalGroundedBaseline(restoreBottomAnchor) {
-    if (!Number.isFinite(restoreBottomAnchor)) {
-      return;
-    }
-
-    this.sprite.y += restoreBottomAnchor - this.body.bottom;
-    this.body.updateFromGameObject();
-    this.body.setVelocityY(0);
-    this.lastGroundedBodyBottom = restoreBottomAnchor;
+    const scaleX = Math.abs(this.sprite.scaleX) || 1;
+    const scaleY = Math.abs(this.sprite.scaleY) || 1;
+    this.body.setSize(this.baseBodyDimensions.width / scaleX, this.baseBodyDimensions.height / scaleY);
+    this.body.setOffset(this.baseBodyDimensions.offsetX / scaleX, this.baseBodyDimensions.offsetY / scaleY);
   }
 
   getAttackDamage() {
@@ -771,12 +734,13 @@ export class Player {
   }
 
   hardResetAttackState() {
-    this.endAttack();
+    this.stopWeaponSwingTween();
     this.attackPhase = 'idle';
     this.attackActive = false;
     if (this.attackHitbox?.body) {
       this.attackHitbox.body.enable = false;
     }
+    this.resetWeaponToRestPose();
   }
 
   restoreNormalAttackHitbox() {
