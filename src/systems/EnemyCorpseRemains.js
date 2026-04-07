@@ -154,6 +154,15 @@ function resolveRemainsDepth(scene, requestedDepth) {
   return resolvedDepth;
 }
 
+export function resolveEnemyCorpseFloorPlaneY({ groundY = null, y = 0, floorPlaneY = null } = {}) {
+  if (Number.isFinite(floorPlaneY)) {
+    return floorPlaneY;
+  }
+
+  const resolvedGroundY = Number.isFinite(groundY) ? groundY : y;
+  return resolvedGroundY + LEGACY_GROUND_Y_TO_FLOOR_PLANE_OFFSET_Y;
+}
+
 export function spawnEnemyCorpseRemains(scene, {
   x = 0,
   y = 0,
@@ -171,7 +180,7 @@ export function spawnEnemyCorpseRemains(scene, {
   const profile = REMAINS_PROFILES[size] ?? REMAINS_PROFILES.small;
   const bloodPoolProfile = BLOOD_POOL_PROFILES[size] ?? BLOOD_POOL_PROFILES.small;
   const pieceCount = Phaser.Math.Between(profile.pieceCountRange[0], profile.pieceCountRange[1]);
-  const resolvedFloorPlaneY = floorPlaneY ?? (groundY ?? y) + LEGACY_GROUND_Y_TO_FLOOR_PLANE_OFFSET_Y;
+  const resolvedFloorPlaneY = resolveEnemyCorpseFloorPlaneY({ groundY, y, floorPlaneY });
   const groundedPlaneY = resolvedFloorPlaneY;
   const containerDepth = resolveRemainsDepth(scene, depth);
   const bloodShadowColor = bloodPoolProfile.shadowColor ?? 0x18080a;
