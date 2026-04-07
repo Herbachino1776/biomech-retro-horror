@@ -387,7 +387,6 @@ export class Player {
   }
 
   initializeBrutalityForms() {
-    const normalVisualFeetToBodyBottomDelta = this.getVisualFeetY(this.sprite, this.sprite.displayHeight, this.sprite.originY) - this.body.bottom;
     const normalFormValues = Object.freeze({
       displayWidth: this.sprite.displayWidth,
       displayHeight: this.sprite.displayHeight,
@@ -396,8 +395,7 @@ export class Player {
       bodyWidth: this.body.width,
       bodyHeight: this.body.height,
       bodyOffsetX: this.body.offset.x,
-      bodyOffsetY: this.body.offset.y,
-      visualFeetToBodyBottomDelta: normalVisualFeetToBodyBottomDelta
+      bodyOffsetY: this.body.offset.y
     });
 
     const brutalityBodyWidth = normalFormValues.bodyWidth * BRUTALITY_FORM_MULTIPLIERS.bodyWidth;
@@ -410,8 +408,7 @@ export class Player {
       bodyWidth: brutalityBodyWidth,
       bodyHeight: brutalityBodyHeight,
       bodyOffsetX: normalFormValues.bodyOffsetX - (brutalityBodyWidth - normalFormValues.bodyWidth) * 0.5,
-      bodyOffsetY: normalFormValues.bodyOffsetY - (brutalityBodyHeight - normalFormValues.bodyHeight),
-      visualFeetToBodyBottomDelta: normalFormValues.visualFeetToBodyBottomDelta
+      bodyOffsetY: normalFormValues.bodyOffsetY - (brutalityBodyHeight - normalFormValues.bodyHeight)
     });
 
     this.normalFormValues = normalFormValues;
@@ -441,13 +438,6 @@ export class Player {
     this.sprite.y += preservedBodyBottom - this.body.bottom;
     this.body.updateFromGameObject();
 
-    if (Number.isFinite(formValues.visualFeetToBodyBottomDelta)) {
-      const visualFeetY = this.getVisualFeetY(this.sprite, formValues.displayHeight, formValues.originY);
-      const desiredVisualFeetY = this.body.bottom + formValues.visualFeetToBodyBottomDelta;
-      this.sprite.y += desiredVisualFeetY - visualFeetY;
-      this.body.updateFromGameObject();
-    }
-
     this.currentPlayerForm = formValues === this.brutalityFormValues ? 'brutality' : 'normal';
   }
 
@@ -471,10 +461,6 @@ export class Player {
     }
 
     this.brutalityActivationGroundedBottom = null;
-  }
-
-  getVisualFeetY(sprite, displayHeight, originY) {
-    return sprite.y + displayHeight * (1 - originY);
   }
 
   getAttackDamage() {
