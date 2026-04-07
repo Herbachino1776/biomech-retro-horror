@@ -14,6 +14,10 @@ const PLAYER_NORMAL_STABLE_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME = 0;
 const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
+const NORMAL_RESTING_WEAPON_POSE_ADJUST = Object.freeze({
+  offsetX: 14,
+  offsetY: -12
+});
 const BRUTALITY_WEAPON_POSE_ADJUST = Object.freeze({
   offsetX: 24,
   offsetY: -24,
@@ -106,7 +110,7 @@ export class Player {
       height: weaponDisplay.height
     };
     this.weaponSprite = this.createWeaponSprite(x, y + visualYOffset);
-    const restingPose = this.config.weaponVisual?.restingPose;
+    const restingPose = this.resolveRestingWeaponPose();
     this.weaponPoseState = restingPose
       ? {
           offsetX: restingPose.offsetX,
@@ -531,7 +535,7 @@ export class Player {
   }
 
   buildWeaponTweenStep(pose, depthOffset) {
-    const resolvedPose = pose ?? this.config.weaponVisual?.restingPose;
+    const resolvedPose = pose ?? this.resolveRestingWeaponPose();
 
     return {
       offsetX: resolvedPose?.offsetX ?? 0,
@@ -549,7 +553,7 @@ export class Player {
     }
 
     if (this.attackPhase === 'idle') {
-      const restPose = this.config.weaponVisual?.restingPose;
+      const restPose = this.resolveRestingWeaponPose();
       this.weaponPoseState.offsetX = restPose?.offsetX ?? this.weaponPoseState.offsetX;
       this.weaponPoseState.offsetY = restPose?.offsetY ?? this.weaponPoseState.offsetY;
       this.weaponPoseState.rotationDeg = restPose?.rotationDeg ?? this.weaponPoseState.rotationDeg;
@@ -564,7 +568,7 @@ export class Player {
       return;
     }
 
-    const restPose = this.config.weaponVisual?.restingPose;
+    const restPose = this.resolveRestingWeaponPose();
     this.weaponPoseState.offsetX = restPose?.offsetX ?? this.weaponPoseState.offsetX;
     this.weaponPoseState.offsetY = restPose?.offsetY ?? this.weaponPoseState.offsetY;
     this.weaponPoseState.rotationDeg = restPose?.rotationDeg ?? this.weaponPoseState.rotationDeg;
@@ -592,6 +596,23 @@ export class Player {
     this.weaponSprite.setPosition(this.sprite.x + brutalityAdjustedOffsetX * facing, this.sprite.y + brutalityAdjustedOffsetY);
     this.weaponSprite.setRotation(Phaser.Math.DegToRad(brutalityAdjustedRotationDeg * facing));
     this.weaponSprite.setDepth((this.sprite.depth ?? 6) + this.weaponPoseState.depthOffset);
+  }
+
+  resolveRestingWeaponPose() {
+    const restPose = this.config.weaponVisual?.restingPose;
+    if (!restPose) {
+      return null;
+    }
+
+    if (this.brutalityMode?.active) {
+      return restPose;
+    }
+
+    return {
+      ...restPose,
+      offsetX: restPose.offsetX + NORMAL_RESTING_WEAPON_POSE_ADJUST.offsetX,
+      offsetY: restPose.offsetY + NORMAL_RESTING_WEAPON_POSE_ADJUST.offsetY
+    };
   }
 
   updateSpriteAnimationState() {
