@@ -14,7 +14,7 @@ const PLAYER_NORMAL_STABLE_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME = 0;
 const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
-const BRUTALITY_FORM_ORIGIN_Y_BIAS = 0.08;
+const BRUTALITY_FORM_ORIGIN_Y_BIAS = 0.1;
 const BRUTALITY_HAMMER_DEPTH_BUMP = 3;
 const NORMAL_RESTING_WEAPON_POSE_ADJUST = Object.freeze({
   offsetX: 14,
@@ -430,15 +430,11 @@ export class Player {
     }
 
     const bodyBottomBeforeTransform = this.body.bottom;
-    const spriteBottomBeforeTransform = this.sprite.getBottomCenter().y;
     this.sprite.setOrigin(formValues.originX, formValues.originY);
     this.sprite.setDisplaySize(formValues.displayWidth, formValues.displayHeight);
     this.syncCollisionBodyToBaseline();
     const bodyBottomAfterTransform = this.body.bottom;
     this.sprite.y += bodyBottomBeforeTransform - bodyBottomAfterTransform;
-    this.body.updateFromGameObject();
-    const spriteBottomAfterTransform = this.sprite.getBottomCenter().y;
-    this.sprite.y += spriteBottomBeforeTransform - spriteBottomAfterTransform;
     this.body.updateFromGameObject();
     this.sprite.y += bodyBottomBeforeTransform - this.body.bottom;
     this.body.updateFromGameObject();
