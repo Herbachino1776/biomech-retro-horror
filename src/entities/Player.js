@@ -376,8 +376,13 @@ export class Player {
     this.stopSpriteAnimation();
     this.brutalityMode.active = false;
     this.config.moveSpeed = this.baseMoveSpeed;
+    const hasBrutalityActivationAnchor = Number.isFinite(this.brutalityActivationGroundedBottom);
     const hasNormalGroundedBaseline = Number.isFinite(this.normalGroundedBaselineBottom);
-    const restoreBottomAnchor = hasNormalGroundedBaseline ? this.normalGroundedBaselineBottom : null;
+    const restoreBottomAnchor = hasBrutalityActivationAnchor
+      ? this.brutalityActivationGroundedBottom
+      : hasNormalGroundedBaseline
+        ? this.normalGroundedBaselineBottom
+        : null;
     this.applyPlayerForm(this.normalFormValues, { restoreBottomAnchor });
     this.snapToNormalGroundedBaseline(restoreBottomAnchor);
     this.brutalityActivationGroundedBottom = null;
