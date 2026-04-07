@@ -12,6 +12,7 @@ import { restartRunFromDeath } from '../systems/RunReset.js';
 import { applyChamberEntryRestore } from '../systems/VesselRunEconomy.js';
 import { BrutalityModeState } from '../systems/BrutalityModeState.js';
 import { triggerBrutalityBasicChunkBurst } from '../systems/BrutalityChunkBurst.js';
+import { resolveEnemyCorpseFloorPlaneY } from '../systems/EnemyCorpseRemains.js';
 
 const CHAMBER = {
   sceneKey: 'Sector04Chamber02Scene',
@@ -504,11 +505,12 @@ export class Sector04Chamber02Scene extends Phaser.Scene {
           x: enemy.sprite.x,
           groundY: enemy.body?.bottom ?? this.player?.sprite?.body?.bottom
         };
+        const corpseFloorPlaneY = resolveEnemyCorpseFloorPlaneY({ groundY: remainsSpawnPoint.groundY });
         triggerBrutalityBasicChunkBurst(this, {
           x: remainsSpawnPoint.x,
-          y: remainsSpawnPoint.groundY - 16,
-          floorPlaneY: remainsSpawnPoint.groundY,
-          depth: enemy.sprite.depth + 0.12
+          y: corpseFloorPlaneY - 16,
+          floorPlaneY: corpseFloorPlaneY,
+          depth: enemy.sprite.depth - 0.08
         });
         this.cameras.main.shake(86, 0.005, true);
       }
