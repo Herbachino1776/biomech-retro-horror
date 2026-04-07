@@ -14,6 +14,8 @@ const PLAYER_NORMAL_STABLE_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME = 0;
 const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
+const BRUTALITY_FORM_ORIGIN_Y_BIAS = 0.08;
+const BRUTALITY_HAMMER_DEPTH_BUMP = 3;
 const NORMAL_RESTING_WEAPON_POSE_ADJUST = Object.freeze({
   offsetX: 14,
   offsetY: -12
@@ -415,7 +417,7 @@ export class Player {
       displayWidth: normalFormValues.displayWidth * BRUTALITY_FORM_MULTIPLIERS.displayWidth,
       displayHeight: normalFormValues.displayHeight * BRUTALITY_FORM_MULTIPLIERS.displayHeight,
       originX: normalFormValues.originX,
-      originY: normalFormValues.originY
+      originY: Phaser.Math.Clamp(normalFormValues.originY + BRUTALITY_FORM_ORIGIN_Y_BIAS, 0, 0.99)
     });
 
     this.normalFormValues = normalFormValues;
@@ -583,7 +585,8 @@ export class Player {
 
     this.weaponSprite.setPosition(this.sprite.x + brutalityAdjustedOffsetX * facing, this.sprite.y + brutalityAdjustedOffsetY);
     this.weaponSprite.setRotation(Phaser.Math.DegToRad(brutalityAdjustedRotationDeg * facing));
-    this.weaponSprite.setDepth((this.sprite.depth ?? 6) + this.weaponPoseState.depthOffset);
+    const brutalityDepthBump = this.brutalityMode?.active ? BRUTALITY_HAMMER_DEPTH_BUMP : 0;
+    this.weaponSprite.setDepth((this.sprite.depth ?? 6) + this.weaponPoseState.depthOffset + brutalityDepthBump);
   }
 
   resolveRestingWeaponPose() {
