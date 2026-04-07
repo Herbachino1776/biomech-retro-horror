@@ -14,6 +14,11 @@ const PLAYER_NORMAL_STABLE_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME = 0;
 const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
+const BRUTALITY_WEAPON_POSE_ADJUST = Object.freeze({
+  offsetX: 13,
+  offsetY: -11,
+  rotationDeg: -3
+});
 const BRUTALITY_FORM_MULTIPLIERS = Object.freeze({
   displayWidth: 1.42,
   displayHeight: 1.34,
@@ -22,7 +27,7 @@ const BRUTALITY_FORM_MULTIPLIERS = Object.freeze({
 });
 const DEFAULT_BRUTALITY_MODIFIERS = {
   speedMultiplier: 1.25,
-  reachMultiplier: 1.2,
+  reachMultiplier: 1.1,
   damageMultiplier: 2
 };
 
@@ -366,6 +371,7 @@ export class Player {
     this.brutalityActivationGroundedBottom = null;
     this.setNormalStableFrame();
     this.updateWeaponTexture();
+    this.updateAttackHitbox(true);
   }
 
   updateWeaponTexture() {
@@ -578,9 +584,13 @@ export class Player {
     const adjustedOffsetX = this.weaponPoseState.offsetX + (airborneAttackPoseAdjust?.offsetX ?? 0);
     const adjustedOffsetY = this.weaponPoseState.offsetY + (airborneAttackPoseAdjust?.offsetY ?? 0);
     const adjustedRotationDeg = this.weaponPoseState.rotationDeg + (airborneAttackPoseAdjust?.rotationDeg ?? 0);
+    const brutalityPoseAdjust = this.brutalityMode?.active ? BRUTALITY_WEAPON_POSE_ADJUST : null;
+    const brutalityAdjustedOffsetX = adjustedOffsetX + (brutalityPoseAdjust?.offsetX ?? 0);
+    const brutalityAdjustedOffsetY = adjustedOffsetY + (brutalityPoseAdjust?.offsetY ?? 0);
+    const brutalityAdjustedRotationDeg = adjustedRotationDeg + (brutalityPoseAdjust?.rotationDeg ?? 0);
 
-    this.weaponSprite.setPosition(this.sprite.x + adjustedOffsetX * facing, this.sprite.y + adjustedOffsetY);
-    this.weaponSprite.setRotation(Phaser.Math.DegToRad(adjustedRotationDeg * facing));
+    this.weaponSprite.setPosition(this.sprite.x + brutalityAdjustedOffsetX * facing, this.sprite.y + brutalityAdjustedOffsetY);
+    this.weaponSprite.setRotation(Phaser.Math.DegToRad(brutalityAdjustedRotationDeg * facing));
     this.weaponSprite.setDepth((this.sprite.depth ?? 6) + this.weaponPoseState.depthOffset);
   }
 
@@ -696,9 +706,9 @@ export class Player {
     this.scene.audioDirector?.playPlayerFootstep();
   }
 
-  updateAttackHitbox() {
+  updateAttackHitbox(forceNormalReach = false) {
     const attackHitboxConfig = this.baseAttackHitbox;
-    const reachMultiplier = this.brutalityMode.active ? this.brutalityMode.reachMultiplier : 1;
+    const reachMultiplier = forceNormalReach ? 1 : this.brutalityMode.active ? this.brutalityMode.reachMultiplier : 1;
     const strikeY = this.body.center.y + (attackHitboxConfig.yOffset ?? 2);
     const offsetX = this.facing * (attackHitboxConfig.forwardOffset ?? 42) * reachMultiplier;
     this.attackHitbox.body.setSize((attackHitboxConfig.width ?? 50) * reachMultiplier, attackHitboxConfig.height ?? 34);
