@@ -14,6 +14,7 @@ const BRUTALITY_BURST_PROFILE = Object.freeze({
   holdBeforeFadeMs: 1700,
   fadeDurationMs: 520
 });
+const BRUTALITY_BURST_FLOOR_OFFSET_Y = 10;
 
 export function triggerBrutalityBasicChunkBurst(scene, {
   x,
@@ -26,7 +27,8 @@ export function triggerBrutalityBasicChunkBurst(scene, {
   }
 
   if (scene.textures.exists(ASSET_KEYS.brutalityBasicChunkBurst01)) {
-    const groundedPlaneY = Number.isFinite(floorPlaneY) ? floorPlaneY : (y ?? 0) + 26;
+    const groundedPlaneYBase = Number.isFinite(floorPlaneY) ? floorPlaneY : (y ?? 0) + 26;
+    const groundedPlaneY = groundedPlaneYBase + BRUTALITY_BURST_FLOOR_OFFSET_Y;
     const container = scene.add.container(x ?? 0, groundedPlaneY).setDepth(depth);
     ignoreRuntimeWorldObjectFromUiCamera(scene, container);
 
