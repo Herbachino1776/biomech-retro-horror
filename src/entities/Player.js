@@ -15,8 +15,8 @@ const PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME = 0;
 const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
 const BRUTALITY_WEAPON_POSE_ADJUST = Object.freeze({
-  offsetX: 13,
-  offsetY: -11,
+  offsetX: 24,
+  offsetY: -24,
   rotationDeg: -3
 });
 const BRUTALITY_FORM_MULTIPLIERS = Object.freeze({
