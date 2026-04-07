@@ -376,6 +376,7 @@ export class Player {
     this.stopSpriteAnimation();
     this.brutalityMode.active = false;
     this.config.moveSpeed = this.baseMoveSpeed;
+    this.hardResetAttackState();
     const hasBrutalityActivationAnchor = Number.isFinite(this.brutalityActivationGroundedBottom);
     const hasNormalGroundedBaseline = Number.isFinite(this.normalGroundedBaselineBottom);
     const restoreBottomAnchor = hasBrutalityActivationAnchor
@@ -388,7 +389,7 @@ export class Player {
     this.brutalityActivationGroundedBottom = null;
     this.setNormalStableFrame();
     this.updateWeaponTexture();
-    this.resetAttackHitboxToBaseline();
+    this.restoreNormalAttackHitbox();
   }
 
   updateWeaponTexture() {
@@ -773,7 +774,15 @@ export class Player {
     return Number.isFinite(configuredReach) && configuredReach > 0 ? configuredReach : 1;
   }
 
-  resetAttackHitboxToBaseline() {
+  hardResetAttackState() {
+    this.attackPhase = 'idle';
+    this.attackActive = false;
+    this.attackHitbox.body.enable = false;
+    this.stopWeaponSwingTween();
+    this.resetWeaponToRestPose();
+  }
+
+  restoreNormalAttackHitbox() {
     const attackHitboxConfig = this.baseAttackHitbox;
     const strikeY = this.body.center.y + attackHitboxConfig.yOffset;
     const offsetX = this.facing * attackHitboxConfig.forwardOffset;
