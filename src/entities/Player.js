@@ -368,10 +368,10 @@ export class Player {
     this.stopSpriteAnimation();
     this.brutalityMode.active = false;
     this.config.moveSpeed = this.baseMoveSpeed;
-    const exitGrounded = this.body.blocked.down;
     const hasCachedActivationAnchor = Number.isFinite(this.brutalityActivationGroundedBottom);
-    const restoreBottomAnchor = exitGrounded && hasCachedActivationAnchor ? this.brutalityActivationGroundedBottom : null;
+    const restoreBottomAnchor = hasCachedActivationAnchor ? this.brutalityActivationGroundedBottom : null;
     this.applyPlayerForm(this.normalFormValues, { restoreBottomAnchor });
+    this.snapToNormalGroundedBaseline(restoreBottomAnchor);
     this.brutalityActivationGroundedBottom = null;
     this.setNormalStableFrame();
     this.updateWeaponTexture();
@@ -471,6 +471,17 @@ export class Player {
     }
 
     this.brutalityActivationGroundedBottom = null;
+  }
+
+  snapToNormalGroundedBaseline(restoreBottomAnchor) {
+    if (!Number.isFinite(restoreBottomAnchor)) {
+      return;
+    }
+
+    this.sprite.y += restoreBottomAnchor - this.body.bottom;
+    this.body.updateFromGameObject();
+    this.body.setVelocityY(0);
+    this.lastGroundedBodyBottom = restoreBottomAnchor;
   }
 
   getAttackDamage() {
