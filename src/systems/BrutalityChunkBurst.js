@@ -3,18 +3,18 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { ignoreRuntimeWorldObjectFromUiCamera } from '../ui/mobileUiCamera.js';
 
 const BRUTALITY_BURST_PROFILE = Object.freeze({
-  chunkCountRange: [18, 26],
-  launchX: 38,
-  launchLift: [18, 54],
-  settleSpreadX: 24,
-  settleLiftY: [0, 10],
-  settleSinkY: [3, 8],
+  chunkCountRange: [20, 30],
+  launchX: 56,
+  launchLift: [8, 32],
+  settleSpreadX: 44,
+  settleLiftY: [0, 6],
+  settleSinkY: [8, 14],
   apexDurationMs: [90, 140],
   settleDurationMs: [300, 500],
   holdBeforeFadeMs: 1700,
   fadeDurationMs: 520
 });
-const BRUTALITY_BURST_FLOOR_OFFSET_Y = 10;
+const BRUTALITY_BURST_FLOOR_OFFSET_Y = 18;
 
 export function triggerBrutalityBasicChunkBurst(scene, {
   x,
@@ -32,8 +32,8 @@ export function triggerBrutalityBasicChunkBurst(scene, {
     const container = scene.add.container(x ?? 0, groundedPlaneY).setDepth(depth);
     ignoreRuntimeWorldObjectFromUiCamera(scene, container);
 
-    const poolShadow = scene.add.ellipse(0, 8, 62, 20, 0x140b0b, 0.32).setScale(0.35, 0.4);
-    const poolCore = scene.add.ellipse(0, 6, 52, 16, 0x5a1318, 0.38).setScale(0.24, 0.3);
+    const poolShadow = scene.add.ellipse(0, 8, 102, 22, 0x140b0b, 0.32).setScale(0.35, 0.4);
+    const poolCore = scene.add.ellipse(0, 6, 88, 18, 0x5a1318, 0.38).setScale(0.24, 0.3);
     container.add([poolShadow, poolCore]);
 
     scene.tweens.add({
@@ -90,7 +90,7 @@ export function triggerBrutalityBasicChunkBurst(scene, {
             BRUTALITY_BURST_PROFILE.settleSinkY[0],
             BRUTALITY_BURST_PROFILE.settleSinkY[1]
           );
-          const settledY = -halfDisplayHeight - settleLift + settleSink + 6;
+          const settledY = -halfDisplayHeight - settleLift + settleSink + 12;
 
           scene.tweens.add({
             targets: chunk,
