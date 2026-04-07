@@ -34,6 +34,12 @@ const DEFAULT_BRUTALITY_MODIFIERS = {
   reachMultiplier: 1.1,
   damageMultiplier: 2
 };
+const DEFAULT_ATTACK_HITBOX = Object.freeze({
+  forwardOffset: 42,
+  yOffset: 2,
+  width: 50,
+  height: 34
+});
 
 export class Player {
   constructor(scene, x, y, config) {
@@ -85,12 +91,12 @@ export class Player {
     this.normalGroundedBaselineBottom = this.body.bottom;
     this.brutalityActivationGroundedBottom = null;
 
-    const attackHitboxConfig = this.config.attackHitbox ?? {};
+    const attackHitboxConfig = this.resolveAttackHitboxBaseline(this.config.attackHitbox);
     this.attackHitbox = scene.add.zone(
-      x + (attackHitboxConfig.forwardOffset ?? 42),
-      y + (attackHitboxConfig.yOffset ?? 2),
-      attackHitboxConfig.width ?? 50,
-      attackHitboxConfig.height ?? 34
+      x + attackHitboxConfig.forwardOffset,
+      y + attackHitboxConfig.yOffset,
+      attackHitboxConfig.width,
+      attackHitboxConfig.height
     );
     scene.physics.add.existing(this.attackHitbox);
     this.attackHitbox.body.allowGravity = false;
@@ -99,7 +105,7 @@ export class Player {
 
     this.weaponSwingTween = null;
     this.baseMoveSpeed = this.config.moveSpeed;
-    this.baseAttackHitbox = { ...(this.config.attackHitbox ?? {}) };
+    this.baseAttackHitbox = attackHitboxConfig;
     this.brutalityMode = {
       active: false,
       ...DEFAULT_BRUTALITY_MODIFIERS
@@ -363,6 +369,7 @@ export class Player {
     this.captureBrutalityActivationGroundedAnchor();
     this.applyPlayerForm(this.brutalityFormValues);
     this.updateWeaponTexture();
+    this.updateAttackHitbox();
   }
 
   clearBrutalityMode() {
@@ -376,7 +383,7 @@ export class Player {
     this.brutalityActivationGroundedBottom = null;
     this.setNormalStableFrame();
     this.updateWeaponTexture();
-    this.updateAttackHitbox(true);
+    this.resetAttackHitboxToBaseline();
   }
 
   updateWeaponTexture() {
@@ -743,12 +750,39 @@ export class Player {
     this.scene.audioDirector?.playPlayerFootstep();
   }
 
-  updateAttackHitbox(forceNormalReach = false) {
+  resolveAttackHitboxBaseline(attackHitbox = {}) {
+    return Object.freeze({
+      forwardOffset: attackHitbox.forwardOffset ?? DEFAULT_ATTACK_HITBOX.forwardOffset,
+      yOffset: attackHitbox.yOffset ?? DEFAULT_ATTACK_HITBOX.yOffset,
+      width: attackHitbox.width ?? DEFAULT_ATTACK_HITBOX.width,
+      height: attackHitbox.height ?? DEFAULT_ATTACK_HITBOX.height
+    });
+  }
+
+  getActiveAttackReachMultiplier() {
+    if (!this.brutalityMode?.active) {
+      return 1;
+    }
+
+    const configuredReach = Number(this.brutalityMode.reachMultiplier);
+    return Number.isFinite(configuredReach) && configuredReach > 0 ? configuredReach : 1;
+  }
+
+  resetAttackHitboxToBaseline() {
     const attackHitboxConfig = this.baseAttackHitbox;
-    const reachMultiplier = forceNormalReach ? 1 : this.brutalityMode.active ? this.brutalityMode.reachMultiplier : 1;
-    const strikeY = this.body.center.y + (attackHitboxConfig.yOffset ?? 2);
-    const offsetX = this.facing * (attackHitboxConfig.forwardOffset ?? 42) * reachMultiplier;
-    this.attackHitbox.body.setSize((attackHitboxConfig.width ?? 50) * reachMultiplier, attackHitboxConfig.height ?? 34);
+    const strikeY = this.body.center.y + attackHitboxConfig.yOffset;
+    const offsetX = this.facing * attackHitboxConfig.forwardOffset;
+    this.attackHitbox.body.setSize(attackHitboxConfig.width, attackHitboxConfig.height);
+    this.attackHitbox.setPosition(this.body.center.x + offsetX, strikeY);
+    this.attackHitbox.body.updateFromGameObject();
+  }
+
+  updateAttackHitbox() {
+    const attackHitboxConfig = this.baseAttackHitbox;
+    const reachMultiplier = this.getActiveAttackReachMultiplier();
+    const strikeY = this.body.center.y + attackHitboxConfig.yOffset;
+    const offsetX = this.facing * attackHitboxConfig.forwardOffset * reachMultiplier;
+    this.attackHitbox.body.setSize(attackHitboxConfig.width * reachMultiplier, attackHitboxConfig.height);
     this.attackHitbox.setPosition(this.body.center.x + offsetX, strikeY);
     this.attackHitbox.body.updateFromGameObject();
   }
