@@ -471,9 +471,6 @@ export class Player {
     }
 
     this.lastGroundedBodyBottom = this.body.bottom;
-    if (!this.brutalityMode?.active) {
-      this.normalGroundedBaselineBottom = this.body.bottom;
-    }
   }
 
   captureBrutalityActivationGroundedAnchor() {
@@ -499,7 +496,6 @@ export class Player {
     this.body.updateFromGameObject();
     this.body.setVelocityY(0);
     this.lastGroundedBodyBottom = restoreBottomAnchor;
-    this.normalGroundedBaselineBottom = restoreBottomAnchor;
   }
 
   getAttackDamage() {
