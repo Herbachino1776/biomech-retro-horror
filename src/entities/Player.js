@@ -14,7 +14,7 @@ const PLAYER_NORMAL_STABLE_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME = 0;
 const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
-const BRUTALITY_FORM_ORIGIN_Y_BIAS = 0.1;
+const BRUTALITY_FORM_ORIGIN_Y_BIAS = 0.06;
 const BRUTALITY_HAMMER_DEPTH_BUMP = 3;
 const NORMAL_RESTING_WEAPON_POSE_ADJUST = Object.freeze({
   offsetX: 14,
@@ -282,6 +282,9 @@ export class Player {
   }
 
   die() {
+    if (this.brutalityMode?.active) {
+      this.clearBrutalityMode();
+    }
     this.isDead = true;
     this.endAttack();
     this.body.setVelocity(0, 0);
@@ -377,7 +380,10 @@ export class Player {
 
   clearBrutalityMode() {
     this.stopSpriteAnimation();
-    this.brutalityMode.active = false;
+    this.brutalityMode = {
+      active: false,
+      ...DEFAULT_BRUTALITY_MODIFIERS
+    };
     this.config.moveSpeed = this.baseMoveSpeed;
     this.applyPlayerForm(this.normalFormValues);
     this.setNormalStableFrame();
@@ -736,6 +742,7 @@ export class Player {
     this.stopWeaponSwingTween();
     this.attackPhase = 'idle';
     this.attackActive = false;
+    this.lastAttackTime = -Infinity;
     if (this.attackHitbox?.body) {
       this.attackHitbox.body.enable = false;
     }
