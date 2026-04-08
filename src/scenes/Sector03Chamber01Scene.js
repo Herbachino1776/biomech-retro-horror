@@ -389,7 +389,7 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
     enemy.pocketWakeAtTime = null;
 
     this.physics.add.collider(enemy.sprite, this.platforms);
-    this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (attackZone, enemySprite) => {
+    this.physics.add.overlap(this.player.attackHitbox, enemy.damageHurtbox ?? enemy.sprite, (attackZone, enemySprite) => {
       this.handlePlayerHitEnemy(attackZone, enemySprite, enemy);
     });
     this.physics.add.overlap(this.player.sprite, enemy.sprite, (playerSprite, enemySprite) => {
@@ -952,7 +952,7 @@ export class Sector03Chamber01Scene extends Phaser.Scene {
   }
 
   isEnemyOverlapTarget(target, enemy) {
-    return target === enemy.sprite || target?.gameObject === enemy.sprite;
+    return target === enemy.sprite || target === enemy.damageHurtbox || target?.gameObject === enemy.sprite || target?.gameObject === enemy.damageHurtbox;
   }
 
   createInvisiblePlatform(x, y, width, height) {

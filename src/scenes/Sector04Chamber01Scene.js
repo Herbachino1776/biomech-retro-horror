@@ -387,11 +387,11 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
 
         this.physics.add.collider(enemy.sprite, this.platforms);
         this.physics.add.collider(enemy.sprite, this.terminalBarrier);
-        this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (attackZone, enemySprite) => {
+        this.physics.add.overlap(this.player.attackHitbox, enemy.damageHurtbox ?? enemy.sprite, (attackZone, enemySprite) => {
           this.handlePlayerHitEnemy(attackZone, enemySprite, enemy);
         });
         this.physics.add.overlap(this.player.sprite, enemy.sprite, (_p, enemySprite) => {
-          if (enemy.dead || !(enemySprite === enemy.sprite || enemySprite?.gameObject === enemy.sprite) || !enemy.canDealContactDamage(this.time.now)) {
+          if (enemy.dead || !(enemySprite === enemy.sprite || enemySprite === enemy.damageHurtbox || enemySprite?.gameObject === enemy.sprite || enemySprite?.gameObject === enemy.damageHurtbox) || !enemy.canDealContactDamage(this.time.now)) {
             return;
           }
           const tookDamage = this.player.receiveDamage(SKITTER.contactDamage, this.time.now);
@@ -419,7 +419,7 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     this.endBoss.sprite.setDepth(6.2);
     this.physics.add.collider(this.endBoss.sprite, this.platforms);
     this.physics.add.collider(this.endBoss.sprite, this.terminalBarrier);
-    this.physics.add.overlap(this.player.attackHitbox, this.endBoss.sprite, () => this.handlePlayerHitEndBoss());
+    this.physics.add.overlap(this.player.attackHitbox, this.endBoss.damageHurtbox ?? this.endBoss.sprite, () => this.handlePlayerHitEndBoss());
     this.physics.add.overlap(this.player.sprite, this.endBoss.sprite, () => this.handleEndBossContactPlayer());
   }
 
@@ -651,7 +651,7 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
   }
 
   handlePlayerHitEnemy(_attackZone, enemySprite, enemy) {
-    if (!this.player.attackActive || enemy.dead || enemy.lastAttackHitId === this.player.attackId || !(enemySprite === enemy.sprite || enemySprite?.gameObject === enemy.sprite)) {
+    if (!this.player.attackActive || enemy.dead || enemy.lastAttackHitId === this.player.attackId || !(enemySprite === enemy.sprite || enemySprite === enemy.damageHurtbox || enemySprite?.gameObject === enemy.sprite || enemySprite?.gameObject === enemy.damageHurtbox)) {
       return;
     }
 

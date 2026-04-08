@@ -4,6 +4,7 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { triggerEnemyDeathRuptureBurst } from '../systems/EnemyDeathRuptureBurst.js';
 import { triggerEnemyHitSplatterBurst } from '../systems/EnemyHitSplatterBurst.js';
 import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
+import { createDamageHurtbox, resolveDamageHurtboxConfig, syncDamageHurtbox } from './damageHurtbox.js';
 
 const DEATH_FADE_DURATION_MS = 180;
 const DEATH_REMAINS_SPAWN_DELAY_MS = 60;
@@ -44,6 +45,10 @@ export class SkitterServitor {
       speedMultiplier: 1,
       aggroRangeMultiplier: 1
     };
+    this.damageHurtboxConfig = resolveDamageHurtboxConfig(this.config.damageHurtbox, {
+      trimXRatio: 0.04,
+      trimYRatio: 0.03
+    });
     this.poiseConfig = {
       max: Math.max(1, this.config.poise?.max ?? 0),
       recoverDelayMs: Math.max(0, this.config.poise?.recoverDelayMs ?? 1400),
@@ -99,6 +104,8 @@ export class SkitterServitor {
     const tunedOffsetX = this.config.body.offsetX + (this.config.body.width - tunedBodyWidth) * 0.5;
     this.body.setSize(tunedBodyWidth / scaleX, this.config.body.height / scaleY);
     this.body.setOffset(tunedOffsetX / scaleX, this.config.body.offsetY / scaleY);
+    this.damageHurtbox = createDamageHurtbox(scene, this.sprite);
+    this.syncDamageHurtbox();
 
     this.baseScaleX = this.sprite.scaleX || 1;
     this.baseScaleY = this.sprite.scaleY || 1;
@@ -121,6 +128,7 @@ export class SkitterServitor {
     this.active = Boolean(isActive);
     this.sprite.setActive(this.active).setVisible(this.active);
     this.body.enable = this.active;
+    this.setDamageHurtboxEnabled(this.active && !this.dead);
     if (!this.active) {
       this.body.setVelocity(0, 0);
       this.contactDamageWindowUntil = -Infinity;
@@ -131,12 +139,14 @@ export class SkitterServitor {
 
   update(time, playerX) {
     if (!this.active) {
+      this.syncDamageHurtbox();
       this.body.setVelocity(0, 0);
       return;
     }
 
     this.updatePoiseState(time);
     this.updateVisuals(time);
+    this.syncDamageHurtbox();
 
     if (this.dead) {
       this.body.setVelocity(0, 0);
@@ -385,6 +395,7 @@ export class SkitterServitor {
       this.body.stop();
       this.body.setAllowGravity(false);
       this.body.enable = false;
+      this.setDamageHurtboxEnabled(false);
       this.eyeGlow.setVisible(false);
       this.setVisualTint(0x1f1714);
       this.deathRemainsSpawnPoint = this.resolveDeathRemainsSpawnPoint();
@@ -645,5 +656,20 @@ export class SkitterServitor {
     }
 
     this.sprite.fillColor = color;
+  }
+
+  setDamageHurtboxEnabled(enabled) {
+    if (this.damageHurtbox?.body) {
+      this.damageHurtbox.body.enable = Boolean(enabled);
+    }
+  }
+
+  syncDamageHurtbox() {
+    syncDamageHurtbox(
+      this.damageHurtbox,
+      this.sprite,
+      this.damageHurtboxConfig,
+      this.active && !this.dead
+    );
   }
 }

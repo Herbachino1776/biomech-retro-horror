@@ -206,8 +206,8 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
         enemy.pocketWakeAtTime = null;
 
         this.physics.add.collider(enemy.sprite, this.platforms);
-        this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (attackZone, enemySprite) => {
-          if (!this.player.attackActive || enemy.dead || enemy.lastAttackHitId === this.player.attackId || !(enemySprite === enemy.sprite || enemySprite?.gameObject === enemy.sprite)) {
+        this.physics.add.overlap(this.player.attackHitbox, enemy.damageHurtbox ?? enemy.sprite, (attackZone, enemySprite) => {
+          if (!this.player.attackActive || enemy.dead || enemy.lastAttackHitId === this.player.attackId || !(enemySprite === enemy.sprite || enemySprite === enemy.damageHurtbox || enemySprite?.gameObject === enemy.sprite || enemySprite?.gameObject === enemy.damageHurtbox)) {
             return;
           }
           enemy.lastAttackHitId = this.player.attackId;
@@ -217,7 +217,7 @@ export class Sector03Chamber02Scene extends Phaser.Scene {
           this.audioDirector?.playPlayerHit();
         });
         this.physics.add.overlap(this.player.sprite, enemy.sprite, (_p, enemySprite) => {
-          if (enemy.dead || !(enemySprite === enemy.sprite || enemySprite?.gameObject === enemy.sprite) || !enemy.canDealContactDamage(this.time.now)) {
+          if (enemy.dead || !(enemySprite === enemy.sprite || enemySprite === enemy.damageHurtbox || enemySprite?.gameObject === enemy.sprite || enemySprite?.gameObject === enemy.damageHurtbox) || !enemy.canDealContactDamage(this.time.now)) {
             return;
           }
           const tookDamage = this.player.receiveDamage(SKITTER.contactDamage, this.time.now);

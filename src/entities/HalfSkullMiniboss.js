@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { COLORS } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
+import { createDamageHurtbox, resolveDamageHurtboxConfig, syncDamageHurtbox } from './damageHurtbox.js';
 
 const FALLBACK_WIDTH = 188;
 const FALLBACK_HEIGHT = 208;
@@ -37,6 +38,10 @@ export class HalfSkullMiniboss {
     this.staggerUntil = -Infinity;
 
     this.textureKey = config.textureKey ?? ASSET_KEYS.chamber01HalfSkullMiniboss;
+    this.damageHurtboxConfig = resolveDamageHurtboxConfig(config.damageHurtbox, {
+      trimXRatio: 0.07,
+      trimYRatio: 0.06
+    });
     this.usingTexture = scene.textures.exists(this.textureKey);
 
     this.sprite = this.usingTexture
@@ -65,10 +70,13 @@ export class HalfSkullMiniboss {
     this.body.setSize(tunedBodyWidth / scaleX, config.body.height / scaleY);
     this.body.setOffset(tunedOffsetX / scaleX, config.body.offsetY / scaleY);
     this.body.setAllowGravity(true);
+    this.damageHurtbox = createDamageHurtbox(scene, this.sprite);
+    this.syncDamageHurtbox();
   }
 
   setActive(active) {
     this.active = active;
+    this.setDamageHurtboxEnabled(this.active && !this.dead);
     if (!active && !this.dead) {
       this.clearAttackState();
       this.body.setVelocityX(0);
@@ -78,6 +86,7 @@ export class HalfSkullMiniboss {
   update(time, player) {
     this.updatePoiseState(time);
     this.updateVisuals(time);
+    this.syncDamageHurtbox();
 
     if (this.dead) {
       this.body.setVelocityX(0);
@@ -215,6 +224,7 @@ export class HalfSkullMiniboss {
       this.dead = true;
       this.clearAttackState();
       this.body.enable = false;
+      this.setDamageHurtboxEnabled(false);
       this.playDeathEffect();
     }
 
@@ -365,5 +375,20 @@ export class HalfSkullMiniboss {
       this.sprite.setFillStyle(telegraphing ? 0xd6bb7a : takingHit ? 0xd8bdaa : COLORS.bone, telegraphing ? 0.96 : 0.94);
     }
 
+  }
+
+  setDamageHurtboxEnabled(enabled) {
+    if (this.damageHurtbox?.body) {
+      this.damageHurtbox.body.enable = Boolean(enabled);
+    }
+  }
+
+  syncDamageHurtbox() {
+    syncDamageHurtbox(
+      this.damageHurtbox,
+      this.sprite,
+      this.damageHurtboxConfig,
+      this.active && !this.dead
+    );
   }
 }
