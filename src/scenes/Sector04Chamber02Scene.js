@@ -208,6 +208,7 @@ export class Sector04Chamber02Scene extends Phaser.Scene {
     this.createLoreAnchor();
     this.createUi();
     this.configureLayout();
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleSceneShutdown, this);
     this.cameras.main.fadeIn(600, 0, 0, 0);
   }
 
@@ -484,6 +485,11 @@ export class Sector04Chamber02Scene extends Phaser.Scene {
         this.enemies.forEach((enemy) => enemy.setBrutalityAggression(false));
       }
     });
+  }
+
+  handleSceneShutdown() {
+    this.player?.clearBrutalityMode?.();
+    this.enemies?.forEach((enemy) => enemy.setBrutalityAggression(false));
   }
 
   handlePlayerHitEnemy(_attackZone, enemySprite, enemy) {

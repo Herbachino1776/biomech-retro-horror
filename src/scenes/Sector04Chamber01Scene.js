@@ -272,6 +272,7 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     this.majorEncounterResolution = new MajorEncounterResolution(this);
     this.createForwardThreshold();
     this.configureLayout();
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleSceneShutdown, this);
     this.cameras.main.fadeIn(600, 0, 0, 0);
   }
 
@@ -642,6 +643,12 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
         this.endBoss?.setBrutalityAggression(false);
       }
     });
+  }
+
+  handleSceneShutdown() {
+    this.player?.clearBrutalityMode?.();
+    this.enemies?.forEach((enemy) => enemy.setBrutalityAggression(false));
+    this.endBoss?.setBrutalityAggression?.(false);
   }
 
   handlePlayerHitEnemy(_attackZone, enemySprite, enemy) {
