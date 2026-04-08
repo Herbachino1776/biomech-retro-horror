@@ -629,7 +629,12 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   handlePlayerHitBoss(_attackZone, bossSprite) {
-    if (!this.player.attackActive || !this.bossEncounterStarted || this.boss.dead || !this.isEnemyOverlapTarget(bossSprite, this.boss.sprite)) {
+    if (
+      !this.player.attackActive
+      || !this.bossEncounterStarted
+      || this.boss.dead
+      || !this.isEnemyOverlapTarget(bossSprite, this.boss.sprite, this.boss.damageHurtbox)
+    ) {
       return;
     }
     if (this.boss.lastAttackHitId === this.player.attackId) {
@@ -1199,7 +1204,10 @@ export class Chamber01Scene extends Phaser.Scene {
     return platform;
   }
 
-  isEnemyOverlapTarget(target, sprite) {
-    return target === sprite || target?.gameObject === sprite;
+  isEnemyOverlapTarget(target, sprite, alternateSprite = null) {
+    return target === sprite
+      || target === alternateSprite
+      || target?.gameObject === sprite
+      || target?.gameObject === alternateSprite;
   }
 }
