@@ -14,6 +14,7 @@ import { triggerSector02BlackOilBlowout } from '../../systems/Sector02BlackOilPa
 import { spawnEnemyCorpseRemains } from '../../systems/EnemyCorpseRemains.js';
 import { grantMajorEncounterIntegrityReward } from '../../systems/VesselRunEconomy.js';
 import { MajorEncounterResolution } from '../../systems/MajorEncounterResolution.js';
+import { beginBossDeathPayoffPackage } from '../../systems/BossDeathPayoffPackage.js';
 
 export function createBossPitSceneClass(config) {
   const BOSS_PIT_BOOTSTRAP = config.bootstrap;
@@ -178,7 +179,7 @@ export function createBossPitSceneClass(config) {
     this.boss.setActive(false);
     this.boss.sprite.setDepth(6.2);
     this.physics.add.collider(this.boss.sprite, this.platforms);
-    this.physics.add.overlap(this.player.attackHitbox, this.boss.sprite, () => this.handlePlayerHitBoss());
+    this.physics.add.overlap(this.player.attackHitbox, this.boss.damageHurtbox ?? this.boss.sprite, () => this.handlePlayerHitBoss());
     this.physics.add.overlap(this.player.sprite, this.boss.sprite, () => this.handleBossContactPlayer());
   }
 
@@ -519,76 +520,102 @@ export function createBossPitSceneClass(config) {
       return;
     }
 
-    this.majorEncounterResolution?.begin({
+    beginBossDeathPayoffPackage({
+      scene: this,
       encounterId: config.encounterId,
-      freezePlayer: true,
-      disablePlayerAttack: true,
+      majorEncounterResolution: this.majorEncounterResolution,
+      bossSprite: this.boss.sprite,
+      bossBody: this.boss.body,
+      bossActor: this.boss,
+      player: this.player,
       pauseProjectiles: (paused) => this.setEnemyProjectilesPaused(paused),
       setResolutionLock: (locked) => {
         this.resolutionLockActive = locked;
+      },
+      followPlayer: {
+        cameraLerp: BOSS_PIT_BOOTSTRAP.cameraLerp,
+        followOffsetX: BOSS_PIT_BOOTSTRAP.desktopFollowOffsetX,
+        followOffsetY: 0,
+        zoom: this.getGameplayZoom(),
+        onRestored: () => this.applyResponsiveLayout()
+      },
+      deathCamera: BOSS_PIT_DEATH_CAMERA,
+      payoffPose: {
+        floorPlaneY: BOSS_PIT_FLOOR_PLANE_Y,
+        maxUpwardSnapPx: BOSS_PIT_PAYOFF_POSE.maxUpwardSnapPx
+      },
+      corpseRemains: {
+        floorPlaneY: BOSS_PIT_FLOOR_PLANE_Y,
+        size: 'bossPitBoss'
+      },
+      victory: {
+        preExplosionShakeMs: BOSS_PIT_VICTORY.preExplosionShakeMs,
+        preExplosionShakeIntensity: BOSS_PIT_VICTORY.preExplosionShakeIntensity,
+        explosionFadeStartDelayMs: BOSS_PIT_VICTORY.explosionFadeStartDelayMs,
+        explosionFadeDurationMs: BOSS_PIT_VICTORY.explosionFadeDurationMs,
+        postExplosionDespawnDelayMs: BOSS_PIT_VICTORY.postExplosionDespawnDelayMs,
+        goreFountainCadenceMs: BOSS_PIT_VICTORY.goreFountainCadenceMs,
+        fountainBurst: {
+          xJitter: [-58, 58],
+          yFromBottom: [104, 156],
+          depthOffset: 0.38,
+          randomScale: [0.7, 0.92],
+          durationMs: 560,
+          burstCount: 52,
+          sprayCount: 76,
+          mistCount: 7,
+          emberCount: 6,
+          burstRadiusX: 124,
+          burstRadiusY: 168,
+          dropletWidth: [8, 20],
+          dropletHeight: [18, 44],
+          sprayWidth: [4, 11],
+          sprayHeight: [14, 36],
+          splashColor: 0x86111b,
+          heavyColor: 0x560b13,
+          highlightColor: 0xa23340,
+          redSpeckColor: 0xc24753,
+          mistColor: 0x1e090d
+        },
+        blowoutBurst: {
+          yFromBottom: [90, 126],
+          depthOffset: 0.46,
+          scale: 1.34,
+          durationMs: 760,
+          burstCount: 88,
+          sprayCount: 114,
+          mistCount: 16,
+          emberCount: 16,
+          burstRadiusX: 148,
+          burstRadiusY: 184,
+          dropletWidth: [10, 28],
+          dropletHeight: [20, 50],
+          sprayWidth: [5, 13],
+          sprayHeight: [16, 38],
+          splashColor: 0x8b111c,
+          heavyColor: 0x5e0a13,
+          highlightColor: 0xb43645,
+          redSpeckColor: 0xc84a55,
+          mistColor: 0x1d080b
+        }
       },
       onStart: () => {
         this.hasProcessedBossPitVictory = true;
         this.victorySequenceActive = true;
         config.runState.markCompleted?.();
-        this.stabilizeBossCorpseForPayoff();
-        this.focusCameraOnBossDeathPayoff();
-        this.cameras.main.shake(BOSS_PIT_VICTORY.preExplosionShakeMs, BOSS_PIT_VICTORY.preExplosionShakeIntensity, true);
-        this.startVictoryGoreFountain();
       },
-      stages: [
-        {
-          atMs: BOSS_PIT_VICTORY.preExplosionShakeMs,
-          run: () => {
-            this.stopVictoryGoreFountain();
-            triggerSector02BlackOilBlowout(this, {
-              source: this.boss.sprite,
-              x: this.boss.sprite.x,
-              y: (this.boss.sprite.body?.bottom ?? this.boss.sprite.y) - Phaser.Math.Between(90, 126),
-              depth: this.boss.sprite.depth + 0.46,
-              scale: 1.34,
-              durationMs: 760,
-              burstCount: 88,
-              sprayCount: 114,
-              mistCount: 16,
-              emberCount: 16,
-              burstRadiusX: 148,
-              burstRadiusY: 184,
-              dropletWidth: [10, 28],
-              dropletHeight: [20, 50],
-              sprayWidth: [5, 13],
-              sprayHeight: [16, 38],
-              splashColor: 0x8b111c,
-              heavyColor: 0x5e0a13,
-              highlightColor: 0xb43645,
-              redSpeckColor: 0xc84a55,
-              mistColor: 0x1d080b,
-              alpha: 0.98,
-              includeGroundPool: false,
-              persistPuddle: false,
-              fadeSource: false
-            });
-            this.majorEncounterResolution?.schedule(BOSS_PIT_VICTORY.explosionFadeStartDelayMs, () => {
-              this.startBossExplosionFade();
-            });
-            this.audioDirector?.playBanishmentSting();
-            if (!config.runState.hasRewardGranted?.()) {
-              const rewarded = grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, config.rewardGrantId);
-              if (rewarded) {
-                config.runState.markRewardGranted?.();
-              }
-            }
-          }
-        },
-        {
-          atMs: BOSS_PIT_VICTORY.preExplosionShakeMs + BOSS_PIT_VICTORY.postExplosionDespawnDelayMs,
-          run: () => {
-            this.despawnBossAfterPayoff();
+      onPreExplosion: () => {
+        if (!config.runState.hasRewardGranted?.()) {
+          const rewarded = grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, config.rewardGrantId);
+          if (rewarded) {
+            config.runState.markRewardGranted?.();
           }
         }
-      ],
+      },
       onComplete: () => {
-        this.completeBossPitVictoryState();
+        this.victorySequenceActive = false;
+        this.mobileControls.setMode('gameplay');
+        this.unlockExitAltar();
       }
     });
   }

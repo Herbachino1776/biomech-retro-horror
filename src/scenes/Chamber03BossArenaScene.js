@@ -11,6 +11,8 @@ import { AudioDirector } from '../audio/AudioDirector.js';
 import { applyChamberEntryRestore, grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
 import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
+import { beginBossDeathPayoffPackage } from '../systems/BossDeathPayoffPackage.js';
+import { createDamageHurtbox, resolveDamageHurtboxConfig, syncDamageHurtbox } from '../entities/damageHurtbox.js';
 
 const CHAMBER03_BOSS_ARENA = {
   worldWidth: 1920,
@@ -108,6 +110,13 @@ const CHAMBER03_BOSS_COMBAT = {
   projectilePhaseTwoSpreadY: 28,
   arenaPaddingX: 164
 };
+
+const CHAMBER03_BOSS_DAMAGE_HURTBOX = resolveDamageHurtboxConfig({
+  trimXRatio: 0.06,
+  trimYRatio: 0.06,
+  minWidth: 88,
+  minHeight: 150
+});
 
 const CHAMBER03_FINALE = {
   bloodFlashMs: 860,
@@ -449,7 +458,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       CHAMBER03_BOSS_ARENA.groundedBodyRestingYOffset;
 
     this.physics.add.collider(this.bossSprite, this.platforms);
-    this.physics.add.overlap(this.player.attackHitbox, this.bossSprite, this.handlePlayerHitBoss, null, this);
+    this.bossDamageHurtbox = createDamageHurtbox(this, this.bossSprite);
+    this.physics.add.overlap(this.player.attackHitbox, this.bossDamageHurtbox, this.handlePlayerHitBoss, null, this);
     this.physics.add.overlap(this.player.sprite, this.bossSprite, this.handleBossContactPlayer, null, this);
     this.resetBossPresentationState();
 
@@ -513,6 +523,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.audioDirector?.shutdown();
       this.majorEncounterResolution?.teardown();
+      this.bossDamageHurtbox?.destroy();
     });
   }
 
@@ -770,7 +781,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
   }
 
   handlePlayerHitBoss(_hitbox, bossSprite) {
-    if (!this.player.attackActive || !this.hasActivatedBoss || this.bossCombat?.defeated || bossSprite !== this.bossSprite) {
+    if (!this.player.attackActive || !this.hasActivatedBoss || this.bossCombat?.defeated || bossSprite !== this.bossDamageHurtbox) {
       return;
     }
 
@@ -850,12 +861,113 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       return;
     }
 
-    this.majorEncounterResolution?.begin({
+    beginBossDeathPayoffPackage({
+      scene: this,
       encounterId: 'chamber03-precentor',
-      freezePlayer: true,
-      disablePlayerAttack: true,
+      majorEncounterResolution: this.majorEncounterResolution,
+      bossSprite: this.bossSprite,
+      bossBody: this.bossBody,
+      player: this.player,
       setResolutionLock: (locked) => {
         this.resolutionLockActive = locked;
+      },
+      followPlayer: {
+        cameraLerp: CHAMBER03_BOSS_ARENA.cameraLerp,
+        followOffsetX: CHAMBER03_BOSS_ARENA.desktopFollowOffsetX,
+        followOffsetY: 0,
+        zoom: this.mobileControls.enabled && this.scale.height >= this.scale.width ? PORTRAIT_LAYOUT.portraitZoom : PORTRAIT_LAYOUT.desktopZoom,
+        onRestored: () => this.applyResponsiveLayout()
+      },
+      deathCamera: {
+        focusLerp: { x: 0.07, y: 0.07 },
+        focusOffsetX: 0,
+        focusOffsetY: -32,
+        zoomScale: 1.2,
+        zoomInDurationMs: 340,
+        zoomOutDurationMs: 360
+      },
+      payoffPose: {
+        floorPlaneY: WORLD.floorY + 2,
+        maxUpwardSnapPx: 42
+      },
+      corpseRemains: {
+        groundY: WORLD.floorY + 2,
+        size: 'large'
+      },
+      victory: {
+        preExplosionShakeMs: CHAMBER03_FINALE.bloodFlashMs,
+        preExplosionShakeIntensity: 0.028,
+        explosionFadeStartDelayMs: 0,
+        explosionFadeDurationMs: CHAMBER03_FINALE.bossBarDropDelayMs,
+        postExplosionDespawnDelayMs: CHAMBER03_FINALE.bossBarDropDelayMs,
+        goreFountainCadenceMs: 86,
+        fountainBurst: {
+          xJitter: [-64, 64],
+          yFromBottom: [96, 156],
+          depthOffset: 0.38,
+          randomScale: [0.84, 1.06],
+          durationMs: 590,
+          burstCount: 64,
+          sprayCount: 88,
+          mistCount: 10,
+          emberCount: 8,
+          burstRadiusX: 136,
+          burstRadiusY: 186,
+          dropletWidth: [8, 24],
+          dropletHeight: [18, 48],
+          sprayWidth: [4, 12],
+          sprayHeight: [14, 38],
+          splashColor: 0x86111b,
+          heavyColor: 0x560b13,
+          highlightColor: 0xa23340,
+          redSpeckColor: 0xc24753,
+          mistColor: 0x1e090d
+        },
+        blowoutBurst: {
+          yFromBottom: [94, 134],
+          depthOffset: 0.46,
+          scale: 1.46,
+          durationMs: 840,
+          burstCount: 102,
+          sprayCount: 136,
+          mistCount: 22,
+          emberCount: 20,
+          burstRadiusX: 168,
+          burstRadiusY: 204,
+          dropletWidth: [12, 34],
+          dropletHeight: [24, 58],
+          sprayWidth: [6, 15],
+          sprayHeight: [16, 42],
+          splashColor: 0x8b111c,
+          heavyColor: 0x5e0a13,
+          highlightColor: 0xb43645,
+          redSpeckColor: 0xc84a55,
+          mistColor: 0x1d080b
+        },
+        extraStages: [
+          {
+            atMs: CHAMBER03_FINALE.payoffRevealDelayMs,
+            run: () => this.showSectorPayoffText()
+          },
+          {
+            atMs: CHAMBER03_FINALE.bossBarDropDelayMs,
+            run: () => {
+              this.bossDefeatCeremonyBossBarActive = false;
+              this.hud.setBossBarState({ visible: false });
+            }
+          },
+          {
+            atMs: CHAMBER03_FINALE.progressionRevealDelayMs,
+            run: () => this.revealProgressionGate()
+          },
+          {
+            atMs: CHAMBER03_FINALE.controlReleaseDelayMs,
+            run: () => {
+              this.isSectorFinaleActive = true;
+              this.player.attackHitbox?.body?.setEnable(false);
+            }
+          }
+        ]
       },
       onStart: () => {
         this.bossCombat.defeated = true;
@@ -869,10 +981,6 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         this.bossBody.setVelocity(0, 0);
         this.bossDefeatCeremonyBossBarActive = true;
         this.audioDirector?.playEnemyDeath('miniboss');
-        const bossRemainsX = this.bossSprite.x;
-        const bossGroundedY = WORLD.floorY + 2 - this.bossSprite.displayHeight * (1 - this.bossSprite.originY);
-        this.bossSprite.setY(bossGroundedY);
-        this.bossBody?.setVelocity?.(0, 0);
         this.bossStatusPrompt
           ?.setText(CHAMBER03_FINALE.payoffTitle)
           .setPosition(this.scale.width / 2, this.getBossPromptY())
@@ -881,23 +989,6 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
           ?.setText(CHAMBER03_FINALE.payoffBody)
           .setPosition(this.scale.width / 2, this.getBossPromptY() + 44);
         this.triggerSectorFinalePayoff();
-        this.tweens.add({
-          targets: [this.bossSprite, this.bossFallbackLabel].filter(Boolean),
-          alpha: 0.06,
-          y: '-=42',
-          duration: 1180,
-          ease: 'Cubic.easeOut'
-        });
-        this.time.delayedCall(1180, () => {
-          spawnEnemyCorpseRemains(this, {
-            x: bossRemainsX,
-            groundY: WORLD.floorY + 2,
-            depth: this.bossSprite.depth,
-            size: 'large'
-          });
-          this.bossSprite.setVisible(false).setAlpha(0);
-          this.bossFallbackLabel?.setVisible(false).setAlpha(0);
-        });
         this.tweens.add({
           targets: this.bossArrivalAura,
           alpha: 0.06,
@@ -911,37 +1002,14 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
           ease: 'Sine.out'
         });
       },
-      stages: [
-        {
-          atMs: CHAMBER03_FINALE.payoffRevealDelayMs,
-          run: () => {
-            this.showSectorPayoffText();
-          }
-        },
-        {
-          atMs: CHAMBER03_FINALE.bossBarDropDelayMs,
-          run: () => {
-            this.bossDefeatCeremonyBossBarActive = false;
-            this.hud.setBossBarState({ visible: false });
-          }
-        },
-        {
-          atMs: CHAMBER03_FINALE.progressionRevealDelayMs,
-          run: () => {
-            this.revealProgressionGate();
-          }
-        },
-        {
-          atMs: CHAMBER03_FINALE.controlReleaseDelayMs,
-          run: () => {
-            this.isSectorFinaleActive = true;
-            this.player.attackHitbox?.body?.setEnable(false);
-
-          }
-        }
-      ],
+      onDespawn: () => {
+        this.bossFallbackLabel?.setVisible(false).setAlpha(0);
+      },
       onComplete: () => {
         this.bossDefeatCeremonyBossBarActive = false;
+        if (this.isSectorFinaleActive) {
+          this.player.attackHitbox?.body?.setEnable(false);
+        }
       }
     });
   }
@@ -1418,6 +1486,12 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossArrivalShadow
       ?.setPosition(this.bossSprite.x, WORLD.floorY + 8)
       .setAlpha(this.bossCombat.defeated ? 0.08 : 0.2 + (Math.sin(time / (phaseTwo ? 160 : 320)) + 1) * 0.04);
+    syncDamageHurtbox(
+      this.bossDamageHurtbox,
+      this.bossSprite,
+      CHAMBER03_BOSS_DAMAGE_HURTBOX,
+      this.hasActivatedBoss && !this.bossCombat.defeated && this.bossBody?.enable
+    );
   }
 
   resetBossPresentationState() {
@@ -1449,6 +1523,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossArrivalShadow?.setPosition(CHAMBER03_BOSS_ARENA.bossAnchorX, WORLD.floorY + 8).setAlpha(0).setDepth(-4.2);
     this.bossArrivalAura?.setPosition(CHAMBER03_BOSS_ARENA.bossAnchorX, CHAMBER03_BOSS_ARENA.bossAnchorY + 18).setAlpha(0).setDepth(-4.1);
     this.bossArrivalHalo?.setPosition(CHAMBER03_BOSS_ARENA.bossAnchorX, CHAMBER03_BOSS_ARENA.bossAnchorY - 16).setAlpha(0).setDepth(-4.05);
+    this.bossDamageHurtbox?.body?.setEnable(false);
   }
 
   getBossPromptY() {
