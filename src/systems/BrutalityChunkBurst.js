@@ -5,15 +5,14 @@ import { ignoreRuntimeWorldObjectFromUiCamera } from '../ui/mobileUiCamera.js';
 const BRUTALITY_BURST_PROFILE = Object.freeze({
   chunkCountRange: [20, 30],
   maxDisplaySidePx: [42, 76],
-  spawnOffsetX: [-20, 20],
+  spawnOffsetX: [-34, 34],
   spawnOffsetY: [-32, -8],
-  launchX: [94, 182],
-  launchLiftY: [86, 188],
-  apexDurationMs: [80, 130],
+  burstOutwardX: [18, 44],
+  arcLiftY: [132, 232],
+  flightDurationMs: [360, 560],
   settleSpreadX: 108,
   settleDropY: [0, 4],
   settleSinkY: [7, 13],
-  settleDurationMs: [230, 430],
   settleRotationDeg: [-28, 28],
   bloodPoolGrowMs: 300
 });
@@ -79,12 +78,13 @@ export function triggerBrutalityBasicChunkBurst(scene, {
     const container = scene.add.container(x ?? 0, groundedPlaneY).setDepth(containerDepth);
     ignoreRuntimeWorldObjectFromUiCamera(scene, container);
 
-    const poolShadow = scene.add.ellipse(0, 8, 126, 28, 0x140b0b, 0.4).setScale(0.3, 0.34);
-    const poolCore = scene.add.ellipse(-4, 6, 108, 24, 0x5a1318, 0.44).setScale(0.24, 0.26);
-    container.add([poolShadow, poolCore]);
+    const poolShadow = scene.add.ellipse(0, 10, 138, 36, 0x170707, 0.94).setScale(0.28, 0.32);
+    const poolRim = scene.add.ellipse(9, 7, 122, 30, 0x2d090c, 0.96).setScale(0.24, 0.28);
+    const poolCore = scene.add.ellipse(-6, 6, 110, 26, 0x4a0d12, 0.98).setScale(0.2, 0.24);
+    container.add([poolShadow, poolRim, poolCore]);
 
     scene.tweens.add({
-      targets: [poolShadow, poolCore],
+      targets: [poolShadow, poolRim, poolCore],
       scaleX: 1,
       scaleY: 1,
       duration: BRUTALITY_BURST_PROFILE.bloodPoolGrowMs,
@@ -121,51 +121,57 @@ export function triggerBrutalityBasicChunkBurst(scene, {
 
       const sourceMaxSide = Math.max(chunk.width || 1, chunk.height || 1);
       chunk.setScale(targetMaxSide / sourceMaxSide);
-      const launchDirection = settleOffsetX >= 0 ? 1 : -1;
       container.add(chunk);
+      const halfDisplayHeight = Math.max(1, chunk.displayHeight * 0.5);
+      const settleDrop = Phaser.Math.Between(
+        BRUTALITY_BURST_PROFILE.settleDropY[0],
+        BRUTALITY_BURST_PROFILE.settleDropY[1]
+      );
+      const settleSink = Phaser.Math.Between(
+        BRUTALITY_BURST_PROFILE.settleSinkY[0],
+        BRUTALITY_BURST_PROFILE.settleSinkY[1]
+      );
+      const settledY = -halfDisplayHeight - settleDrop + settleSink + 10;
+      const outwardDirection = settleOffsetX >= 0 ? 1 : -1;
+      const burstOutwardX = Phaser.Math.Between(
+        BRUTALITY_BURST_PROFILE.burstOutwardX[0],
+        BRUTALITY_BURST_PROFILE.burstOutwardX[1]
+      );
+      const controlX = spawnOffsetX + outwardDirection * burstOutwardX + settleOffsetX * 0.34;
+      const controlY = Math.min(
+        spawnOffsetY,
+        settledY
+      ) - Phaser.Math.Between(
+        BRUTALITY_BURST_PROFILE.arcLiftY[0],
+        BRUTALITY_BURST_PROFILE.arcLiftY[1]
+      );
+      const startX = spawnOffsetX;
+      const startY = spawnOffsetY;
+      const startAngle = chunk.angle;
+      const endAngle = Phaser.Math.Between(
+        BRUTALITY_BURST_PROFILE.settleRotationDeg[0],
+        BRUTALITY_BURST_PROFILE.settleRotationDeg[1]
+      );
 
-      scene.tweens.add({
-        targets: chunk,
-        x: spawnOffsetX + launchDirection * Phaser.Math.Between(
-          BRUTALITY_BURST_PROFILE.launchX[0],
-          BRUTALITY_BURST_PROFILE.launchX[1]
-        ),
-        y: spawnOffsetY - Phaser.Math.Between(
-          BRUTALITY_BURST_PROFILE.launchLiftY[0],
-          BRUTALITY_BURST_PROFILE.launchLiftY[1]
-        ),
-        angle: Phaser.Math.Between(-90, 90),
+      scene.tweens.addCounter({
+        from: 0,
+        to: 1,
         duration: Phaser.Math.Between(
-          BRUTALITY_BURST_PROFILE.apexDurationMs[0],
-          BRUTALITY_BURST_PROFILE.apexDurationMs[1]
+          BRUTALITY_BURST_PROFILE.flightDurationMs[0],
+          BRUTALITY_BURST_PROFILE.flightDurationMs[1]
         ),
-        ease: 'Quad.Out',
+        ease: 'Sine.easeInOut',
+        onUpdate: (tween) => {
+          const t = tween.getValue();
+          const inverse = 1 - t;
+          chunk.x = (inverse * inverse * startX) + (2 * inverse * t * controlX) + (t * t * settleOffsetX);
+          chunk.y = (inverse * inverse * startY) + (2 * inverse * t * controlY) + (t * t * settledY);
+          chunk.angle = Phaser.Math.Linear(startAngle, endAngle, t);
+        },
         onComplete: () => {
-          const halfDisplayHeight = Math.max(1, chunk.displayHeight * 0.5);
-          const settleDrop = Phaser.Math.Between(
-            BRUTALITY_BURST_PROFILE.settleDropY[0],
-            BRUTALITY_BURST_PROFILE.settleDropY[1]
-          );
-          const settleSink = Phaser.Math.Between(
-            BRUTALITY_BURST_PROFILE.settleSinkY[0],
-            BRUTALITY_BURST_PROFILE.settleSinkY[1]
-          );
-          const settledY = -halfDisplayHeight - settleDrop + settleSink + 10;
-
-          scene.tweens.add({
-            targets: chunk,
-            x: settleOffsetX,
-            y: settledY,
-            angle: Phaser.Math.Between(
-              BRUTALITY_BURST_PROFILE.settleRotationDeg[0],
-              BRUTALITY_BURST_PROFILE.settleRotationDeg[1]
-            ),
-            duration: Phaser.Math.Between(
-              BRUTALITY_BURST_PROFILE.settleDurationMs[0],
-              BRUTALITY_BURST_PROFILE.settleDurationMs[1]
-            ),
-            ease: 'Cubic.easeIn'
-          });
+          chunk.x = settleOffsetX;
+          chunk.y = settledY;
+          chunk.angle = endAngle;
         }
       });
     }
