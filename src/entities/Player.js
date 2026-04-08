@@ -71,6 +71,7 @@ export class Player {
           .setAlpha(playerPresentation.alpha ?? 1)
           .setDepth(6)
       : scene.add.rectangle(x, y, 48, 60, 0xb8aa92).setOrigin(0.5).setDepth(6);
+    this.baseVisualAlpha = typeof this.sprite.alpha === 'number' ? this.sprite.alpha : 1;
     if (this.usingConceptSprite) {
       this.registerWalkAnimation();
       this.registerIdleAnimation();
@@ -374,6 +375,7 @@ export class Player {
     this.applyBrutalityStableStance();
     this.config.moveSpeed = this.baseMoveSpeed * this.brutalityMode.speedMultiplier;
     this.applyPlayerForm(this.brutalityFormValues);
+    this.applyBrutalityVisualAlpha();
     this.updateWeaponTexture();
     this.updateAttackHitbox();
   }
@@ -386,6 +388,7 @@ export class Player {
     };
     this.config.moveSpeed = this.baseMoveSpeed;
     this.applyPlayerForm(this.normalFormValues);
+    this.restoreBaseVisualAlpha();
     this.setNormalStableFrame();
     this.updateWeaponTexture();
     this.hardResetAttackState();
@@ -444,6 +447,20 @@ export class Player {
     this.body.updateFromGameObject();
     this.sprite.y += bodyBottomBeforeTransform - this.body.bottom;
     this.body.updateFromGameObject();
+  }
+
+  applyBrutalityVisualAlpha() {
+    if (!this.sprite) {
+      return;
+    }
+    this.sprite.setAlpha(1);
+  }
+
+  restoreBaseVisualAlpha() {
+    if (!this.sprite) {
+      return;
+    }
+    this.sprite.setAlpha(this.baseVisualAlpha ?? 1);
   }
 
   captureGroundedFloorAnchor() {
