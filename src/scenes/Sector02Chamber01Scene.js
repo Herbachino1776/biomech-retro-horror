@@ -521,7 +521,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     enemy.isTollKeeper = isTollKeeper;
 
     this.physics.add.collider(enemy.sprite, this.platforms);
-    this.physics.add.overlap(this.player.attackHitbox, enemy.sprite, (attackZone, enemySprite) => {
+    this.physics.add.overlap(this.player.attackHitbox, enemy.damageHurtbox ?? enemy.sprite, (attackZone, enemySprite) => {
       this.handlePlayerHitEnemy(attackZone, enemySprite, enemy);
     });
     this.physics.add.overlap(this.player.sprite, enemy.sprite, (playerSprite, enemySprite) => {
@@ -547,7 +547,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.archon.sprite.setDepth(6.2);
     this.archon.body.setCollideWorldBounds(true);
     this.physics.add.collider(this.archon.sprite, this.platforms);
-    this.physics.add.overlap(this.player.attackHitbox, this.archon.sprite, (_attackZone, enemySprite) => {
+    this.physics.add.overlap(this.player.attackHitbox, this.archon.damageHurtbox ?? this.archon.sprite, (_attackZone, enemySprite) => {
       this.handlePlayerHitArchon(enemySprite);
     });
     this.physics.add.overlap(this.player.sprite, this.archon.sprite, (_playerSprite, enemySprite) => {
@@ -1014,7 +1014,7 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
   }
 
   isEnemyOverlapTarget(target, enemy) {
-    return target === enemy.sprite || target?.gameObject === enemy.sprite;
+    return target === enemy.sprite || target === enemy.damageHurtbox || target?.gameObject === enemy.sprite || target?.gameObject === enemy.damageHurtbox;
   }
 
   triggerSector02BlackOilPayoff(targetEnemy, config = {}) {
