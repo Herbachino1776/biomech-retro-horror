@@ -197,7 +197,7 @@ export class Sector02Chamber02BossPitScene extends Phaser.Scene {
     this.boss.setActive(false);
     this.boss.sprite.setDepth(6.2);
     this.physics.add.collider(this.boss.sprite, this.platforms);
-    this.physics.add.overlap(this.player.attackHitbox, this.boss.sprite, () => this.handlePlayerHitBoss());
+    this.physics.add.overlap(this.player.attackHitbox, this.boss.damageHurtbox ?? this.boss.sprite, () => this.handlePlayerHitBoss());
     this.physics.add.overlap(this.player.sprite, this.boss.sprite, () => this.handleBossContactPlayer());
   }
 
