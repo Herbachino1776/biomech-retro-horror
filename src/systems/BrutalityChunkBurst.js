@@ -4,23 +4,69 @@ import { ignoreRuntimeWorldObjectFromUiCamera } from '../ui/mobileUiCamera.js';
 
 const BRUTALITY_BURST_PROFILE = Object.freeze({
   chunkCountRange: [20, 30],
-  launchX: 56,
-  launchLift: [8, 32],
-  settleSpreadX: 44,
-  settleLiftY: [0, 6],
-  settleSinkY: [8, 14],
-  apexDurationMs: [90, 140],
-  settleDurationMs: [300, 500],
-  holdBeforeFadeMs: 1700,
-  fadeDurationMs: 520
+  maxDisplaySidePx: [42, 76],
+  spawnOffsetX: [-20, 20],
+  spawnOffsetY: [-32, -8],
+  launchX: [94, 182],
+  launchLiftY: [86, 188],
+  apexDurationMs: [80, 130],
+  settleSpreadX: 108,
+  settleDropY: [0, 4],
+  settleSinkY: [7, 13],
+  settleDurationMs: [230, 430],
+  settleRotationDeg: [-28, 28],
+  bloodPoolGrowMs: 300
 });
 const BRUTALITY_BURST_FLOOR_OFFSET_Y = 18;
+const BRUTALITY_REMAINS_CAP_PER_SCENE = 34;
+const BRUTALITY_REMAINS_DEPTH_OFFSET_FROM_SOURCE = 0.1;
+const BRUTALITY_REMAINS_PLAYER_LAYER_CLEARANCE = 0.1;
+
+function ensureBrutalityBurstStore(scene) {
+  if (!scene.__brutalityChunkBurstEntries) {
+    scene.__brutalityChunkBurstEntries = [];
+  }
+  return scene.__brutalityChunkBurstEntries;
+}
+
+function capBrutalityBurstStore(scene, cap = BRUTALITY_REMAINS_CAP_PER_SCENE) {
+  const store = ensureBrutalityBurstStore(scene);
+  while (store.length > cap) {
+    const entry = store.shift();
+    entry?.container?.destroy(true);
+  }
+}
+
+function resolveGameplayForegroundDepth(scene) {
+  const playerBodyDepth = scene?.player?.sprite?.depth;
+  const playerWeaponDepth = scene?.player?.weaponSprite?.depth;
+  const foregroundDepths = [playerBodyDepth, playerWeaponDepth].filter((value) => Number.isFinite(value));
+
+  if (!foregroundDepths.length) {
+    return null;
+  }
+
+  return Math.min(...foregroundDepths);
+}
+
+function resolveBrutalityPileDepth(scene, requestedDepth) {
+  const sourceDepth = Number.isFinite(requestedDepth) ? requestedDepth : 6.6;
+  let resolvedDepth = sourceDepth - BRUTALITY_REMAINS_DEPTH_OFFSET_FROM_SOURCE;
+  const gameplayForegroundDepth = resolveGameplayForegroundDepth(scene);
+
+  if (Number.isFinite(gameplayForegroundDepth)) {
+    resolvedDepth = Math.min(resolvedDepth, gameplayForegroundDepth - BRUTALITY_REMAINS_PLAYER_LAYER_CLEARANCE);
+  }
+
+  return resolvedDepth;
+}
 
 export function triggerBrutalityBasicChunkBurst(scene, {
   x,
   y,
   floorPlaneY = null,
-  depth = 6.6
+  depth = 6.6,
+  maxPersistPerScene = BRUTALITY_REMAINS_CAP_PER_SCENE
 } = {}) {
   if (!scene || !scene.add) {
     return;
@@ -29,18 +75,19 @@ export function triggerBrutalityBasicChunkBurst(scene, {
   if (scene.textures.exists(ASSET_KEYS.brutalityBasicChunkBurst01)) {
     const groundedPlaneYBase = Number.isFinite(floorPlaneY) ? floorPlaneY : (y ?? 0) + 26;
     const groundedPlaneY = groundedPlaneYBase + BRUTALITY_BURST_FLOOR_OFFSET_Y;
-    const container = scene.add.container(x ?? 0, groundedPlaneY).setDepth(depth);
+    const containerDepth = resolveBrutalityPileDepth(scene, depth);
+    const container = scene.add.container(x ?? 0, groundedPlaneY).setDepth(containerDepth);
     ignoreRuntimeWorldObjectFromUiCamera(scene, container);
 
-    const poolShadow = scene.add.ellipse(0, 8, 102, 22, 0x140b0b, 0.32).setScale(0.35, 0.4);
-    const poolCore = scene.add.ellipse(0, 6, 88, 18, 0x5a1318, 0.38).setScale(0.24, 0.3);
+    const poolShadow = scene.add.ellipse(0, 8, 126, 28, 0x140b0b, 0.4).setScale(0.3, 0.34);
+    const poolCore = scene.add.ellipse(-4, 6, 108, 24, 0x5a1318, 0.44).setScale(0.24, 0.26);
     container.add([poolShadow, poolCore]);
 
     scene.tweens.add({
       targets: [poolShadow, poolCore],
       scaleX: 1,
       scaleY: 1,
-      duration: 220,
+      duration: BRUTALITY_BURST_PROFILE.bloodPoolGrowMs,
       ease: 'Sine.easeOut'
     });
 
@@ -50,9 +97,18 @@ export function triggerBrutalityBasicChunkBurst(scene, {
     );
 
     for (let index = 0; index < chunkCount; index += 1) {
-      const targetMaxSide = Phaser.Math.Between(40, 72);
-      const spawnOffsetX = Phaser.Math.Between(-12, 12);
-      const spawnOffsetY = Phaser.Math.Between(-34, -10);
+      const targetMaxSide = Phaser.Math.Between(
+        BRUTALITY_BURST_PROFILE.maxDisplaySidePx[0],
+        BRUTALITY_BURST_PROFILE.maxDisplaySidePx[1]
+      );
+      const spawnOffsetX = Phaser.Math.Between(
+        BRUTALITY_BURST_PROFILE.spawnOffsetX[0],
+        BRUTALITY_BURST_PROFILE.spawnOffsetX[1]
+      );
+      const spawnOffsetY = Phaser.Math.Between(
+        BRUTALITY_BURST_PROFILE.spawnOffsetY[0],
+        BRUTALITY_BURST_PROFILE.spawnOffsetY[1]
+      );
       const settleOffsetX = Phaser.Math.Between(
         -BRUTALITY_BURST_PROFILE.settleSpreadX,
         BRUTALITY_BURST_PROFILE.settleSpreadX
@@ -65,14 +121,18 @@ export function triggerBrutalityBasicChunkBurst(scene, {
 
       const sourceMaxSide = Math.max(chunk.width || 1, chunk.height || 1);
       chunk.setScale(targetMaxSide / sourceMaxSide);
+      const launchDirection = settleOffsetX >= 0 ? 1 : -1;
       container.add(chunk);
 
       scene.tweens.add({
         targets: chunk,
-        x: spawnOffsetX + Phaser.Math.Between(-BRUTALITY_BURST_PROFILE.launchX, BRUTALITY_BURST_PROFILE.launchX),
+        x: spawnOffsetX + launchDirection * Phaser.Math.Between(
+          BRUTALITY_BURST_PROFILE.launchX[0],
+          BRUTALITY_BURST_PROFILE.launchX[1]
+        ),
         y: spawnOffsetY - Phaser.Math.Between(
-          BRUTALITY_BURST_PROFILE.launchLift[0],
-          BRUTALITY_BURST_PROFILE.launchLift[1]
+          BRUTALITY_BURST_PROFILE.launchLiftY[0],
+          BRUTALITY_BURST_PROFILE.launchLiftY[1]
         ),
         angle: Phaser.Math.Between(-90, 90),
         duration: Phaser.Math.Between(
@@ -82,54 +142,45 @@ export function triggerBrutalityBasicChunkBurst(scene, {
         ease: 'Quad.Out',
         onComplete: () => {
           const halfDisplayHeight = Math.max(1, chunk.displayHeight * 0.5);
-          const settleLift = Phaser.Math.Between(
-            BRUTALITY_BURST_PROFILE.settleLiftY[0],
-            BRUTALITY_BURST_PROFILE.settleLiftY[1]
+          const settleDrop = Phaser.Math.Between(
+            BRUTALITY_BURST_PROFILE.settleDropY[0],
+            BRUTALITY_BURST_PROFILE.settleDropY[1]
           );
           const settleSink = Phaser.Math.Between(
             BRUTALITY_BURST_PROFILE.settleSinkY[0],
             BRUTALITY_BURST_PROFILE.settleSinkY[1]
           );
-          const settledY = -halfDisplayHeight - settleLift + settleSink + 12;
+          const settledY = -halfDisplayHeight - settleDrop + settleSink + 10;
 
           scene.tweens.add({
             targets: chunk,
             x: settleOffsetX,
             y: settledY,
-            angle: Phaser.Math.Between(-16, 16),
+            angle: Phaser.Math.Between(
+              BRUTALITY_BURST_PROFILE.settleRotationDeg[0],
+              BRUTALITY_BURST_PROFILE.settleRotationDeg[1]
+            ),
             duration: Phaser.Math.Between(
               BRUTALITY_BURST_PROFILE.settleDurationMs[0],
               BRUTALITY_BURST_PROFILE.settleDurationMs[1]
             ),
-            ease: 'Bounce.Out'
+            ease: 'Cubic.easeIn'
           });
         }
       });
     }
 
-    scene.time.delayedCall(BRUTALITY_BURST_PROFILE.holdBeforeFadeMs, () => {
-      if (!container.active) {
-        return;
-      }
-      scene.tweens.add({
-        targets: container.list,
-        alpha: 0,
-        duration: BRUTALITY_BURST_PROFILE.fadeDurationMs,
-        ease: 'Sine.easeIn',
-        onComplete: () => container.destroy(true)
-      });
-    });
+    const store = ensureBrutalityBurstStore(scene);
+    store.push({ container, createdAt: scene.time?.now ?? Date.now() });
+    capBrutalityBurstStore(scene, maxPersistPerScene);
 
-    return;
+    return container;
   }
 
   const fallback = scene.add.ellipse(x, y, 48, 28, 0x6f231c, 0.9).setDepth(depth);
-  scene.tweens.add({
-    targets: fallback,
-    alpha: 0,
-    scaleX: 1.28,
-    scaleY: 1.36,
-    duration: 600,
-    onComplete: () => fallback.destroy()
-  });
+  ignoreRuntimeWorldObjectFromUiCamera(scene, fallback);
+  const store = ensureBrutalityBurstStore(scene);
+  store.push({ container: fallback, createdAt: scene.time?.now ?? Date.now() });
+  capBrutalityBurstStore(scene, maxPersistPerScene);
+  return fallback;
 }
