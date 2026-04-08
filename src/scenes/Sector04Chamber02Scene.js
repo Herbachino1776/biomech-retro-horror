@@ -488,7 +488,6 @@ export class Sector04Chamber02Scene extends Phaser.Scene {
   }
 
   handleSceneShutdown() {
-    this.player?.clearBrutalityMode?.();
     this.enemies?.forEach((enemy) => enemy.setBrutalityAggression(false));
   }
 

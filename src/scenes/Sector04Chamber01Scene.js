@@ -646,7 +646,6 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
   }
 
   handleSceneShutdown() {
-    this.player?.clearBrutalityMode?.();
     this.enemies?.forEach((enemy) => enemy.setBrutalityAggression(false));
     this.endBoss?.setBrutalityAggression?.(false);
   }
@@ -877,6 +876,9 @@ export class Sector04Chamber01Scene extends Phaser.Scene {
     }
 
     this.bossPitTransitionActive = true;
+    if (this.brutalityMode?.isActive?.()) {
+      this.brutalityMode.end(this.time.now);
+    }
     this.currentBossPitAltar = null;
     this.bossPitAltar?.prompt?.setVisible(false);
     this.mobileControls.setMode('dialogue');
