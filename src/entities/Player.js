@@ -17,6 +17,7 @@ const PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME = 0;
 const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
 const BRUTALITY_HAMMER_DEPTH_BUMP = 3;
+const BRUTALITY_GROUNDED_VISUAL_Y_CORRECTION = 0;
 const NORMAL_RESTING_WEAPON_POSE_ADJUST = Object.freeze({
   offsetX: 14,
   offsetY: -12
@@ -375,7 +376,8 @@ export class Player {
     this.swapPresentationFamilyWithGroundedBaseline({
       textureKey: this.resolveBrutalityPresentationTextureKey(),
       stableFrame: PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME,
-      formValues: this.brutalityFormValues
+      formValues: this.normalFormValues,
+      visualYCorrection: BRUTALITY_GROUNDED_VISUAL_Y_CORRECTION
     });
     this.applyBrutalityVisualAlpha();
     this.applyBrutalityStableStance();
@@ -460,7 +462,7 @@ export class Player {
   }
 
   // Keep visual-family swaps atomic so BRUTALITY entry/exit cannot reintroduce sprite-floor sinking.
-  swapPresentationFamilyWithGroundedBaseline({ textureKey, stableFrame = 0, formValues }) {
+  swapPresentationFamilyWithGroundedBaseline({ textureKey, stableFrame = 0, formValues, visualYCorrection = 0 }) {
     if (!this.usingConceptSprite || !textureKey) {
       return;
     }
@@ -474,6 +476,9 @@ export class Player {
 
     const bodyBottomAfterSwap = this.body?.bottom ?? baselineBodyBottom;
     this.sprite.y += baselineBodyBottom - bodyBottomAfterSwap;
+    if (visualYCorrection !== 0) {
+      this.sprite.y += visualYCorrection;
+    }
     this.body?.updateFromGameObject();
     this.lastGroundedBodyBottom = baselineBodyBottom;
   }
@@ -783,7 +788,8 @@ export class Player {
       this.swapPresentationFamilyWithGroundedBaseline({
         textureKey,
         stableFrame,
-        formValues: this.brutalityFormValues
+        formValues: this.normalFormValues,
+        visualYCorrection: BRUTALITY_GROUNDED_VISUAL_Y_CORRECTION
       });
       return;
     }
