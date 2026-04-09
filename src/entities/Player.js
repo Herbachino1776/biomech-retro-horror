@@ -372,8 +372,11 @@ export class Player {
     };
     this.stopSpriteAnimation();
     this.config.moveSpeed = this.baseMoveSpeed * this.brutalityMode.speedMultiplier;
-    this.applyPlayerForm(this.brutalityFormValues);
-    this.useBrutalityPresentationFamily();
+    this.swapPresentationFamilyWithGroundedBaseline({
+      textureKey: this.resolveBrutalityPresentationTextureKey(),
+      stableFrame: PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME,
+      formValues: this.brutalityFormValues
+    });
     this.applyBrutalityVisualAlpha();
     this.applyBrutalityStableStance();
     this.updateWeaponTexture();
@@ -387,8 +390,11 @@ export class Player {
       ...DEFAULT_BRUTALITY_MODIFIERS
     };
     this.config.moveSpeed = this.baseMoveSpeed;
-    this.applyPlayerForm(this.normalFormValues);
-    this.useNormalPresentationFamily();
+    this.swapPresentationFamilyWithGroundedBaseline({
+      textureKey: ASSET_KEYS.player,
+      stableFrame: PLAYER_NORMAL_STABLE_FRAME,
+      formValues: this.normalFormValues
+    });
     this.restoreBaseVisualAlpha();
     this.setNormalStableFrame();
     this.updateWeaponTexture();
@@ -451,6 +457,25 @@ export class Player {
     this.body.updateFromGameObject();
     this.sprite.y += bodyBottomBeforeTransform - this.body.bottom;
     this.body.updateFromGameObject();
+  }
+
+  // Keep visual-family swaps atomic so BRUTALITY entry/exit cannot reintroduce sprite-floor sinking.
+  swapPresentationFamilyWithGroundedBaseline({ textureKey, stableFrame = 0, formValues }) {
+    if (!this.usingConceptSprite || !textureKey) {
+      return;
+    }
+
+    const baselineBodyBottom = this.body?.blocked.down
+      ? this.body.bottom
+      : this.lastGroundedBodyBottom ?? this.body?.bottom ?? this.sprite.y;
+
+    this.sprite.setTexture(textureKey, stableFrame);
+    this.applyPlayerForm(formValues);
+
+    const bodyBottomAfterSwap = this.body?.bottom ?? baselineBodyBottom;
+    this.sprite.y += baselineBodyBottom - bodyBottomAfterSwap;
+    this.body?.updateFromGameObject();
+    this.lastGroundedBodyBottom = baselineBodyBottom;
   }
 
   applyBrutalityVisualAlpha() {
@@ -741,20 +766,9 @@ export class Player {
     this.setStaticFrame(PLAYER_NORMAL_STABLE_FRAME);
   }
 
-  useNormalPresentationFamily() {
-    if (!this.usingConceptSprite) {
-      return;
-    }
-    this.sprite.setTexture(ASSET_KEYS.player, PLAYER_NORMAL_STABLE_FRAME);
-  }
-
-  useBrutalityPresentationFamily() {
-    if (!this.usingConceptSprite) {
-      return;
-    }
+  resolveBrutalityPresentationTextureKey() {
     const grounded = this.body?.blocked.down ?? true;
-    const textureKey = grounded ? ASSET_KEYS.playerBrutalityIdle : ASSET_KEYS.playerBrutalityWalk;
-    this.sprite.setTexture(textureKey, PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME);
+    return grounded ? ASSET_KEYS.playerBrutalityIdle : ASSET_KEYS.playerBrutalityWalk;
   }
 
   applyBrutalityStableStance() {
@@ -763,10 +777,14 @@ export class Player {
     }
 
     const grounded = this.body.blocked.down;
-    const textureKey = grounded ? ASSET_KEYS.playerBrutalityIdle : ASSET_KEYS.playerBrutalityWalk;
+    const textureKey = this.resolveBrutalityPresentationTextureKey();
     const stableFrame = grounded ? PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME : PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME;
     if (this.sprite.texture?.key !== textureKey) {
-      this.sprite.setTexture(textureKey, stableFrame);
+      this.swapPresentationFamilyWithGroundedBaseline({
+        textureKey,
+        stableFrame,
+        formValues: this.brutalityFormValues
+      });
       return;
     }
     this.setStaticFrame(stableFrame);
