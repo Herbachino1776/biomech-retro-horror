@@ -6,6 +6,8 @@ import { vesselIntegrityState } from '../systems/VesselIntegrityState.js';
 
 const PLAYER_WALK_ANIMATION_KEY = 'player-walk';
 const PLAYER_IDLE_ANIMATION_KEY = 'player-idle';
+const PLAYER_BRUTALITY_WALK_ANIMATION_KEY = 'player-brutality-walk';
+const PLAYER_BRUTALITY_IDLE_ANIMATION_KEY = 'player-brutality-idle';
 const PLAYER_WALK_FPS = 8;
 const PLAYER_WALK_MIN_SPEED = 36;
 const PLAYER_IDLE_FPS = 5;
@@ -14,7 +16,6 @@ const PLAYER_NORMAL_STABLE_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME = 0;
 const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
-const BRUTALITY_FORM_ORIGIN_Y_BIAS = 0.06;
 const BRUTALITY_HAMMER_DEPTH_BUMP = 3;
 const NORMAL_RESTING_WEAPON_POSE_ADJUST = Object.freeze({
   offsetX: 14,
@@ -24,10 +25,6 @@ const BRUTALITY_WEAPON_POSE_ADJUST = Object.freeze({
   offsetX: 24,
   offsetY: -24,
   rotationDeg: -3
-});
-const BRUTALITY_FORM_MULTIPLIERS = Object.freeze({
-  displayWidth: 1.52,
-  displayHeight: 1.14
 });
 const DEFAULT_BRUTALITY_MODIFIERS = {
   speedMultiplier: 1.25,
@@ -75,6 +72,8 @@ export class Player {
     if (this.usingConceptSprite) {
       this.registerWalkAnimation();
       this.registerIdleAnimation();
+      this.registerBrutalityWalkAnimation();
+      this.registerBrutalityIdleAnimation();
     }
     scene.physics.add.existing(this.sprite);
 
@@ -372,10 +371,11 @@ export class Player {
       active: true
     };
     this.stopSpriteAnimation();
-    this.applyBrutalityStableStance();
     this.config.moveSpeed = this.baseMoveSpeed * this.brutalityMode.speedMultiplier;
     this.applyPlayerForm(this.brutalityFormValues);
+    this.useBrutalityPresentationFamily();
     this.applyBrutalityVisualAlpha();
+    this.applyBrutalityStableStance();
     this.updateWeaponTexture();
     this.updateAttackHitbox();
   }
@@ -388,6 +388,7 @@ export class Player {
     };
     this.config.moveSpeed = this.baseMoveSpeed;
     this.applyPlayerForm(this.normalFormValues);
+    this.useNormalPresentationFamily();
     this.restoreBaseVisualAlpha();
     this.setNormalStableFrame();
     this.updateWeaponTexture();
@@ -415,6 +416,9 @@ export class Player {
   }
 
   initializeBrutalityForms() {
+    const brutalityPresentation = CONCEPT_PRESENTATION.playerBrutality;
+    const brutalityDisplaySize = getNormalizedDisplaySize(brutalityPresentation);
+    const brutalityOrigin = getNormalizedOrigin(brutalityPresentation);
     const normalFormValues = Object.freeze({
       displayWidth: this.sprite.displayWidth,
       displayHeight: this.sprite.displayHeight,
@@ -423,10 +427,10 @@ export class Player {
     });
 
     const brutalityFormValues = Object.freeze({
-      displayWidth: normalFormValues.displayWidth * BRUTALITY_FORM_MULTIPLIERS.displayWidth,
-      displayHeight: normalFormValues.displayHeight * BRUTALITY_FORM_MULTIPLIERS.displayHeight,
-      originX: normalFormValues.originX,
-      originY: Phaser.Math.Clamp(normalFormValues.originY + BRUTALITY_FORM_ORIGIN_Y_BIAS, 0, 0.99)
+      displayWidth: brutalityDisplaySize.width,
+      displayHeight: brutalityDisplaySize.height,
+      originX: brutalityOrigin.x,
+      originY: brutalityOrigin.y
     });
 
     this.normalFormValues = normalFormValues;
@@ -626,31 +630,34 @@ export class Player {
   }
 
   updateSpriteAnimationState() {
-    if (this.brutalityMode?.active) {
-      this.applyBrutalityStableStance();
-      return;
-    }
-
     const isGrounded = this.body.blocked.down;
     const horizontalSpeed = Math.abs(this.body.velocity.x);
     const isMovingHorizontally = horizontalSpeed >= PLAYER_WALK_MIN_SPEED;
     const isNearlyStationary = horizontalSpeed <= PLAYER_IDLE_MAX_SPEED;
     const inAttackCommit = this.attackPhase === 'startup' || this.attackPhase === 'active' || this.attackPhase === 'recovery';
     const canAnimate = !this.isDead && !inAttackCommit && isGrounded;
+    const usingBrutalityFamily = this.brutalityMode?.active;
+    const walkAnimationKey = usingBrutalityFamily ? PLAYER_BRUTALITY_WALK_ANIMATION_KEY : PLAYER_WALK_ANIMATION_KEY;
+    const idleAnimationKey = usingBrutalityFamily ? PLAYER_BRUTALITY_IDLE_ANIMATION_KEY : PLAYER_IDLE_ANIMATION_KEY;
     const canPlayWalk = canAnimate && isMovingHorizontally;
     const canPlayIdle = canAnimate && isNearlyStationary;
 
     if (canPlayWalk) {
-      if (this.sprite.anims.currentAnim?.key !== PLAYER_WALK_ANIMATION_KEY || !this.sprite.anims.isPlaying) {
-        this.sprite.play(PLAYER_WALK_ANIMATION_KEY, true);
+      if (this.sprite.anims.currentAnim?.key !== walkAnimationKey || !this.sprite.anims.isPlaying) {
+        this.sprite.play(walkAnimationKey, true);
       }
       return;
     }
 
     if (canPlayIdle) {
-      if (this.sprite.anims.currentAnim?.key !== PLAYER_IDLE_ANIMATION_KEY || !this.sprite.anims.isPlaying) {
-        this.sprite.play(PLAYER_IDLE_ANIMATION_KEY, true);
+      if (this.sprite.anims.currentAnim?.key !== idleAnimationKey || !this.sprite.anims.isPlaying) {
+        this.sprite.play(idleAnimationKey, true);
       }
+      return;
+    }
+
+    if (usingBrutalityFamily) {
+      this.applyBrutalityStableStance();
       return;
     }
 
@@ -683,6 +690,32 @@ export class Player {
     });
   }
 
+  registerBrutalityWalkAnimation() {
+    if (this.scene.anims.exists(PLAYER_BRUTALITY_WALK_ANIMATION_KEY)) {
+      return;
+    }
+
+    this.scene.anims.create({
+      key: PLAYER_BRUTALITY_WALK_ANIMATION_KEY,
+      frames: this.scene.anims.generateFrameNumbers(ASSET_KEYS.playerBrutalityWalk, { start: 0, end: 4 }),
+      frameRate: PLAYER_WALK_FPS,
+      repeat: -1
+    });
+  }
+
+  registerBrutalityIdleAnimation() {
+    if (this.scene.anims.exists(PLAYER_BRUTALITY_IDLE_ANIMATION_KEY)) {
+      return;
+    }
+
+    this.scene.anims.create({
+      key: PLAYER_BRUTALITY_IDLE_ANIMATION_KEY,
+      frames: this.scene.anims.generateFrameNumbers(ASSET_KEYS.playerBrutalityIdle, { start: 0, end: 4 }),
+      frameRate: PLAYER_IDLE_FPS,
+      repeat: -1
+    });
+  }
+
   setStaticFrame(frameIndex = 0) {
     if (!this.usingConceptSprite) {
       return;
@@ -708,12 +741,34 @@ export class Player {
     this.setStaticFrame(PLAYER_NORMAL_STABLE_FRAME);
   }
 
+  useNormalPresentationFamily() {
+    if (!this.usingConceptSprite) {
+      return;
+    }
+    this.sprite.setTexture(ASSET_KEYS.player, PLAYER_NORMAL_STABLE_FRAME);
+  }
+
+  useBrutalityPresentationFamily() {
+    if (!this.usingConceptSprite) {
+      return;
+    }
+    const grounded = this.body?.blocked.down ?? true;
+    const textureKey = grounded ? ASSET_KEYS.playerBrutalityIdle : ASSET_KEYS.playerBrutalityWalk;
+    this.sprite.setTexture(textureKey, PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME);
+  }
+
   applyBrutalityStableStance() {
     if (!this.usingConceptSprite) {
       return;
     }
 
-    const stableFrame = this.body.blocked.down ? PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME : PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME;
+    const grounded = this.body.blocked.down;
+    const textureKey = grounded ? ASSET_KEYS.playerBrutalityIdle : ASSET_KEYS.playerBrutalityWalk;
+    const stableFrame = grounded ? PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME : PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME;
+    if (this.sprite.texture?.key !== textureKey) {
+      this.sprite.setTexture(textureKey, stableFrame);
+      return;
+    }
     this.setStaticFrame(stableFrame);
   }
 
