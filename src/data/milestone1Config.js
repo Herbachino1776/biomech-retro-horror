@@ -95,6 +95,16 @@ export const CONCEPT_PRESENTATION = {
     },
     alpha: 0.94
   },
+  playerBrutality: {
+    display: { width: 208, height: 288 },
+    origin: { x: 0.5, y: 0.98 },
+    normalization: {
+      targetDisplayHeight: 205,
+      origin: { x: 0.5, y: 0.995 },
+      yOffset: -10
+    },
+    alpha: 1
+  },
   skitter: {
     crop: { x: 40, y: 340, width: 930, height: 840 },
     display: { width: 158, height: 142 },
