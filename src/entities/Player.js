@@ -18,7 +18,7 @@ const PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME = 0;
 const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
 const BRUTALITY_HAMMER_DEPTH_BUMP = 3;
 const BRUTALITY_FORM_SCALE_MULTIPLIER = 1.32;
-const BRUTALITY_VISUAL_LIFT_PX = 18;
+const BRUTALITY_VISUAL_LIFT_PX = 20;
 const BRUTALITY_IDLE_VISUAL_Y_CORRECTION = -BRUTALITY_VISUAL_LIFT_PX;
 const BRUTALITY_WALK_VISUAL_Y_CORRECTION = -BRUTALITY_VISUAL_LIFT_PX;
 const NORMAL_RESTING_WEAPON_POSE_ADJUST = Object.freeze({
@@ -673,6 +673,9 @@ export class Player {
     const canPlayIdle = canAnimate && isNearlyStationary;
 
     if (canPlayWalk) {
+      if (usingBrutalityFamily) {
+        this.ensureBrutalityPresentationTexture(ASSET_KEYS.playerBrutalityWalk);
+      }
       if (this.sprite.anims.currentAnim?.key !== walkAnimationKey || !this.sprite.anims.isPlaying) {
         this.sprite.play(walkAnimationKey, true);
       }
@@ -680,6 +683,9 @@ export class Player {
     }
 
     if (canPlayIdle) {
+      if (usingBrutalityFamily) {
+        this.ensureBrutalityPresentationTexture(ASSET_KEYS.playerBrutalityIdle);
+      }
       if (this.sprite.anims.currentAnim?.key !== idleAnimationKey || !this.sprite.anims.isPlaying) {
         this.sprite.play(idleAnimationKey, true);
       }
@@ -776,6 +782,25 @@ export class Player {
     return grounded ? ASSET_KEYS.playerBrutalityIdle : ASSET_KEYS.playerBrutalityWalk;
   }
 
+  getBrutalityVisualYCorrection(textureKey) {
+    return textureKey === ASSET_KEYS.playerBrutalityWalk
+      ? BRUTALITY_WALK_VISUAL_Y_CORRECTION
+      : BRUTALITY_IDLE_VISUAL_Y_CORRECTION;
+  }
+
+  ensureBrutalityPresentationTexture(textureKey, stableFrame = PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME) {
+    if (!this.usingConceptSprite || !textureKey || this.sprite.texture?.key === textureKey) {
+      return;
+    }
+
+    this.swapPresentationFamilyWithGroundedBaseline({
+      textureKey,
+      stableFrame,
+      formValues: this.brutalityFormValues,
+      visualYCorrection: this.getBrutalityVisualYCorrection(textureKey)
+    });
+  }
+
   applyBrutalityStableStance() {
     // This must run in the final BRUTALITY presentation path so texture-family swaps cannot
     // overwrite the stronger visual lift during grounded/airborne transitions.
@@ -787,15 +812,7 @@ export class Player {
     const textureKey = this.resolveBrutalityPresentationTextureKey();
     const stableFrame = grounded ? PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME : PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME;
     if (this.sprite.texture?.key !== textureKey) {
-      const visualYCorrection = textureKey === ASSET_KEYS.playerBrutalityWalk
-        ? BRUTALITY_WALK_VISUAL_Y_CORRECTION
-        : BRUTALITY_IDLE_VISUAL_Y_CORRECTION;
-      this.swapPresentationFamilyWithGroundedBaseline({
-        textureKey,
-        stableFrame,
-        formValues: this.brutalityFormValues,
-        visualYCorrection
-      });
+      this.ensureBrutalityPresentationTexture(textureKey, stableFrame);
       return;
     }
     this.setStaticFrame(stableFrame);
