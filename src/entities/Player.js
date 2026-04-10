@@ -18,16 +18,17 @@ const PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME = 0;
 const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
 const BRUTALITY_HAMMER_DEPTH_BUMP = 3;
 const BRUTALITY_FORM_SCALE_MULTIPLIER = 1.32;
-const BRUTALITY_IDLE_VISUAL_Y_CORRECTION = -3;
-const BRUTALITY_WALK_VISUAL_Y_CORRECTION = -3;
+const BRUTALITY_VISUAL_LIFT_PX = 18;
+const BRUTALITY_IDLE_VISUAL_Y_CORRECTION = -BRUTALITY_VISUAL_LIFT_PX;
+const BRUTALITY_WALK_VISUAL_Y_CORRECTION = -BRUTALITY_VISUAL_LIFT_PX;
 const NORMAL_RESTING_WEAPON_POSE_ADJUST = Object.freeze({
   offsetX: 14,
   offsetY: -12
 });
 const BRUTALITY_WEAPON_POSE_ADJUST = Object.freeze({
   offsetX: 24,
-  offsetY: -28,
-  rotationDeg: -5
+  offsetY: -52,
+  rotationDeg: -8
 });
 const DEFAULT_BRUTALITY_MODIFIERS = {
   speedMultiplier: 1.25,
@@ -776,6 +777,8 @@ export class Player {
   }
 
   applyBrutalityStableStance() {
+    // This must run in the final BRUTALITY presentation path so texture-family swaps cannot
+    // overwrite the stronger visual lift during grounded/airborne transitions.
     if (!this.usingConceptSprite) {
       return;
     }
