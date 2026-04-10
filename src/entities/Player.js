@@ -17,7 +17,9 @@ const PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME = 0;
 const PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME = 0;
 const BRUTALITY_HAMMER_DISPLAY_SCALE = 2.35;
 const BRUTALITY_HAMMER_DEPTH_BUMP = 3;
-const BRUTALITY_GROUNDED_VISUAL_Y_CORRECTION = 0;
+const BRUTALITY_FORM_SCALE_MULTIPLIER = 1.32;
+const BRUTALITY_IDLE_VISUAL_Y_CORRECTION = 0;
+const BRUTALITY_WALK_VISUAL_Y_CORRECTION = 0;
 const NORMAL_RESTING_WEAPON_POSE_ADJUST = Object.freeze({
   offsetX: 14,
   offsetY: -12
@@ -377,7 +379,7 @@ export class Player {
       textureKey: this.resolveBrutalityPresentationTextureKey(),
       stableFrame: PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME,
       formValues: this.brutalityFormValues,
-      visualYCorrection: BRUTALITY_GROUNDED_VISUAL_Y_CORRECTION
+      visualYCorrection: BRUTALITY_IDLE_VISUAL_Y_CORRECTION
     });
     this.applyBrutalityVisualAlpha();
     this.applyBrutalityStableStance();
@@ -424,9 +426,6 @@ export class Player {
   }
 
   initializeBrutalityForms() {
-    const brutalityPresentation = CONCEPT_PRESENTATION.playerBrutality;
-    const brutalityDisplaySize = getNormalizedDisplaySize(brutalityPresentation);
-    const brutalityOrigin = getNormalizedOrigin(brutalityPresentation);
     const normalFormValues = Object.freeze({
       displayWidth: this.sprite.displayWidth,
       displayHeight: this.sprite.displayHeight,
@@ -435,10 +434,10 @@ export class Player {
     });
 
     const brutalityFormValues = Object.freeze({
-      displayWidth: brutalityDisplaySize.width,
-      displayHeight: brutalityDisplaySize.height,
-      originX: brutalityOrigin.x,
-      originY: brutalityOrigin.y
+      displayWidth: Math.round(normalFormValues.displayWidth * BRUTALITY_FORM_SCALE_MULTIPLIER),
+      displayHeight: Math.round(normalFormValues.displayHeight * BRUTALITY_FORM_SCALE_MULTIPLIER),
+      originX: normalFormValues.originX,
+      originY: normalFormValues.originY
     });
 
     this.normalFormValues = normalFormValues;
@@ -785,11 +784,14 @@ export class Player {
     const textureKey = this.resolveBrutalityPresentationTextureKey();
     const stableFrame = grounded ? PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME : PLAYER_BRUTALITY_STABLE_AIRBORNE_FRAME;
     if (this.sprite.texture?.key !== textureKey) {
+      const visualYCorrection = textureKey === ASSET_KEYS.playerBrutalityWalk
+        ? BRUTALITY_WALK_VISUAL_Y_CORRECTION
+        : BRUTALITY_IDLE_VISUAL_Y_CORRECTION;
       this.swapPresentationFamilyWithGroundedBaseline({
         textureKey,
         stableFrame,
         formValues: this.brutalityFormValues,
-        visualYCorrection: BRUTALITY_GROUNDED_VISUAL_Y_CORRECTION
+        visualYCorrection
       });
       return;
     }
