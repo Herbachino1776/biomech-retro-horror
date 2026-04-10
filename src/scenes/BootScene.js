@@ -193,13 +193,13 @@ export class BootScene extends Phaser.Scene {
       endFrame: 4
     });
     this.load.spritesheet(ASSET_KEYS.playerBrutalityWalk, ASSET_URLS[ASSET_KEYS.playerBrutalityWalk], {
-      frameWidth: 750,
-      frameHeight: 1038,
+      frameWidth: 440,
+      frameHeight: 732,
       endFrame: 4
     });
     this.load.spritesheet(ASSET_KEYS.playerBrutalityIdle, ASSET_URLS[ASSET_KEYS.playerBrutalityIdle], {
-      frameWidth: 750,
-      frameHeight: 1038,
+      frameWidth: 440,
+      frameHeight: 732,
       endFrame: 4
     });
     this.load.image(ASSET_KEYS.playerWeaponHammer01, ASSET_URLS[ASSET_KEYS.playerWeaponHammer01]);

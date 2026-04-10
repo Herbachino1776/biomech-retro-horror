@@ -169,8 +169,8 @@ import enemyGoreClusterMeatBone01Url from '../../art/raw/shared/fx/enemy_gore_cl
 import brutalityBasicChunkBurst01Url from '../../art/raw/shared/fx/brutality_basic_chunk_burst_01.png';
 import playerWalkPuppetStrip06Url from '../../art/raw/player/player_walk_puppet_strip_06.png';
 import playerIdleBreatheStrip05Url from '../../art/raw/player/player_idle_breathe_strip_05.png';
-import playerBrutalityWalkStrip01Url from '../../art/raw/player/player_brutality_walk_strip_01.PNG?url';
-import playerBrutalityIdleStrip01Url from '../../art/raw/player/player_brutality_idle_strip_01.PNG?url';
+import playerBrutalityWalkStrip01Url from '../../art/raw/player/player_brutality_walk_strip_01.png';
+import playerBrutalityIdleStrip01Url from '../../art/raw/player/player_brutality_idle_strip_01.png';
 import playerWeaponHammer01Url from '../../art/raw/player/player_weapon_hammer_01.png';
 import playerWeaponHammerOfBanishment01Url from '../../art/raw/player/player_weapon_hammer_of_banishment_01.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';

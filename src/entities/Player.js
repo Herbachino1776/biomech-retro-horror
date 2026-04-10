@@ -376,7 +376,7 @@ export class Player {
     this.swapPresentationFamilyWithGroundedBaseline({
       textureKey: this.resolveBrutalityPresentationTextureKey(),
       stableFrame: PLAYER_BRUTALITY_STABLE_GROUNDED_FRAME,
-      formValues: this.normalFormValues,
+      formValues: this.brutalityFormValues,
       visualYCorrection: BRUTALITY_GROUNDED_VISUAL_Y_CORRECTION
     });
     this.applyBrutalityVisualAlpha();
@@ -788,7 +788,7 @@ export class Player {
       this.swapPresentationFamilyWithGroundedBaseline({
         textureKey,
         stableFrame,
-        formValues: this.normalFormValues,
+        formValues: this.brutalityFormValues,
         visualYCorrection: BRUTALITY_GROUNDED_VISUAL_Y_CORRECTION
       });
       return;
