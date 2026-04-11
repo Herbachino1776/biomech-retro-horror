@@ -1257,6 +1257,7 @@ export class Chamber01Scene extends Phaser.Scene {
       x,
       y: WORLD.floorY - 18,
       depth: 6.1,
+      fadeSource: false,
       scale: 0.72,
       durationMs: 540,
       burstCount: 26,
