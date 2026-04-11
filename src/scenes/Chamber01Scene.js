@@ -39,6 +39,8 @@ const CHAMBER = {
 };
 
 const CHAMBER_FLOOR_PLANE_Y = WORLD.floorY + CHAMBER.floorColliderCenterYOffset - CHAMBER.floorColliderHeight / 2;
+const PLAYER_FLOOR_CLAMP_EPSILON_PX = 0.5;
+const PLAYER_HIT_GROUND_RESYNC_DELAY_MS = 260;
 
 const BLIND_CANTOR = {
   encounterId: 'chamber01-blind-cantor-major-encounter',
@@ -225,6 +227,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.nextBossFloorHazardAt = Number.POSITIVE_INFINITY;
     this.nextBossProjectileAt = Number.POSITIVE_INFINITY;
     this.nextBossAoeAt = Number.POSITIVE_INFINITY;
+    this.pendingPlayerGroundResyncCall = null;
 
     this.createWorld();
     this.createBackdrop();
@@ -254,6 +257,8 @@ export class Chamber01Scene extends Phaser.Scene {
       this.destroyBossProjectilePool();
       this.majorEncounterResolution?.teardown();
       this.hud?.setBossBarState({ visible: false });
+      this.pendingPlayerGroundResyncCall?.remove(false);
+      this.pendingPlayerGroundResyncCall = null;
       this.brutalityMode?.end(this.time.now);
       this.enemies?.forEach((enemy) => enemy.setBrutalityAggression(false));
       this.boss?.setBrutalityAggression?.(false);
@@ -579,6 +584,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.tryBeginGateTransition(mobileInput);
 
     this.updateBossArenaFeedback(time);
+    this.clampPlayerToFloorBaseline();
     this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
     this.hud.setBossBarState({
@@ -1279,6 +1285,7 @@ export class Chamber01Scene extends Phaser.Scene {
       const knockDirection = Math.sign(this.player.sprite.x - x) || 1;
       this.player.body.setVelocityX(knockDirection * 238);
       this.player.body.setVelocityY(-210);
+      this.schedulePlayerGroundingResync();
     }
   }
 
@@ -1291,8 +1298,38 @@ export class Chamber01Scene extends Phaser.Scene {
       const knockDirection = Math.sign(this.player.sprite.x - x) || 1;
       this.player.body.setVelocityX(knockDirection * 244);
       this.player.body.setVelocityY(-194);
+      this.schedulePlayerGroundingResync();
     }
     this.cameras.main.shake(150, 0.005, true);
+  }
+
+  schedulePlayerGroundingResync(delayMs = PLAYER_HIT_GROUND_RESYNC_DELAY_MS) {
+    this.pendingPlayerGroundResyncCall?.remove(false);
+    this.pendingPlayerGroundResyncCall = this.time.delayedCall(delayMs, () => {
+      this.pendingPlayerGroundResyncCall = null;
+      this.clampPlayerToFloorBaseline({ forceSettle: true });
+    });
+  }
+
+  clampPlayerToFloorBaseline({ forceSettle = false } = {}) {
+    const playerBody = this.player?.body;
+    if (!playerBody?.enable || this.player?.isDead) {
+      return;
+    }
+
+    const floorPlaneY = CHAMBER_FLOOR_PLANE_Y;
+    const floorOverflow = playerBody.bottom - floorPlaneY;
+    const canSettleNow = forceSettle || playerBody.blocked.down || playerBody.velocity.y >= 0;
+    if (!canSettleNow || floorOverflow <= PLAYER_FLOOR_CLAMP_EPSILON_PX) {
+      return;
+    }
+
+    this.player.sprite.y -= floorOverflow;
+    playerBody.updateFromGameObject();
+    if (playerBody.velocity.y > 0) {
+      playerBody.setVelocityY(0);
+    }
+    this.player.lastGroundedBodyBottom = floorPlaneY;
   }
 
   getReusableBossProjectile() {
