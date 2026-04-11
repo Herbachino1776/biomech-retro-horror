@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Player } from '../entities/Player.js';
 import { SkitterServitor } from '../entities/SkitterServitor.js';
 import { HalfSkullMiniboss } from '../entities/HalfSkullMiniboss.js';
+import { EnemyProjectile } from '../entities/EnemyProjectile.js';
 import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import {
@@ -20,7 +21,9 @@ import { AudioDirector } from '../audio/AudioDirector.js';
 import { grantMajorEncounterIntegrityReward } from '../systems/VesselRunEconomy.js';
 import { MajorEncounterResolution } from '../systems/MajorEncounterResolution.js';
 import { triggerSector02BlackOilBlowout } from '../systems/Sector02BlackOilPayoff.js';
-import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
+import { beginBossDeathPayoffPackage } from '../systems/BossDeathPayoffPackage.js';
+import { BrutalityModeState } from '../systems/BrutalityModeState.js';
+import { triggerBrutalityBasicChunkBurst } from '../systems/BrutalityChunkBurst.js';
 
 const CHAMBER = {
   sceneKey: 'Chamber01Scene',
@@ -74,15 +77,25 @@ const BLIND_CANTOR = {
     scaleY: 1
   },
   resolution: {
-    cameraZoomScale: 1.2,
-    cameraFocusDurationMs: 240,
+    cameraZoomScale: 1.24,
+    cameraFocusDurationMs: 260,
     ceremonyDurationMs: 3300,
-    preExplosionShakeMs: 2800,
-    preExplosionShakeIntensity: 0.006,
-    goreFountainCadenceMs: 78,
+    preExplosionShakeMs: 2860,
+    preExplosionShakeIntensity: 0.0064,
+    goreFountainCadenceMs: 76,
     explosionFadeStartDelayMs: 90,
     explosionFadeDurationMs: 340,
     postExplosionDespawnDelayMs: 560
+  },
+  threat: {
+    floorHazardCooldownMs: 2600,
+    floorHazardTelegraphMs: 860,
+    floorHazardRadius: 64,
+    aoeCooldownMs: 4200,
+    aoeTelegraphMs: 680,
+    aoeRadius: 152,
+    projectileCooldownMs: 2300,
+    projectileSpeed: 248
   }
 };
 
@@ -94,8 +107,9 @@ const POCKET_CONFIGS = [
     zoneWidth: 420,
     zoneHeight: 236,
     enemies: [
-      { x: 610, variant: 'basic' },
-      { x: 790, variant: 'basic' }
+      { x: 666, variant: 'basic' },
+      { x: 760, variant: 'basic' },
+      { x: 844, variant: 'basic' }
     ]
   },
   {
@@ -105,9 +119,10 @@ const POCKET_CONFIGS = [
     zoneWidth: 520,
     zoneHeight: 236,
     enemies: [
-      { x: 980, variant: 'basic' },
-      { x: 1160, variant: 'basic' },
-      { x: 1320, variant: 'basic' }
+      { x: 1030, variant: 'basic' },
+      { x: 1134, variant: 'basic' },
+      { x: 1230, variant: 'basic' },
+      { x: 1342, variant: 'basic' }
     ]
   },
   {
@@ -117,12 +132,30 @@ const POCKET_CONFIGS = [
     zoneWidth: 660,
     zoneHeight: 248,
     enemies: [
-      { x: 1400, variant: 'basic' },
-      { x: 1540, variant: 'elite' },
-      { x: 1680, variant: 'basic' }
+      { x: 1462, variant: 'elite' },
+      { x: 1610, variant: 'elite' },
+      { x: 1730, variant: 'basic' }
     ]
   }
 ];
+
+const BRUTALITY_MODE = {
+  rules: {
+    streakTriggerKills: 2,
+    streakWindowMs: 5000,
+    activeDurationMs: 20000,
+    maxActivationsPerChamber: 2
+  },
+  player: {
+    speedMultiplier: 1.1,
+    damageMultiplier: 3,
+    reachMultiplier: 1.24
+  },
+  enemyAggression: {
+    speedMultiplier: 1.22,
+    aggroRangeMultiplier: 1.28
+  }
+};
 
 const ENEMY_VARIANTS = {
   basic: {
@@ -138,6 +171,7 @@ const ENEMY_VARIANTS = {
   elite: {
     ...SKITTER,
     awakenPlayerX: undefined,
+    isElite: true,
     health: 6,
     speed: 54,
     aggroRange: 286,
@@ -183,7 +217,14 @@ export class Chamber01Scene extends Phaser.Scene {
     this.hasProcessedBossVictory = false;
     this.bossCeremonyBossBarActive = false;
     this.bossDeathFlashUntil = -Infinity;
-    this.bossVictoryGoreFountainTimer = null;
+    this.bossProjectilePool = [];
+    this.activeBossProjectiles = [];
+    this.enemyProjectilesPaused = false;
+    this.activeFloorHazards = [];
+    this.activeBossShockwaves = [];
+    this.nextBossFloorHazardAt = Number.POSITIVE_INFINITY;
+    this.nextBossProjectileAt = Number.POSITIVE_INFINITY;
+    this.nextBossAoeAt = Number.POSITIVE_INFINITY;
 
     this.createWorld();
     this.createBackdrop();
@@ -198,6 +239,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.createLoreZones();
     this.createGate();
     this.createUi();
+    this.setupBrutalityMode();
 
     this.majorEncounterResolution = new MajorEncounterResolution(this);
 
@@ -209,9 +251,12 @@ export class Chamber01Scene extends Phaser.Scene {
       this.game.events.off('lore-screen-complete', this.handleLoreScreenComplete, this);
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
       this.audioDirector?.shutdown();
-      this.stopBossVictoryGoreFountain();
+      this.destroyBossProjectilePool();
       this.majorEncounterResolution?.teardown();
       this.hud?.setBossBarState({ visible: false });
+      this.brutalityMode?.end(this.time.now);
+      this.enemies?.forEach((enemy) => enemy.setBrutalityAggression(false));
+      this.boss?.setBrutalityAggression?.(false);
     });
 
     this.configureLayout();
@@ -366,6 +411,11 @@ export class Chamber01Scene extends Phaser.Scene {
     this.boss.setActive(false);
     this.boss.sprite.setVisible(false);
     this.boss.body.enable = false;
+    this.enemyProjectileGroup = this.physics.add.group({ allowGravity: false, immovable: true });
+    this.physics.add.overlap(this.player.sprite, this.enemyProjectileGroup, (_playerSprite, projectileSprite) => {
+      const projectile = projectileSprite?.__enemyProjectileRef;
+      this.handleEnemyProjectileHit(projectile);
+    });
 
     this.bossRewardText = this.add
       .text(this.scale.width / 2, this.scale.height * 0.28, 'BLIND CANTOR\nBANISHED', {
@@ -496,6 +546,7 @@ export class Chamber01Scene extends Phaser.Scene {
       this.restartText.setVisible(true).setText('VESSEL FAILURE\nPress [R] to re-seed chamber');
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
       this.boss?.body?.setVelocity?.(0, 0);
+      this.setEnemyProjectilesPaused(true);
       if (Phaser.Input.Keyboard.JustDown(this.keyRestart) || mobileInput.interactPressed) {
         restartRunFromDeath(this);
       }
@@ -509,10 +560,12 @@ export class Chamber01Scene extends Phaser.Scene {
       this.player.body.setVelocity(0, 0);
       this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
       this.boss?.body?.setVelocity?.(0, 0);
+      this.setEnemyProjectilesPaused(true);
       return;
     }
 
     this.mobileControls.setMode('gameplay');
+    this.setEnemyProjectilesPaused(false);
 
     const input = {
       left: this.cursors.left.isDown || mobileInput.left,
@@ -530,6 +583,11 @@ export class Chamber01Scene extends Phaser.Scene {
 
     this.tryStartBossEncounter();
     this.boss.update(time, this.player.sprite);
+    this.updateBlindCantorThreats(time);
+    this.updateBossProjectiles(time);
+    this.updateBossHazards(time);
+    this.brutalityMode?.update(time);
+    this.syncBrutalityAggression();
 
     this.refreshLoreZonePresence();
     this.tryBeginLoreSequence(mobileInput);
@@ -598,6 +656,9 @@ export class Chamber01Scene extends Phaser.Scene {
     this.gateSigil?.setAlpha(0.16);
     this.gateArt?.setAlpha(0.56).setTint(0xaa9881);
     this.gateFrame?.setAlpha(0.48).setTint(0xa5927a);
+    this.nextBossFloorHazardAt = this.time.now + 1400;
+    this.nextBossProjectileAt = this.time.now + 980;
+    this.nextBossAoeAt = this.time.now + 1860;
   }
 
   handlePlayerHitEnemy(enemy) {
@@ -611,8 +672,31 @@ export class Chamber01Scene extends Phaser.Scene {
     enemy.lastAttackHitId = this.player.attackId;
     const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
     enemy.setHitReactionDirection(knockDirection);
-    enemy.takeDamage(1, this.time.now);
+    const now = this.time.now;
+    const isBasicEnemy = !enemy.config?.isElite;
+    const brutalityActive = this.brutalityMode?.isActive?.() ?? false;
+    if (brutalityActive && isBasicEnemy) {
+      enemy.takeDamage(Math.max(enemy.health, 1), now, { skipDefaultDeathFx: true });
+      if (enemy.dead) {
+        const remainsSpawnPoint = enemy.getDeathRemainsSpawnPoint?.() ?? {
+          x: enemy.sprite.x,
+          groundY: enemy.body?.bottom ?? this.player?.sprite?.body?.bottom
+        };
+        triggerBrutalityBasicChunkBurst(this, {
+          x: remainsSpawnPoint.x,
+          y: CHAMBER_FLOOR_PLANE_Y - 16,
+          floorPlaneY: CHAMBER_FLOOR_PLANE_Y,
+          depth: enemy.sprite.depth - 0.08
+        });
+        this.cameras.main.shake(86, 0.005, true);
+      }
+    } else {
+      enemy.takeDamage(this.player.getAttackDamage(), now);
+    }
     this.audioDirector?.playPlayerHit();
+    if (enemy.dead && isBasicEnemy) {
+      this.brutalityMode?.registerBasicKill(now);
+    }
   }
 
   handleEnemyContactPlayer(enemy) {
@@ -679,67 +763,111 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    this.majorEncounterResolution?.begin({
+    beginBossDeathPayoffPackage({
+      scene: this,
       encounterId: BLIND_CANTOR.encounterId,
-      freezePlayer: true,
-      disablePlayerAttack: true,
+      majorEncounterResolution: this.majorEncounterResolution,
+      bossSprite: this.boss?.sprite,
+      bossBody: this.boss?.body,
+      bossActor: this.boss,
+      player: this.player,
       setResolutionLock: (locked) => {
         this.resolutionLockActive = locked;
+      },
+      pauseProjectiles: (paused) => this.setEnemyProjectilesPaused(paused),
+      followPlayer: {
+        cameraLerp: CHAMBER.cameraLerp,
+        followOffsetX: this.getFollowOffsetX(),
+        followOffsetY: 0,
+        zoom: this.cameras.main.zoom
+      },
+      deathCamera: {
+        focusLerp: { x: 0.08, y: 0.08 },
+        focusOffsetX: 0,
+        focusOffsetY: -24,
+        zoomScale: BLIND_CANTOR.resolution.cameraZoomScale,
+        zoomInDurationMs: BLIND_CANTOR.resolution.cameraFocusDurationMs,
+        zoomOutDurationMs: 260
+      },
+      victory: {
+        preExplosionShakeMs: BLIND_CANTOR.resolution.preExplosionShakeMs,
+        preExplosionShakeIntensity: BLIND_CANTOR.resolution.preExplosionShakeIntensity,
+        goreFountainCadenceMs: BLIND_CANTOR.resolution.goreFountainCadenceMs,
+        explosionFadeStartDelayMs: BLIND_CANTOR.resolution.explosionFadeStartDelayMs,
+        explosionFadeDurationMs: BLIND_CANTOR.resolution.explosionFadeDurationMs,
+        postExplosionDespawnDelayMs: BLIND_CANTOR.resolution.postExplosionDespawnDelayMs,
+        fountainBurst: {
+          xJitter: [-62, 62],
+          yFromBottom: [108, 160],
+          depthOffset: 0.38,
+          randomScale: [0.74, 0.96],
+          durationMs: 600,
+          burstCount: 58,
+          sprayCount: 82,
+          mistCount: 8,
+          emberCount: 8,
+          burstRadiusX: 128,
+          burstRadiusY: 172,
+          dropletWidth: [8, 22],
+          dropletHeight: [18, 46],
+          sprayWidth: [4, 11],
+          sprayHeight: [14, 38],
+          splashColor: 0x8b111c,
+          heavyColor: 0x5e0a13,
+          highlightColor: 0xb43645,
+          redSpeckColor: 0xc84a55,
+          mistColor: 0x1d080b
+        },
+        blowoutBurst: {
+          yFromBottom: [96, 138],
+          depthOffset: 0.46,
+          scale: 1.32,
+          durationMs: 820,
+          burstCount: 96,
+          sprayCount: 134,
+          mistCount: 20,
+          emberCount: 18,
+          burstRadiusX: 162,
+          burstRadiusY: 196,
+          dropletWidth: [12, 30],
+          dropletHeight: [22, 56],
+          sprayWidth: [5, 14],
+          sprayHeight: [16, 42],
+          splashColor: 0x8b111c,
+          heavyColor: 0x5e0a13,
+          highlightColor: 0xb43645,
+          redSpeckColor: 0xc84a55,
+          mistColor: 0x1d080b
+        }
+      },
+      payoffPose: {
+        floorPlaneY: CHAMBER_FLOOR_PLANE_Y,
+        maxUpwardSnapPx: 22,
+        scaleX: this.boss.baseScaleX * this.boss.config.presentation.scaleX,
+        scaleY: this.boss.baseScaleY * this.boss.config.presentation.scaleY,
+        angle: 0
+      },
+      corpseRemains: {
+        floorPlaneY: CHAMBER_FLOOR_PLANE_Y,
+        size: 'sector3Boss'
       },
       onStart: () => {
         this.hasProcessedBossVictory = true;
         this.bossDefeated = true;
         this.bossCeremonyBossBarActive = true;
-        this.boss.setActive(false);
         this.isBossCeremonyActive = true;
         this.bossDeathFlashUntil = this.time.now + BLIND_CANTOR.resolution.preExplosionShakeMs;
         this.playBossCeremonyStart();
       },
-      stages: [
-        {
-          atMs: BLIND_CANTOR.resolution.preExplosionShakeMs,
-          run: () => {
-            this.stopBossVictoryGoreFountain();
-            this.triggerBlindCantorDeathBurst({
-              x: this.boss.sprite.x,
-              y: (this.boss.sprite.body?.bottom ?? this.boss.sprite.y) - Phaser.Math.Between(96, 138),
-              depth: this.boss.sprite.depth + 0.46,
-              scale: 1.32,
-              durationMs: 820,
-              burstCount: 96,
-              sprayCount: 134,
-              mistCount: 20,
-              emberCount: 18,
-              burstRadiusX: 162,
-              burstRadiusY: 196,
-              dropletWidth: [12, 30],
-              dropletHeight: [22, 56],
-              sprayWidth: [5, 14],
-              sprayHeight: [16, 42]
-            });
-            this.majorEncounterResolution?.schedule(BLIND_CANTOR.resolution.explosionFadeStartDelayMs, () => {
-              this.startBossExplosionFade();
-            });
-            this.audioDirector?.playBanishmentSting();
-            this.bossRewardText?.setText('BLIND CANTOR\nBANISHED');
-            grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, BLIND_CANTOR.encounterId);
-            this.audioDirector?.playGateUnlock();
-            this.updateGateActivationVisuals();
-          }
-        },
-        {
-          atMs: BLIND_CANTOR.resolution.preExplosionShakeMs + BLIND_CANTOR.resolution.postExplosionDespawnDelayMs,
-          run: () => {
-            this.despawnBossAfterPayoff();
-          }
-        },
-        {
-          atMs: BLIND_CANTOR.resolution.ceremonyDurationMs,
-          run: () => {
-            this.finishBossCeremony();
-          }
-        }
-      ]
+      onPreExplosion: () => {
+        this.bossRewardText?.setText('BLIND CANTOR\nBANISHED');
+        grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, BLIND_CANTOR.encounterId);
+        this.audioDirector?.playGateUnlock();
+        this.updateGateActivationVisuals();
+      },
+      onComplete: () => {
+        this.finishBossCeremony();
+      }
     });
   }
 
@@ -748,7 +876,6 @@ export class Chamber01Scene extends Phaser.Scene {
     this.focusCameraOnBoss();
     this.cameras.main.shake(BLIND_CANTOR.resolution.preExplosionShakeMs, BLIND_CANTOR.resolution.preExplosionShakeIntensity, true);
     this.time.delayedCall(210, () => this.cameras.main.shake(1200, BLIND_CANTOR.resolution.preExplosionShakeIntensity * 0.82, true));
-    this.startBossVictoryGoreFountain();
     this.bossRewardText?.setText('CEREMONIAL\nBANISHMENT');
 
     if (this.bossRewardText) {
@@ -792,103 +919,7 @@ export class Chamber01Scene extends Phaser.Scene {
       .setY(groundedY);
   }
 
-  startBossExplosionFade() {
-    if (!this.boss?.sprite?.active) {
-      return;
-    }
-
-    this.tweens.killTweensOf(this.boss.sprite);
-    this.tweens.add({
-      targets: this.boss.sprite,
-      alpha: 0,
-      duration: BLIND_CANTOR.resolution.explosionFadeDurationMs,
-      ease: 'Sine.easeInOut'
-    });
-  }
-
-  despawnBossAfterPayoff() {
-    if (!this.boss?.sprite) {
-      return;
-    }
-
-    this.stopBossVictoryGoreFountain();
-    spawnEnemyCorpseRemains(this, {
-      x: this.boss.sprite.x,
-      floorPlaneY: CHAMBER_FLOOR_PLANE_Y,
-      depth: this.boss.sprite.depth,
-      size: 'sector3Boss'
-    });
-    this.boss.sprite.setVisible(false).setAlpha(0);
-    this.boss.setActive(false);
-    this.boss.body?.setEnable(false);
-    this.boss.destroyCombatTelegraphs?.();
-  }
-
-  startBossVictoryGoreFountain() {
-    this.stopBossVictoryGoreFountain();
-    if (!this.boss?.sprite?.active) {
-      return;
-    }
-
-    const spawnFountainBurst = () => {
-      if (!this.isBossCeremonyActive || !this.boss?.sprite?.active) {
-        return;
-      }
-
-      this.triggerBlindCantorDeathBurst({
-        x: this.boss.sprite.x + Phaser.Math.Between(-62, 62),
-        y: (this.boss.sprite.body?.bottom ?? this.boss.sprite.y) - Phaser.Math.Between(108, 160),
-        depth: this.boss.sprite.depth + 0.38,
-        scale: Phaser.Math.FloatBetween(0.74, 0.96),
-        durationMs: 600,
-        burstCount: 58,
-        sprayCount: 82,
-        mistCount: 8,
-        emberCount: 8,
-        burstRadiusX: 128,
-        burstRadiusY: 172,
-        dropletWidth: [8, 22],
-        dropletHeight: [18, 46],
-        sprayWidth: [4, 11],
-        sprayHeight: [14, 38]
-      });
-    };
-
-    spawnFountainBurst();
-    this.bossVictoryGoreFountainTimer = this.time.addEvent({
-      delay: BLIND_CANTOR.resolution.goreFountainCadenceMs,
-      repeat: Math.ceil(BLIND_CANTOR.resolution.preExplosionShakeMs / BLIND_CANTOR.resolution.goreFountainCadenceMs),
-      callback: spawnFountainBurst
-    });
-  }
-
-  stopBossVictoryGoreFountain() {
-    this.bossVictoryGoreFountainTimer?.remove(false);
-    this.bossVictoryGoreFountainTimer = null;
-  }
-
-  triggerBlindCantorDeathBurst(config = {}) {
-    if (!this.boss?.sprite?.active) {
-      return;
-    }
-
-    triggerSector02BlackOilBlowout(this, {
-      source: this.boss.sprite,
-      splashColor: 0x8b111c,
-      heavyColor: 0x5e0a13,
-      highlightColor: 0xb43645,
-      redSpeckColor: 0xc84a55,
-      mistColor: 0x1d080b,
-      alpha: 0.98,
-      includeGroundPool: false,
-      persistPuddle: false,
-      fadeSource: false,
-      ...config
-    });
-  }
-
   finishBossCeremony() {
-    this.stopBossVictoryGoreFountain();
     this.bossCeremonyBossBarActive = false;
     this.hud.setBossBarState({ visible: false });
     this.isBossCeremonyActive = false;
@@ -957,6 +988,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.player.body.setVelocity(0, 0);
     this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
     this.boss?.body?.setVelocity?.(0, 0);
+    this.setEnemyProjectilesPaused(true);
 
     this.audioDirector?.stopAmbientLoop();
 
@@ -1000,6 +1032,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.isLoreTransitionActive = false;
     this.mobileControls.setMode('gameplay');
     this.audioDirector?.playAmbientLoop(ASSET_KEYS.ambientChamber01Loop01, { volume: 0.252 });
+    this.setEnemyProjectilesPaused(false);
     this.cameras.main.fadeIn(500, 0, 0, 0);
   }
 
@@ -1082,17 +1115,16 @@ export class Chamber01Scene extends Phaser.Scene {
       return;
     }
 
-    console.info('[Chamber01->Chamber02] gate transition requested');
     this.isGateTransitionActive = true;
     this.mobileControls.setMode('dialogue');
     this.player.body.setVelocity(0, 0);
     this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
     this.boss?.body?.setVelocity?.(0, 0);
+    this.setEnemyProjectilesPaused(true);
 
     this.audioDirector?.stopAmbientLoop({ fadeOut: false });
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      console.info('[Chamber01->Chamber02] fade out complete, starting Chamber02Scene');
       this.audioDirector?.shutdown();
       try {
         this.scene.start('Chamber02Scene', {
@@ -1120,6 +1152,255 @@ export class Chamber01Scene extends Phaser.Scene {
     }
 
     this.cameras.main.setBackgroundColor(COLORS.backdrop);
+  }
+
+  setupBrutalityMode() {
+    this.brutalityMode = new BrutalityModeState(this, {
+      ...BRUTALITY_MODE.rules,
+      onActivated: () => {
+        this.player.applyBrutalityMode(BRUTALITY_MODE.player);
+        this.audioDirector?.playEnemyAttack('miniboss');
+        this.syncBrutalityAggression();
+      },
+      onEnded: () => {
+        this.player.clearBrutalityMode();
+        this.enemies.forEach((enemy) => enemy.setBrutalityAggression(false));
+        this.boss?.setBrutalityAggression?.(false);
+      }
+    });
+  }
+
+  syncBrutalityAggression() {
+    const brutalityActive = this.brutalityMode?.isActive?.() ?? false;
+    this.enemies.forEach((enemy) => enemy.setBrutalityAggression(brutalityActive, BRUTALITY_MODE.enemyAggression));
+    this.boss?.setBrutalityAggression?.(brutalityActive, BRUTALITY_MODE.enemyAggression);
+  }
+
+  updateBlindCantorThreats(time) {
+    if (!this.bossEncounterStarted || this.boss?.dead || !this.boss?.active || this.isBossCeremonyActive || this.resolutionLockActive) {
+      return;
+    }
+
+    if (time >= this.nextBossProjectileAt) {
+      this.fireBlindCantorProjectiles();
+      this.nextBossProjectileAt = time + BLIND_CANTOR.threat.projectileCooldownMs;
+    }
+
+    if (time >= this.nextBossFloorHazardAt) {
+      this.spawnFloorHazardTelegraph();
+      this.nextBossFloorHazardAt = time + BLIND_CANTOR.threat.floorHazardCooldownMs;
+    }
+
+    if (time >= this.nextBossAoeAt) {
+      this.castBlindCantorShockwave();
+      this.nextBossAoeAt = time + BLIND_CANTOR.threat.aoeCooldownMs;
+    }
+  }
+
+  fireBlindCantorProjectiles() {
+    if (!this.player?.sprite?.active || !this.boss?.sprite?.active) {
+      return;
+    }
+
+    const originX = this.boss.sprite.x + (this.boss.direction >= 0 ? 52 : -52);
+    const originY = this.boss.sprite.y - 78;
+    const targetY = this.player.sprite.y - 52;
+    [-42, 0, 42].forEach((spreadY) => {
+      const projectile = this.getReusableBossProjectile();
+      const velocity = new Phaser.Math.Vector2(this.player.sprite.x - originX, targetY + spreadY - originY)
+        .normalize()
+        .scale(BLIND_CANTOR.threat.projectileSpeed);
+      projectile.fire({
+        x: originX,
+        y: originY + spreadY * 0.18,
+        velocityX: velocity.x,
+        velocityY: velocity.y,
+        textureKey: ASSET_KEYS.enemyProjectileBoneShard,
+        lifetimeMs: 2600,
+        damage: 1,
+        rotationSpeed: 260,
+        tint: 0xd6c8b0
+      });
+      projectile.sprite.__enemyProjectileRef = projectile;
+      this.enemyProjectileGroup.add(projectile.sprite);
+    });
+  }
+
+  spawnFloorHazardTelegraph() {
+    const targetX = Phaser.Math.Clamp(
+      this.player.sprite.x + Phaser.Math.Between(-84, 84),
+      BLIND_CANTOR.arenaStartX + 40,
+      CHAMBER.gateX - 128
+    );
+    const cue = this.add.ellipse(targetX, WORLD.floorY - 6, BLIND_CANTOR.threat.floorHazardRadius * 2, 30, 0x8a1520, 0.1).setDepth(5.95);
+    this.tweens.add({
+      targets: cue,
+      alpha: 0.56,
+      width: BLIND_CANTOR.threat.floorHazardRadius * 2.3,
+      duration: BLIND_CANTOR.threat.floorHazardTelegraphMs,
+      ease: 'Sine.easeIn'
+    });
+
+    this.activeFloorHazards.push({
+      cue,
+      x: targetX,
+      triggerAt: this.time.now + BLIND_CANTOR.threat.floorHazardTelegraphMs,
+      radius: BLIND_CANTOR.threat.floorHazardRadius
+    });
+  }
+
+  castBlindCantorShockwave() {
+    if (!this.boss?.sprite?.active) {
+      return;
+    }
+    const ring = this.add.circle(this.boss.sprite.x, this.boss.sprite.y - 10, 18, 0xb43a46, 0.18).setDepth(6.15);
+    ring.setStrokeStyle(4, 0xd5c4a9, 0.6);
+    this.activeBossShockwaves.push({
+      ring,
+      x: this.boss.sprite.x,
+      y: this.boss.sprite.y - 10,
+      triggerAt: this.time.now + BLIND_CANTOR.threat.aoeTelegraphMs,
+      radius: BLIND_CANTOR.threat.aoeRadius
+    });
+    this.tweens.add({
+      targets: ring,
+      scaleX: BLIND_CANTOR.threat.aoeRadius / 18,
+      scaleY: BLIND_CANTOR.threat.aoeRadius / 18,
+      alpha: 0.62,
+      duration: BLIND_CANTOR.threat.aoeTelegraphMs,
+      ease: 'Sine.easeOut'
+    });
+  }
+
+  updateBossHazards(time) {
+    this.activeFloorHazards = this.activeFloorHazards.filter((hazard) => {
+      if (time < hazard.triggerAt) {
+        return true;
+      }
+      this.triggerSectorFloorRupture(hazard.x, hazard.radius);
+      hazard.cue?.destroy();
+      return false;
+    });
+
+    this.activeBossShockwaves = this.activeBossShockwaves.filter((entry) => {
+      if (time < entry.triggerAt) {
+        return true;
+      }
+      entry.ring?.destroy();
+      this.applyShockwaveDamage(entry.x, entry.y, entry.radius);
+      return false;
+    });
+  }
+
+  triggerSectorFloorRupture(x, radius) {
+    this.cameras.main.shake(120, 0.0042, true);
+    triggerSector02BlackOilBlowout(this, {
+      source: this.boss.sprite,
+      x,
+      y: WORLD.floorY - 18,
+      depth: 6.1,
+      scale: 0.72,
+      durationMs: 540,
+      burstCount: 26,
+      sprayCount: 38,
+      mistCount: 4,
+      emberCount: 0,
+      burstRadiusX: 84,
+      burstRadiusY: 96,
+      dropletWidth: [6, 14],
+      dropletHeight: [10, 30],
+      sprayWidth: [3, 8],
+      sprayHeight: [10, 22],
+      includeGroundPool: false,
+      persistPuddle: false
+    });
+
+    const playerDistance = Math.abs(this.player.sprite.x - x);
+    if (playerDistance <= radius && this.player.receiveDamage(1, this.time.now)) {
+      const knockDirection = Math.sign(this.player.sprite.x - x) || 1;
+      this.player.body.setVelocityX(knockDirection * 238);
+      this.player.body.setVelocityY(-210);
+    }
+  }
+
+  applyShockwaveDamage(x, y, radius) {
+    const distance = Phaser.Math.Distance.Between(this.player.sprite.x, this.player.sprite.y, x, y);
+    if (distance > radius) {
+      return;
+    }
+    if (this.player.receiveDamage(1, this.time.now)) {
+      const knockDirection = Math.sign(this.player.sprite.x - x) || 1;
+      this.player.body.setVelocityX(knockDirection * 244);
+      this.player.body.setVelocityY(-194);
+    }
+    this.cameras.main.shake(150, 0.005, true);
+  }
+
+  getReusableBossProjectile() {
+    const reusable = this.bossProjectilePool.find((entry) => !entry.active);
+    if (reusable) {
+      return reusable;
+    }
+
+    const projectile = new EnemyProjectile(this, {
+      speed: BLIND_CANTOR.threat.projectileSpeed,
+      damage: 1,
+      lifetimeMs: 2400,
+      bodySize: { width: 20, height: 20 },
+      depth: 6.3,
+      rotationSpeed: 320,
+      presentation: {
+        displayWidth: 40,
+        displayHeight: 40,
+        alpha: 0.96,
+        tint: 0xd8c9b1,
+        fallbackFill: 0xc3b39a,
+        fallbackStroke: 0x7b6b5d
+      }
+    });
+    projectile.sprite.__enemyProjectileRef = projectile;
+    this.bossProjectilePool.push(projectile);
+    this.activeBossProjectiles.push(projectile);
+    return projectile;
+  }
+
+  updateBossProjectiles(time) {
+    const delta = this.game.loop.delta;
+    this.activeBossProjectiles.forEach((projectile) => projectile.update(time, delta));
+  }
+
+  handleEnemyProjectileHit(projectile) {
+    if (!projectile?.active || this.player.isDead || this.isLoreTransitionActive || this.isGateTransitionActive || this.isBossCeremonyActive) {
+      return;
+    }
+
+    const tookDamage = this.player.receiveDamage(projectile.damage ?? 1, this.time.now);
+    projectile.playImpact(this.player.sprite.x, this.player.sprite.y - 26, 0xe5d8c4);
+    if (tookDamage) {
+      const knockDirection = Math.sign(this.player.sprite.x - (projectile.sprite?.x ?? this.player.sprite.x - 1)) || 1;
+      this.player.body.setVelocityX(knockDirection * 214);
+      this.player.body.setVelocityY(-168);
+    }
+  }
+
+  setEnemyProjectilesPaused(paused) {
+    if (this.enemyProjectilesPaused === paused) {
+      return;
+    }
+    this.enemyProjectilesPaused = paused;
+    this.activeBossProjectiles.forEach((projectile) => {
+      if (paused) {
+        projectile.pauseMotion();
+      } else {
+        projectile.resumeMotion();
+      }
+    });
+  }
+
+  destroyBossProjectilePool() {
+    this.activeBossProjectiles.forEach((projectile) => projectile.destroy());
+    this.activeBossProjectiles = [];
+    this.bossProjectilePool = [];
   }
 
   setupMobileUiCamera() {
