@@ -36,6 +36,10 @@ export class HalfSkullMiniboss {
     this.poiseBroken = false;
     this.lastPoiseDamageAt = -Infinity;
     this.staggerUntil = -Infinity;
+    this.brutalityAggression = {
+      speedMultiplier: 1,
+      aggroRangeMultiplier: 1
+    };
 
     this.textureKey = config.textureKey ?? ASSET_KEYS.chamber01HalfSkullMiniboss;
     this.damageHurtboxConfig = resolveDamageHurtboxConfig(config.damageHurtbox, {
@@ -146,12 +150,12 @@ export class HalfSkullMiniboss {
       return;
     }
 
-    if (absDx > this.config.approachRange) {
-      this.body.setVelocityX(this.direction * this.config.approachSpeed);
+    if (absDx > this.getApproachRange()) {
+      this.body.setVelocityX(this.direction * this.getApproachSpeed());
       return;
     }
 
-    this.body.setVelocityX(this.direction * this.config.idleAdvanceSpeed);
+    this.body.setVelocityX(this.direction * this.getIdleAdvanceSpeed());
 
     if (absDx <= this.config.attackRange && time >= this.lastAttackTime + this.config.attackCooldownMs) {
       this.attackState = 'windup';
@@ -390,5 +394,28 @@ export class HalfSkullMiniboss {
       this.damageHurtboxConfig,
       this.active && !this.dead
     );
+  }
+
+  getApproachSpeed() {
+    return this.config.approachSpeed * this.brutalityAggression.speedMultiplier;
+  }
+
+  getIdleAdvanceSpeed() {
+    return this.config.idleAdvanceSpeed * this.brutalityAggression.speedMultiplier;
+  }
+
+  getApproachRange() {
+    return this.config.approachRange * this.brutalityAggression.aggroRangeMultiplier;
+  }
+
+  setBrutalityAggression(active, config = {}) {
+    if (active) {
+      this.brutalityAggression.speedMultiplier = config.speedMultiplier ?? 1;
+      this.brutalityAggression.aggroRangeMultiplier = config.aggroRangeMultiplier ?? 1;
+      return;
+    }
+
+    this.brutalityAggression.speedMultiplier = 1;
+    this.brutalityAggression.aggroRangeMultiplier = 1;
   }
 }
