@@ -417,22 +417,6 @@ export class Chamber01Scene extends Phaser.Scene {
       this.handleEnemyProjectileHit(projectile);
     });
 
-    this.bossRewardText = this.add
-      .text(this.scale.width / 2, this.scale.height * 0.28, 'BLIND CANTOR\nBANISHED', {
-        fontFamily: 'Georgia, Times, serif',
-        fontSize: '42px',
-        fontStyle: 'bold',
-        align: 'center',
-        color: '#f4efe5',
-        stroke: '#201514',
-        strokeThickness: 8,
-        shadow: { offsetX: 0, offsetY: 6, color: '#090404', blur: 10, fill: true }
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(34)
-      .setAlpha(0)
-      .setVisible(false);
   }
 
   createLoreZones() {
@@ -600,7 +584,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.hud.setBossBarState({
       visible: this.bossEncounterStarted && (!this.bossDefeated || this.bossCeremonyBossBarActive),
       name: BLIND_CANTOR.name,
-      subtitle: this.bossCeremonyBossBarActive ? 'CEREMONIAL BANISHMENT' : BLIND_CANTOR.subtitle,
+      subtitle: BLIND_CANTOR.subtitle,
       current: this.bossCeremonyBossBarActive ? 0 : this.boss.health,
       max: this.boss.maxHealth,
       telegraph: this.bossCeremonyBossBarActive ? 1 : this.boss.getTelegraphProgress(time),
@@ -860,7 +844,6 @@ export class Chamber01Scene extends Phaser.Scene {
         this.playBossCeremonyStart();
       },
       onPreExplosion: () => {
-        this.bossRewardText?.setText('BLIND CANTOR\nBANISHED');
         grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, BLIND_CANTOR.encounterId);
         this.audioDirector?.playGateUnlock();
         this.updateGateActivationVisuals();
@@ -876,20 +859,6 @@ export class Chamber01Scene extends Phaser.Scene {
     this.focusCameraOnBoss();
     this.cameras.main.shake(BLIND_CANTOR.resolution.preExplosionShakeMs, BLIND_CANTOR.resolution.preExplosionShakeIntensity, true);
     this.time.delayedCall(210, () => this.cameras.main.shake(1200, BLIND_CANTOR.resolution.preExplosionShakeIntensity * 0.82, true));
-    this.bossRewardText?.setText('CEREMONIAL\nBANISHMENT');
-
-    if (this.bossRewardText) {
-      this.tweens.killTweensOf(this.bossRewardText);
-      this.bossRewardText.setVisible(true).setAlpha(0).setScale(0.92);
-      this.tweens.add({
-        targets: this.bossRewardText,
-        alpha: 1,
-        scaleX: 1,
-        scaleY: 1,
-        duration: 330,
-        ease: 'Cubic.easeOut'
-      });
-    }
   }
 
   focusCameraOnBoss() {
@@ -923,17 +892,6 @@ export class Chamber01Scene extends Phaser.Scene {
     this.bossCeremonyBossBarActive = false;
     this.hud.setBossBarState({ visible: false });
     this.isBossCeremonyActive = false;
-
-    if (this.bossRewardText) {
-      this.tweens.killTweensOf(this.bossRewardText);
-      this.tweens.add({
-        targets: this.bossRewardText,
-        alpha: 0,
-        duration: 300,
-        ease: 'Cubic.easeIn',
-        onComplete: () => this.bossRewardText.setVisible(false)
-      });
-    }
 
     if (this.cameraPreCeremonyZoom) {
       this.tweens.add({
@@ -1215,7 +1173,7 @@ export class Chamber01Scene extends Phaser.Scene {
         y: originY + spreadY * 0.18,
         velocityX: velocity.x,
         velocityY: velocity.y,
-        textureKey: ASSET_KEYS.enemyProjectileBoneShard,
+        textureKey: ASSET_KEYS.sector02PressureShardProjectile,
         lifetimeMs: 2600,
         damage: 1,
         rotationSpeed: 260,
@@ -1358,7 +1316,6 @@ export class Chamber01Scene extends Phaser.Scene {
         fallbackStroke: 0x7b6b5d
       }
     });
-    projectile.sprite.__enemyProjectileRef = projectile;
     this.bossProjectilePool.push(projectile);
     this.activeBossProjectiles.push(projectile);
     return projectile;
@@ -1441,7 +1398,6 @@ export class Chamber01Scene extends Phaser.Scene {
       this.directionalCameraBias?.setLayout({ isPortrait: true, followOffsetY: PORTRAIT_LAYOUT.portraitFollowOffsetY });
       this.mobileControls.setReservedBottomPx(height - worldBandHeight);
       this.restartText?.setPosition(width / 2, Math.max(PORTRAIT_LAYOUT.restartTextMinY, worldBandHeight * PORTRAIT_LAYOUT.restartTextRatioY));
-      this.layoutBossRewardText(width, height, worldBandHeight);
       this.hud?.layout();
       return;
     }
@@ -1451,21 +1407,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.directionalCameraBias?.setLayout({ isPortrait: false, followOffsetY: PORTRAIT_LAYOUT.desktopFollowOffsetY });
     this.mobileControls.setReservedBottomPx(0);
     this.restartText?.setPosition(width / 2, 90);
-    this.layoutBossRewardText(width, height, height);
     this.hud?.layout();
-  }
-
-  layoutBossRewardText(width = this.scale.width, height = this.scale.height, worldBandHeight = height) {
-    if (!this.bossRewardText) {
-      return;
-    }
-
-    const isPortrait = height >= width;
-    this.bossRewardText
-      .setPosition(width / 2, Math.max(78, worldBandHeight * (isPortrait ? 0.34 : 0.26)))
-      .setFontSize(isPortrait ? '28px' : '42px')
-      .setStroke('#201514', isPortrait ? 6 : 8)
-      .setShadow(0, isPortrait ? 4 : 6, '#090404', isPortrait ? 8 : 10, true, true);
   }
 
   getFollowOffsetX() {
