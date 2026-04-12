@@ -5,6 +5,7 @@ import { createDamageHurtbox, resolveDamageHurtboxConfig, syncDamageHurtbox } fr
 
 const FALLBACK_WIDTH = 188;
 const FALLBACK_HEIGHT = 208;
+const FLOOR_SINK_EPSILON_PX = 0.5;
 
 export class HalfSkullMiniboss {
   constructor(scene, x, y, config) {
@@ -74,6 +75,8 @@ export class HalfSkullMiniboss {
     this.body.setSize(tunedBodyWidth / scaleX, config.body.height / scaleY);
     this.body.setOffset(tunedOffsetX / scaleX, config.body.offsetY / scaleY);
     this.body.setAllowGravity(true);
+    this.floorPlaneY = Number.isFinite(config.floorPlaneY) ? config.floorPlaneY : this.body.bottom;
+    this.floorSinkClampPx = Math.max(0, config.floorSinkClampPx ?? 4);
     this.damageHurtbox = createDamageHurtbox(scene, this.sprite);
     this.syncDamageHurtbox();
   }
@@ -84,6 +87,9 @@ export class HalfSkullMiniboss {
     if (!active && !this.dead) {
       this.clearAttackState();
       this.body.setVelocityX(0);
+    }
+    if (active && !this.dead) {
+      this.syncToFloorBaseline({ force: true });
     }
   }
 
@@ -102,6 +108,8 @@ export class HalfSkullMiniboss {
       this.body.setVelocityX(0);
       return;
     }
+
+    this.clampBossFloorSink();
 
     if (this.isStaggered(time)) {
       this.body.setVelocity(0, 0);
@@ -145,7 +153,8 @@ export class HalfSkullMiniboss {
 
     if (this.attackState === 'recover') {
       if (time >= this.lastAttackTime + this.config.attackRecoveryMs) {
-        this.attackState = 'idle';
+        this.clearAttackState();
+        this.syncToFloorBaseline();
       }
       return;
     }
@@ -268,6 +277,7 @@ export class HalfSkullMiniboss {
     this.staggerUntil = time + this.poiseConfig.staggerDurationMs;
     this.clearAttackState();
     this.body.setVelocity(0, 0);
+    this.syncToFloorBaseline();
     this.recordContactDamage(time);
   }
 
@@ -282,6 +292,7 @@ export class HalfSkullMiniboss {
 
     this.poiseBroken = false;
     this.poise = this.poiseConfig.max;
+    this.syncToFloorBaseline({ force: true });
     return false;
   }
 
@@ -394,6 +405,41 @@ export class HalfSkullMiniboss {
       this.damageHurtboxConfig,
       this.active && !this.dead
     );
+  }
+
+  syncToFloorBaseline({ force = false } = {}) {
+    if (!this.body?.enable) {
+      return;
+    }
+
+    const floorOverflow = this.body.bottom - this.floorPlaneY;
+    const canSettleNow = force || this.body.blocked.down || this.body.velocity.y >= 0;
+    if (!canSettleNow || floorOverflow <= FLOOR_SINK_EPSILON_PX) {
+      return;
+    }
+
+    this.sprite.y -= floorOverflow;
+    this.body.updateFromGameObject();
+    if (this.body.velocity.y > 0) {
+      this.body.setVelocityY(0);
+    }
+  }
+
+  clampBossFloorSink() {
+    if (!this.body?.enable) {
+      return;
+    }
+
+    const maxBottomY = this.floorPlaneY + this.floorSinkClampPx;
+    if (this.body.bottom <= maxBottomY) {
+      return;
+    }
+
+    this.sprite.y -= this.body.bottom - maxBottomY;
+    this.body.updateFromGameObject();
+    if (this.body.velocity.y > 0) {
+      this.body.setVelocityY(0);
+    }
   }
 
   getApproachSpeed() {
