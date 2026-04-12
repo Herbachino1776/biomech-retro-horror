@@ -46,7 +46,7 @@ const BLIND_CANTOR = {
   encounterId: 'chamber01-blind-cantor-major-encounter',
   name: 'THE BLIND CANTOR',
   subtitle: 'Ritual Choir Profanation',
-  health: 4.5,
+  health: 4.5 * 0.25,
   contactDamage: 1,
   contactDamageCooldownMs: 1120,
   attackCooldownMs: 2650,
