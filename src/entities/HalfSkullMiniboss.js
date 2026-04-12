@@ -6,6 +6,7 @@ import { createDamageHurtbox, resolveDamageHurtboxConfig, syncDamageHurtbox } fr
 const FALLBACK_WIDTH = 188;
 const FALLBACK_HEIGHT = 208;
 const FLOOR_SINK_EPSILON_PX = 0.5;
+const VISUAL_FLOOR_SINK_EPSILON_PX = 0.5;
 
 export class HalfSkullMiniboss {
   constructor(scene, x, y, config) {
@@ -90,6 +91,7 @@ export class HalfSkullMiniboss {
     }
     if (active && !this.dead) {
       this.syncToFloorBaseline({ force: true });
+      this.clampVisualFloorSink({ force: true });
     }
   }
 
@@ -110,6 +112,7 @@ export class HalfSkullMiniboss {
     }
 
     this.clampBossFloorSink();
+    this.clampVisualFloorSink();
 
     if (this.isStaggered(time)) {
       this.body.setVelocity(0, 0);
@@ -155,6 +158,7 @@ export class HalfSkullMiniboss {
       if (time >= this.lastAttackTime + this.config.attackRecoveryMs) {
         this.clearAttackState();
         this.syncToFloorBaseline();
+        this.clampVisualFloorSink({ force: true });
       }
       return;
     }
@@ -278,6 +282,7 @@ export class HalfSkullMiniboss {
     this.clearAttackState();
     this.body.setVelocity(0, 0);
     this.syncToFloorBaseline();
+    this.clampVisualFloorSink({ force: true });
     this.recordContactDamage(time);
   }
 
@@ -293,6 +298,7 @@ export class HalfSkullMiniboss {
     this.poiseBroken = false;
     this.poise = this.poiseConfig.max;
     this.syncToFloorBaseline({ force: true });
+    this.clampVisualFloorSink({ force: true });
     return false;
   }
 
@@ -436,6 +442,25 @@ export class HalfSkullMiniboss {
     }
 
     this.sprite.y -= this.body.bottom - maxBottomY;
+    this.body.updateFromGameObject();
+    if (this.body.velocity.y > 0) {
+      this.body.setVelocityY(0);
+    }
+  }
+
+  clampVisualFloorSink({ force = false } = {}) {
+    if (!this.body?.enable) {
+      return;
+    }
+
+    const maxVisualBottomY = this.floorPlaneY + this.floorSinkClampPx;
+    const visualBottomY = this.sprite.y + this.sprite.displayHeight * (1 - this.sprite.originY);
+    const canSettleNow = force || this.isGrounded() || this.body.velocity.y >= 0;
+    if (!canSettleNow || visualBottomY <= maxVisualBottomY + VISUAL_FLOOR_SINK_EPSILON_PX) {
+      return;
+    }
+
+    this.sprite.y -= visualBottomY - maxVisualBottomY;
     this.body.updateFromGameObject();
     if (this.body.velocity.y > 0) {
       this.body.setVelocityY(0);
