@@ -4,6 +4,7 @@ import { ASSET_KEYS } from '../data/assetKeys.js';
 import { triggerEnemyDeathRuptureBurst } from '../systems/EnemyDeathRuptureBurst.js';
 import { triggerEnemyHitSplatterBurst } from '../systems/EnemyHitSplatterBurst.js';
 import { spawnEnemyCorpseRemains } from '../systems/EnemyCorpseRemains.js';
+import { resolveSceneGameplayFloorY } from '../systems/floorGrounding.js';
 import { createDamageHurtbox, resolveDamageHurtboxConfig, syncDamageHurtbox } from './damageHurtbox.js';
 
 const DEATH_FADE_DURATION_MS = 180;
@@ -454,7 +455,7 @@ export class SkitterServitor {
 
     this.deathRemainsSpawnPoint = {
       x: this.sprite.x,
-      groundY: this.scene?.player?.sprite?.body?.bottom ?? WORLD.floorY + 2
+      groundY: resolveSceneGameplayFloorY(this.scene, WORLD.floorY + 2)
     };
     return this.deathRemainsSpawnPoint;
   }
