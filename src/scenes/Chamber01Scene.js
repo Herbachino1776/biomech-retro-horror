@@ -27,7 +27,7 @@ import { triggerBrutalityBasicChunkBurst } from '../systems/BrutalityChunkBurst.
 
 const CHAMBER = {
   sceneKey: 'Chamber01Scene',
-  width: WORLD.width,
+  width: 2720,
   floorColliderHeight: 72,
   floorColliderCenterYOffset: 28,
   spawnX: PLAYER.startX,
@@ -35,7 +35,7 @@ const CHAMBER = {
   cameraLerp: { x: 0.08, y: 0.08 },
   portraitFollowOffsetX: -118,
   desktopFollowOffsetX: -148,
-  gateX: WORLD.width - 82
+  gateX: 2624
 };
 
 const CHAMBER_FLOOR_PLANE_Y = WORLD.floorY + CHAMBER.floorColliderCenterYOffset - CHAMBER.floorColliderHeight / 2;
@@ -63,12 +63,12 @@ const BLIND_CANTOR = {
   hurtRecoverMs: 240,
   hurtRecoilVelocityX: 120,
   hurtRecoilVelocityY: -64,
-  spawnX: 1980,
+  spawnX: 2420,
   spawnY: CHAMBER_FLOOR_PLANE_Y,
   floorPlaneY: CHAMBER_FLOOR_PLANE_Y,
   floorSinkClampPx: 6,
-  activationX: 1640,
-  arenaStartX: 1600,
+  activationX: 2060,
+  arenaStartX: 2020,
   body: { width: 90, height: 134, offsetX: 98, offsetY: 78 },
   textureKey: ASSET_KEYS.sector03Chamber02EnemyBasicBlindCantor,
   audioProfile: 'miniboss',
@@ -106,39 +106,52 @@ const BLIND_CANTOR = {
 const POCKET_CONFIGS = [
   {
     id: 'corridor-wall-pocket-01',
-    zoneX: 740,
+    zoneX: 760,
     zoneY: WORLD.floorY - 76,
-    zoneWidth: 420,
+    zoneWidth: 460,
     zoneHeight: 236,
     enemies: [
-      { x: 666, variant: 'basic' },
-      { x: 760, variant: 'basic' },
-      { x: 844, variant: 'basic' }
+      { x: 670, variant: 'basic' },
+      { x: 780, variant: 'basic' },
+      { x: 890, variant: 'basic' }
     ]
   },
   {
     id: 'corridor-wall-pocket-02',
-    zoneX: 1160,
+    zoneX: 1240,
     zoneY: WORLD.floorY - 76,
-    zoneWidth: 520,
+    zoneWidth: 560,
     zoneHeight: 236,
     enemies: [
-      { x: 1030, variant: 'basic' },
-      { x: 1134, variant: 'basic' },
-      { x: 1230, variant: 'basic' },
-      { x: 1342, variant: 'basic' }
+      { x: 1080, variant: 'basic' },
+      { x: 1200, variant: 'basic' },
+      { x: 1320, variant: 'basic' },
+      { x: 1440, variant: 'basic' }
+    ]
+  },
+  {
+    id: 'corridor-wall-pocket-03',
+    zoneX: 1710,
+    zoneY: WORLD.floorY - 76,
+    zoneWidth: 540,
+    zoneHeight: 236,
+    enemies: [
+      { x: 1570, variant: 'basic' },
+      { x: 1690, variant: 'basic' },
+      { x: 1810, variant: 'basic' },
+      { x: 1930, variant: 'basic' }
     ]
   },
   {
     id: 'opened-reveal-domain',
-    zoneX: 1540,
+    zoneX: 2170,
     zoneY: WORLD.floorY - 82,
-    zoneWidth: 660,
+    zoneWidth: 700,
     zoneHeight: 248,
     enemies: [
-      { x: 1462, variant: 'elite' },
-      { x: 1610, variant: 'elite' },
-      { x: 1730, variant: 'basic' }
+      { x: 2020, variant: 'elite' },
+      { x: 2170, variant: 'elite' },
+      { x: 2310, variant: 'basic' }
     ]
   }
 ];
@@ -195,9 +208,14 @@ const SEGMENTS = [
   { type: 'opening', x: 340, y: 214, w: 700, h: 432, tint: 0xd3c4b0, alpha: 0.74 },
   { type: 'corridor', x: 860, y: 214, w: 540, h: 430, tint: 0xbcae9e, alpha: 0.62 },
   { type: 'corridor', x: 1270, y: 214, w: 540, h: 430, tint: 0xaea08f, alpha: 0.56 },
-  { type: 'reveal', x: 1650, y: 214, w: 760, h: 444, tint: 0xd7c7b1, alpha: 0.8 },
-  { type: 'threshold', x: 2050, y: 214, w: 420, h: 436, tint: 0xd2c2ab, alpha: 0.74 }
+  { type: 'corridor', x: 1680, y: 214, w: 560, h: 430, tint: 0xa89a8a, alpha: 0.54 },
+  { type: 'reveal', x: 2170, y: 214, w: 780, h: 444, tint: 0xd7c7b1, alpha: 0.8 },
+  { type: 'threshold', x: 2570, y: 214, w: 420, h: 436, tint: 0xd2c2ab, alpha: 0.74 }
 ];
+
+const LORE_ENTRY_POSITION_OVERRIDES = {
+  'end-deadgod': { x: 2360 }
+};
 
 export class Chamber01Scene extends Phaser.Scene {
   constructor() {
@@ -344,7 +362,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
     if (this.textures.exists(ASSET_KEYS.chamber01RibArch)) {
       this.add
-        .image(1620, 198, ASSET_KEYS.chamber01RibArch)
+        .image(2120, 198, ASSET_KEYS.chamber01RibArch)
         .setDisplaySize(760, 344)
         .setTint(0xd2c3ae)
         .setAlpha(0.5)
@@ -353,7 +371,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
     if (this.textures.exists(ASSET_KEYS.sentinel)) {
       this.add
-        .image(1960, 398, ASSET_KEYS.sentinel)
+        .image(2380, 398, ASSET_KEYS.sentinel)
         .setOrigin(CONCEPT_PRESENTATION.sentinel.origin.x, CONCEPT_PRESENTATION.sentinel.origin.y)
         .setDisplaySize(CONCEPT_PRESENTATION.sentinel.display.width, CONCEPT_PRESENTATION.sentinel.display.height)
         .setCrop(
@@ -429,11 +447,12 @@ export class Chamber01Scene extends Phaser.Scene {
   createLoreZones() {
     this.loreZones = this.physics.add.staticGroup();
     LORE_ENTRIES.forEach((entry) => {
-      const zone = this.add.zone(entry.x, entry.y, entry.width, entry.height).setOrigin(0.5);
+      const resolvedEntry = { ...entry, ...(LORE_ENTRY_POSITION_OVERRIDES[entry.id] ?? {}) };
+      const zone = this.add.zone(resolvedEntry.x, resolvedEntry.y, resolvedEntry.width, resolvedEntry.height).setOrigin(0.5);
       this.physics.add.existing(zone, true);
-      zone.loreEntry = entry;
+      zone.loreEntry = resolvedEntry;
       this.loreZones.add(zone);
-      this.createLoreShrineProp(entry);
+      this.createLoreShrineProp(resolvedEntry);
     });
   }
 
@@ -448,15 +467,6 @@ export class Chamber01Scene extends Phaser.Scene {
         .setDepth(-5.5);
     }
 
-    if (entry.id === 'end-deadgod' && this.textures.exists(ASSET_KEYS.chamber01DeadgodCutscene)) {
-      this.add
-        .image(entry.x, baseY - 44, ASSET_KEYS.chamber01DeadgodCutscene)
-        .setDisplaySize(162, 120)
-        .setTint(0xcab99f)
-        .setAlpha(0.56)
-        .setDepth(-5.42);
-    }
-
     this.add.ellipse(entry.x, baseY + 5, 136, 42, 0x090606, 0.3).setDepth(-5.4);
   }
 
@@ -465,26 +475,22 @@ export class Chamber01Scene extends Phaser.Scene {
     this.gateZone = this.add.zone(CHAMBER.gateX - 84, WORLD.floorY - 76, 168, 220).setOrigin(0.5);
     this.physics.add.existing(this.gateZone, true);
 
-    if (this.textures.exists(ASSET_KEYS.chamber02VertebralHornGate)) {
+    if (this.textures.exists(ASSET_KEYS.sector04Chamber02PropThresholdDoor)) {
       this.gateArt = this.add
-        .image(CHAMBER.gateX - 12, WORLD.floorY - 122, ASSET_KEYS.chamber02VertebralHornGate)
-        .setDisplaySize(228, 288)
-        .setCrop(336, 218, 356, 1012)
-        .setTint(0xb9aa92)
-        .setAlpha(0.64)
-        .setDepth(-5.3);
+        .image(CHAMBER.gateX - 12, WORLD.floorY - 116, ASSET_KEYS.sector04Chamber02PropThresholdDoor)
+        .setDisplaySize(242, 258)
+        .setTint(0xc6b49d)
+        .setAlpha(0.68)
+        .setDepth(-5.24);
+    } else if (this.textures.exists(ASSET_KEYS.sector02Chamber02Gate)) {
+      this.gateArt = this.add
+        .image(CHAMBER.gateX - 12, WORLD.floorY - 124, ASSET_KEYS.sector02Chamber02Gate)
+        .setDisplaySize(242, 268)
+        .setTint(0xc6b49d)
+        .setAlpha(0.68)
+        .setDepth(-5.24);
     }
 
-    if (this.textures.exists(ASSET_KEYS.sector02Chamber01Gate)) {
-      this.gateFrame = this.add
-        .image(CHAMBER.gateX - 12, WORLD.floorY - 120, ASSET_KEYS.sector02Chamber01Gate)
-        .setDisplaySize(202, 262)
-        .setTint(0xcfbea8)
-        .setAlpha(0.52)
-        .setDepth(-5.2);
-    }
-
-    this.gateSigil = this.add.ellipse(CHAMBER.gateX - 20, WORLD.floorY - 92, 42, 112, COLORS.sickly, 0.1).setDepth(-5.1);
     this.updateGateActivationVisuals();
   }
 
@@ -645,9 +651,7 @@ export class Chamber01Scene extends Phaser.Scene {
     this.boss.body.enable = true;
     this.boss.setActive(true);
     this.boss.recordContactDamage(this.time.now + 320);
-    this.gateSigil?.setAlpha(0.16);
     this.gateArt?.setAlpha(0.56).setTint(0xaa9881);
-    this.gateFrame?.setAlpha(0.48).setTint(0xa5927a);
     this.nextBossFloorHazardAt = this.time.now + 1400;
     this.nextBossProjectileAt = this.time.now + 980;
     this.nextBossAoeAt = this.time.now + 1860;
@@ -1053,27 +1057,21 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   updateGateActivationVisuals() {
-    if (!this.gateSigil) {
+    if (!this.gateArt) {
       return;
     }
 
     if (this.canUseGate()) {
-      this.gateSigil.setAlpha(0.44);
-      this.gateArt?.setAlpha(0.84).setTint(0xd7c8af);
-      this.gateFrame?.setAlpha(0.72).setTint(0xe1d3bc);
+      this.gateArt.setAlpha(0.86).setTint(0xd7c8af);
       return;
     }
 
     if (this.completedLoreBeats.has('entry-altar')) {
-      this.gateSigil.setAlpha(0.16);
-      this.gateArt?.setAlpha(0.58).setTint(0xb7a88f);
-      this.gateFrame?.setAlpha(0.52).setTint(0xc6b59f);
+      this.gateArt.setAlpha(0.58).setTint(0xb7a88f);
       return;
     }
 
-    this.gateSigil.setAlpha(0.1);
-    this.gateArt?.setAlpha(0.62).setTint(0xb39f85);
-    this.gateFrame?.setAlpha(0.48).setTint(0xb6a187);
+    this.gateArt.setAlpha(0.62).setTint(0xb39f85);
   }
 
   beginGateTransitionToChamber02() {
