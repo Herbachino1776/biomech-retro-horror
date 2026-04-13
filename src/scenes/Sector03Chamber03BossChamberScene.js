@@ -197,9 +197,9 @@ export class Sector03Chamber03BossChamberScene extends Phaser.Scene {
     this.boss = new FirstRefused(this, FIRST_REFUSED_BOSS.spawnX, FIRST_REFUSED_BOSS.spawnY, FIRST_REFUSED_BOSS);
     this.boss.setActive(false);
     this.boss.sprite.setDepth(6.2);
-    this.physics.add.collider(this.boss.sprite, this.platforms);
+    this.physics.add.collider(this.boss.getCollisionTarget?.() ?? this.boss.sprite, this.platforms);
     this.physics.add.overlap(this.player.attackHitbox, this.boss.damageHurtbox ?? this.boss.sprite, () => this.handlePlayerHitBoss());
-    this.physics.add.overlap(this.player.sprite, this.boss.sprite, () => this.handleBossContactPlayer());
+    this.physics.add.overlap(this.player.sprite, this.boss.getCollisionTarget?.() ?? this.boss.sprite, () => this.handleBossContactPlayer());
   }
 
   createUi() {

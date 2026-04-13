@@ -40,8 +40,8 @@ export class GroundBurstAttack {
     this.recoverUntil = -Infinity;
     this.lastCastAt = -Infinity;
     this.hasAppliedDamage = false;
-    this.anchorX = owner?.sprite?.x ?? 0;
-    this.anchorY = owner?.sprite?.y ?? 0;
+    this.anchorX = owner?.getAnchorX?.() ?? owner?.sprite?.x ?? 0;
+    this.anchorY = owner?.getAnchorY?.() ?? owner?.sprite?.y ?? 0;
     this.telegraph = new AoeTelegraph(scene, { depth: this.config.depth, ...this.config.telegraphStyle });
   }
 
@@ -89,8 +89,10 @@ export class GroundBurstAttack {
       return false;
     }
 
-    const dx = targetSprite.x - this.owner.sprite.x;
-    const dy = targetSprite.y - this.owner.sprite.y;
+    const ownerX = this.owner.getAnchorX?.() ?? this.owner.sprite.x;
+    const ownerY = this.owner.getAnchorY?.() ?? this.owner.sprite.y;
+    const dx = targetSprite.x - ownerX;
+    const dy = targetSprite.y - ownerY;
     const absDx = Math.abs(dx);
     this.owner.direction = Math.sign(dx) || this.owner.direction;
 

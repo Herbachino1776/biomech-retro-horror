@@ -152,8 +152,8 @@ export class AbyssalArchon extends HalfSkullMiniboss {
       return false;
     }
 
-    const dx = player.x - this.sprite.x;
-    const dy = player.y - this.sprite.y;
+    const dx = player.x - this.getAnchorX();
+    const dy = player.y - this.getAnchorY();
     const absDx = Math.abs(dx);
     this.direction = Math.sign(dx) || this.direction;
 
@@ -163,7 +163,7 @@ export class AbyssalArchon extends HalfSkullMiniboss {
   }
 
   fireProjectileAt(player, time) {
-    const spawnX = this.sprite.x + this.direction * this.projectileConfig.spawnOffsetX;
+    const spawnX = this.getAnchorX() + this.direction * this.projectileConfig.spawnOffsetX;
     const spawnY = this.sprite.y + this.projectileConfig.spawnOffsetY;
     const bodyCenterX = player.body?.center?.x ?? player.x;
     const bodyCenterY = player.body?.center?.y ?? player.y;

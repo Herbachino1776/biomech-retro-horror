@@ -546,11 +546,11 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
     this.archon.setActive(false);
     this.archon.sprite.setDepth(6.2);
     this.archon.body.setCollideWorldBounds(true);
-    this.physics.add.collider(this.archon.sprite, this.platforms);
+    this.physics.add.collider(this.archon.getCollisionTarget?.() ?? this.archon.sprite, this.platforms);
     this.physics.add.overlap(this.player.attackHitbox, this.archon.damageHurtbox ?? this.archon.sprite, (_attackZone, enemySprite) => {
       this.handlePlayerHitArchon(enemySprite);
     });
-    this.physics.add.overlap(this.player.sprite, this.archon.sprite, (_playerSprite, enemySprite) => {
+    this.physics.add.overlap(this.player.sprite, this.archon.getCollisionTarget?.() ?? this.archon.sprite, (_playerSprite, enemySprite) => {
       this.handleArchonContactPlayer(enemySprite);
     });
 
@@ -1014,7 +1014,13 @@ export class Sector02Chamber01Scene extends Phaser.Scene {
   }
 
   isEnemyOverlapTarget(target, enemy) {
-    return target === enemy.sprite || target === enemy.damageHurtbox || target?.gameObject === enemy.sprite || target?.gameObject === enemy.damageHurtbox;
+    const collisionTarget = enemy.getCollisionTarget?.();
+    return target === enemy.sprite
+      || target === enemy.damageHurtbox
+      || target === collisionTarget
+      || target?.gameObject === enemy.sprite
+      || target?.gameObject === enemy.damageHurtbox
+      || target?.gameObject === collisionTarget;
   }
 
   triggerSector02BlackOilPayoff(targetEnemy, config = {}) {

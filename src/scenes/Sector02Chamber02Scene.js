@@ -738,11 +738,11 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
     this.pressureDeacon.sprite.setDepth(6.28);
     this.pressureDeacon.sprite.setPosition(COMPRESSION_VAULTS_PRESSURE_DEACON.spawnX, COMPRESSION_VAULTS_PRESSURE_DEACON.spawnY);
     this.pressureDeacon.body.setCollideWorldBounds(true);
-    this.physics.add.collider(this.pressureDeacon.sprite, this.platforms);
+    this.physics.add.collider(this.pressureDeacon.getCollisionTarget?.() ?? this.pressureDeacon.sprite, this.platforms);
     this.physics.add.overlap(this.player.attackHitbox, this.pressureDeacon.damageHurtbox ?? this.pressureDeacon.sprite, (_attackZone, enemySprite) => {
       this.handlePlayerHitPressureDeacon(enemySprite);
     });
-    this.physics.add.overlap(this.player.sprite, this.pressureDeacon.sprite, (_playerSprite, enemySprite) => {
+    this.physics.add.overlap(this.player.sprite, this.pressureDeacon.getCollisionTarget?.() ?? this.pressureDeacon.sprite, (_playerSprite, enemySprite) => {
       this.handlePressureDeaconContactPlayer(enemySprite);
     });
 
@@ -1553,7 +1553,13 @@ export class Sector02Chamber02Scene extends Phaser.Scene {
   }
 
   isEnemyOverlapTarget(target, enemy) {
-    return target === enemy.sprite || target === enemy.damageHurtbox || target?.gameObject === enemy.sprite || target?.gameObject === enemy.damageHurtbox;
+    const collisionTarget = enemy.getCollisionTarget?.();
+    return target === enemy.sprite
+      || target === enemy.damageHurtbox
+      || target === collisionTarget
+      || target?.gameObject === enemy.sprite
+      || target?.gameObject === enemy.damageHurtbox
+      || target?.gameObject === collisionTarget;
   }
 
   unlockForwardPath() {

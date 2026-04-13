@@ -653,11 +653,11 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
     this.sorrowEngine.setActive(false);
     this.sorrowEngine.sprite.setDepth(6.32);
     this.sorrowEngine.body.setCollideWorldBounds(true);
-    this.physics.add.collider(this.sorrowEngine.sprite, this.platforms);
+    this.physics.add.collider(this.sorrowEngine.getCollisionTarget?.() ?? this.sorrowEngine.sprite, this.platforms);
     this.physics.add.overlap(this.player.attackHitbox, this.sorrowEngine.damageHurtbox ?? this.sorrowEngine.sprite, (_attackZone, enemySprite) => {
       this.handlePlayerHitSorrowEngine(enemySprite);
     });
-    this.physics.add.overlap(this.player.sprite, this.sorrowEngine.sprite, (_playerSprite, enemySprite) => {
+    this.physics.add.overlap(this.player.sprite, this.sorrowEngine.getCollisionTarget?.() ?? this.sorrowEngine.sprite, (_playerSprite, enemySprite) => {
       this.handleSorrowEngineContactPlayer(enemySprite);
     });
     this.applyGameplayReadabilitySupport(this.sorrowEngine.sprite, { fill: 0xd9cab0, alpha: 0.18, scale: 1.26 });
@@ -1378,7 +1378,13 @@ export class Sector02Chamber03Scene extends Phaser.Scene {
   }
 
   isEnemyOverlapTarget(target, enemy) {
-    return target === enemy.sprite || target === enemy.damageHurtbox || target?.gameObject === enemy.sprite || target?.gameObject === enemy.damageHurtbox;
+    const collisionTarget = enemy.getCollisionTarget?.();
+    return target === enemy.sprite
+      || target === enemy.damageHurtbox
+      || target === collisionTarget
+      || target?.gameObject === enemy.sprite
+      || target?.gameObject === enemy.damageHurtbox
+      || target?.gameObject === collisionTarget;
   }
 
   triggerSector02BlackOilPayoff(targetEnemy, config = {}) {
