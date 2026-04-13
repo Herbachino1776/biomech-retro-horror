@@ -437,7 +437,10 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   createBoss() {
-    this.boss = new HalfSkullMiniboss(this, BLIND_CANTOR.spawnX, BLIND_CANTOR.spawnY, BLIND_CANTOR);
+    this.boss = new HalfSkullMiniboss(this, BLIND_CANTOR.spawnX, BLIND_CANTOR.spawnY, {
+      ...BLIND_CANTOR,
+      floorPlaneY: CHAMBER_FLOOR_PLANE_Y
+    });
     this.physics.add.collider(this.boss.getCollisionTarget?.() ?? this.boss.sprite, this.platforms);
     this.physics.add.overlap(this.player.attackHitbox, this.boss.damageHurtbox ?? this.boss.sprite, this.handlePlayerHitBoss, null, this);
     this.physics.add.overlap(this.player.sprite, this.boss.getCollisionTarget?.() ?? this.boss.sprite, this.handleBossContactPlayer, null, this);

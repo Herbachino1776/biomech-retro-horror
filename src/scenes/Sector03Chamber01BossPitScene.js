@@ -26,6 +26,7 @@ const BOSS_PIT_BOOTSTRAP = {
   portraitFollowOffsetX: -112,
   desktopFollowOffsetX: -130
 };
+const BOSS_PIT_FLOOR_PLANE_Y = WORLD.floorY + 28 - BOSS_PIT_BOOTSTRAP.floorColliderHeight / 2;
 
 const BOSS_PIT_RETURN = {
   returnSceneKey: 'Sector03Chamber01Scene',
@@ -59,7 +60,8 @@ const BOSS_PIT_BOSS = {
   name: 'THE WITHHELD CHOIR BODY',
   subtitle: 'Cradle Adjudicator',
   spawnX: 972,
-  spawnY: WORLD.floorY - 2,
+  spawnY: BOSS_PIT_FLOOR_PLANE_Y,
+  floorPlaneY: BOSS_PIT_FLOOR_PLANE_Y,
   activationX: 760,
   textureKey: ASSET_KEYS.sector03Chamber01BossRefusalMass,
   health: 9,

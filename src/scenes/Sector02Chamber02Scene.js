@@ -33,6 +33,7 @@ const COMPRESSION_VAULTS_BOOTSTRAP = {
   pressureBandY: WORLD.floorY - 128,
   pressureBandHeight: 170
 };
+const COMPRESSION_VAULTS_FLOOR_PLANE_Y = WORLD.floorY + 28 - COMPRESSION_VAULTS_BOOTSTRAP.floorColliderHeight / 2;
 
 const CHAMBER_ENTRY_STAGING = {
   settleDelayMs: 180,
@@ -312,7 +313,8 @@ const COMPRESSION_VAULTS_PRESSURE_DEACON = {
   hurtRecoilVelocityX: 92,
   hurtRecoilVelocityY: -56,
   spawnX: 5196,
-  spawnY: WORLD.floorY - 2,
+  spawnY: COMPRESSION_VAULTS_FLOOR_PLANE_Y,
+  floorPlaneY: COMPRESSION_VAULTS_FLOOR_PLANE_Y,
   activationX: 4890,
   body: { width: 96, height: 132, offsetX: 108, offsetY: 150 },
   audioProfile: 'miniboss',
