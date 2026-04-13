@@ -15,6 +15,7 @@ import { spawnEnemyCorpseRemains } from '../../systems/EnemyCorpseRemains.js';
 import { grantMajorEncounterIntegrityReward } from '../../systems/VesselRunEconomy.js';
 import { MajorEncounterResolution } from '../../systems/MajorEncounterResolution.js';
 import { beginBossDeathPayoffPackage } from '../../systems/BossDeathPayoffPackage.js';
+import { resolveSceneGameplayFloorY, resolveSceneVisualFloorY } from '../../systems/floorGrounding.js';
 
 export function createBossPitSceneClass(config) {
   const BOSS_PIT_BOOTSTRAP = config.bootstrap;
@@ -133,6 +134,8 @@ export function createBossPitSceneClass(config) {
   }
 
   createWorld() {
+    this.gameplayFloorY = BOSS_PIT_FLOOR_PLANE_Y;
+    this.visualFloorY = BOSS_PIT_FLOOR_PLANE_Y;
     this.physics.world.gravity.y = WORLD.gravityY;
     this.cameras.main.setBounds(0, 0, BOSS_PIT_BOOTSTRAP.worldWidth, WORLD.height);
     this.physics.world.setBounds(0, 0, BOSS_PIT_BOOTSTRAP.worldWidth, WORLD.height);
@@ -154,6 +157,7 @@ export function createBossPitSceneClass(config) {
   }
 
   createBackdrop() {
+    const visualFloorY = this.getVisualFloorY();
     this.add.rectangle(BOSS_PIT_BOOTSTRAP.worldWidth / 2, WORLD.height / 2, BOSS_PIT_BOOTSTRAP.worldWidth, WORLD.height, 0x040304, 1).setDepth(-16);
     if (config.visuals?.backgroundImageKey && this.textures.exists(config.visuals.backgroundImageKey)) {
       this.add.image(BOSS_PIT_BOOTSTRAP.worldWidth / 2, config.visuals.backgroundY ?? 210, config.visuals.backgroundImageKey)
@@ -161,9 +165,17 @@ export function createBossPitSceneClass(config) {
         .setAlpha(config.visuals.backgroundAlpha ?? 0.9)
         .setDepth(-14.8);
     }
-    this.add.rectangle(BOSS_PIT_BOOTSTRAP.worldWidth / 2, WORLD.floorY - 24, BOSS_PIT_BOOTSTRAP.worldWidth, 120, 0x101010, 0.96).setDepth(-6.2);
-    this.add.ellipse(BOSS_PIT_BOOTSTRAP.worldWidth / 2, WORLD.floorY + 10, BOSS_PIT_BOOTSTRAP.worldWidth, 56, 0x010101, 0.36).setDepth(-5.9);
+    this.add.rectangle(BOSS_PIT_BOOTSTRAP.worldWidth / 2, visualFloorY - 26, BOSS_PIT_BOOTSTRAP.worldWidth, 120, 0x101010, 0.96).setDepth(-6.2);
+    this.add.ellipse(BOSS_PIT_BOOTSTRAP.worldWidth / 2, visualFloorY + 8, BOSS_PIT_BOOTSTRAP.worldWidth, 56, 0x010101, 0.36).setDepth(-5.9);
     this.createPitAltars();
+  }
+
+  getGameplayFloorY() {
+    return resolveSceneGameplayFloorY(this, BOSS_PIT_FLOOR_PLANE_Y);
+  }
+
+  getVisualFloorY() {
+    return resolveSceneVisualFloorY(this, this.getGameplayFloorY());
   }
 
   createPlayerAndCombat() {
@@ -541,11 +553,11 @@ export function createBossPitSceneClass(config) {
       },
       deathCamera: BOSS_PIT_DEATH_CAMERA,
       payoffPose: {
-        floorPlaneY: BOSS_PIT_FLOOR_PLANE_Y,
+        floorPlaneY: this.getGameplayFloorY(),
         maxUpwardSnapPx: BOSS_PIT_PAYOFF_POSE.maxUpwardSnapPx
       },
       corpseRemains: {
-        floorPlaneY: BOSS_PIT_FLOOR_PLANE_Y,
+        floorPlaneY: this.getGameplayFloorY(),
         size: 'bossPitBoss'
       },
       victory: {
@@ -626,7 +638,7 @@ export function createBossPitSceneClass(config) {
     }
 
     const payoffX = this.boss.sprite.x;
-    const payoffGroundY = BOSS_PIT_FLOOR_PLANE_Y;
+    const payoffGroundY = this.getGameplayFloorY();
     const groundedPayoffY = payoffGroundY - this.boss.sprite.displayHeight * (1 - this.boss.sprite.originY);
     const maxRaisedY = this.boss.sprite.y - BOSS_PIT_PAYOFF_POSE.maxUpwardSnapPx;
     const payoffY = Math.max(groundedPayoffY, maxRaisedY);
@@ -670,7 +682,7 @@ export function createBossPitSceneClass(config) {
     this.stopVictoryGoreFountain();
     const remainsX = this.bossDeathPayoffLocation?.x ?? this.boss.sprite.x;
     const remainsGroundY = this.bossDeathPayoffLocation?.groundY
-      ?? BOSS_PIT_FLOOR_PLANE_Y;
+      ?? this.getGameplayFloorY();
     spawnEnemyCorpseRemains(this, {
       x: remainsX,
       floorPlaneY: remainsGroundY,
@@ -946,10 +958,11 @@ export function createBossPitSceneClass(config) {
   }
 
   createPitAltars() {
+    const visualFloorY = this.getVisualFloorY();
     BOSS_PIT_ALTARS.presentation.forEach((altarConfig) => {
-      this.add.rectangle(altarConfig.x, WORLD.floorY - 8, altarConfig.width + 82, 18, 0x080707, 0.8).setDepth(-6.16);
-      this.add.ellipse(altarConfig.x, WORLD.floorY - 16, altarConfig.width + 42, 26, 0x1b1714, 0.24).setDepth(-6.12);
-      this.add.ellipse(altarConfig.x, WORLD.floorY + 10, altarConfig.width + 152, 36, 0x010101, 0.34).setDepth(-6.04);
+      this.add.rectangle(altarConfig.x, visualFloorY - 10, altarConfig.width + 82, 18, 0x080707, 0.8).setDepth(-6.16);
+      this.add.ellipse(altarConfig.x, visualFloorY - 18, altarConfig.width + 42, 26, 0x1b1714, 0.24).setDepth(-6.12);
+      this.add.ellipse(altarConfig.x, visualFloorY + 8, altarConfig.width + 152, 36, 0x010101, 0.34).setDepth(-6.04);
 
       const primaryKey = altarConfig.id === BOSS_PIT_ALTARS.returnAltarId
         ? BOSS_PIT_ALTARS.returnAltarImageKey
@@ -978,7 +991,7 @@ export function createBossPitSceneClass(config) {
         return;
       }
 
-      const zone = this.add.zone(altarConfig.x, WORLD.floorY - 74, BOSS_PIT_ALTARS.interaction.zoneWidth, BOSS_PIT_ALTARS.interaction.zoneHeight).setOrigin(0.5);
+      const zone = this.add.zone(altarConfig.x, visualFloorY - 76, BOSS_PIT_ALTARS.interaction.zoneWidth, BOSS_PIT_ALTARS.interaction.zoneHeight).setOrigin(0.5);
       this.physics.add.existing(zone, true);
       this.exitAltar = { ...altarEntry, zone, prompt: null };
     });

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { COLORS } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { createDamageHurtbox, resolveDamageHurtboxConfig, syncDamageHurtbox } from './damageHurtbox.js';
+import { resolveSceneGameplayFloorY, syncActorSpriteToPhysicsBody } from '../systems/floorGrounding.js';
 
 const FALLBACK_WIDTH = 188;
 const FALLBACK_HEIGHT = 208;
@@ -77,7 +78,9 @@ export class HalfSkullMiniboss {
     this.anchor.setPosition(initialBodyLeft + tunedBodyWidth * 0.5, initialBodyTop + config.body.height * 0.5);
     this.body.updateFromGameObject();
     this.body.setAllowGravity(true);
-    this.floorPlaneY = Number.isFinite(config.floorPlaneY) ? config.floorPlaneY : this.body.bottom;
+    this.floorPlaneY = Number.isFinite(config.floorPlaneY)
+      ? config.floorPlaneY
+      : resolveSceneGameplayFloorY(scene, this.body.bottom);
     this.visualCenterOffsetFromBodyCenterX = this.sprite.x - this.body.center.x;
     this.damageHurtbox = createDamageHurtbox(scene, this.sprite);
     this.syncVisualFromAnchor();
@@ -427,9 +430,12 @@ export class HalfSkullMiniboss {
       return;
     }
 
-    const desiredX = (this.body?.center?.x ?? this.sprite.x) + this.visualCenterOffsetFromBodyCenterX;
-    const desiredY = this.floorPlaneY - this.sprite.displayHeight * (1 - this.sprite.originY);
-    this.sprite.setPosition(desiredX, desiredY);
+    syncActorSpriteToPhysicsBody({
+      sprite: this.sprite,
+      body: this.body,
+      floorY: this.floorPlaneY,
+      visualCenterOffsetFromBodyCenterX: this.visualCenterOffsetFromBodyCenterX
+    });
   }
 
   getAnchorX() {
