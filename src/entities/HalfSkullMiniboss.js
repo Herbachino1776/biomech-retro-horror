@@ -42,8 +42,8 @@ export class HalfSkullMiniboss {
 
     this.textureKey = config.textureKey ?? ASSET_KEYS.chamber01HalfSkullMiniboss;
     this.damageHurtboxConfig = resolveDamageHurtboxConfig(config.damageHurtbox, {
-      trimXRatio: 0.015,
-      trimYRatio: 0.015
+      trimXRatio: 0.01,
+      trimYRatio: 0.01
     });
     this.usingTexture = scene.textures.exists(this.textureKey);
 
@@ -63,18 +63,23 @@ export class HalfSkullMiniboss {
     this.baseScaleX = this.sprite.scaleX;
     this.baseScaleY = this.sprite.scaleY;
 
-    scene.physics.add.existing(this.sprite);
-    this.body = this.sprite.body;
+    this.anchor = scene.add.rectangle(x, y, 8, 8, 0xffffff, 0).setVisible(false).setDepth(0);
+    scene.physics.add.existing(this.anchor);
+    this.body = this.anchor.body;
     this.body.setCollideWorldBounds(true);
-    const scaleX = Math.abs(this.sprite.scaleX) || 1;
-    const scaleY = Math.abs(this.sprite.scaleY) || 1;
     const tunedBodyWidth = config.body.width * (config.contactBodyWidthScale ?? 0.88);
     const tunedOffsetX = config.body.offsetX + (config.body.width - tunedBodyWidth) * 0.5;
-    this.body.setSize(tunedBodyWidth / scaleX, config.body.height / scaleY);
-    this.body.setOffset(tunedOffsetX / scaleX, config.body.offsetY / scaleY);
+    this.body.setSize(tunedBodyWidth, config.body.height);
+    this.body.setOffset(0, 0);
+    const initialBounds = this.sprite.getBounds();
+    const initialBodyLeft = initialBounds.x + tunedOffsetX;
+    const initialBodyTop = initialBounds.y + config.body.offsetY;
+    this.anchor.setPosition(initialBodyLeft + tunedBodyWidth * 0.5, initialBodyTop + config.body.height * 0.5);
+    this.body.updateFromGameObject();
     this.body.setAllowGravity(true);
     this.floorPlaneY = Number.isFinite(config.floorPlaneY) ? config.floorPlaneY : this.body.bottom;
     this.visualBottomOffsetFromBody = this.getVisualBottomY() - this.body.bottom;
+    this.visualCenterOffsetFromBodyCenterX = this.sprite.x - this.body.center.x;
     this.damageHurtbox = createDamageHurtbox(scene, this.sprite);
     this.syncDamageHurtbox();
   }
@@ -121,7 +126,7 @@ export class HalfSkullMiniboss {
       return;
     }
 
-    const dx = player.x - this.sprite.x;
+    const dx = player.x - this.getAnchorX();
     const absDx = Math.abs(dx);
     this.direction = Math.sign(dx) || this.direction;
 
@@ -306,7 +311,7 @@ export class HalfSkullMiniboss {
       return false;
     }
 
-    return Phaser.Math.Distance.Between(playerSprite.x, playerSprite.y, this.sprite.x, this.sprite.y) <= this.poiseConfig.finisherRange;
+    return Phaser.Math.Distance.Between(playerSprite.x, playerSprite.y, this.getAnchorX(), this.getAnchorY()) <= this.poiseConfig.finisherRange;
   }
 
   playDeathEffect() {
@@ -429,8 +434,21 @@ export class HalfSkullMiniboss {
       return;
     }
 
+    const desiredX = (this.body?.center?.x ?? this.sprite.x) + this.visualCenterOffsetFromBodyCenterX;
     const desiredY = targetVisualBottomY - this.sprite.displayHeight * (1 - this.sprite.originY);
-    this.sprite.setY(desiredY);
+    this.sprite.setPosition(desiredX, desiredY);
+  }
+
+  getAnchorX() {
+    return this.body?.center?.x ?? this.anchor?.x ?? this.sprite.x;
+  }
+
+  getAnchorY() {
+    return this.body?.center?.y ?? this.anchor?.y ?? this.sprite.y;
+  }
+
+  getCollisionTarget() {
+    return this.anchor ?? this.sprite;
   }
 
   getApproachSpeed() {

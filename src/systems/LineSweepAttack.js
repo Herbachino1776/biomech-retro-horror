@@ -40,8 +40,8 @@ export class LineSweepAttack {
     this.recoverUntil = -Infinity;
     this.hasAppliedDamage = false;
 
-    this.startX = owner?.sprite?.x ?? 0;
-    this.startY = owner?.sprite?.y ?? 0;
+    this.startX = owner?.getAnchorX?.() ?? owner?.sprite?.x ?? 0;
+    this.startY = owner?.getAnchorY?.() ?? owner?.sprite?.y ?? 0;
     this.endX = this.startX;
     this.endY = this.startY;
     this.direction = 1;
@@ -99,8 +99,10 @@ export class LineSweepAttack {
       return false;
     }
 
-    const dx = targetSprite.x - this.owner.sprite.x;
-    const dy = targetSprite.y - this.owner.sprite.y;
+    const ownerX = this.owner.getAnchorX?.() ?? this.owner.sprite.x;
+    const ownerY = this.owner.getAnchorY?.() ?? this.owner.sprite.y;
+    const dx = targetSprite.x - ownerX;
+    const dy = targetSprite.y - ownerY;
     const absDx = Math.abs(dx);
     this.owner.direction = Math.sign(dx) || this.owner.direction;
 
@@ -114,9 +116,11 @@ export class LineSweepAttack {
     this.windupStartedAt = time;
     this.hasAppliedDamage = false;
 
-    this.direction = Math.sign(targetSprite.x - this.owner.sprite.x) || this.owner.direction || 1;
-    this.startX = this.owner.sprite.x + this.direction * this.config.originOffsetX;
-    this.startY = this.owner.sprite.y + this.config.originOffsetY;
+    const ownerX = this.owner.getAnchorX?.() ?? this.owner.sprite.x;
+    const ownerY = this.owner.getAnchorY?.() ?? this.owner.sprite.y;
+    this.direction = Math.sign(targetSprite.x - ownerX) || this.owner.direction || 1;
+    this.startX = ownerX + this.direction * this.config.originOffsetX;
+    this.startY = ownerY + this.config.originOffsetY;
     this.endX = this.startX + this.direction * this.config.maxRange;
     this.endY = this.startY;
 
