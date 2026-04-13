@@ -31,3 +31,8 @@ export function getNormalizedOrigin(presentation) {
 export function getNormalizedYOffset(presentation) {
   return presentation?.normalization?.yOffset ?? 0;
 }
+
+
+export function getNormalizedVisibleFootOffset(presentation) {
+  return Number(presentation?.normalization?.visibleFootOffsetY) || 0;
+}

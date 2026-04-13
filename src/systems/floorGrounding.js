@@ -33,19 +33,20 @@ export function resolveSceneVisualFloorY(scene, fallbackFloorY = null) {
   return resolveSceneGameplayFloorY(scene);
 }
 
-export function placeSpriteFeetOnFloorLine(sprite, floorY) {
+export function placeSpriteFeetOnFloorLine(sprite, floorY, visualFootOffsetY = 0) {
   if (!sprite || !Number.isFinite(floorY)) {
     return;
   }
 
-  sprite.y = floorY - sprite.displayHeight * (1 - sprite.originY);
+  sprite.y = floorY - sprite.displayHeight * (1 - sprite.originY) + visualFootOffsetY;
 }
 
 export function syncActorSpriteToPhysicsBody({
   sprite,
   body,
   floorY,
-  visualCenterOffsetFromBodyCenterX = 0
+  visualCenterOffsetFromBodyCenterX = 0,
+  visualFootOffsetY = 0
 }) {
   if (!sprite?.active || !body) {
     return;
@@ -53,5 +54,5 @@ export function syncActorSpriteToPhysicsBody({
 
   const desiredX = (body.center?.x ?? sprite.x) + visualCenterOffsetFromBodyCenterX;
   sprite.x = desiredX;
-  placeSpriteFeetOnFloorLine(sprite, floorY);
+  placeSpriteFeetOnFloorLine(sprite, floorY, visualFootOffsetY);
 }

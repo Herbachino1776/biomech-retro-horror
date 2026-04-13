@@ -6,7 +6,11 @@ const DEFAULT_DAMAGE_HURTBOX_CONFIG = Object.freeze({
   minWidth: 26,
   minHeight: 24,
   offsetX: 0,
-  offsetY: 0
+  offsetY: 0,
+  insetTopPx: 0,
+  insetBottomPx: 0,
+  insetLeftPx: 0,
+  insetRightPx: 0
 });
 
 function clampRatio(value) {
@@ -21,7 +25,11 @@ export function resolveDamageHurtboxConfig(config = {}, defaults = {}) {
     minWidth: Math.max(8, Number(merged.minWidth) || DEFAULT_DAMAGE_HURTBOX_CONFIG.minWidth),
     minHeight: Math.max(8, Number(merged.minHeight) || DEFAULT_DAMAGE_HURTBOX_CONFIG.minHeight),
     offsetX: Number(merged.offsetX) || 0,
-    offsetY: Number(merged.offsetY) || 0
+    offsetY: Number(merged.offsetY) || 0,
+    insetTopPx: Math.max(0, Number(merged.insetTopPx) || 0),
+    insetBottomPx: Math.max(0, Number(merged.insetBottomPx) || 0),
+    insetLeftPx: Math.max(0, Number(merged.insetLeftPx) || 0),
+    insetRightPx: Math.max(0, Number(merged.insetRightPx) || 0)
   };
 }
 
@@ -45,8 +53,16 @@ export function syncDamageHurtbox(hurtbox, sprite, config, enabled = true) {
   }
 
   const bounds = sprite.getBounds();
-  const width = Math.max(config.minWidth, bounds.width * (1 - config.trimXRatio * 2));
-  const height = Math.max(config.minHeight, bounds.height * (1 - config.trimYRatio * 2));
-  hurtbox.setPosition(bounds.centerX + config.offsetX, bounds.centerY + config.offsetY);
+  const innerLeft = bounds.left + config.insetLeftPx;
+  const innerRight = bounds.right - config.insetRightPx;
+  const innerTop = bounds.top + config.insetTopPx;
+  const innerBottom = bounds.bottom - config.insetBottomPx;
+  const usableWidth = Math.max(1, innerRight - innerLeft);
+  const usableHeight = Math.max(1, innerBottom - innerTop);
+  const width = Math.max(config.minWidth, usableWidth * (1 - config.trimXRatio * 2));
+  const height = Math.max(config.minHeight, usableHeight * (1 - config.trimYRatio * 2));
+  const centerX = innerLeft + usableWidth * 0.5;
+  const centerY = innerTop + usableHeight * 0.5;
+  hurtbox.setPosition(centerX + config.offsetX, centerY + config.offsetY);
   hurtbox.body.setSize(width, height, true);
 }

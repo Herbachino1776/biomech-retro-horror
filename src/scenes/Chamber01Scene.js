@@ -75,6 +75,9 @@ const BLIND_CANTOR = {
   presentation: {
     display: { width: 304, height: 292 },
     origin: { x: 0.52, y: 0.97 },
+    normalization: {
+      visibleFootOffsetY: 26
+    },
     alpha: 1,
     tint: 0xd8c8b2,
     scaleX: 1,
