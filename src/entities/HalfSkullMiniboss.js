@@ -5,8 +5,6 @@ import { createDamageHurtbox, resolveDamageHurtboxConfig, syncDamageHurtbox } fr
 
 const FALLBACK_WIDTH = 188;
 const FALLBACK_HEIGHT = 208;
-const VISUAL_FLOOR_ALIGN_EPSILON_PX = 0.5;
-
 export class HalfSkullMiniboss {
   constructor(scene, x, y, config) {
     this.scene = scene;
@@ -76,6 +74,7 @@ export class HalfSkullMiniboss {
     this.body.setOffset(tunedOffsetX / scaleX, config.body.offsetY / scaleY);
     this.body.setAllowGravity(true);
     this.floorPlaneY = Number.isFinite(config.floorPlaneY) ? config.floorPlaneY : this.body.bottom;
+    this.visualBottomOffsetFromBody = this.getVisualBottomY() - this.body.bottom;
     this.damageHurtbox = createDamageHurtbox(scene, this.sprite);
     this.syncDamageHurtbox();
   }
@@ -91,30 +90,34 @@ export class HalfSkullMiniboss {
 
   update(time, player) {
     this.updatePoiseState(time);
-    this.updateVisuals(time);
-    this.syncDamageHurtbox();
 
     if (this.dead) {
       this.body.setVelocityX(0);
+      this.updateVisuals(time);
+      this.syncDamageHurtbox();
       return;
     }
 
     if (!this.active) {
       this.attackState = 'idle';
       this.body.setVelocityX(0);
+      this.updateVisuals(time);
+      this.syncDamageHurtbox();
       return;
     }
-
-    this.clampVisualFloorSink();
 
     if (this.isStaggered(time)) {
       this.body.setVelocity(0, 0);
       this.recordContactDamage(time);
+      this.updateVisuals(time);
+      this.syncDamageHurtbox();
       return;
     }
 
     if (time < this.hurtUntil) {
       this.body.setVelocityX(this.direction * -this.config.hurtRecoilVelocityX);
+      this.updateVisuals(time);
+      this.syncDamageHurtbox();
       return;
     }
 
@@ -144,6 +147,8 @@ export class HalfSkullMiniboss {
           this.body.setVelocityY(attackLiftVelocity);
         }
       }
+      this.updateVisuals(time);
+      this.syncDamageHurtbox();
       return;
     }
 
@@ -151,11 +156,15 @@ export class HalfSkullMiniboss {
       if (time >= this.lastAttackTime + this.config.attackRecoveryMs) {
         this.clearAttackState();
       }
+      this.updateVisuals(time);
+      this.syncDamageHurtbox();
       return;
     }
 
     if (absDx > this.getApproachRange()) {
       this.body.setVelocityX(this.direction * this.getApproachSpeed());
+      this.updateVisuals(time);
+      this.syncDamageHurtbox();
       return;
     }
 
@@ -167,6 +176,9 @@ export class HalfSkullMiniboss {
       this.attackCommitAt = time + this.config.attackTelegraphMs;
       this.body.setVelocityX(this.direction * this.config.windupDriftSpeed);
     }
+
+    this.updateVisuals(time);
+    this.syncDamageHurtbox();
   }
 
   isGrounded() {
@@ -376,6 +388,7 @@ export class HalfSkullMiniboss {
     }
 
     this.sprite.setScale(scaleX, scaleY);
+    this.alignVisualFeetToAuthority();
     this.sprite.setAngle(angle);
     if (this.usingTexture) {
       this.sprite.setTint(tint);
@@ -400,24 +413,24 @@ export class HalfSkullMiniboss {
     );
   }
 
-  clampVisualFloorSink({ force = false } = {}) {
-    if (!this.body?.enable) {
+  getVisualBottomY() {
+    return this.sprite.y + this.sprite.displayHeight * (1 - this.sprite.originY);
+  }
+
+  alignVisualFeetToAuthority() {
+    if (!this.sprite?.active || this.dead) {
       return;
     }
 
-    const targetVisualBottomY = this.floorPlaneY;
-    const visualBottomY = this.sprite.y + this.sprite.displayHeight * (1 - this.sprite.originY);
-    const visualFloorDelta = visualBottomY - targetVisualBottomY;
-    const canSettleNow = force || this.isGrounded() || this.body.velocity.y >= 0;
-    if (!canSettleNow || Math.abs(visualFloorDelta) <= VISUAL_FLOOR_ALIGN_EPSILON_PX) {
+    const targetVisualBottomY = this.body?.enable
+      ? this.body.bottom + this.visualBottomOffsetFromBody
+      : this.floorPlaneY;
+    if (!Number.isFinite(targetVisualBottomY)) {
       return;
     }
 
-    this.sprite.y -= visualFloorDelta;
-    this.body.updateFromGameObject();
-    if (this.body.velocity.y > 0 && visualFloorDelta > 0) {
-      this.body.setVelocityY(0);
-    }
+    const desiredY = targetVisualBottomY - this.sprite.displayHeight * (1 - this.sprite.originY);
+    this.sprite.setY(desiredY);
   }
 
   getApproachSpeed() {
