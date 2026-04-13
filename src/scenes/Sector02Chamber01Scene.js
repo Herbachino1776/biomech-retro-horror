@@ -35,6 +35,7 @@ const BLACK_AQUEDUCT_BOOTSTRAP = {
   reflectionY: WORLD.floorY + 28,
   processionalShadowY: WORLD.floorY - 22
 };
+const BLACK_AQUEDUCT_FLOOR_PLANE_Y = WORLD.floorY + 28 - BLACK_AQUEDUCT_BOOTSTRAP.floorColliderHeight / 2;
 
 const BLACK_AQUEDUCT_SEGMENTS = [
   { key: ASSET_KEYS.sector02Chamber01BackgroundEntryCanal, x: 420, y: 220, width: 920, height: 480, tint: 0xb7b9ad, alpha: 0.72, depth: -14.72 },
@@ -138,7 +139,8 @@ const BLACK_AQUEDUCT_ARCHON_CONFIG = {
   hurtRecoilVelocityX: 90,
   hurtRecoilVelocityY: -54,
   spawnX: 5060,
-  spawnY: WORLD.floorY + 2,
+  spawnY: BLACK_AQUEDUCT_FLOOR_PLANE_Y,
+  floorPlaneY: BLACK_AQUEDUCT_FLOOR_PLANE_Y,
   activationX: 4740,
   body: { width: 78, height: 118, offsetX: 118, offsetY: 150 },
   audioProfile: 'miniboss',

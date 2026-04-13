@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { COLORS } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { createDamageHurtbox, resolveDamageHurtboxConfig, syncDamageHurtbox } from './damageHurtbox.js';
-import { resolveSceneGameplayFloorY, syncActorSpriteToPhysicsBody } from '../systems/floorGrounding.js';
+import { syncActorSpriteToPhysicsBody } from '../systems/floorGrounding.js';
 
 const FALLBACK_WIDTH = 188;
 const FALLBACK_HEIGHT = 208;
@@ -78,9 +78,10 @@ export class HalfSkullMiniboss {
     this.anchor.setPosition(initialBodyLeft + tunedBodyWidth * 0.5, initialBodyTop + config.body.height * 0.5);
     this.body.updateFromGameObject();
     this.body.setAllowGravity(true);
-    this.floorPlaneY = Number.isFinite(config.floorPlaneY)
-      ? config.floorPlaneY
-      : resolveSceneGameplayFloorY(scene);
+    this.floorPlaneY = Number(config.floorPlaneY);
+    if (!Number.isFinite(this.floorPlaneY)) {
+      throw new Error('HalfSkullMiniboss requires an explicit floorPlaneY.');
+    }
     this.visualCenterOffsetFromBodyCenterX = this.sprite.x - this.body.center.x;
     this.damageHurtbox = createDamageHurtbox(scene, this.sprite);
     this.syncVisualFromAnchor();
@@ -102,7 +103,6 @@ export class HalfSkullMiniboss {
     if (this.dead) {
       this.body.setVelocityX(0);
       this.updateVisuals(time);
-      this.syncDamageHurtbox();
       return;
     }
 
@@ -110,7 +110,6 @@ export class HalfSkullMiniboss {
       this.attackState = 'idle';
       this.body.setVelocityX(0);
       this.updateVisuals(time);
-      this.syncDamageHurtbox();
       return;
     }
 
@@ -118,14 +117,12 @@ export class HalfSkullMiniboss {
       this.body.setVelocity(0, 0);
       this.recordContactDamage(time);
       this.updateVisuals(time);
-      this.syncDamageHurtbox();
       return;
     }
 
     if (time < this.hurtUntil) {
       this.body.setVelocityX(this.direction * -this.config.hurtRecoilVelocityX);
       this.updateVisuals(time);
-      this.syncDamageHurtbox();
       return;
     }
 
@@ -156,7 +153,6 @@ export class HalfSkullMiniboss {
         }
       }
       this.updateVisuals(time);
-      this.syncDamageHurtbox();
       return;
     }
 
@@ -165,14 +161,12 @@ export class HalfSkullMiniboss {
         this.clearAttackState();
       }
       this.updateVisuals(time);
-      this.syncDamageHurtbox();
       return;
     }
 
     if (absDx > this.getApproachRange()) {
       this.body.setVelocityX(this.direction * this.getApproachSpeed());
       this.updateVisuals(time);
-      this.syncDamageHurtbox();
       return;
     }
 
@@ -186,7 +180,6 @@ export class HalfSkullMiniboss {
     }
 
     this.updateVisuals(time);
-    this.syncDamageHurtbox();
   }
 
   isGrounded() {
@@ -403,6 +396,7 @@ export class HalfSkullMiniboss {
     } else {
       this.sprite.setFillStyle(telegraphing ? 0xd6bb7a : takingHit ? 0xd8bdaa : COLORS.bone, telegraphing ? 0.96 : 0.94);
     }
+    this.syncDamageHurtbox();
 
   }
 

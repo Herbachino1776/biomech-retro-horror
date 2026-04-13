@@ -30,6 +30,7 @@ const KILN_OF_JUDGEMENT_BOOTSTRAP = {
   lowerBandHeight: 308,
   lowerBandAlpha: 0.24
 };
+const KILN_OF_JUDGEMENT_FLOOR_PLANE_Y = WORLD.floorY + 28 - KILN_OF_JUDGEMENT_BOOTSTRAP.floorColliderHeight / 2;
 
 const KILN_OF_JUDGEMENT_SEGMENTS = [
   { key: ASSET_KEYS.sector02Chamber03BackgroundEntryCondensers, x: 430, y: 220, width: 920, height: 478, tint: 0xc9c8ba, alpha: 0.74, depth: -14.82 },
@@ -253,7 +254,8 @@ const KILN_SORROW_ENGINE = {
   hurtRecoilVelocityX: 96,
   hurtRecoilVelocityY: -68,
   spawnX: 5334,
-  spawnY: WORLD.floorY - 2,
+  spawnY: KILN_OF_JUDGEMENT_FLOOR_PLANE_Y,
+  floorPlaneY: KILN_OF_JUDGEMENT_FLOOR_PLANE_Y,
   activationX: 5020,
   body: { width: 102, height: 136, offsetX: 108, offsetY: 148 },
   audioProfile: 'miniboss',

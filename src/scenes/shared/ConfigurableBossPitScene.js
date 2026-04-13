@@ -197,7 +197,10 @@ export function createBossPitSceneClass(config) {
       this.handleEnemyProjectileHit(projectileSprite);
     });
 
-    this.boss = new PressureDeacon(this, BOSS_PIT_BOSS.spawnX, BOSS_PIT_BOSS.spawnY, BOSS_PIT_BOSS);
+    this.boss = new PressureDeacon(this, BOSS_PIT_BOSS.spawnX, BOSS_PIT_BOSS.spawnY, {
+      ...BOSS_PIT_BOSS,
+      floorPlaneY: this.getGameplayFloorY()
+    });
     this.boss.setActive(false);
     this.boss.sprite.setDepth(6.2);
     this.physics.add.collider(this.boss.getCollisionTarget?.() ?? this.boss.sprite, this.platforms);
