@@ -127,6 +127,9 @@ export const chamber02BossPitConfig = {
     presentation: {
       display: { width: 352, height: 372 },
       origin: { x: 0.52, y: 0.986 },
+      normalization: {
+        visibleFootOffsetY: 22
+      },
       alpha: 0.99,
       tint: 0xded8cb,
       scaleX: 1,

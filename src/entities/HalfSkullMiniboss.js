@@ -3,6 +3,7 @@ import { COLORS } from '../data/milestone1Config.js';
 import { ASSET_KEYS } from '../data/assetKeys.js';
 import { createDamageHurtbox, resolveDamageHurtboxConfig, syncDamageHurtbox } from './damageHurtbox.js';
 import { syncActorSpriteToPhysicsBody } from '../systems/floorGrounding.js';
+import { getNormalizedDisplaySize, getNormalizedOrigin, getNormalizedYOffset, getNormalizedVisibleFootOffset } from '../systems/conceptSpriteNormalizer.js';
 
 const FALLBACK_WIDTH = 188;
 const FALLBACK_HEIGHT = 208;
@@ -42,22 +43,28 @@ export class HalfSkullMiniboss {
     };
 
     this.textureKey = config.textureKey ?? ASSET_KEYS.chamber01HalfSkullMiniboss;
+    this.presentation = config.presentation ?? {};
+    this.normalizedPresentationDisplaySize = getNormalizedDisplaySize(this.presentation);
+    this.normalizedPresentationOrigin = getNormalizedOrigin(this.presentation);
+    this.normalizedPresentationYOffset = getNormalizedYOffset(this.presentation);
+    this.normalizedVisibleFootOffsetY = getNormalizedVisibleFootOffset(this.presentation);
     this.damageHurtboxConfig = resolveDamageHurtboxConfig(config.damageHurtbox, {
       trimXRatio: 0.005,
-      trimYRatio: 0.005
+      trimYRatio: 0.005,
+      insetBottomPx: this.normalizedVisibleFootOffsetY
     });
     this.usingTexture = scene.textures.exists(this.textureKey);
 
     this.sprite = this.usingTexture
       ? scene.add
-          .image(x, y, this.textureKey)
-          .setOrigin(config.presentation.origin.x, config.presentation.origin.y)
-          .setDisplaySize(config.presentation.display.width, config.presentation.display.height)
+          .image(x, y + this.normalizedPresentationYOffset, this.textureKey)
+          .setOrigin(this.normalizedPresentationOrigin.x, this.normalizedPresentationOrigin.y)
+          .setDisplaySize(this.normalizedPresentationDisplaySize.width, this.normalizedPresentationDisplaySize.height)
           .setTint(config.presentation.tint)
           .setAlpha(config.presentation.alpha)
           .setDepth(6)
       : scene.add
-          .ellipse(x, y - FALLBACK_HEIGHT * 0.48, FALLBACK_WIDTH, FALLBACK_HEIGHT, COLORS.bone, 0.96)
+          .ellipse(x, y - FALLBACK_HEIGHT * 0.48 + this.normalizedPresentationYOffset, FALLBACK_WIDTH, FALLBACK_HEIGHT, COLORS.bone, 0.96)
           .setStrokeStyle(4, COLORS.rust, 0.9)
           .setDepth(6);
 
@@ -428,7 +435,8 @@ export class HalfSkullMiniboss {
       sprite: this.sprite,
       body: this.body,
       floorY: this.floorPlaneY,
-      visualCenterOffsetFromBodyCenterX: this.visualCenterOffsetFromBodyCenterX
+      visualCenterOffsetFromBodyCenterX: this.visualCenterOffsetFromBodyCenterX,
+      visualFootOffsetY: this.normalizedVisibleFootOffsetY
     });
   }
 
