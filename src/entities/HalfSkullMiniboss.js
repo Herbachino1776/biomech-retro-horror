@@ -80,7 +80,7 @@ export class HalfSkullMiniboss {
     this.body.setAllowGravity(true);
     this.floorPlaneY = Number.isFinite(config.floorPlaneY)
       ? config.floorPlaneY
-      : resolveSceneGameplayFloorY(scene, this.body.bottom);
+      : resolveSceneGameplayFloorY(scene);
     this.visualCenterOffsetFromBodyCenterX = this.sprite.x - this.body.center.x;
     this.damageHurtbox = createDamageHurtbox(scene, this.sprite);
     this.syncVisualFromAnchor();

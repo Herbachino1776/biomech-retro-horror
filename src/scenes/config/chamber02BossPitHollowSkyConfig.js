@@ -101,6 +101,7 @@ export const chamber02BossPitHollowSkyConfig = {
     difficultyTier,
     spawnX: 960,
     spawnY: floorPlaneY,
+    floorPlaneY,
     textureKey: ASSET_KEYS.bossPit03RedMaskHollowSky,
     health: selectedDifficulty.health,
     contactDamage: selectedDifficulty.contactDamage,
