@@ -112,11 +112,15 @@ const CHAMBER03_BOSS_COMBAT = {
 };
 
 const CHAMBER03_BOSS_DAMAGE_HURTBOX = resolveDamageHurtboxConfig({
-  trimXRatio: 0.06,
-  trimYRatio: 0.06,
+  trimXRatio: 0.015,
+  trimYRatio: 0.015,
   minWidth: 88,
   minHeight: 150
 });
+
+const CHAMBER03_BOSS_VISUAL_FLOOR_ALIGN = {
+  floorLineY: WORLD.floorY + 2
+};
 
 const CHAMBER03_FINALE = {
   bloodFlashMs: 860,
@@ -1460,11 +1464,13 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     }
 
     const bossX = this.bossBody?.enable ? this.bossBody.gameObject.x : this.bossSprite.x;
-    const bossY = this.bossBody?.enable
+    const baseBossY = this.bossBody?.enable
       ? this.bossBody.bottom + this.bossGroundedBodyOffsetY + floatOffset
       : CHAMBER03_BOSS_ARENA.bossAnchorY + floatOffset;
-    this.bossSprite.setPosition(bossX, bossY);
     this.bossSprite.setScale(scaleX, scaleY);
+    const visualBottomAtBaseY = baseBossY + this.bossSprite.displayHeight * (1 - this.bossSprite.originY);
+    const alignedBossY = baseBossY + (CHAMBER03_BOSS_VISUAL_FLOOR_ALIGN.floorLineY - visualBottomAtBaseY);
+    this.bossSprite.setPosition(bossX, alignedBossY);
     this.bossSprite.setAngle(angle);
     if (typeof this.bossSprite.setFlipX === 'function') {
       this.bossSprite.setFlipX(this.bossCombat.facing > 0);
