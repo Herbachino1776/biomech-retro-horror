@@ -15,7 +15,6 @@ import { spawnEnemyCorpseRemains } from '../../systems/EnemyCorpseRemains.js';
 import { grantMajorEncounterIntegrityReward } from '../../systems/VesselRunEconomy.js';
 import { MajorEncounterResolution } from '../../systems/MajorEncounterResolution.js';
 import { beginBossDeathPayoffPackage } from '../../systems/BossDeathPayoffPackage.js';
-import { resolveSceneGameplayFloorY, resolveSceneVisualFloorY } from '../../systems/floorGrounding.js';
 
 export function createBossPitSceneClass(config) {
   const BOSS_PIT_BOOTSTRAP = config.bootstrap;
@@ -167,15 +166,26 @@ export function createBossPitSceneClass(config) {
     }
     this.add.rectangle(BOSS_PIT_BOOTSTRAP.worldWidth / 2, visualFloorY - 26, BOSS_PIT_BOOTSTRAP.worldWidth, 120, 0x101010, 0.96).setDepth(-6.2);
     this.add.ellipse(BOSS_PIT_BOOTSTRAP.worldWidth / 2, visualFloorY + 8, BOSS_PIT_BOOTSTRAP.worldWidth, 56, 0x010101, 0.36).setDepth(-5.9);
-    this.createPitAltars();
+    try {
+      this.createPitAltars();
+    } catch (error) {
+      console.error(`[${BOSS_PIT_BOOTSTRAP.sceneKey}] createPitAltars failed; boot will continue with no altar visuals`, error);
+      this.pitAltars = [];
+      this.exitAltar = null;
+      this.currentExitAltar = null;
+    }
   }
 
   getGameplayFloorY() {
-    return resolveSceneGameplayFloorY(this, BOSS_PIT_FLOOR_PLANE_Y);
+    return Number.isFinite(this.gameplayFloorY)
+      ? this.gameplayFloorY
+      : BOSS_PIT_FLOOR_PLANE_Y;
   }
 
   getVisualFloorY() {
-    return resolveSceneVisualFloorY(this, this.getGameplayFloorY());
+    return Number.isFinite(this.visualFloorY)
+      ? this.visualFloorY
+      : this.getGameplayFloorY();
   }
 
   createPlayerAndCombat() {
@@ -1013,14 +1023,18 @@ export function createBossPitSceneClass(config) {
       return;
     }
 
-    if (this.hasUnlockedExitAltar) {
-      this.applyExitAltarSpriteVisualState(0.98, 0xffffff);
-      this.exitAltar.aura?.setAlpha(0.24).setFillStyle(0xd2c28a, 0.26);
-      return;
-    }
+    try {
+      if (this.hasUnlockedExitAltar) {
+        this.applyExitAltarSpriteVisualState(0.98, 0xffffff);
+        this.exitAltar.aura?.setAlpha(0.24).setFillStyle(0xd2c28a, 0.26);
+        return;
+      }
 
-    this.applyExitAltarSpriteVisualState(0.84, 0xf1e4cd);
-    this.exitAltar.aura?.setAlpha(0.1).setFillStyle(0x8a7e6d, 0.1);
+      this.applyExitAltarSpriteVisualState(0.84, 0xf1e4cd);
+      this.exitAltar.aura?.setAlpha(0.1).setFillStyle(0x8a7e6d, 0.1);
+    } catch (error) {
+      console.error(`[${BOSS_PIT_BOOTSTRAP.sceneKey}] exit altar visual update failed`, error);
+    }
   }
 
   applyExitAltarSpriteVisualState(alpha, tint) {
