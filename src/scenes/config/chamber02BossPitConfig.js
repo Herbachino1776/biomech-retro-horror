@@ -101,6 +101,7 @@ export const chamber02BossPitConfig = {
     difficultyTier,
     spawnX: 960,
     spawnY: floorPlaneY,
+    floorPlaneY,
     textureKey: ASSET_KEYS.bossPit02StarvedProphetOfAsh,
     health: selectedDifficulty.health,
     contactDamage: selectedDifficulty.contactDamage,

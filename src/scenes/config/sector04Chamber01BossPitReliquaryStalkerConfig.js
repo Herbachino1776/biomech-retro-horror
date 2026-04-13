@@ -101,6 +101,7 @@ export const sector04Chamber01BossPitReliquaryStalkerConfig = {
     difficultyTier,
     spawnX: 964,
     spawnY: floorPlaneY,
+    floorPlaneY,
     textureKey: ASSET_KEYS.bossPit19ReliquaryStalker,
     health: selectedDifficulty.health,
     contactDamage: selectedDifficulty.contactDamage,

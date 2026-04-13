@@ -288,6 +288,8 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   createWorld() {
+    this.gameplayFloorY = CHAMBER_FLOOR_PLANE_Y;
+    this.visualFloorY = CHAMBER_FLOOR_PLANE_Y;
     this.physics.world.gravity.y = WORLD.gravityY;
     this.cameras.main.setBounds(0, 0, CHAMBER.width, WORLD.height);
     this.physics.world.setBounds(0, 0, CHAMBER.width, WORLD.height);
@@ -300,6 +302,12 @@ export class Chamber01Scene extends Phaser.Scene {
       CHAMBER.width,
       CHAMBER.floorColliderHeight
     );
+  }
+
+  getGameplayFloorY() {
+    return Number.isFinite(this.gameplayFloorY)
+      ? this.gameplayFloorY
+      : CHAMBER_FLOOR_PLANE_Y;
   }
 
   createBackdrop() {
