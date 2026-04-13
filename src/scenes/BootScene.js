@@ -193,7 +193,7 @@ export class BootScene extends Phaser.Scene {
       endFrame: 4
     });
     this.load.spritesheet(ASSET_KEYS.playerBrutalityWalk, ASSET_URLS[ASSET_KEYS.playerBrutalityWalk], {
-      frameWidth: 440,
+      frameWidth: 570,
       frameHeight: 732,
       endFrame: 4
     });
