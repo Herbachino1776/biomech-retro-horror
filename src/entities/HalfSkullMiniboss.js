@@ -42,8 +42,8 @@ export class HalfSkullMiniboss {
 
     this.textureKey = config.textureKey ?? ASSET_KEYS.chamber01HalfSkullMiniboss;
     this.damageHurtboxConfig = resolveDamageHurtboxConfig(config.damageHurtbox, {
-      trimXRatio: 0.01,
-      trimYRatio: 0.01
+      trimXRatio: 0.005,
+      trimYRatio: 0.005
     });
     this.usingTexture = scene.textures.exists(this.textureKey);
 
@@ -78,9 +78,9 @@ export class HalfSkullMiniboss {
     this.body.updateFromGameObject();
     this.body.setAllowGravity(true);
     this.floorPlaneY = Number.isFinite(config.floorPlaneY) ? config.floorPlaneY : this.body.bottom;
-    this.visualBottomOffsetFromBody = this.getVisualBottomY() - this.body.bottom;
     this.visualCenterOffsetFromBodyCenterX = this.sprite.x - this.body.center.x;
     this.damageHurtbox = createDamageHurtbox(scene, this.sprite);
+    this.syncVisualFromAnchor();
     this.syncDamageHurtbox();
   }
 
@@ -393,8 +393,8 @@ export class HalfSkullMiniboss {
     }
 
     this.sprite.setScale(scaleX, scaleY);
-    this.alignVisualFeetToAuthority();
     this.sprite.setAngle(angle);
+    this.syncVisualFromAnchor();
     if (this.usingTexture) {
       this.sprite.setTint(tint);
     } else {
@@ -418,24 +418,17 @@ export class HalfSkullMiniboss {
     );
   }
 
-  getVisualBottomY() {
-    return this.sprite.y + this.sprite.displayHeight * (1 - this.sprite.originY);
-  }
-
-  alignVisualFeetToAuthority() {
+  syncVisualFromAnchor() {
     if (!this.sprite?.active || this.dead) {
       return;
     }
 
-    const targetVisualBottomY = this.body?.enable
-      ? this.body.bottom + this.visualBottomOffsetFromBody
-      : this.floorPlaneY;
-    if (!Number.isFinite(targetVisualBottomY)) {
+    if (!Number.isFinite(this.floorPlaneY)) {
       return;
     }
 
     const desiredX = (this.body?.center?.x ?? this.sprite.x) + this.visualCenterOffsetFromBodyCenterX;
-    const desiredY = targetVisualBottomY - this.sprite.displayHeight * (1 - this.sprite.originY);
+    const desiredY = this.floorPlaneY - this.sprite.displayHeight * (1 - this.sprite.originY);
     this.sprite.setPosition(desiredX, desiredY);
   }
 
