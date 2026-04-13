@@ -6,7 +6,7 @@ import { createDamageHurtbox, resolveDamageHurtboxConfig, syncDamageHurtbox } fr
 const FALLBACK_WIDTH = 188;
 const FALLBACK_HEIGHT = 208;
 const FLOOR_SINK_EPSILON_PX = 0.5;
-const VISUAL_FLOOR_SINK_EPSILON_PX = 0.5;
+const VISUAL_FLOOR_ALIGN_EPSILON_PX = 0.5;
 
 export class HalfSkullMiniboss {
   constructor(scene, x, y, config) {
@@ -45,8 +45,8 @@ export class HalfSkullMiniboss {
 
     this.textureKey = config.textureKey ?? ASSET_KEYS.chamber01HalfSkullMiniboss;
     this.damageHurtboxConfig = resolveDamageHurtboxConfig(config.damageHurtbox, {
-      trimXRatio: 0.07,
-      trimYRatio: 0.06
+      trimXRatio: 0.015,
+      trimYRatio: 0.015
     });
     this.usingTexture = scene.textures.exists(this.textureKey);
 
@@ -453,16 +453,17 @@ export class HalfSkullMiniboss {
       return;
     }
 
-    const maxVisualBottomY = this.floorPlaneY + this.floorSinkClampPx;
+    const targetVisualBottomY = this.floorPlaneY;
     const visualBottomY = this.sprite.y + this.sprite.displayHeight * (1 - this.sprite.originY);
+    const visualFloorDelta = visualBottomY - targetVisualBottomY;
     const canSettleNow = force || this.isGrounded() || this.body.velocity.y >= 0;
-    if (!canSettleNow || visualBottomY <= maxVisualBottomY + VISUAL_FLOOR_SINK_EPSILON_PX) {
+    if (!canSettleNow || Math.abs(visualFloorDelta) <= VISUAL_FLOOR_ALIGN_EPSILON_PX) {
       return;
     }
 
-    this.sprite.y -= visualBottomY - maxVisualBottomY;
+    this.sprite.y -= visualFloorDelta;
     this.body.updateFromGameObject();
-    if (this.body.velocity.y > 0) {
+    if (this.body.velocity.y > 0 && visualFloorDelta > 0) {
       this.body.setVelocityY(0);
     }
   }
