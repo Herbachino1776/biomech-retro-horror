@@ -44,6 +44,7 @@ Milestone 7 is **advanced/largely established** and no longer the main active bu
 ## Active Build Lane Now
 - **Sector 4 Chamber 1 (Milestone 9 lane) is the practical active content build lane.**
 - **Sector 4 Chamber 2 shell/buildout remains a real secondary support lane, not a pure placeholder note.**
+- **Targeted support lanes are valid when explicitly requested (for example: S1C1 retrofit hardening and one-boss pilot validation), but they do not replace the active milestone roadmap by default.**
 - Milestone 8 remains established and still relevant for Sector 3 consistency/polish carryover and boss-pit expansion continuity.
 - Milestone 7 follow-up remains available as targeted polish/support work, not primary sequencing.
 - **BRUTALITY MODE is promoted to next-active combat-design milestone planning and should now shape near-term encounter authoring doctrine.**
@@ -67,13 +68,13 @@ Milestone 7 is **advanced/largely established** and no longer the main active bu
   - while active, streak counting is paused
   - on end, streak counting restarts from zero
 - **Player changes during mode:**
-  - larger player sprite
-  - collision body also grows
+  - larger/stronger presentation state (visual/combat overlay feel)
+  - do **not** assume player collision body or floor contracts change in v1
   - increased reach
   - slight movement-speed boost
   - stronger damage output
   - temporary weapon swap to **Hammer of Banishment**
-  - movement tuning must account for larger body so mode stays fast/predatory, not clumsy
+  - treat BRUTALITY as presentation/combat-state escalation unless a future explicit task proves body/floor/collision changes are required
 - **Enemy behavior during mode:**
   - enemies become more aggressive
   - increased move speed
@@ -129,7 +130,8 @@ Future chamber design should intentionally support:
 - Boss-pack ingestion/registration coverage has been expanded to include additional `art/raw/bosspit` assets; deployment wiring remains a separate later lane.
 - Planned order is now:
   1. polish the abstracted boss package itself
-  2. retrofit/reimplement boss encounters across the game to that package
+  2. prove one controlled boss pilot for runtime/floor/hurtbox behavior
+  3. retrofit/reimplement boss encounters across the game to that package
 - This is preserved as its own later milestone lane and should not be folded into ad-hoc chamber edits.
 
 ## Authoring Doctrine to Follow During Active Sector Buildouts

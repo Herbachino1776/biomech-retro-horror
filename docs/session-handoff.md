@@ -38,6 +38,7 @@ Use this file to start a fresh planning/implementation session from real current
 - Continue Sector 4 Chamber 2 shell/buildout prep as secondary support work.
 - Keep Sector 3 consistency/polish carryover aligned while Sector 4 comes online.
 - Start BRUTALITY MODE as the next-active combat-design lane so upcoming chambers are authored around streak escalation windows.
+- Treat S1C1 retrofit hardening and one-boss pilot work as legitimate targeted support lanes when explicitly requested, not as default roadmap replacement.
 
 ### What is deferred (explicit)
 - Enemy Class Unification + Grounding/Scale Normalization milestone (family audit + contract cleanup + shared spawnY/body alignment normalization).
@@ -79,7 +80,8 @@ Still available as targeted follow-up:
   - taking damage does not cancel/reset mode
   - max 2 activations per chamber
   - streak counting pauses during mode and restarts from zero when mode ends
-  - larger player form + larger collision body + temporary Hammer of Banishment
+  - larger/stronger presentation state + temporary Hammer of Banishment
+  - BRUTALITY is currently treated as presentation/combat-state overlay (do not casually reopen body/floor/collision logic)
   - increased reach, slight speed boost, and stronger damage while active
   - enemy aggression override during mode (higher speed/aggro/pressure), then clean reset to normal on exit
   - basic enemies die instantly with dedicated brutality gore package
@@ -97,7 +99,7 @@ Still available as targeted follow-up:
 
 ## Boss Package + Content Pipeline Notes
 - Boss package abstraction is now mature enough for a true future lane.
-- Required sequencing: polish package first, then retrofit/reimplement boss encounters globally.
+- Required sequencing: polish package first, prove one controlled boss pilot for runtime/floor/hurtbox behavior, then retrofit/reimplement boss encounters globally.
 - Keep this lane separate from enemy-class unification/grounding work.
 - Future content lane should assume approximately a dozen boss concepts across boss-pit/miniboss/full-boss contexts.
 - Likely art ingestion pattern: one background image per boss into `art/raw/bosspit`.

@@ -86,10 +86,10 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
   - max 2 activations per chamber
   - streak counting pauses while active and restarts from zero on mode end
 - player transformation + Hammer of Banishment lane:
-  - larger player sprite and larger collision body
+  - larger/stronger presentation state (overlay feel), without casual body/floor/collision rewrites
   - increased reach, slight movement-speed boost, stronger damage
   - temporary weapon swap to Hammer of Banishment
-  - movement tuning to keep larger-body mode fast/predatory, not clumsy
+  - if body/floor/collision changes are ever proposed, require an explicit proof task first
 - enemy aggression override + reset lane:
   - increased move speed and aggro range
   - more headlong/meat-grinder pressure during mode
@@ -149,7 +149,8 @@ Lean roadmap grounded in current Phaser + Vite + GitHub Pages + mobile-first tra
 
 **Required sequence:**
 1. polish/harden abstracted boss package first
-2. retrofit/reimplement each boss encounter to the package
+2. prove one controlled boss pilot for runtime/floor/hurtbox behavior
+3. retrofit/reimplement each boss encounter to the package
 
 **Scope / Includes:**
 - preserve modern full boss death/payoff doctrine across all converted fights

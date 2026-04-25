@@ -64,3 +64,14 @@ Known failure patterns and what future tasks must protect.
 **Observed risk:** bosses regress to lighter/older death handling.  
 - Keep all bosses/minibosses/pit bosses on the modern death/payoff family.
 - Preserve zoom + shake + elongated ceremonial finish + stronger gore payoff + escalated remains.
+
+## 13) BRUTALITY Body/Floor/Collision Doctrine Drift
+**Observed risk:** BRUTALITY tasks casually reopen player body/floor/collision work as routine tuning.  
+- Treat BRUTALITY as presentation/combat-state overlay by default.
+- Do not reopen BRUTALITY body/floor/collision logic unless a future task explicitly requires and proves it.
+
+## 14) Boss Migration Scope Creep (No Pilot First)
+**Observed risk:** global boss runtime/floor/hurtbox rewrites start without proving one controlled boss pilot.  
+- Run one controlled boss pilot first.
+- Expand migration only after the pilot is stable/verified.
+- Keep boss-package retrofit as its own controlled lane, not routine chamber-edit drift.
