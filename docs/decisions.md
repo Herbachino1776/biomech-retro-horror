@@ -106,6 +106,13 @@ This means:
 - Boss-pack production direction is approved as future lane: roughly a dozen boss concepts and likely one dedicated background per boss in `art/raw/bosspit`.
 - Boss-pack ingestion catalog is now maintained in `docs/boss-pack-catalog.md` to keep boss/background naming and pairing discoverable during future deployment passes.
 - Boss package retrofit lane remains distinct from enemy-class unification lane.
+- Boss vertical-placement triage doctrine is locked:
+  - If a boss appears visually too high/low but interaction mostly works, treat first as boss-specific presentation/normalization tuning, not a global floor-system bug.
+  - Tune scene-local/boss-config values first (especially `presentation.normalization.visibleFootOffsetY`).
+  - Preserve authoritative chamber floor and shared boss systems unless audit proves a real shared defect.
+  - If death/payoff grounding pops, apply `normalizedVisibleFootOffsetY` to corpse/payoff placement before considering broader rewrites.
+  - Do not begin with global boss/floor/hurtbox rewrites.
+  - Precedent: S1C1 Blind Cantor stabilized by changing `BLIND_CANTOR.presentation.normalization.visibleFootOffsetY` from `38` to `104`, then applying `normalizedVisibleFootOffsetY` to corpse/payoff placement.
 
 ## Lore Presentation Doctrine
 - Lore is a primary identity system.

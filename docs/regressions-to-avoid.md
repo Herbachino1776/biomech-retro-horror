@@ -75,3 +75,12 @@ Known failure patterns and what future tasks must protect.
 - Run one controlled boss pilot first.
 - Expand migration only after the pilot is stable/verified.
 - Keep boss-package retrofit as its own controlled lane, not routine chamber-edit drift.
+
+## 15) Boss Grounding Overreach (Blind Cantor Lesson)
+**Observed risk:** boss appears too high/low and task jumps straight to global floor/boss rewrites.  
+- First-response pattern: treat as boss-specific presentation/normalization issue when gameplay interaction mostly works.
+- Tune scene-local/boss-config first; start with `presentation.normalization.visibleFootOffsetY`.
+- Preserve chamber floor authority and shared boss systems unless audit proves shared fault.
+- If death/payoff grounding pops, apply boss `normalizedVisibleFootOffsetY` to corpse/payoff placement.
+- Precedent: S1C1 Blind Cantor fix used `visibleFootOffsetY` `38 -> 104` plus payoff/corpse placement using `normalizedVisibleFootOffsetY`.
+- Do not start with global boss/floor/hurtbox rewrites.
