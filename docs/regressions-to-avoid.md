@@ -84,3 +84,9 @@ Known failure patterns and what future tasks must protect.
 - If death/payoff grounding pops, apply boss `normalizedVisibleFootOffsetY` to corpse/payoff placement.
 - Precedent: S1C1 Blind Cantor fix used `visibleFootOffsetY` `38 -> 104` plus payoff/corpse placement using `normalizedVisibleFootOffsetY`.
 - Do not start with global boss/floor/hurtbox rewrites.
+
+## 16) S1C2 Boss-Pit Damage Rescue Stack Creep
+**Observed risk:** repeated S1C2 boss-pit hitbox/zone/overlap rescue layers made damage routing brittle and opaque.  
+- Accepted recovery for this pit: remove failed hitbox-rescue systems.
+- Use one explicit S1C2 rule: attack button press + generous proximity check directly applies boss damage.
+- Do not reintroduce bossAttackableZone/overlap fallback layering for S1C2 unless a new explicit task proves it is required.
