@@ -29,6 +29,7 @@ Use this file to start a fresh planning/implementation session from real current
 - Core sector progression for Sector 1 and Sector 2.
 - Shared major-encounter resolution flow.
 - Boss-pit loop structure with deterministic return semantics.
+- S1C2 boss pit retired the broken Starved Prophet damage path and now uses a simpler replacement boss implementation after multiple targeted fix attempts failed runtime verification.
 - Modern full boss death/payoff treatment in current authored lanes.
 - Renderer/camera stability fix that resolved prior global sprite shimmer/sparkle behavior.
 - Meaningful fix for feet-hidden-under-black-control-bar readability issue.

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Player } from '../../entities/Player.js';
 import { EnemyProjectile } from '../../entities/EnemyProjectile.js';
 import { PressureDeacon } from '../../entities/PressureDeacon.js';
+import { HalfSkullMiniboss } from '../../entities/HalfSkullMiniboss.js';
 import { HudOverlay } from '../../ui/HudOverlay.js';
 import { MobileControls } from '../../ui/MobileControls.js';
 import { AudioDirector } from '../../audio/AudioDirector.js';
@@ -209,7 +210,9 @@ export function createBossPitSceneClass(config) {
       this.handleEnemyProjectileHit(projectileSprite);
     });
 
-    this.boss = new PressureDeacon(this, BOSS_PIT_BOSS.spawnX, BOSS_PIT_BOSS.spawnY, {
+    const BossClass = BOSS_PIT_BOSS.bossClass ?? PressureDeacon;
+    const ResolvedBossClass = typeof BossClass === 'function' ? BossClass : HalfSkullMiniboss;
+    this.boss = new ResolvedBossClass(this, BOSS_PIT_BOSS.spawnX, BOSS_PIT_BOSS.spawnY, {
       ...BOSS_PIT_BOSS,
       floorPlaneY: this.getGameplayFloorY()
     });
@@ -500,7 +503,9 @@ export function createBossPitSceneClass(config) {
 
     this.player.update(time, input);
     this.tryTriggerBossReveal();
-    this.tryApplyPlayerAttackToBossFallback(time);
+    if (config.enablePlayerAttackOverlapFallback !== false) {
+      this.tryApplyPlayerAttackToBossFallback(time);
+    }
     this.boss.update(time, this.player.sprite);
     this.refreshExitAltarPresence();
     this.tryUseExitAltar(mobileInput);
