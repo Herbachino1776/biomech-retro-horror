@@ -65,4 +65,5 @@ export function syncDamageHurtbox(hurtbox, sprite, config, enabled = true) {
   const centerY = innerTop + usableHeight * 0.5;
   hurtbox.setPosition(centerX + config.offsetX, centerY + config.offsetY);
   hurtbox.body.setSize(width, height, true);
+  hurtbox.body.updateFromGameObject();
 }
