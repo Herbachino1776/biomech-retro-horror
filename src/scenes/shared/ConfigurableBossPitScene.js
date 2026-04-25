@@ -567,10 +567,12 @@ export function createBossPitSceneClass(config) {
       deathCamera: BOSS_PIT_DEATH_CAMERA,
       payoffPose: {
         floorPlaneY: this.getGameplayFloorY(),
-        maxUpwardSnapPx: BOSS_PIT_PAYOFF_POSE.maxUpwardSnapPx
+        maxUpwardSnapPx: BOSS_PIT_PAYOFF_POSE.maxUpwardSnapPx,
+        visibleFootOffsetY: this.boss.normalizedVisibleFootOffsetY ?? 0
       },
       corpseRemains: {
         floorPlaneY: this.getGameplayFloorY(),
+        visibleFootOffsetY: this.boss.normalizedVisibleFootOffsetY ?? 0,
         size: 'bossPitBoss'
       },
       victory: {

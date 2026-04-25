@@ -72,7 +72,7 @@ export function beginBossDeathPayoffPackage({
   };
 
   const stabilizeBossCorpse = () => {
-    const payoffGroundY = payoffPose.floorPlaneY;
+    const payoffGroundY = payoffPose.floorPlaneY + (payoffPose.visibleFootOffsetY ?? 0);
     const groundedPayoffY = payoffGroundY - bossSprite.displayHeight * (1 - bossSprite.originY);
     const maxRaisedY = bossSprite.y - (payoffPose.maxUpwardSnapPx ?? 0);
     const payoffY = Math.max(groundedPayoffY, maxRaisedY);
@@ -177,9 +177,13 @@ export function beginBossDeathPayoffPackage({
       return;
     }
 
+    const corpseFloorPlaneY = Number.isFinite(corpseRemains.floorPlaneY)
+      ? corpseRemains.floorPlaneY + (corpseRemains.visibleFootOffsetY ?? 0)
+      : state.payoffLocation?.floorPlaneY;
+
     spawnEnemyCorpseRemains(scene, {
       x: state.payoffLocation?.x ?? bossSprite.x,
-      floorPlaneY: corpseRemains.floorPlaneY ?? state.payoffLocation?.floorPlaneY,
+      floorPlaneY: corpseFloorPlaneY,
       groundY: corpseRemains.groundY,
       depth: bossSprite.depth,
       size: corpseRemains.size
