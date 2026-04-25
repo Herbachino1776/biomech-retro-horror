@@ -76,6 +76,7 @@ export const chamber02BossPitConfig = {
     postExplosionDespawnDelayMs: 560
   },
   arrival: {
+    activateBossOnArrivalRelease: true,
     lockDurationMs: 2000,
     impactDelayAfterFadeInMs: 48,
     shakeDurationMs: 2000,
