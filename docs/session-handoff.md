@@ -29,8 +29,13 @@ Use this file to start a fresh planning/implementation session from real current
 - Core sector progression for Sector 1 and Sector 2.
 - Shared major-encounter resolution flow.
 - Boss-pit loop structure with deterministic return semantics.
-- S1C2 boss pit retired the broken Starved Prophet damage path and now uses a simpler replacement boss implementation after multiple targeted fix attempts failed runtime verification.
-- S1C2 boss-pit inert-state root cause was activation/reveal sequencing, not sprite/hurtbox tuning; arrival-release reveal/activation is now the first diagnostic check for "boss won't move/attack/take damage" reports.
+- S1C2 boss-pit recovery lock (The Pit Judge):
+  - first diagnostic for "boss won't move/attack/take damage" is activation/reveal state (`boss.active`, body enabled, `hasBossRevealTriggered`, reveal timing), not sprite/hurtbox swaps
+  - boss combat activation is on arrival release (`activateBossOnArrivalRelease`), while boss-bar reveal remains a separate in/near-view presentation gate
+  - normal damage authority is restored: `player.attackHitbox` overlap vs boss damage hurtbox/sprite
+  - emergency fallback damage (`simpleAttackCycleDamage`) is disabled after recovery
+  - intended geometry/config lock: `damageHurtbox` (`trimXRatio 0.08`, `trimYRatio 0.08`, `insetBottomPx 0`, `minWidth 180`, `minHeight 240`, `offsetX 0`, `offsetY -20`), remains lift `56px`, `spawnX 1560`
+  - DEV default currently starts `Chamber02Scene` for focused S1C2 validation unless milestone direction explicitly changes
 - Modern full boss death/payoff treatment in current authored lanes.
 - Renderer/camera stability fix that resolved prior global sprite shimmer/sparkle behavior.
 - Meaningful fix for feet-hidden-under-black-control-bar readability issue.
