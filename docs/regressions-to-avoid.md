@@ -87,6 +87,5 @@ Known failure patterns and what future tasks must protect.
 
 ## 16) S1C2 Boss-Pit Damage Rescue Stack Creep
 **Observed risk:** repeated S1C2 boss-pit hitbox/zone/overlap rescue layers made damage routing brittle and opaque.  
-- Accepted recovery for this pit: remove failed hitbox-rescue systems.
-- Use one explicit S1C2 rule: attack button press + generous proximity check directly applies boss damage.
-- Do not reintroduce bossAttackableZone/overlap fallback layering for S1C2 unless a new explicit task proves it is required.
+- S1C2 boss pit damage must not depend on hitboxes, overlap, zones, or range until the larger boss-pit combat contract is rebuilt.
+- Current accepted emergency fix: active boss + player attack cycle = boss damage once per swing.

@@ -64,6 +64,7 @@ export function createBossPitSceneClass(config) {
     this.bossDeathPayoffLocation = null;
     this.deathCameraFocusTween = null;
     this.deathCameraRestoreTween = null;
+    this.lastSimpleBossDamageAttackTime = Number.NEGATIVE_INFINITY;
   }
 
   create() {
@@ -492,7 +493,7 @@ export function createBossPitSceneClass(config) {
     this.player.update(time, input);
     this.tryTriggerBossReveal();
     this.boss.update(time, this.player.sprite);
-    this.applySimpleAttackButtonBossDamage(input, time);
+    this.applySimpleAttackCycleBossDamage(time);
     this.refreshExitAltarPresence();
     this.tryUseExitAltar(mobileInput);
     this.enemyProjectiles.forEach((projectile) => projectile.update(time, this.game.loop.delta));
@@ -544,44 +545,56 @@ export function createBossPitSceneClass(config) {
     }
   }
 
-  applySimpleAttackButtonBossDamage(input, time) {
-    const simpleAttackConfig = BOSS_PIT_BOSS.simpleAttackButtonDamage;
-    if (!simpleAttackConfig?.enabled) {
+  applySimpleAttackCycleBossDamage(time) {
+    const simpleAttackCycleConfig = BOSS_PIT_BOSS.simpleAttackCycleDamage;
+    if (simpleAttackCycleConfig?.enabled !== true) {
       return;
     }
 
-    if (!input?.attackPressed) {
+    if (!this.hasBossRevealTriggered || !this.boss?.active || this.boss?.dead || this.player?.isDead) {
       return;
     }
 
-    if (!this.hasBossRevealTriggered || !this.boss?.active || this.boss?.dead) {
+    const attackPhase = this.player?.attackPhase;
+    const attackCycleActive = attackPhase === 'startup'
+      || attackPhase === 'active'
+      || attackPhase === 'recovery'
+      || this.player?.attackActive === true;
+    if (!attackCycleActive) {
       return;
     }
 
-    const playerX = this.player?.body?.center?.x ?? this.player?.sprite?.x;
-    const playerY = this.player?.body?.center?.y ?? this.player?.sprite?.y;
-    const bossX = this.boss?.getAnchorX?.() ?? this.boss?.sprite?.x;
-    const bossY = this.boss?.getAnchorY?.() ?? this.boss?.sprite?.y;
-    if (![playerX, playerY, bossX, bossY].every((value) => Number.isFinite(value))) {
+    const attackTime = this.player?.lastAttackTime;
+    if (!Number.isFinite(attackTime)) {
+      return;
+    }
+    if (attackTime === this.lastSimpleBossDamageAttackTime) {
       return;
     }
 
-    const rangeX = Math.max(1, Number(simpleAttackConfig.rangeX) || 0);
-    const rangeY = Math.max(1, Number(simpleAttackConfig.rangeY) || 0);
-    const inRangeX = Math.abs(playerX - bossX) <= rangeX;
-    const inRangeY = Math.abs(playerY - bossY) <= rangeY;
-    if (!inRangeX || !inRangeY) {
-      return;
-    }
-
-    const damage = Math.max(1, Number(simpleAttackConfig.damage) || 1);
+    const bossHealthBefore = this.boss.health;
+    const damage = Math.max(1, Number(simpleAttackCycleConfig.damage) || 1);
     const didDamage = this.boss.takeDamage(damage, time);
+    const bossHealthAfter = this.boss.health;
+
     if (!didDamage) {
       return;
     }
 
+    console.info('[S1C2 simple boss damage]', {
+      attackPhase,
+      attackActive: this.player?.attackActive === true,
+      lastAttackTime: attackTime,
+      previousDamageAttackTime: this.lastSimpleBossDamageAttackTime,
+      bossActive: this.boss?.active === true,
+      bossDead: this.boss?.dead === true,
+      bossHealthBefore,
+      bossHealthAfter
+    });
+
+    this.lastSimpleBossDamageAttackTime = attackTime;
     this.audioDirector?.playPlayerHit();
-    this.spawnBossHitGush();
+    this.spawnBossHitGush?.();
     if (this.boss.dead) {
       this.handleBossPitVictory();
     }
