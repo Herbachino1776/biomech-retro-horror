@@ -94,7 +94,7 @@ export const chamber02BossPitConfig = {
     zoomOutDurationMs: 280
   },
   deathPayoffPose: { maxUpwardSnapPx: 8 },
-  enablePlayerAttackOverlapFallback: false,
+  enablePlayerAttackOverlapFallback: true,
   boss: {
     name: 'THE HORN GATE WITNESS',
     subtitle: 'First Pit Witness',
@@ -135,7 +135,8 @@ export const chamber02BossPitConfig = {
       tint: 0xded8cb,
       scaleX: 1,
       scaleY: 1
-    }
+    },
+    attackableZone: { width: 300, height: 320, offsetX: 0, offsetY: -80 }
   },
   runState: {
     markCompleted: () => bossPitRunState.markChamber02BossPitCompleted(),
