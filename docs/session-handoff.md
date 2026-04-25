@@ -32,6 +32,7 @@ Use this file to start a fresh planning/implementation session from real current
 - Modern full boss death/payoff treatment in current authored lanes.
 - Renderer/camera stability fix that resolved prior global sprite shimmer/sparkle behavior.
 - Meaningful fix for feet-hidden-under-black-control-bar readability issue.
+- Sector 1 Chamber 1 Phase 2 layout/rhythm retrofit is now landed: longer corridor rhythm, wider pocket spacing, and BRUTALITY-era clustering opportunities while preserving Blind Cantor pilot behavior.
 
 ### What is next (active)
 - Continue Sector 4 Chamber 1 content buildout and quality shaping.
@@ -45,7 +46,6 @@ Use this file to start a fresh planning/implementation session from real current
 - Boss package polish -> global boss retrofit sequence.
 - Boss-pack content production lane (roughly a dozen boss concepts + per-boss background planning in `art/raw/bosspit`).
 - Character/action animation lane.
-- Sector 1 Chamber 1 Phase 2 shaping (deferred unless explicitly requested): chamber-length expansion, corridor wall-module spacing rebalance, and BRUTALITY encounter-rhythm retuning after controlled validation.
 
 ## Milestone Snapshot
 ### Milestone 7 (advanced/largely established)
