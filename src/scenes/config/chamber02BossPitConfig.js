@@ -1,24 +1,23 @@
 import { ASSET_KEYS } from '../../data/assetKeys.js';
 import { PLAYER, WORLD } from '../../data/milestone1Config.js';
 import { bossPitRunState } from '../../systems/BossPitRunState.js';
+import { HalfSkullMiniboss } from '../../entities/HalfSkullMiniboss.js';
 
 const PIT_DIFFICULTY_PRESETS = {
   easy: {
     health: 5,
     contactDamage: 1,
     contactDamageCooldownMs: 1800,
-    attackCooldownMs: 4320,
-    attackTelegraphMs: 1120,
-    attackRecoveryMs: 920,
-    approachSpeed: 32,
-    idleAdvanceSpeed: 12,
-    attackSpeed: 162,
-    attackLiftVelocity: 0,
+    attackCooldownMs: 2980,
+    attackTelegraphMs: 760,
+    attackRecoveryMs: 640,
+    approachSpeed: 42,
+    idleAdvanceSpeed: 18,
+    attackSpeed: 188,
+    attackLiftVelocity: -142,
     hurtRecoverMs: 290,
     hurtRecoilVelocityX: 70,
-    hurtRecoilVelocityY: -48,
-    groundBurst: { cooldownMs: 9800, windupMs: 1480, activeMs: 120, recoveryMs: 1120 },
-    projectile: { cooldownMs: 7200, windupMs: 1180, recoveryMs: 1040, speed: 196, lifetimeMs: 1600 }
+    hurtRecoilVelocityY: -48
   }
 };
 
@@ -95,82 +94,47 @@ export const chamber02BossPitConfig = {
     zoomOutDurationMs: 280
   },
   deathPayoffPose: { maxUpwardSnapPx: 8 },
+  enablePlayerAttackOverlapFallback: false,
   boss: {
-    name: 'THE STARVED PROPHET OF ASH',
-    subtitle: 'Ash Prophecy Litigator',
+    name: 'THE HORN GATE WITNESS',
+    subtitle: 'First Pit Witness',
+    bossClass: HalfSkullMiniboss,
     difficultyTier,
     spawnX: 960,
     spawnY: floorPlaneY,
     floorPlaneY,
-    textureKey: ASSET_KEYS.bossPit02StarvedProphetOfAsh,
+    textureKey: ASSET_KEYS.bossPit01TheHornGateWitness,
     health: selectedDifficulty.health,
     contactDamage: selectedDifficulty.contactDamage,
     contactDamageCooldownMs: selectedDifficulty.contactDamageCooldownMs,
     attackCooldownMs: selectedDifficulty.attackCooldownMs,
     attackTelegraphMs: selectedDifficulty.attackTelegraphMs,
     attackRecoveryMs: selectedDifficulty.attackRecoveryMs,
-    attackRange: 194,
-    approachRange: 324,
+    attackRange: 214,
+    approachRange: 356,
     approachSpeed: selectedDifficulty.approachSpeed,
     idleAdvanceSpeed: selectedDifficulty.idleAdvanceSpeed,
-    windupDriftSpeed: 9,
+    windupDriftSpeed: 14,
     attackSpeed: selectedDifficulty.attackSpeed,
     attackLiftVelocity: selectedDifficulty.attackLiftVelocity,
     hitPulseMs: 260,
     hurtRecoverMs: selectedDifficulty.hurtRecoverMs,
     hurtRecoilVelocityX: selectedDifficulty.hurtRecoilVelocityX,
     hurtRecoilVelocityY: selectedDifficulty.hurtRecoilVelocityY,
-    body: { width: 92, height: 122, offsetX: 88, offsetY: 152 },
-    damageHurtbox: {
-      insetBottomPx: 0,
-      trimXRatio: 0.02,
-      trimYRatio: 0.02,
-      minWidth: 84,
-      minHeight: 120,
-      offsetY: 18
-    },
+    body: { width: 92, height: 122, offsetX: 124, offsetY: 168 },
     audioProfile: 'miniboss',
     poise: { max: 5, recoverDelayMs: 1900, recoverPerSecond: 1.1, staggerDurationMs: 2300, finisherRange: 148 },
     revealViewportPadding: 72,
     presentation: {
-      display: { width: 352, height: 372 },
+      display: { width: 398, height: 404 },
       origin: { x: 0.52, y: 0.986 },
       normalization: {
-        visibleFootOffsetY: 96
+        visibleFootOffsetY: 110
       },
       alpha: 0.99,
       tint: 0xded8cb,
       scaleX: 1,
       scaleY: 1
-    },
-    groundBurst: {
-      enabled: true,
-      cooldownMs: selectedDifficulty.groundBurst.cooldownMs,
-      windupMs: selectedDifficulty.groundBurst.windupMs,
-      activeMs: selectedDifficulty.groundBurst.activeMs,
-      recoveryMs: selectedDifficulty.groundBurst.recoveryMs,
-      minRange: 120,
-      maxRange: 390,
-      radius: 128,
-      damage: 1,
-      yTolerance: 150
-    },
-    projectile: {
-      textureKey: ASSET_KEYS.sector02PressureShardProjectile,
-      cooldownMs: selectedDifficulty.projectile.cooldownMs,
-      windupMs: selectedDifficulty.projectile.windupMs,
-      recoveryMs: selectedDifficulty.projectile.recoveryMs,
-      minRange: 220,
-      maxRange: 500,
-      verticalTolerance: 156,
-      spawnOffsetX: 76,
-      spawnOffsetY: -108,
-      speed: selectedDifficulty.projectile.speed,
-      damage: 1,
-      lifetimeMs: selectedDifficulty.projectile.lifetimeMs,
-      rotationSpeed: 380,
-      telegraphRadiusX: 84,
-      telegraphRadiusY: 28
     }
   },
   runState: {
