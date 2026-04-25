@@ -384,6 +384,11 @@ export function createBossPitSceneClass(config) {
     if (time >= this.arrivalReleaseAt) {
       this.arrivalSequenceActive = false;
       this.arrivalWaitingForFadeIn = false;
+      const activateOnArrivalRelease = BOSS_PIT_ARRIVAL.activateBossOnArrivalRelease === true
+        || BOSS_PIT_BOSS.activateOnArrivalRelease === true;
+      if (activateOnArrivalRelease) {
+        this.revealBossNow(time);
+      }
       this.tweens.killTweensOf(this.cameras.main);
       this.cameras.main.startFollow(
         this.player.sprite,
@@ -996,9 +1001,21 @@ export function createBossPitSceneClass(config) {
     if (!this.isBossRevealEligible()) {
       return;
     }
+    this.revealBossNow(this.time.now);
+  }
+
+  revealBossNow(revealTime = this.time.now) {
+    if (this.hasBossRevealTriggered || this.boss?.dead) {
+      return;
+    }
 
     this.hasBossRevealTriggered = true;
+    this.hasBossBarBeenRevealed = true;
     this.boss.setActive(true);
+    this.boss.body?.setEnable?.(true);
+
+    const contactGraceMs = Math.max(0, Number(BOSS_PIT_BOSS.revealContactGraceMs) || 320);
+    this.boss.recordContactDamage?.(revealTime + contactGraceMs);
   }
 
   isBossRevealEligible() {
