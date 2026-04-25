@@ -66,4 +66,6 @@ Do-not-break checklist for current stability.
 - Active content build lane is Milestone 9 (Sector 4 Chamber 1), with Sector 4 Chamber 2 shell/buildout as secondary support.
 - Milestone 8 remains established active-support for Sector 3 consistency/polish shaping.
 - BRUTALITY MODE is promoted as a next-active combat/chamber-authoring lane and should inform near-term encounter pacing doctrine.
+- BRUTALITY MODE v1 is treated as presentation/combat-state overlay by default; do not reopen body/floor/collision logic unless a task explicitly requires and proves it.
 - Preserve separate sequencing for enemy-class unification and boss-package retrofit; do not flatten milestone lanes during routine passes.
+- Boss runtime/floor/hurtbox migration must begin with one controlled pilot before broader rollout.

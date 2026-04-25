@@ -68,6 +68,7 @@ This means:
   - readable rhythm/breathing room so temporary power is usable
 - Encounter density tuning should support authored escalation opportunities, not random spam.
 - BRUTALITY MODE authoring expectations include temporary form/weapon escalation (Hammer of Banishment), aggression ramps, alternate gore packages, and temporary audiovisual/gameplay-state shifts.
+- BRUTALITY MODE is currently treated as a presentation/combat-state overlay lane; do not casually reopen player body/floor/collision logic.
 - Enemy AI/behavior overrides used during BRUTALITY MODE must cleanly revert to normal when mode ends.
 - BRUTALITY MODE is treated as a meaningful combat-state system that influences chamber composition, enemy placement, and encounter pressure, not as a cosmetic buff.
 
@@ -101,6 +102,7 @@ This means:
   - escalated boss remains
 - Boss package abstraction has advanced enough to justify a formal later lane.
 - Required sequencing is locked: polish abstracted boss package first, then retrofit/reimplement boss encounters globally.
+- Boss runtime/floor/hurtbox behavior migration must begin with one controlled boss pilot before broad retrofit.
 - Boss-pack production direction is approved as future lane: roughly a dozen boss concepts and likely one dedicated background per boss in `art/raw/bosspit`.
 - Boss-pack ingestion catalog is now maintained in `docs/boss-pack-catalog.md` to keep boss/background naming and pairing discoverable during future deployment passes.
 - Boss package retrofit lane remains distinct from enemy-class unification lane.
