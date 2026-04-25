@@ -89,3 +89,10 @@ Known failure patterns and what future tasks must protect.
 **Observed risk:** repeated S1C2 boss-pit hitbox/zone/overlap rescue layers made damage routing brittle and opaque.  
 - S1C2 boss pit damage must not depend on hitboxes, overlap, zones, or range until the larger boss-pit combat contract is rebuilt.
 - Current accepted emergency fix: active boss + player attack cycle = boss damage once per swing.
+
+## 17) S1C2 Boss-Pit Activation/Reveal Misdiagnosis
+**Observed risk:** inert boss behavior was misread as sprite/hurtbox/content failure when the boss never entered active/revealed state.  
+- If a boss does not move, does not attack, and cannot be damaged, verify activation/reveal state first (`boss.active`, `hasBossRevealTriggered`).
+- Boss pits with pre-staged bosses should not rely only on viewport/proximity reveal to start combat.
+- S1C2 fix precedent: trigger reveal/activation on arrival release (`revealBossNow` / `activateBossOnArrivalRelease`) before any damage-path surgery.
+- Do not start with sprite swaps, hurtbox retuning, extra zones, or damage fallbacks until activation/reveal checks pass.

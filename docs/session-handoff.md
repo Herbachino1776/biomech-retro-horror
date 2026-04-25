@@ -30,6 +30,7 @@ Use this file to start a fresh planning/implementation session from real current
 - Shared major-encounter resolution flow.
 - Boss-pit loop structure with deterministic return semantics.
 - S1C2 boss pit retired the broken Starved Prophet damage path and now uses a simpler replacement boss implementation after multiple targeted fix attempts failed runtime verification.
+- S1C2 boss-pit inert-state root cause was activation/reveal sequencing, not sprite/hurtbox tuning; arrival-release reveal/activation is now the first diagnostic check for "boss won't move/attack/take damage" reports.
 - Modern full boss death/payoff treatment in current authored lanes.
 - Renderer/camera stability fix that resolved prior global sprite shimmer/sparkle behavior.
 - Meaningful fix for feet-hidden-under-black-control-bar readability issue.
