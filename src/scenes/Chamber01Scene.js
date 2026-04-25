@@ -26,7 +26,7 @@ import { triggerBrutalityBasicChunkBurst } from '../systems/BrutalityChunkBurst.
 
 const CHAMBER = {
   sceneKey: 'Chamber01Scene',
-  width: 2720,
+  width: 3440,
   floorColliderHeight: 72,
   floorColliderCenterYOffset: 28,
   spawnX: PLAYER.startX,
@@ -34,7 +34,7 @@ const CHAMBER = {
   cameraLerp: { x: 0.08, y: 0.08 },
   portraitFollowOffsetX: -118,
   desktopFollowOffsetX: -148,
-  gateX: 2624
+  gateX: 3344
 };
 
 const CHAMBER_FLOOR_PLANE_Y = WORLD.floorY + CHAMBER.floorColliderCenterYOffset - CHAMBER.floorColliderHeight / 2;
@@ -62,12 +62,12 @@ const BLIND_CANTOR = {
   hurtRecoverMs: 240,
   hurtRecoilVelocityX: 120,
   hurtRecoilVelocityY: -64,
-  spawnX: 2420,
+  spawnX: 3090,
   spawnY: CHAMBER_FLOOR_PLANE_Y,
   floorPlaneY: CHAMBER_FLOOR_PLANE_Y,
   floorSinkClampPx: 6,
-  activationX: 2060,
-  arenaStartX: 2020,
+  activationX: 2680,
+  arenaStartX: 2620,
   body: { width: 90, height: 134, offsetX: 98, offsetY: 78 },
   textureKey: ASSET_KEYS.sector03Chamber02EnemyBasicBlindCantor,
   audioProfile: 'miniboss',
@@ -108,52 +108,63 @@ const BLIND_CANTOR = {
 const POCKET_CONFIGS = [
   {
     id: 'corridor-wall-pocket-01',
-    zoneX: 760,
+    zoneX: 820,
     zoneY: WORLD.floorY - 76,
-    zoneWidth: 460,
+    zoneWidth: 480,
     zoneHeight: 236,
     enemies: [
-      { x: 670, variant: 'basic' },
-      { x: 780, variant: 'basic' },
-      { x: 890, variant: 'basic' }
+      { x: 720, variant: 'basic' },
+      { x: 830, variant: 'basic' },
+      { x: 940, variant: 'basic' }
     ]
   },
   {
     id: 'corridor-wall-pocket-02',
-    zoneX: 1240,
+    zoneX: 1340,
     zoneY: WORLD.floorY - 76,
-    zoneWidth: 560,
+    zoneWidth: 520,
     zoneHeight: 236,
     enemies: [
-      { x: 1080, variant: 'basic' },
-      { x: 1200, variant: 'basic' },
-      { x: 1320, variant: 'basic' },
-      { x: 1440, variant: 'basic' }
+      { x: 1220, variant: 'basic' },
+      { x: 1340, variant: 'basic' },
+      { x: 1460, variant: 'basic' }
     ]
   },
   {
     id: 'corridor-wall-pocket-03',
-    zoneX: 1710,
+    zoneX: 1860,
     zoneY: WORLD.floorY - 76,
-    zoneWidth: 540,
+    zoneWidth: 620,
     zoneHeight: 236,
     enemies: [
-      { x: 1570, variant: 'basic' },
-      { x: 1690, variant: 'basic' },
-      { x: 1810, variant: 'basic' },
-      { x: 1930, variant: 'basic' }
+      { x: 1680, variant: 'basic' },
+      { x: 1820, variant: 'basic' },
+      { x: 1960, variant: 'basic' },
+      { x: 2100, variant: 'basic' }
+    ]
+  },
+  {
+    id: 'corridor-wall-pocket-04',
+    zoneX: 2360,
+    zoneY: WORLD.floorY - 76,
+    zoneWidth: 600,
+    zoneHeight: 236,
+    enemies: [
+      { x: 2210, variant: 'basic' },
+      { x: 2350, variant: 'basic' },
+      { x: 2490, variant: 'basic' }
     ]
   },
   {
     id: 'opened-reveal-domain',
-    zoneX: 2170,
+    zoneX: 2860,
     zoneY: WORLD.floorY - 82,
-    zoneWidth: 700,
+    zoneWidth: 760,
     zoneHeight: 248,
     enemies: [
-      { x: 2020, variant: 'elite' },
-      { x: 2170, variant: 'elite' },
-      { x: 2310, variant: 'basic' }
+      { x: 2700, variant: 'elite' },
+      { x: 2870, variant: 'elite' },
+      { x: 3020, variant: 'basic' }
     ]
   }
 ];
@@ -207,16 +218,17 @@ const ENEMY_VARIANTS = {
 };
 
 const SEGMENTS = [
-  { type: 'opening', x: 340, y: 214, w: 700, h: 432, tint: 0xd3c4b0, alpha: 0.74 },
-  { type: 'corridor', x: 860, y: 214, w: 540, h: 430, tint: 0xbcae9e, alpha: 0.62 },
-  { type: 'corridor', x: 1270, y: 214, w: 540, h: 430, tint: 0xaea08f, alpha: 0.56 },
-  { type: 'corridor', x: 1680, y: 214, w: 560, h: 430, tint: 0xa89a8a, alpha: 0.54 },
-  { type: 'reveal', x: 2170, y: 214, w: 780, h: 444, tint: 0xd7c7b1, alpha: 0.8 },
-  { type: 'threshold', x: 2570, y: 214, w: 420, h: 436, tint: 0xd2c2ab, alpha: 0.74 }
+  { type: 'opening', x: 360, y: 214, w: 720, h: 432, tint: 0xd3c4b0, alpha: 0.74 },
+  { type: 'corridor', x: 940, y: 214, w: 500, h: 430, tint: 0xbcae9e, alpha: 0.62 },
+  { type: 'corridor', x: 1410, y: 214, w: 500, h: 430, tint: 0xaea08f, alpha: 0.56 },
+  { type: 'corridor', x: 1880, y: 214, w: 520, h: 430, tint: 0xa89a8a, alpha: 0.54 },
+  { type: 'corridor', x: 2360, y: 214, w: 520, h: 430, tint: 0xa39382, alpha: 0.52 },
+  { type: 'reveal', x: 2860, y: 214, w: 860, h: 444, tint: 0xd7c7b1, alpha: 0.8 },
+  { type: 'threshold', x: 3260, y: 214, w: 420, h: 436, tint: 0xd2c2ab, alpha: 0.74 }
 ];
 
 const LORE_ENTRY_POSITION_OVERRIDES = {
-  'end-deadgod': { x: 2360 }
+  'end-deadgod': { x: 2780 }
 };
 
 export class Chamber01Scene extends Phaser.Scene {
@@ -372,7 +384,7 @@ export class Chamber01Scene extends Phaser.Scene {
 
     if (this.textures.exists(ASSET_KEYS.chamber01RibArch)) {
       this.add
-        .image(2120, 198, ASSET_KEYS.chamber01RibArch)
+        .image(2780, 198, ASSET_KEYS.chamber01RibArch)
         .setDisplaySize(760, 344)
         .setTint(0xd2c3ae)
         .setAlpha(0.5)
