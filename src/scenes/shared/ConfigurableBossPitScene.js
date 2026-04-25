@@ -389,7 +389,7 @@ export function createBossPitSceneClass(config) {
       const activateOnArrivalRelease = BOSS_PIT_ARRIVAL.activateBossOnArrivalRelease === true
         || BOSS_PIT_BOSS.activateOnArrivalRelease === true;
       if (activateOnArrivalRelease) {
-        this.revealBossNow(time);
+        this.revealBossNow({ revealTime: time, revealBar: false });
       }
       this.tweens.killTweensOf(this.cameras.main);
       this.cameras.main.startFollow(
@@ -968,9 +968,7 @@ export function createBossPitSceneClass(config) {
   }
 
   refreshBossBar(time) {
-    if (!this.hasBossBarBeenRevealed && this.hasBossRevealTriggered) {
-      this.hasBossBarBeenRevealed = true;
-    }
+    this.tryRevealBossBarWhenInView();
 
     this.hud.setBossBarState({
       visible: this.hasBossBarBeenRevealed && !this.boss.dead,
@@ -990,16 +988,18 @@ export function createBossPitSceneClass(config) {
     if (!this.isBossRevealEligible()) {
       return;
     }
-    this.revealBossNow(this.time.now);
+    this.revealBossNow({ revealTime: this.time.now, revealBar: true });
   }
 
-  revealBossNow(revealTime = this.time.now) {
+  revealBossNow({ revealTime = this.time.now, revealBar = true } = {}) {
     if (this.hasBossRevealTriggered || this.boss?.dead) {
       return;
     }
 
     this.hasBossRevealTriggered = true;
-    this.hasBossBarBeenRevealed = true;
+    if (revealBar) {
+      this.hasBossBarBeenRevealed = true;
+    }
     this.boss.setActive(true);
     this.boss.body?.setEnable?.(true);
 
@@ -1023,6 +1023,35 @@ export function createBossPitSceneClass(config) {
     const bossX = this.boss.sprite.x;
     const bossY = this.boss.sprite.body?.center?.y ?? this.boss.sprite.y;
     return Phaser.Geom.Rectangle.Contains(revealRect, bossX, bossY);
+  }
+
+  tryRevealBossBarWhenInView() {
+    if (!this.hasBossRevealTriggered || this.hasBossBarBeenRevealed || this.boss?.dead) {
+      return;
+    }
+
+    const padding = BOSS_PIT_BOSS.bossBarRevealViewportPadding ?? BOSS_PIT_BOSS.revealViewportPadding ?? 72;
+    if (!this.isBossNearMainCameraView(padding)) {
+      return;
+    }
+
+    this.hasBossBarBeenRevealed = true;
+  }
+
+  isBossNearMainCameraView(padding = 72) {
+    if (!this.boss?.sprite?.active) {
+      return false;
+    }
+
+    const worldView = this.cameras.main.worldView;
+    const paddedView = new Phaser.Geom.Rectangle(
+      worldView.x - padding,
+      worldView.y - padding,
+      worldView.width + padding * 2,
+      worldView.height + padding * 2
+    );
+    const bossBounds = this.boss.sprite.getBounds();
+    return Phaser.Geom.Rectangle.Overlaps(paddedView, bossBounds);
   }
 
   setEnemyProjectilesPaused(paused) {
