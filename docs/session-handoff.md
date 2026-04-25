@@ -36,6 +36,7 @@ Use this file to start a fresh planning/implementation session from real current
   - emergency fallback damage (`simpleAttackCycleDamage`) is disabled after recovery
   - intended geometry/config lock: `damageHurtbox` (`trimXRatio 0.08`, `trimYRatio 0.08`, `insetBottomPx 0`, `minWidth 180`, `minHeight 240`, `offsetX 0`, `offsetY -20`), remains lift `56px`, `spawnX 1560`
   - DEV default currently starts `Chamber02Scene` for focused S1C2 validation unless milestone direction explicitly changes
+- S1C2 boss-pit activation/damage loop has been repaired and should be treated as stable unless runtime testing says otherwise.
 - Modern full boss death/payoff treatment in current authored lanes.
 - Renderer/camera stability fix that resolved prior global sprite shimmer/sparkle behavior.
 - Meaningful fix for feet-hidden-under-black-control-bar readability issue.
