@@ -16,6 +16,18 @@ import { grantMajorEncounterIntegrityReward } from '../../systems/VesselRunEcono
 import { MajorEncounterResolution } from '../../systems/MajorEncounterResolution.js';
 import { beginBossDeathPayoffPackage } from '../../systems/BossDeathPayoffPackage.js';
 
+function isValidBounds(bounds) {
+  return Boolean(
+    bounds
+    && Number.isFinite(bounds.x)
+    && Number.isFinite(bounds.y)
+    && Number.isFinite(bounds.width)
+    && Number.isFinite(bounds.height)
+    && bounds.width > 0
+    && bounds.height > 0
+  );
+}
+
 export function createBossPitSceneClass(config) {
   const BOSS_PIT_BOOTSTRAP = config.bootstrap;
   const BOSS_PIT_RETURN = config.returnFlow;
@@ -488,6 +500,7 @@ export function createBossPitSceneClass(config) {
 
     this.player.update(time, input);
     this.tryTriggerBossReveal();
+    this.tryApplyPlayerAttackToBossFallback(time);
     this.boss.update(time, this.player.sprite);
     this.refreshExitAltarPresence();
     this.tryUseExitAltar(mobileInput);
@@ -538,6 +551,41 @@ export function createBossPitSceneClass(config) {
     if (this.boss.dead) {
       this.handleBossPitVictory();
     }
+  }
+
+  tryApplyPlayerAttackToBossFallback(_time) {
+    if (!this.player || !this.boss || this.boss.dead) {
+      return;
+    }
+
+    if (!this.player.attackActive || this.boss.lastAttackHitId === this.player.attackId) {
+      return;
+    }
+
+    const attackHitbox = this.player.attackHitbox;
+    if (!attackHitbox?.active || !attackHitbox.body?.enable) {
+      return;
+    }
+
+    const attackBounds = attackHitbox.getBounds?.();
+    if (!isValidBounds(attackBounds)) {
+      return;
+    }
+
+    const damageHurtboxBounds = this.boss.damageHurtbox?.active
+      ? this.boss.damageHurtbox.getBounds?.()
+      : null;
+    const spriteBounds = this.boss.sprite?.active ? this.boss.sprite.getBounds?.() : null;
+    const bossBounds = isValidBounds(damageHurtboxBounds) ? damageHurtboxBounds : spriteBounds;
+    if (!isValidBounds(bossBounds)) {
+      return;
+    }
+
+    if (!Phaser.Geom.Rectangle.Overlaps(attackBounds, bossBounds)) {
+      return;
+    }
+
+    this.handlePlayerHitBoss();
   }
 
   handleBossPitVictory() {
