@@ -121,6 +121,14 @@ export const chamber02BossPitConfig = {
     hurtRecoilVelocityX: selectedDifficulty.hurtRecoilVelocityX,
     hurtRecoilVelocityY: selectedDifficulty.hurtRecoilVelocityY,
     body: { width: 92, height: 122, offsetX: 88, offsetY: 152 },
+    damageHurtbox: {
+      insetBottomPx: 0,
+      trimXRatio: 0.02,
+      trimYRatio: 0.02,
+      minWidth: 84,
+      minHeight: 120,
+      offsetY: 18
+    },
     audioProfile: 'miniboss',
     poise: { max: 5, recoverDelayMs: 1900, recoverPerSecond: 1.1, staggerDurationMs: 2300, finisherRange: 148 },
     revealViewportPadding: 72,
