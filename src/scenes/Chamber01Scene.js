@@ -748,7 +748,11 @@ export class Chamber01Scene extends Phaser.Scene {
   }
 
   handleBossContactPlayer(_playerSprite, bossSprite) {
-    if (this.boss.dead || !this.bossEncounterStarted || !this.isEnemyOverlapTarget(bossSprite, this.boss.sprite)) {
+    if (
+      this.boss.dead
+      || !this.bossEncounterStarted
+      || !this.isEnemyOverlapTarget(bossSprite, this.boss.sprite, this.boss.getCollisionTarget?.())
+    ) {
       return;
     }
     if (!this.boss.canDealContactDamage(this.time.now)) {
