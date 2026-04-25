@@ -75,7 +75,7 @@ const BLIND_CANTOR = {
     display: { width: 304, height: 292 },
     origin: { x: 0.52, y: 0.97 },
     normalization: {
-      visibleFootOffsetY: 26
+      visibleFootOffsetY: 38
     },
     alpha: 1,
     tint: 0xd8c8b2,
@@ -485,20 +485,37 @@ export class Chamber01Scene extends Phaser.Scene {
     this.gateZone = this.add.zone(CHAMBER.gateX - 84, WORLD.floorY - 76, 168, 220).setOrigin(0.5);
     this.physics.add.existing(this.gateZone, true);
 
-    if (this.textures.exists(ASSET_KEYS.chamber02VertebralHornGate)) {
+    this.add.rectangle(CHAMBER.gateX - 14, WORLD.floorY - 86, 166, 194, 0x1a110c, 0.38).setDepth(-6.22);
+    this.add.ellipse(CHAMBER.gateX - 14, WORLD.floorY + 8, 236, 36, 0x020202, 0.42).setDepth(-6.18);
+
+    if (this.textures.exists(ASSET_KEYS.sector04Chamber02PropThresholdDoor)) {
       this.gateArt = this.add
-        .image(CHAMBER.gateX - 12, WORLD.floorY - 122, ASSET_KEYS.chamber02VertebralHornGate)
-        .setDisplaySize(250, 266)
-        .setTint(0xc6b49d)
-        .setAlpha(0.66)
-        .setDepth(-5.24);
+        .image(CHAMBER.gateX - 14, WORLD.floorY - 106, ASSET_KEYS.sector04Chamber02PropThresholdDoor)
+        .setDisplaySize(168, 206)
+        .setTint(0xd9c8b0)
+        .setAlpha(0.9)
+        .setDepth(-6.14);
+    } else if (this.textures.exists(ASSET_KEYS.sector04Chamber02PropGate)) {
+      this.gateArt = this.add
+        .image(CHAMBER.gateX - 14, WORLD.floorY - 106, ASSET_KEYS.sector04Chamber02PropGate)
+        .setDisplaySize(168, 206)
+        .setTint(0xd9c8b0)
+        .setAlpha(0.9)
+        .setDepth(-6.14);
+    } else if (this.textures.exists(ASSET_KEYS.chamber02VertebralHornGate)) {
+      this.gateArt = this.add
+        .image(CHAMBER.gateX - 14, WORLD.floorY - 112, ASSET_KEYS.chamber02VertebralHornGate)
+        .setDisplaySize(176, 218)
+        .setTint(0xd1c0a8)
+        .setAlpha(0.88)
+        .setDepth(-6.14);
     } else if (this.textures.exists(ASSET_KEYS.sector02Chamber02Gate)) {
       this.gateArt = this.add
-        .image(CHAMBER.gateX - 12, WORLD.floorY - 124, ASSET_KEYS.sector02Chamber02Gate)
-        .setDisplaySize(242, 268)
-        .setTint(0xc6b49d)
-        .setAlpha(0.68)
-        .setDepth(-5.24);
+        .image(CHAMBER.gateX - 14, WORLD.floorY - 112, ASSET_KEYS.sector02Chamber02Gate)
+        .setDisplaySize(172, 214)
+        .setTint(0xd1c0a8)
+        .setAlpha(0.88)
+        .setDepth(-6.14);
     }
 
     this.updateGateActivationVisuals();
