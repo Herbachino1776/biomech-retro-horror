@@ -94,6 +94,8 @@ Known failure patterns and what future tasks must protect.
 ## 17) S1C2 Boss-Pit Activation/Reveal Misdiagnosis
 **Observed risk:** inert boss behavior was misread as sprite/hurtbox/content failure when the boss never entered active/revealed state.  
 - If a boss does not move, does not attack, and cannot be damaged, verify activation/reveal state first (`boss.active`, `hasBossRevealTriggered`).
-- Boss pits with pre-staged bosses should not rely only on viewport/proximity reveal to start combat.
-- S1C2 fix precedent: trigger reveal/activation on arrival release (`revealBossNow` / `activateBossOnArrivalRelease`) before any damage-path surgery.
 - Do not start with sprite swaps, hurtbox retuning, extra zones, or damage fallbacks until activation/reveal checks pass.
+- Boss pits may separate combat activation from UI reveal:
+  - activation can fire on arrival release (`activateBossOnArrivalRelease`)
+  - boss-bar reveal can remain view-gated (`revealBossNow` timing)
+- S1C2 lock: once activation is healthy, keep emergency fallback damage paths (for example `simpleAttackCycleDamage`) disabled and use normal `player.attackHitbox` overlap vs boss damage hurtbox/sprite as damage authority.
