@@ -87,8 +87,9 @@ Known failure patterns and what future tasks must protect.
 
 ## 16) S1C2 Boss-Pit Damage Rescue Stack Creep
 **Observed risk:** repeated S1C2 boss-pit hitbox/zone/overlap rescue layers made damage routing brittle and opaque.  
-- S1C2 boss pit damage must not depend on hitboxes, overlap, zones, or range until the larger boss-pit combat contract is rebuilt.
-- Current accepted emergency fix: active boss + player attack cycle = boss damage once per swing.
+- The S1C2 `simpleAttackCycleDamage` path was an emergency recovery tool only.
+- After activation/reveal was fixed, S1C2 must return to sprite/hurtbox-aligned overlap damage (`player.attackHitbox` vs boss hurtbox/sprite).
+- Do not reintroduce global/proximity swing-anywhere boss damage as fallback behavior.
 
 ## 17) S1C2 Boss-Pit Activation/Reveal Misdiagnosis
 **Observed risk:** inert boss behavior was misread as sprite/hurtbox/content failure when the boss never entered active/revealed state.  

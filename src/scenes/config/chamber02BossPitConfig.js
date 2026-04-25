@@ -139,8 +139,17 @@ export const chamber02BossPitConfig = {
       scaleX: 1,
       scaleY: 1
     },
+    damageHurtbox: {
+      trimXRatio: 0.08,
+      trimYRatio: 0.08,
+      insetBottomPx: 0,
+      minWidth: 180,
+      minHeight: 240,
+      offsetX: 0,
+      offsetY: -20
+    },
     simpleAttackCycleDamage: {
-      enabled: true,
+      enabled: false,
       damage: 1,
       rangeX: 300,
       rangeY: 260
