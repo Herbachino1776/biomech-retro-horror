@@ -579,6 +579,14 @@ export function createBossPitSceneClass(config) {
       return;
     }
 
+    const configuredRangeX = Number(simpleAttackCycleConfig.rangeX);
+    const configuredRangeY = Number(simpleAttackCycleConfig.rangeY);
+    const rangeX = Number.isFinite(configuredRangeX) ? Math.max(0, configuredRangeX) : Number.POSITIVE_INFINITY;
+    const rangeY = Number.isFinite(configuredRangeY) ? Math.max(0, configuredRangeY) : Number.POSITIVE_INFINITY;
+    if (!this.isPlayerWithinSimpleBossDamageRange(rangeX, rangeY)) {
+      return;
+    }
+
     const damage = Math.max(1, Number(simpleAttackCycleConfig.damage) || 1);
     const didDamage = this.boss.takeDamage(damage, time);
 
@@ -592,6 +600,19 @@ export function createBossPitSceneClass(config) {
     if (this.boss.dead) {
       this.handleBossPitVictory();
     }
+  }
+
+  isPlayerWithinSimpleBossDamageRange(rangeX, rangeY) {
+    const playerX = this.player?.body?.center?.x ?? this.player?.sprite?.x;
+    const playerY = this.player?.body?.center?.y ?? this.player?.sprite?.y;
+    const bossX = this.boss?.getAnchorX?.() ?? this.boss?.sprite?.x;
+    const bossY = this.boss?.getAnchorY?.() ?? this.boss?.sprite?.body?.center?.y ?? this.boss?.sprite?.y;
+
+    if (!Number.isFinite(playerX) || !Number.isFinite(playerY) || !Number.isFinite(bossX) || !Number.isFinite(bossY)) {
+      return false;
+    }
+
+    return Math.abs(playerX - bossX) <= rangeX && Math.abs(playerY - bossY) <= rangeY;
   }
 
   handleBossPitVictory() {

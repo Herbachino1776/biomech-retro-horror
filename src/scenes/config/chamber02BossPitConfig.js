@@ -103,7 +103,7 @@ export const chamber02BossPitConfig = {
     subtitle: 'Emergency Boss Replacement',
     bossClass: HalfSkullMiniboss,
     difficultyTier,
-    spawnX: 960,
+    spawnX: 1560,
     spawnY: floorPlaneY,
     floorPlaneY,
     textureKey: ASSET_KEYS.bossPit20HornedMothJudge,
@@ -141,7 +141,9 @@ export const chamber02BossPitConfig = {
     },
     simpleAttackCycleDamage: {
       enabled: true,
-      damage: 1
+      damage: 1,
+      rangeX: 300,
+      rangeY: 260
     }
   },
   runState: {
