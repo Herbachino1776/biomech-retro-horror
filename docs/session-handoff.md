@@ -45,6 +45,7 @@ Use this file to start a fresh planning/implementation session from real current
 - Boss package polish -> global boss retrofit sequence.
 - Boss-pack content production lane (roughly a dozen boss concepts + per-boss background planning in `art/raw/bosspit`).
 - Character/action animation lane.
+- Sector 1 Chamber 1 Phase 2 shaping (deferred unless explicitly requested): chamber-length expansion, corridor wall-module spacing rebalance, and BRUTALITY encounter-rhythm retuning after controlled validation.
 
 ## Milestone Snapshot
 ### Milestone 7 (advanced/largely established)

@@ -7,7 +7,6 @@ import { HudOverlay } from '../ui/HudOverlay.js';
 import { MobileControls } from '../ui/MobileControls.js';
 import {
   COLORS,
-  CONCEPT_PRESENTATION,
   LORE_ENTRIES,
   PLAYER,
   SKITTER,
@@ -380,21 +379,6 @@ export class Chamber01Scene extends Phaser.Scene {
         .setDepth(-8.2);
     }
 
-    if (this.textures.exists(ASSET_KEYS.sentinel)) {
-      this.add
-        .image(2380, 398, ASSET_KEYS.sentinel)
-        .setOrigin(CONCEPT_PRESENTATION.sentinel.origin.x, CONCEPT_PRESENTATION.sentinel.origin.y)
-        .setDisplaySize(CONCEPT_PRESENTATION.sentinel.display.width, CONCEPT_PRESENTATION.sentinel.display.height)
-        .setCrop(
-          CONCEPT_PRESENTATION.sentinel.crop.x,
-          CONCEPT_PRESENTATION.sentinel.crop.y,
-          CONCEPT_PRESENTATION.sentinel.crop.width,
-          CONCEPT_PRESENTATION.sentinel.crop.height
-        )
-        .setTint(0xb8a88f)
-        .setAlpha(0.58)
-        .setDepth(-7.8);
-    }
   }
 
   createPlayer() {
@@ -489,12 +473,12 @@ export class Chamber01Scene extends Phaser.Scene {
     this.gateZone = this.add.zone(CHAMBER.gateX - 84, WORLD.floorY - 76, 168, 220).setOrigin(0.5);
     this.physics.add.existing(this.gateZone, true);
 
-    if (this.textures.exists(ASSET_KEYS.sector04Chamber02PropThresholdDoor)) {
+    if (this.textures.exists(ASSET_KEYS.chamber02VertebralHornGate)) {
       this.gateArt = this.add
-        .image(CHAMBER.gateX - 12, WORLD.floorY - 116, ASSET_KEYS.sector04Chamber02PropThresholdDoor)
-        .setDisplaySize(242, 258)
+        .image(CHAMBER.gateX - 12, WORLD.floorY - 122, ASSET_KEYS.chamber02VertebralHornGate)
+        .setDisplaySize(250, 266)
         .setTint(0xc6b49d)
-        .setAlpha(0.68)
+        .setAlpha(0.66)
         .setDepth(-5.24);
     } else if (this.textures.exists(ASSET_KEYS.sector02Chamber02Gate)) {
       this.gateArt = this.add
