@@ -208,7 +208,9 @@ export function createBossPitSceneClass(config) {
     this.boss.setActive(false);
     this.boss.sprite.setDepth(6.2);
     this.physics.add.collider(this.boss.getCollisionTarget?.() ?? this.boss.sprite, this.platforms);
-    this.physics.add.overlap(this.player.attackHitbox, this.boss.damageHurtbox ?? this.boss.sprite, () => this.handlePlayerHitBoss());
+    if (BOSS_PIT_BOSS.simpleAttackCycleDamage?.enabled !== true) {
+      this.physics.add.overlap(this.player.attackHitbox, this.boss.damageHurtbox ?? this.boss.sprite, () => this.handlePlayerHitBoss());
+    }
     this.physics.add.overlap(this.player.sprite, this.boss.getCollisionTarget?.() ?? this.boss.sprite, () => this.handleBossContactPlayer());
   }
 
@@ -577,25 +579,12 @@ export function createBossPitSceneClass(config) {
       return;
     }
 
-    const bossHealthBefore = this.boss.health;
     const damage = Math.max(1, Number(simpleAttackCycleConfig.damage) || 1);
     const didDamage = this.boss.takeDamage(damage, time);
-    const bossHealthAfter = this.boss.health;
 
     if (!didDamage) {
       return;
     }
-
-    console.info('[S1C2 simple boss damage]', {
-      attackPhase,
-      attackActive: this.player?.attackActive === true,
-      lastAttackTime: attackTime,
-      previousDamageAttackTime: this.lastSimpleBossDamageAttackTime,
-      bossActive: this.boss?.active === true,
-      bossDead: this.boss?.dead === true,
-      bossHealthBefore,
-      bossHealthAfter
-    });
 
     this.lastSimpleBossDamageAttackTime = attackTime;
     this.audioDirector?.playPlayerHit();
@@ -636,7 +625,7 @@ export function createBossPitSceneClass(config) {
         visibleFootOffsetY: this.boss.normalizedVisibleFootOffsetY ?? 0
       },
       corpseRemains: {
-        floorPlaneY: this.getGameplayFloorY(),
+        floorPlaneY: this.getGameplayFloorY() - (BOSS_PIT_PAYOFF_POSE.corpseRemainsLiftPx ?? 0),
         visibleFootOffsetY: this.boss.normalizedVisibleFootOffsetY ?? 0,
         size: 'bossPitBoss'
       },

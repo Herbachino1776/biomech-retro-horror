@@ -94,7 +94,10 @@ export const chamber02BossPitConfig = {
     zoomInDurationMs: 250,
     zoomOutDurationMs: 280
   },
-  deathPayoffPose: { maxUpwardSnapPx: 8 },
+  deathPayoffPose: {
+    maxUpwardSnapPx: 8,
+    corpseRemainsLiftPx: 56
+  },
   boss: {
     name: 'THE PIT JUDGE',
     subtitle: 'Emergency Boss Replacement',
