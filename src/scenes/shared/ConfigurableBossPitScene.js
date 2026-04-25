@@ -208,9 +208,7 @@ export function createBossPitSceneClass(config) {
     this.boss.setActive(false);
     this.boss.sprite.setDepth(6.2);
     this.physics.add.collider(this.boss.getCollisionTarget?.() ?? this.boss.sprite, this.platforms);
-    if (BOSS_PIT_BOSS.simpleAttackCycleDamage?.enabled !== true) {
-      this.physics.add.overlap(this.player.attackHitbox, this.boss.damageHurtbox ?? this.boss.sprite, () => this.handlePlayerHitBoss());
-    }
+    this.physics.add.overlap(this.player.attackHitbox, this.boss.damageHurtbox ?? this.boss.sprite, () => this.handlePlayerHitBoss());
     this.physics.add.overlap(this.player.sprite, this.boss.getCollisionTarget?.() ?? this.boss.sprite, () => this.handleBossContactPlayer());
   }
 
@@ -500,7 +498,9 @@ export function createBossPitSceneClass(config) {
     this.player.update(time, input);
     this.tryTriggerBossReveal();
     this.boss.update(time, this.player.sprite);
-    this.applySimpleAttackCycleBossDamage(time);
+    if (BOSS_PIT_BOSS.simpleAttackCycleDamage?.enabled === true) {
+      this.applySimpleAttackCycleBossDamage(time);
+    }
     this.refreshExitAltarPresence();
     this.tryUseExitAltar(mobileInput);
     this.enemyProjectiles.forEach((projectile) => projectile.update(time, this.game.loop.delta));
