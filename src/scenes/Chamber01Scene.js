@@ -75,7 +75,7 @@ const BLIND_CANTOR = {
     display: { width: 304, height: 292 },
     origin: { x: 0.52, y: 0.97 },
     normalization: {
-      visibleFootOffsetY: 38
+      visibleFootOffsetY: 104
     },
     alpha: 1,
     tint: 0xd8c8b2,
@@ -921,7 +921,9 @@ export class Chamber01Scene extends Phaser.Scene {
     }
 
     const floorBottomY = CHAMBER_FLOOR_PLANE_Y;
-    const groundedY = floorBottomY - this.boss.sprite.displayHeight * (1 - this.boss.sprite.originY);
+    const groundedY = floorBottomY
+      - this.boss.sprite.displayHeight * (1 - this.boss.sprite.originY)
+      + (this.boss.normalizedVisibleFootOffsetY ?? 0);
     this.tweens.killTweensOf(this.boss.sprite);
     this.boss.sprite
       .setAlpha(1)
