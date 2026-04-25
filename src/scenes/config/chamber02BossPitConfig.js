@@ -94,16 +94,15 @@ export const chamber02BossPitConfig = {
     zoomOutDurationMs: 280
   },
   deathPayoffPose: { maxUpwardSnapPx: 8 },
-  enablePlayerAttackOverlapFallback: true,
   boss: {
-    name: 'THE HORN GATE WITNESS',
-    subtitle: 'First Pit Witness',
+    name: 'THE PIT JUDGE',
+    subtitle: 'Emergency Boss Replacement',
     bossClass: HalfSkullMiniboss,
     difficultyTier,
     spawnX: 960,
     spawnY: floorPlaneY,
     floorPlaneY,
-    textureKey: ASSET_KEYS.bossPit01TheHornGateWitness,
+    textureKey: ASSET_KEYS.bossPit20HornedMothJudge,
     health: selectedDifficulty.health,
     contactDamage: selectedDifficulty.contactDamage,
     contactDamageCooldownMs: selectedDifficulty.contactDamageCooldownMs,
@@ -136,7 +135,12 @@ export const chamber02BossPitConfig = {
       scaleX: 1,
       scaleY: 1
     },
-    attackableZone: { width: 300, height: 320, offsetX: 0, offsetY: -80 }
+    simpleAttackButtonDamage: {
+      enabled: true,
+      rangeX: 460,
+      rangeY: 380,
+      damage: 1
+    }
   },
   runState: {
     markCompleted: () => bossPitRunState.markChamber02BossPitCompleted(),

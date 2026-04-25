@@ -17,18 +17,6 @@ import { grantMajorEncounterIntegrityReward } from '../../systems/VesselRunEcono
 import { MajorEncounterResolution } from '../../systems/MajorEncounterResolution.js';
 import { beginBossDeathPayoffPackage } from '../../systems/BossDeathPayoffPackage.js';
 
-function isValidBounds(bounds) {
-  return Boolean(
-    bounds
-    && Number.isFinite(bounds.x)
-    && Number.isFinite(bounds.y)
-    && Number.isFinite(bounds.width)
-    && Number.isFinite(bounds.height)
-    && bounds.width > 0
-    && bounds.height > 0
-  );
-}
-
 export function createBossPitSceneClass(config) {
   const BOSS_PIT_BOOTSTRAP = config.bootstrap;
   const BOSS_PIT_RETURN = config.returnFlow;
@@ -76,8 +64,6 @@ export function createBossPitSceneClass(config) {
     this.bossDeathPayoffLocation = null;
     this.deathCameraFocusTween = null;
     this.deathCameraRestoreTween = null;
-    this.bossAttackableZone = null;
-    this.bossAttackableZoneConfig = null;
   }
 
   create() {
@@ -220,64 +206,9 @@ export function createBossPitSceneClass(config) {
     });
     this.boss.setActive(false);
     this.boss.sprite.setDepth(6.2);
-    this.createBossAttackableZone();
     this.physics.add.collider(this.boss.getCollisionTarget?.() ?? this.boss.sprite, this.platforms);
-    this.physics.add.overlap(this.player.attackHitbox, this.bossAttackableZone, () => this.handlePlayerHitBoss());
     this.physics.add.overlap(this.player.attackHitbox, this.boss.damageHurtbox ?? this.boss.sprite, () => this.handlePlayerHitBoss());
     this.physics.add.overlap(this.player.sprite, this.boss.getCollisionTarget?.() ?? this.boss.sprite, () => this.handleBossContactPlayer());
-  }
-
-  resolveBossAttackableZoneConfig() {
-    const spriteWidth = Math.max(1, this.boss?.sprite?.displayWidth ?? 280);
-    const spriteHeight = Math.max(1, this.boss?.sprite?.displayHeight ?? 320);
-    const defaults = {
-      width: Math.round(spriteWidth * 0.78),
-      height: Math.round(spriteHeight * 0.84),
-      offsetX: 0,
-      offsetY: Math.round(-spriteHeight * 0.12)
-    };
-    const override = BOSS_PIT_BOSS.attackableZone ?? {};
-    return {
-      width: Math.max(24, Number(override.width) || defaults.width),
-      height: Math.max(24, Number(override.height) || defaults.height),
-      offsetX: Number(override.offsetX) || defaults.offsetX,
-      offsetY: Number(override.offsetY) || defaults.offsetY
-    };
-  }
-
-  createBossAttackableZone() {
-    this.bossAttackableZoneConfig = this.resolveBossAttackableZoneConfig();
-    this.bossAttackableZone = this.add.zone(
-      this.boss.sprite.x + this.bossAttackableZoneConfig.offsetX,
-      this.boss.sprite.y + this.bossAttackableZoneConfig.offsetY,
-      this.bossAttackableZoneConfig.width,
-      this.bossAttackableZoneConfig.height
-    ).setOrigin(0.5).setVisible(false);
-    this.physics.add.existing(this.bossAttackableZone);
-    this.bossAttackableZone.body.allowGravity = false;
-    this.bossAttackableZone.body.moves = false;
-    this.bossAttackableZone.body.immovable = true;
-    this.bossAttackableZone.body.enable = false;
-    this.syncBossAttackableZone();
-  }
-
-  syncBossAttackableZone() {
-    const zone = this.bossAttackableZone;
-    const sprite = this.boss?.sprite;
-    const body = zone?.body;
-    if (!zone || !sprite?.active || !body) {
-      return;
-    }
-
-    const zoneConfig = this.bossAttackableZoneConfig ?? this.resolveBossAttackableZoneConfig();
-    zone.setPosition(
-      sprite.x + zoneConfig.offsetX,
-      sprite.y + zoneConfig.offsetY
-    );
-    zone.setSize(zoneConfig.width, zoneConfig.height);
-    body.setSize(zoneConfig.width, zoneConfig.height, true);
-    body.updateFromGameObject();
-    body.enable = Boolean(this.boss?.active && !this.boss?.dead && this.hasBossRevealTriggered);
   }
 
   createUiAndInput() {
@@ -561,10 +492,7 @@ export function createBossPitSceneClass(config) {
     this.player.update(time, input);
     this.tryTriggerBossReveal();
     this.boss.update(time, this.player.sprite);
-    this.syncBossAttackableZone();
-    if (config.enablePlayerAttackOverlapFallback !== false) {
-      this.tryApplyPlayerAttackToBossFallback(time);
-    }
+    this.applySimpleAttackButtonBossDamage(input, time);
     this.refreshExitAltarPresence();
     this.tryUseExitAltar(mobileInput);
     this.enemyProjectiles.forEach((projectile) => projectile.update(time, this.game.loop.delta));
@@ -616,46 +544,47 @@ export function createBossPitSceneClass(config) {
     }
   }
 
-  tryApplyPlayerAttackToBossFallback(_time) {
-    if (!this.player || !this.boss || this.boss.dead) {
+  applySimpleAttackButtonBossDamage(input, time) {
+    const simpleAttackConfig = BOSS_PIT_BOSS.simpleAttackButtonDamage;
+    if (!simpleAttackConfig?.enabled) {
       return;
     }
 
-    if (!this.player.attackActive || this.boss.lastAttackHitId === this.player.attackId) {
+    if (!input?.attackPressed) {
       return;
     }
 
-    const attackHitbox = this.player.attackHitbox;
-    if (!attackHitbox?.active || !attackHitbox.body?.enable) {
+    if (!this.hasBossRevealTriggered || !this.boss?.active || this.boss?.dead) {
       return;
     }
 
-    const attackBounds = attackHitbox.getBounds?.();
-    if (!isValidBounds(attackBounds)) {
+    const playerX = this.player?.body?.center?.x ?? this.player?.sprite?.x;
+    const playerY = this.player?.body?.center?.y ?? this.player?.sprite?.y;
+    const bossX = this.boss?.getAnchorX?.() ?? this.boss?.sprite?.x;
+    const bossY = this.boss?.getAnchorY?.() ?? this.boss?.sprite?.y;
+    if (![playerX, playerY, bossX, bossY].every((value) => Number.isFinite(value))) {
       return;
     }
 
-    const attackableZoneBounds = this.bossAttackableZone?.body?.enable
-      ? this.bossAttackableZone.getBounds?.()
-      : null;
-    const damageHurtboxBounds = this.boss.damageHurtbox?.active
-      ? this.boss.damageHurtbox.getBounds?.()
-      : null;
-    const spriteBounds = this.boss.sprite?.active ? this.boss.sprite.getBounds?.() : null;
-    const bossBounds = isValidBounds(attackableZoneBounds)
-      ? attackableZoneBounds
-      : isValidBounds(damageHurtboxBounds)
-        ? damageHurtboxBounds
-        : spriteBounds;
-    if (!isValidBounds(bossBounds)) {
+    const rangeX = Math.max(1, Number(simpleAttackConfig.rangeX) || 0);
+    const rangeY = Math.max(1, Number(simpleAttackConfig.rangeY) || 0);
+    const inRangeX = Math.abs(playerX - bossX) <= rangeX;
+    const inRangeY = Math.abs(playerY - bossY) <= rangeY;
+    if (!inRangeX || !inRangeY) {
       return;
     }
 
-    if (!Phaser.Geom.Rectangle.Overlaps(attackBounds, bossBounds)) {
+    const damage = Math.max(1, Number(simpleAttackConfig.damage) || 1);
+    const didDamage = this.boss.takeDamage(damage, time);
+    if (!didDamage) {
       return;
     }
 
-    this.handlePlayerHitBoss();
+    this.audioDirector?.playPlayerHit();
+    this.spawnBossHitGush();
+    if (this.boss.dead) {
+      this.handleBossPitVictory();
+    }
   }
 
   handleBossPitVictory() {
@@ -825,9 +754,6 @@ export function createBossPitSceneClass(config) {
     this.boss.sprite.setVisible(false).setAlpha(0);
     this.boss.setActive(false);
     this.boss.body?.setEnable(false);
-    if (this.bossAttackableZone?.body) {
-      this.bossAttackableZone.body.enable = false;
-    }
     this.boss.destroyCombatTelegraphs?.();
   }
 
@@ -1060,10 +986,6 @@ export function createBossPitSceneClass(config) {
 
     this.hasBossRevealTriggered = true;
     this.boss.setActive(true);
-    this.syncBossAttackableZone();
-    if (this.bossAttackableZone?.body) {
-      this.bossAttackableZone.body.enable = true;
-    }
   }
 
   isBossRevealEligible() {
