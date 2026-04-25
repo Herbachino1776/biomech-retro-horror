@@ -135,10 +135,8 @@ export const chamber02BossPitConfig = {
       scaleX: 1,
       scaleY: 1
     },
-    simpleAttackButtonDamage: {
+    simpleAttackCycleDamage: {
       enabled: true,
-      rangeX: 460,
-      rangeY: 380,
       damage: 1
     }
   },
