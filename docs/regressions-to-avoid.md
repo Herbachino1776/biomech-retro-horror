@@ -99,3 +99,9 @@ Known failure patterns and what future tasks must protect.
   - activation can fire on arrival release (`activateBossOnArrivalRelease`)
   - boss-bar reveal can remain view-gated (`revealBossNow` timing)
 - S1C2 lock: once activation is healthy, keep emergency fallback damage paths (for example `simpleAttackCycleDamage`) disabled and use normal `player.attackHitbox` overlap vs boss damage hurtbox/sprite as damage authority.
+
+## 18) Chamber02 BRUTALITY Transition Hardlock (Boss-Pit/Chamber Handoff)
+**Observed risk:** entering a new scene while Chamber02 BRUTALITY state is still active can hardlock handoff (seen on Hollow Sky pit entry while BRUTALITY was active).  
+- Before any Chamber02 `scene.start(...)` handoff to boss pits or Chamber03, explicitly end/reset BRUTALITY via Chamber02 transition cleanup.
+- Do not rely only on scene shutdown hooks to clear BRUTALITY presentation/combat state and aggression overrides.
+- Outgoing Chamber02 transitions must leave boss-pit scenes with a normal player state unless a future task explicitly designs cross-scene BRUTALITY carryover.

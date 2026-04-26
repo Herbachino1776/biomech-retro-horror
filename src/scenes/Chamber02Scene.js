@@ -285,6 +285,7 @@ export class Chamber02Scene extends Phaser.Scene {
       this.endBossBarRevealed = false;
       this.endBossVictorySequenceActive = false;
       this.hasProcessedEndBossVictory = false;
+      this.transitionBrutalityCleanupApplied = false;
 
       this.sceneEntryFadeInActive = true;
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
@@ -859,6 +860,7 @@ export class Chamber02Scene extends Phaser.Scene {
 
     const targetAltar = this.currentBossPitAltar;
     this.bossPitTransitionActive = true;
+    this.prepareForOutgoingSceneTransition();
     const transitionPayload = {
       fromScene: this.scene.key,
       returnFromBossPit: false,
@@ -882,6 +884,25 @@ export class Chamber02Scene extends Phaser.Scene {
       this.hud?.setVisible(true);
       this.mobileControls?.setMode('gameplay');
     }
+  }
+
+  prepareForOutgoingSceneTransition() {
+    if (this.transitionBrutalityCleanupApplied) {
+      return;
+    }
+
+    this.transitionBrutalityCleanupApplied = true;
+    const now = this.time?.now ?? 0;
+    this.brutalityMode?.end(now);
+    this.brutalityMode?.resetStreak?.();
+    this.player?.clearBrutalityMode?.();
+
+    this.enemies?.forEach((enemy) => enemy?.setBrutalityAggression?.(false));
+    this.tollKeepers?.forEach((enemy) => enemy?.setBrutalityAggression?.(false));
+    this.endBoss?.setBrutalityAggression?.(false);
+
+    this.exitGateUnlockAudioTimer?.remove(false);
+    this.exitGateUnlockAudioTimer = null;
   }
 
   update(time) {
@@ -973,7 +994,7 @@ export class Chamber02Scene extends Phaser.Scene {
     const brutalityActive = this.brutalityMode?.isActive?.() ?? false;
     if (brutalityActive && isBasicEnemy) {
       enemy.takeDamage(Math.max(enemy.health, 1), now, { skipDefaultDeathFx: true });
-      if (enemy.dead) {
+      if (enemy.dead && !this.transitionBrutalityCleanupApplied) {
         const remainsSpawnPoint = enemy.getDeathRemainsSpawnPoint?.() ?? {
           x: enemy.sprite.x,
           groundY: enemy.body?.bottom ?? this.player?.sprite?.body?.bottom
@@ -1397,6 +1418,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.isExitGateTransitionActive = true;
     this.isHandingOffToChamber03 = true;
     this.chamber03StartHasRun = true;
+    this.prepareForOutgoingSceneTransition();
 
     console.log('[Chamber02->Chamber03] handoff lock engaged');
 
