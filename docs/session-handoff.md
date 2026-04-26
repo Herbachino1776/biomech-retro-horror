@@ -3,6 +3,9 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-04-26)
+- **Chamber02 second boss-pit hardlock root cause identified (exact regression):** commit `de1c601` (PR #448 lane) moved `prepareForOutgoingSceneTransition()` into `beginBossPitTransition()` *before* `scene.start(...)` with no local error containment. Any throw in BRUTALITY teardown could block `scene.start`, leave `bossPitTransitionActive` true, and hardlock altar handoff (especially when entering Hollow Sky while BRUTALITY was active).
+- **Fix applied:** Chamber02 boss-pit handoff now captures selected altar identity up front (`id` / `sceneKey` / `completionKey`), builds payload, wraps pre-start cleanup in local `try/catch` so cleanup can never block `scene.start`, logs handoff steps/errors with `[Chamber02 boss-pit transition]`, and still resets `bossPitTransitionActive` if `scene.start` itself throws.
+- **Scope confirmation:** this was a source-scene handoff/cleanup-order issue (not Hollow Sky scene registration/config boot, not altar completion mapping, not first pit combat logic).
 - **Chamber02 progression authority repaired:** chamber exit progression is now governed by defeating the end boss (**THE VERTEBRAL TOLL JUDGE**) rather than side-encounter completion state; boss-pit loops/toll-keeper cleanup no longer gate end-boss spawn authority.
 - **Chamber02 ending boss identity/path:** end boss remains the Chamber02 `HalfSkullMiniboss` behavior path but now binds to `ASSET_KEYS.sector02Chamber02PressureDeacon` (non-original-HalfSkull visual), preserving overlap-based melee damage and modern death/payoff package.
 - **Chamber02 lore screen repaired:** `chamber02-vertebral-threshold` lore screen now has explicit non-empty text and a guaranteed loaded image (`ASSET_KEYS.sector02Chamber02PressureDeacon`) for a stable non-blank lore beat.
