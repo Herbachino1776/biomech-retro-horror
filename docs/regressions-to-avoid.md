@@ -100,8 +100,9 @@ Known failure patterns and what future tasks must protect.
   - boss-bar reveal can remain view-gated (`revealBossNow` timing)
 - S1C2 lock: once activation is healthy, keep emergency fallback damage paths (for example `simpleAttackCycleDamage`) disabled and use normal `player.attackHitbox` overlap vs boss damage hurtbox/sprite as damage authority.
 
-## 18) Chamber02 BRUTALITY Transition Hardlock (Boss-Pit/Chamber Handoff)
-**Observed risk:** entering a new scene while Chamber02 BRUTALITY state is still active can hardlock handoff (seen on Hollow Sky pit entry while BRUTALITY was active).  
-- Before any Chamber02 `scene.start(...)` handoff to boss pits or Chamber03, explicitly end/reset BRUTALITY via Chamber02 transition cleanup.
-- Do not rely only on scene shutdown hooks to clear BRUTALITY presentation/combat state and aggression overrides.
-- Outgoing Chamber02 transitions must leave boss-pit scenes with a normal player state unless a future task explicitly designs cross-scene BRUTALITY carryover.
+## 18) Chamber02 Outgoing Transition/Shutdown Hardlock (Boss-Pit + Chamber Handoff)
+**Observed risk:** Chamber02 altar/threshold transitions can freeze when source-scene cleanup throws before or during handoff (affects both BRUTALITY and non-BRUTALITY states).  
+- Treat Chamber02 source-scene cleanup as **non-fatal**; no cleanup step may block `scene.start(...)`.
+- Capture destination scene key + payload first, then guard pre-handoff cleanup with local `try/catch`.
+- Make cleanup/shutdown idempotent with optional chaining and per-step guards (enemy aggression reset, HUD/major encounter teardown, UI cleanup, audio shutdown, timers, mobile mode reset).
+- Keep BRUTALITY teardown explicit before leaving Chamber02, but never let BRUTALITY cleanup failure prevent outgoing handoff.
