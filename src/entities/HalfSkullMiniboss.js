@@ -360,8 +360,10 @@ export class HalfSkullMiniboss {
       return;
     }
 
-    let scaleX = this.baseScaleX * this.config.presentation.scaleX;
-    let scaleY = this.baseScaleY * this.config.presentation.scaleY;
+    const presentationScaleX = Number.isFinite(this.config.presentation.scaleX) ? this.config.presentation.scaleX : 1;
+    const presentationScaleY = Number.isFinite(this.config.presentation.scaleY) ? this.config.presentation.scaleY : 1;
+    let scaleX = this.baseScaleX * presentationScaleX;
+    let scaleY = this.baseScaleY * presentationScaleY;
     let angle = 0;
     let tint = this.config.presentation.tint;
 
