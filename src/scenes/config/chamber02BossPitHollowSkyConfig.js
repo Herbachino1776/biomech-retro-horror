@@ -77,6 +77,7 @@ export const chamber02BossPitHollowSkyConfig = {
     postExplosionDespawnDelayMs: 560
   },
   arrival: {
+    activateBossOnArrivalRelease: true,
     lockDurationMs: 2000,
     impactDelayAfterFadeInMs: 48,
     shakeDurationMs: 2000,
@@ -99,7 +100,7 @@ export const chamber02BossPitHollowSkyConfig = {
     name: 'RED MASK OF HOLLOW SKY',
     subtitle: 'Theatre Null Litigator',
     difficultyTier,
-    spawnX: 960,
+    spawnX: 1400,
     spawnY: floorPlaneY,
     floorPlaneY,
     textureKey: ASSET_KEYS.bossPit03RedMaskHollowSky,
