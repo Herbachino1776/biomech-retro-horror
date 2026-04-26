@@ -596,25 +596,22 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       return;
     }
 
-    const omenCutscene = this.scene.get('LoreCutsceneScene');
-    const hasOmenCutscene = Boolean(omenCutscene) && omenCutscene.sys.settings.status !== Phaser.Scenes.STOPPED;
-
     this.isOmenBeatActive = true;
     this.mobileControls.setMode('init');
     this.player.body.setVelocity(0, 0);
     this.player.body.setEnable(false);
     this.player.attackHitbox?.body?.setEnable(false);
 
-    if (!hasOmenCutscene) {
+    try {
+      this.scene.pause();
+      this.scene.launch('LoreCutsceneScene', {
+        cutsceneId: CHAMBER03_BOSS_OMEN_CUTSCENE_ID,
+        returnSceneKey: this.scene.key
+      });
+    } catch (error) {
+      console.error('[Chamber03BossArenaScene] failed to launch omen cutscene; falling back to direct boss activation', error);
       this.resolvePreBossOmenBeat({ usedFallback: true });
-      return;
     }
-
-    this.scene.pause();
-    this.scene.launch('LoreCutsceneScene', {
-      cutsceneId: CHAMBER03_BOSS_OMEN_CUTSCENE_ID,
-      returnSceneKey: this.scene.key
-    });
   }
 
   handleLoreCutsceneComplete({ cutsceneId } = {}) {

@@ -154,3 +154,7 @@ Known failure patterns and what future tasks must protect.
 - Runtime scene flow still requires interactive verification: entry, activation, damage, death payoff, unlock, and return/transition.
 - Final task reports should explicitly separate build verification from runtime verification.
 
+## 20) Lore/Cutscene Availability Misdiagnosis (Scene Status Gate Drift)
+**Observed risk:** pre-checking scene runtime status (`STOPPED`/etc.) before `scene.launch(...)` can falsely classify a registered scene as unavailable and silently skip intended lore beats.  
+- Prefer direct `scene.launch(...)` with guarded fallback/logging over status-gating launch attempts.
+- If lore is unexpectedly skipped, verify launch path and error handling first before changing cutscene content/config.

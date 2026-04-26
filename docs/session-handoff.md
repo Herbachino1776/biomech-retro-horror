@@ -3,6 +3,15 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-04-26)
+- **Chamber03 baseline audit completed (controlled stabilization pass):**
+  - Scene registration and boot wiring were already valid (`Chamber03Scene` + `Chamber03BossArenaScene` registered in `main.js`; `Chamber02Scene` exit threshold already handoffs to `Chamber03Scene`; `START GAME` remained `Chamber01Scene`).
+  - Chamber02 -> Chamber03 payload contract was already valid (`enteredFrom` / `progressionSource` payload does not break Chamber03 `init/create`; Chamber02 fresh-interact threshold rule remains intact and unchanged).
+  - Chamber03 baseline flow confirmed: entry/processional combat pockets -> threshold handoff -> Chamber03 boss arena -> pre-boss lore omen -> boss combat + modern death payoff -> progression gate -> Sector02Chamber01 handoff.
+  - **Fix applied (narrow):** Chamber03 boss-arena omen launch previously used a scene-status gate that could incorrectly force fallback activation and skip lore. Omen launch now attempts `scene.launch('LoreCutsceneScene', ...)` directly with guarded fallback only on real launch error.
+  - Combat/boss status in current lane: main chamber enemies activate/engage via pocket triggers; boss arena keeps normal overlap-based player damage contract (`player.attackHitbox` vs boss damage hurtbox), boss can damage player, payoff pipeline remains modern package.
+  - BRUTALITY status: no Chamber03 BRUTALITY wiring in this lane; no BRUTALITY body/floor/collision logic was touched.
+  - **Current DEV target updated:** BootScene `DEV` now points to `Chamber03Scene` for focused Chamber03 validation (`START GAME` still `Chamber01Scene`).
+
 - **Chamber02 recovery cycle snapshot (documentation lock):** this run required a full recovery pass across boss-pit activation misdiagnosis, emergency damage fallback removal, atomic/non-fatal boss-pit handoff, lore-screen camera isolation, end-boss visual/boss-bar/damage wiring repair, death-payoff payload hardlock fix, and boss-tier remains polish.
 - **Chamber02 end-boss remains payoff polish landed:** the end-boss death package previously passed `corpseRemains.size: 'boss'`, but `EnemyCorpseRemains` has no `boss` profile, so remains silently fell back to `small` and looked underwhelming/missing after ceremony. Chamber02 now uses the supported boss-tier profile (`size: 'bossPitBoss'`) and an explicit floor lift (`floorLiftPx: 52`) when building `corpseRemains.floorPlaneY/groundY`, keeping the final pile large, visible, and grounded after payoff completion.
 - **Chamber02 end-boss death hardlock root cause (confirmed):** `Chamber02Scene.handleEndBossDefeated()` invoked `beginBossDeathPayoffPackage(...)` with an incomplete `victory` payload (missing required `fountainBurst` / `blowoutBurst` objects). The package then dereferenced undefined burst config during `onStart` gore setup, throwing after lethal death audio and leaving major-encounter resolution locked (apparent freeze before gore/remains/exit unlock).

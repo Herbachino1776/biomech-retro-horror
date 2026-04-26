@@ -295,7 +295,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   beginDevChamber() {
-    this.beginScene('Chamber02Scene');
+    this.beginScene('Chamber03Scene');
   }
 
   beginScene(targetSceneKey) {
