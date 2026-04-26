@@ -764,6 +764,7 @@ export class Chamber02Scene extends Phaser.Scene {
     });
     this.endBoss.setActive(false);
     this.endBoss.sprite.setDepth(6.16).setAlpha(0.94);
+    this.endBoss.body?.setEnable?.(false);
     this.physics.add.collider(this.endBoss.getCollisionTarget?.() ?? this.endBoss.sprite, this.platforms);
     this.physics.add.overlap(this.player.attackHitbox, this.endBoss.damageHurtbox ?? this.endBoss.sprite, () => this.handlePlayerHitEndBoss());
     this.physics.add.overlap(this.player.sprite, this.endBoss.getCollisionTarget?.() ?? this.endBoss.sprite, () => this.handleEndBossContactPlayer());
@@ -1199,14 +1200,11 @@ export class Chamber02Scene extends Phaser.Scene {
   updateEndBossEncounter(time) {
     if (this.shouldStartEndBossEncounter()) {
       this.endBossEncounterStarted = true;
+      this.revealEndBoss(time);
     }
 
     if (!this.endBossEncounterStarted || this.endBossDefeated) {
       return;
-    }
-
-    if (!this.endBossRevealTriggered && this.isEndBossRevealEligible()) {
-      this.revealEndBoss(time);
     }
 
     this.endBoss.update(time, this.player.sprite);
@@ -1303,6 +1301,7 @@ export class Chamber02Scene extends Phaser.Scene {
     this.endBossRevealTriggered = true;
     this.endBoss.setActive(true);
     this.endBoss.body?.setEnable?.(true);
+    this.endBoss.body?.updateFromGameObject?.();
     this.endBoss.recordContactDamage?.(time + 300);
     this.exitGateArt?.setAlpha(0.56).setTint(0x8e7c66);
     this.exitGateReadyAura?.setVisible(false);
@@ -1431,6 +1430,7 @@ export class Chamber02Scene extends Phaser.Scene {
         screenId: loreEntry.screenId,
         returnSceneKey: this.scene.key
       });
+      this.scene.bringToTop('LoreScreenScene');
     });
 
     this.cameras.main.fadeOut(420, 0, 0, 0);
