@@ -220,6 +220,11 @@ const CHAMBER02_END_BOSS = {
   }
 };
 
+const CHAMBER02_END_BOSS_DEATH_REMAINS = {
+  size: 'bossPitBoss',
+  floorLiftPx: 52
+};
+
 const BRUTALITY_MODE = {
   rules: {
     streakTriggerKills: 2,
@@ -1249,10 +1254,10 @@ export class Chamber02Scene extends Phaser.Scene {
         visibleFootOffsetY: this.endBoss.normalizedVisibleFootOffsetY ?? 0
       },
       corpseRemains: {
-        floorPlaneY: anchors.floorPlaneY,
-        groundY: anchors.bossGroundY,
+        floorPlaneY: anchors.floorPlaneY - CHAMBER02_END_BOSS_DEATH_REMAINS.floorLiftPx,
+        groundY: anchors.bossGroundY - CHAMBER02_END_BOSS_DEATH_REMAINS.floorLiftPx,
         visibleFootOffsetY: this.endBoss.normalizedVisibleFootOffsetY ?? 0,
-        size: 'boss'
+        size: CHAMBER02_END_BOSS_DEATH_REMAINS.size
       },
       victory: {
         ceremonyDurationMs: 3200,
