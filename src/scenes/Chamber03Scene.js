@@ -10,9 +10,11 @@ import { createDirectionalCameraBias } from '../systems/DirectionalCameraBias.js
 import { restartRunFromDeath } from '../systems/RunReset.js';
 import { AudioDirector } from '../audio/AudioDirector.js';
 import { applyChamberEntryRestore } from '../systems/VesselRunEconomy.js';
+import { BrutalityModeState } from '../systems/BrutalityModeState.js';
+import { triggerBrutalityBasicChunkBurst } from '../systems/BrutalityChunkBurst.js';
 
 const CHAMBER03_BOOTSTRAP = {
-  worldWidth: 4800,
+  worldWidth: 6200,
   floorColliderHeight: 72,
   floorDisplayHeight: 118,
   floorDepthY: WORLD.floorY - 48,
@@ -22,8 +24,8 @@ const CHAMBER03_BOOTSTRAP = {
   cameraLerp: { x: 0.08, y: 0.08 },
   portraitFollowOffsetX: -120,
   desktopFollowOffsetX: -160,
-  segmentWidth: 640,
-  segmentSpacing: 24,
+  segmentWidth: 612,
+  segmentSpacing: 28,
   lowerDepthBandHeight: 252,
   lowerDepthBandAlpha: 0.18,
   floorShadowAlpha: 0.34,
@@ -35,7 +37,7 @@ const CHAMBER03_BOOTSTRAP = {
 };
 
 const CHAMBER03_BOSS_THRESHOLD = {
-  portalX: 4540,
+  portalX: 5920,
   portalY: WORLD.floorY - 112,
   portalWidth: 236,
   portalHeight: 292,
@@ -51,7 +53,7 @@ const CHAMBER03_BOSS_THRESHOLD = {
 };
 
 const CHAMBER03_THRESHOLD_STAGING = {
-  endcapCenterX: 4488,
+  endcapCenterX: 5850,
   endcapWidth: 852,
   endcapHeight: 468,
   endcapY: 218,
@@ -73,7 +75,7 @@ const CHAMBER03_THRESHOLD_STAGING = {
   floorShadowAlpha: 0.18,
   foreArchWidth: 568,
   foreArchHeight: 448,
-  foreArchX: 4528,
+  foreArchX: 5892,
   foreArchY: WORLD.floorY - 114,
   foreArchAlpha: 0.26,
   foreArchTint: 0xb6c19e
@@ -100,12 +102,21 @@ const CHAMBER03_PROCESSION = [
   },
   {
     key: ASSET_KEYS.chamber03BackgroundWallModule,
-    width: 660,
-    height: 362,
-    y: 232,
+    width: 664,
+    height: 374,
+    y: 228,
     tint: 0xbba893,
-    alpha: 0.5,
-    depth: -14.42
+    alpha: 0.56,
+    depth: -14.43
+  },
+  {
+    key: ASSET_KEYS.chamber03BackgroundWallModule,
+    width: 676,
+    height: 382,
+    y: 226,
+    tint: 0xc1ae97,
+    alpha: 0.52,
+    depth: -14.41
   },
   {
     key: ASSET_KEYS.chamber03BackgroundChoirOpening,
@@ -118,12 +129,39 @@ const CHAMBER03_PROCESSION = [
   },
   {
     key: ASSET_KEYS.chamber03BackgroundWallModule,
-    width: 660,
-    height: 362,
+    width: 668,
+    height: 370,
     y: 228,
     tint: 0xb8a48e,
-    alpha: 0.5,
+    alpha: 0.54,
     depth: -14.38
+  },
+  {
+    key: ASSET_KEYS.chamber03BackgroundWallModule,
+    width: 668,
+    height: 370,
+    y: 230,
+    tint: 0xb9a894,
+    alpha: 0.5,
+    depth: -14.4
+  },
+  {
+    key: ASSET_KEYS.chamber03BackgroundChoirOpening,
+    width: 884,
+    height: 414,
+    y: 220,
+    tint: 0xcab89d,
+    alpha: 0.56,
+    depth: -14.55
+  },
+  {
+    key: ASSET_KEYS.chamber03BackgroundWallModule,
+    width: 668,
+    height: 370,
+    y: 226,
+    tint: 0xb8a58f,
+    alpha: 0.53,
+    depth: -14.39
   },
   {
     key: ASSET_KEYS.chamber03BackgroundThreshold,
@@ -147,7 +185,7 @@ const CHAMBER03_MARKERS = [
     depth: -11.8
   },
   {
-    x: 2800,
+    x: 2750,
     ribWidth: 20,
     ribHeight: 286,
     archWidth: 182,
@@ -156,11 +194,20 @@ const CHAMBER03_MARKERS = [
     depth: -11.85
   },
   {
-    x: 4050,
+    x: 4020,
     ribWidth: 24,
     ribHeight: 316,
     archWidth: 220,
     archHeight: 138,
+    alpha: 0.24,
+    depth: -11.9
+  },
+  {
+    x: 5250,
+    ribWidth: 22,
+    ribHeight: 304,
+    archWidth: 204,
+    archHeight: 128,
     alpha: 0.24,
     depth: -11.9
   }
@@ -203,15 +250,39 @@ const CHAMBER03_TOLL_KEEPER_CONFIG = {
   audioProfile: 'tollkeeper'
 };
 
+const BRUTALITY_MODE = {
+  rules: {
+    streakTriggerKills: 2,
+    streakWindowMs: 5000,
+    activeDurationMs: 20000,
+    maxActivationsPerChamber: 2
+  },
+  player: {
+    scaleMultiplier: 1.06,
+    speedMultiplier: 1.08,
+    attackRangeMultiplier: 1.22,
+    attackDamageMultiplier: 2.1
+  },
+  enemyAggression: {
+    speedMultiplier: 1.28,
+    aggroRangeMultiplier: 1.22
+  }
+};
+
+const CHAMBER03_TRANSITION = {
+  fadeOutMs: 420,
+  fallbackStartDelayMs: 560
+};
+
 const CHAMBER03_ENCOUNTER_POCKETS = [
   {
-    id: 'pocket-01-early-pressure',
+    id: 'pocket-01-entry-choir',
     label: 'POCKET I',
-    zoneX: 1120,
+    zoneX: 1260,
     zoneY: WORLD.floorY - 68,
-    zoneWidth: 520,
+    zoneWidth: 560,
     zoneHeight: 232,
-    markerWidth: 318,
+    markerWidth: 344,
     markerHeight: 72,
     markerAlpha: 0.1,
     promptOffsetY: -138,
@@ -226,37 +297,37 @@ const CHAMBER03_ENCOUNTER_POCKETS = [
       },
       {
         type: 'skitter',
-        x: 1455,
+        x: 1420,
         y: PLAYER.startY,
         awakenPlayerX: undefined,
-        patrolDistance: 96,
-        wakeDelayMs: 70
+        patrolDistance: 92,
+        wakeDelayMs: 120
       }
     ]
   },
   {
-    id: 'pocket-02-mid-escalation',
+    id: 'pocket-02-procession-knot',
     label: 'POCKET II',
-    zoneX: 2480,
+    zoneX: 2860,
     zoneY: WORLD.floorY - 68,
-    zoneWidth: 640,
+    zoneWidth: 700,
     zoneHeight: 236,
-    markerWidth: 360,
+    markerWidth: 420,
     markerHeight: 82,
     markerAlpha: 0.12,
     promptOffsetY: -142,
     enemies: [
       {
         type: 'skitter',
-        x: 2320,
+        x: 2580,
         y: PLAYER.startY,
         awakenPlayerX: undefined,
-        patrolDistance: 120,
+        patrolDistance: 116,
         wakeDelayMs: 0
       },
       {
         type: 'skitter',
-        x: 2550,
+        x: 2810,
         y: PLAYER.startY,
         awakenPlayerX: undefined,
         patrolDistance: 84,
@@ -264,65 +335,103 @@ const CHAMBER03_ENCOUNTER_POCKETS = [
       },
       {
         type: 'skitter',
-        x: 2660,
+        x: 3040,
         y: PLAYER.startY,
         awakenPlayerX: undefined,
-        patrolDistance: 82,
-        wakeDelayMs: 140
+        patrolDistance: 92,
+        wakeDelayMs: 168
       },
       {
         type: 'skitter',
-        x: 2790,
+        x: 3170,
         y: PLAYER.startY,
         awakenPlayerX: undefined,
-        patrolDistance: 132,
-        wakeDelayMs: 170
+        patrolDistance: 120,
+        wakeDelayMs: 210
+      },
+      {
+        type: 'tollkeeper',
+        x: 3330,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 102,
+        wakeDelayMs: 330
       }
     ]
   },
   {
-    id: 'pocket-03-threshold-guard',
+    id: 'pocket-03-lore-threshold',
     label: 'POCKET III',
-    zoneX: 3840,
+    zoneX: 4420,
     zoneY: WORLD.floorY - 70,
-    zoneWidth: 620,
+    zoneWidth: 680,
     zoneHeight: 240,
-    markerWidth: 396,
+    markerWidth: 420,
     markerHeight: 90,
     markerAlpha: 0.13,
     promptOffsetY: -146,
     enemies: [
       {
         type: 'skitter',
-        x: 3620,
+        x: 4170,
         y: PLAYER.startY,
         awakenPlayerX: undefined,
-        patrolDistance: 88,
+        patrolDistance: 96,
         wakeDelayMs: 0
       },
       {
         type: 'skitter',
-        x: 3925,
+        x: 4460,
         y: PLAYER.startY,
         awakenPlayerX: undefined,
-        patrolDistance: 108,
+        patrolDistance: 110,
         wakeDelayMs: 90
       },
       {
         type: 'skitter',
-        x: 3815,
+        x: 4620,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 100,
+        wakeDelayMs: 180
+      }
+    ]
+  },
+  {
+    id: 'pocket-04-preclimax-sentries',
+    label: 'POCKET IV',
+    zoneX: 5380,
+    zoneY: WORLD.floorY - 70,
+    zoneWidth: 620,
+    zoneHeight: 240,
+    markerWidth: 420,
+    markerHeight: 92,
+    markerAlpha: 0.14,
+    promptOffsetY: -150,
+    enemies: [
+      {
+        type: 'skitter',
+        x: 5180,
         y: PLAYER.startY,
         awakenPlayerX: undefined,
         patrolDistance: 94,
-        wakeDelayMs: 160
+        wakeDelayMs: 0
+      },
+      {
+        type: 'skitter',
+        x: 5440,
+        y: PLAYER.startY,
+        awakenPlayerX: undefined,
+        patrolDistance: 106,
+        wakeDelayMs: 100
       },
       {
         type: 'tollkeeper',
-        x: 4160,
+        x: 5650,
         y: PLAYER.startY,
         awakenPlayerX: undefined,
-        patrolDistance: 98,
-        wakeDelayMs: 170
+        patrolDistance: 114,
+        wakeDelayMs: 210
       }
     ]
   }
@@ -338,6 +447,10 @@ export class Chamber03Scene extends Phaser.Scene {
     this.transitionContext = data ?? {};
     this.isRestartingRun = false;
     this.isTransitioningToBossArena = false;
+    this.hasAppliedOutgoingCleanup = false;
+    this.hasStartedBossArena = false;
+    this.pendingBossArenaPayload = null;
+    this.bossArenaFallbackTimer = null;
     this.currentBossThresholdZone = null;
     this.currentEncounterPocket = null;
   }
@@ -347,6 +460,7 @@ export class Chamber03Scene extends Phaser.Scene {
     this.createAudio();
     this.createBackgroundAndFloor();
     this.createPlayerAndColliders();
+    this.setupBrutalityMode();
     this.createEncounterPockets();
     this.createBossThreshold();
     this.createUiAndInput();
@@ -622,6 +736,49 @@ export class Chamber03Scene extends Phaser.Scene {
     this.currentEncounterPocket = null;
   }
 
+  setupBrutalityMode() {
+    this.brutalityMode = new BrutalityModeState(this, {
+      ...BRUTALITY_MODE.rules,
+      onActivated: () => {
+        this.player.applyBrutalityMode(BRUTALITY_MODE.player);
+        this.audioDirector?.playEnemyAttack('miniboss');
+        this.syncBrutalityAggression();
+      },
+      onEnded: () => {
+        this.player.clearBrutalityMode();
+        this.enemies.forEach((enemy) => enemy.setBrutalityAggression(false));
+      }
+    });
+  }
+
+  syncBrutalityAggression() {
+    const brutalityActive = this.brutalityMode?.isActive?.() ?? false;
+    this.enemies.forEach((enemy) => enemy.setBrutalityAggression(brutalityActive, BRUTALITY_MODE.enemyAggression));
+  }
+
+  safeInvokeCleanupStep(step, fn) {
+    try {
+      fn?.();
+    } catch (error) {
+      console.error('[Chamber03Scene cleanup failed]', { step, error });
+    }
+  }
+
+  prepareForOutgoingSceneTransition() {
+    if (this.hasAppliedOutgoingCleanup) {
+      return;
+    }
+
+    this.hasAppliedOutgoingCleanup = true;
+    const now = this.time?.now ?? 0;
+    this.safeInvokeCleanupStep('brutalityMode.end', () => this.brutalityMode?.end?.(now));
+    this.safeInvokeCleanupStep('brutalityMode.resetStreak', () => this.brutalityMode?.resetStreak?.());
+    this.safeInvokeCleanupStep('player.clearBrutalityMode', () => this.player?.clearBrutalityMode?.());
+    this.safeInvokeCleanupStep('enemies.clearBrutalityAggression', () => {
+      this.enemies?.forEach((enemy) => enemy?.setBrutalityAggression?.(false));
+    });
+  }
+
   createEncounterPockets() {
     this.encounterPockets = CHAMBER03_ENCOUNTER_POCKETS.map((pocket) => this.createEncounterPocket(pocket));
   }
@@ -803,6 +960,8 @@ export class Chamber03Scene extends Phaser.Scene {
 
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
+      this.safeInvokeCleanupStep('bossArenaFallbackTimer.remove', () => this.bossArenaFallbackTimer?.remove?.(false));
+      this.safeInvokeCleanupStep('prepareOutgoingCleanup', () => this.prepareForOutgoingSceneTransition());
       this.audioDirector?.shutdown();
     });
   }
@@ -871,6 +1030,8 @@ export class Chamber03Scene extends Phaser.Scene {
     this.refreshEncounterPocketPresence();
     this.updateEncounterPockets(time);
     this.enemies.forEach((enemy) => enemy.update(time, this.player.sprite.x));
+    this.brutalityMode?.update(time);
+    this.syncBrutalityAggression();
     this.refreshBossThresholdPresence();
     this.tryBeginBossArenaTransition(mobileInput);
     this.updateBossThresholdAura(time);
@@ -942,7 +1103,30 @@ export class Chamber03Scene extends Phaser.Scene {
     enemy.lastAttackHitId = this.player.attackId;
     const knockDirection = Math.sign(enemy.sprite.x - this.player.sprite.x) || this.player.facing;
     enemy.setHitReactionDirection(knockDirection);
-    enemy.takeDamage(1, this.time.now);
+    const now = this.time.now;
+    const isBasicEnemy = !enemy.isTollKeeper;
+    const brutalityActive = this.brutalityMode?.isActive?.() ?? false;
+    if (brutalityActive && isBasicEnemy) {
+      enemy.takeDamage(Math.max(enemy.health, 1), now, { skipDefaultDeathFx: true });
+      if (enemy.dead && !this.hasAppliedOutgoingCleanup) {
+        const remainsSpawnPoint = enemy.getDeathRemainsSpawnPoint?.() ?? {
+          x: enemy.sprite.x,
+          groundY: enemy.body?.bottom ?? this.player?.sprite?.body?.bottom
+        };
+        triggerBrutalityBasicChunkBurst(this, {
+          x: remainsSpawnPoint.x,
+          y: WORLD.floorY - 24,
+          floorPlaneY: WORLD.floorY - 8,
+          depth: enemy.sprite.depth - 0.08
+        });
+        this.cameras.main.shake(82, 0.005, true);
+      }
+    } else {
+      enemy.takeDamage(this.player.getAttackDamage(), now);
+    }
+    if (enemy.dead && isBasicEnemy) {
+      this.brutalityMode?.registerBasicKill(now);
+    }
   }
 
   handleEnemyContactPlayer(_playerSprite, enemySprite, enemy) {
@@ -1009,16 +1193,39 @@ export class Chamber03Scene extends Phaser.Scene {
     this.player.body.setVelocity(0, 0);
     this.player.body.setEnable(false);
     this.player.attackHitbox?.body?.setEnable(false);
+    this.pendingBossArenaPayload = {
+      enteredFrom: 'chamber03-boss-threshold',
+      progressionSource: 'processional-threshold-gate'
+    };
+
+    try {
+      this.prepareForOutgoingSceneTransition();
+    } catch (error) {
+      console.error('[Chamber03Scene] outgoing cleanup failed before boss-arena handoff', error);
+    }
+
     this.audioDirector?.stopAmbientLoop({ fadeOut: false });
+    const startBossArena = () => {
+      if (this.hasStartedBossArena) {
+        return;
+      }
+      this.hasStartedBossArena = true;
+      this.bossArenaFallbackTimer?.remove?.(false);
+      try {
+        this.scene.start('Chamber03BossArenaScene', this.pendingBossArenaPayload);
+      } catch (error) {
+        this.hasStartedBossArena = false;
+        this.isTransitioningToBossArena = false;
+        this.player?.body?.setEnable(true);
+        this.player?.attackHitbox?.body?.setEnable(true);
+        this.mobileControls?.setMode('gameplay');
+        console.error('[Chamber03Scene] scene.start(Chamber03BossArenaScene) failed', error);
+      }
+    };
 
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.start('Chamber03BossArenaScene', {
-        enteredFrom: 'chamber03-boss-threshold',
-        progressionSource: 'processional-threshold-gate'
-      });
-    });
-
-    this.cameras.main.fadeOut(420, 0, 0, 0);
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, startBossArena);
+    this.bossArenaFallbackTimer = this.time.delayedCall(CHAMBER03_TRANSITION.fallbackStartDelayMs, startBossArena);
+    this.cameras.main.fadeOut(CHAMBER03_TRANSITION.fadeOutMs, 0, 0, 0);
   }
 
   updateBossThresholdAura(time) {
