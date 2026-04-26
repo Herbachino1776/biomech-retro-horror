@@ -1,6 +1,7 @@
 import { ASSET_KEYS } from '../../data/assetKeys.js';
 import { PLAYER, WORLD } from '../../data/milestone1Config.js';
 import { bossPitRunState } from '../../systems/BossPitRunState.js';
+import { HalfSkullMiniboss } from '../../entities/HalfSkullMiniboss.js';
 
 const PIT_DIFFICULTY_PRESETS = {
   easy: {
@@ -99,6 +100,7 @@ export const chamber02BossPitHollowSkyConfig = {
   boss: {
     name: 'RED MASK OF HOLLOW SKY',
     subtitle: 'Theatre Null Litigator',
+    bossClass: HalfSkullMiniboss,
     difficultyTier,
     spawnX: 1400,
     spawnY: floorPlaneY,
@@ -128,39 +130,28 @@ export const chamber02BossPitHollowSkyConfig = {
     presentation: {
       display: { width: 352, height: 372 },
       origin: { x: 0.52, y: 0.986 },
+      normalization: {
+        visibleFootOffsetY: 110
+      },
       alpha: 0.99,
       tint: 0xded8cb,
       scaleX: 1,
       scaleY: 1
     },
-    groundBurst: {
-      enabled: true,
-      cooldownMs: selectedDifficulty.groundBurst.cooldownMs,
-      windupMs: selectedDifficulty.groundBurst.windupMs,
-      activeMs: selectedDifficulty.groundBurst.activeMs,
-      recoveryMs: selectedDifficulty.groundBurst.recoveryMs,
-      minRange: 120,
-      maxRange: 390,
-      radius: 128,
-      damage: 1,
-      yTolerance: 150
+    damageHurtbox: {
+      trimXRatio: 0.08,
+      trimYRatio: 0.08,
+      insetBottomPx: 0,
+      minWidth: 180,
+      minHeight: 240,
+      offsetX: 0,
+      offsetY: -20
     },
-    projectile: {
-      textureKey: ASSET_KEYS.sector02PressureShardProjectile,
-      cooldownMs: selectedDifficulty.projectile.cooldownMs,
-      windupMs: selectedDifficulty.projectile.windupMs,
-      recoveryMs: selectedDifficulty.projectile.recoveryMs,
-      minRange: 220,
-      maxRange: 500,
-      verticalTolerance: 156,
-      spawnOffsetX: 76,
-      spawnOffsetY: -108,
-      speed: selectedDifficulty.projectile.speed,
+    simpleAttackCycleDamage: {
+      enabled: false,
       damage: 1,
-      lifetimeMs: selectedDifficulty.projectile.lifetimeMs,
-      rotationSpeed: 380,
-      telegraphRadiusX: 84,
-      telegraphRadiusY: 28
+      rangeX: 300,
+      rangeY: 260
     }
   },
   runState: {
