@@ -106,3 +106,51 @@ Known failure patterns and what future tasks must protect.
 - Capture destination scene key + payload first, then guard pre-handoff cleanup with local `try/catch`.
 - Make cleanup/shutdown idempotent with optional chaining and per-step guards (enemy aggression reset, HUD/major encounter teardown, UI cleanup, audio shutdown, timers, mobile mode reset).
 - Keep BRUTALITY teardown explicit before leaving Chamber02, but never let BRUTALITY cleanup failure prevent outgoing handoff.
+
+## 19) Chamber02 Bug Cycle Lessons — Activation, Handoff, Lore, End Boss, Payoff
+**Observed risk:** Chamber02 recovery spiraled when runtime symptoms were treated as unrelated bugs instead of one ordered diagnosis/payoff chain.
+
+### A) Activation-first boss diagnosis
+- If a boss does not move, does not attack, does not show a boss bar, and cannot be hurt, verify activation/reveal state first.
+- Check `boss.active`, body enablement, reveal flags, and reveal-trigger timing before touching sprites, hurtboxes, fallback damage, or boss replacement.
+- Do not stack new damage systems before proving the boss is active.
+
+### B) Emergency damage fallbacks are temporary only
+- `simpleAttackCycleDamage` / swing-anywhere damage was an emergency diagnostic/recovery tool only.
+- Once activation was fixed, Chamber02 returned to normal sprite/hurtbox overlap damage.
+- Do not leave global swing-anywhere damage behavior in shipped chamber/boss flows.
+
+### C) Source-scene handoff cleanup must be non-fatal
+- Chamber02 boss-pit hardlocks occurred when outgoing cleanup/shutdown threw and blocked `scene.start(...)`.
+- Source transitions must capture destination scene key/payload first and must not let cleanup prevent `scene.start(...)`.
+- Teardown should be idempotent, optional-chained, and locally guarded.
+- Applies to boss pits, chamber exits, BRUTALITY teardown, audio cleanup, HUD cleanup, enemy aggression reset, major encounter teardown, timers, and mobile controls.
+
+### D) Lore blank/black screen is often camera/viewport layering
+- If lore appears black/blank, check camera viewport, scene ordering, matte/overlay leakage, depth, and whether `LoreScreenScene` is brought to top.
+- Do not assume lore text/image config is missing until camera/layer isolation is verified.
+- Chamber02 required `LoreScreenScene` viewport/zoom reset and scene-order isolation.
+
+### E) Active invisible boss means visual/UI/damage wiring is incomplete
+- If a boss can contact-damage the player but is invisible and has no boss bar, physics is alive but visual/UI wiring is broken.
+- Verify sprite visibility, alpha, finite scale, display size, depth, body state, `damageHurtbox` sync, and boss-bar reveal.
+- Non-finite scale/bounds can make a boss effectively invisible and break hurtbox alignment.
+- Do not treat this as a missing boss or target-scene problem.
+
+### F) Lethal hit + death audio + freeze means death-payoff path issue
+- If boss death audio plays after lethal hit but gore/remains/unlock never happen, damage is working.
+- Inspect `beginBossDeathPayoffPackage` payload, required burst configs, finite anchors, callbacks, duplicate-death guards, and major-encounter-resolution lock state.
+- Chamber02 hardlocked because the payoff package received an incomplete victory payload missing `fountainBurst`/`blowoutBurst`.
+- Payoff calls should validate anchors and use guarded fallback unlock so payoff exceptions cannot strand progression.
+
+### G) Boss-tier remains must be explicit
+- Boss death payoff should leave large, persistent boss-tier remains.
+- Do not assume default/miniboss/basic corpse payloads look correct for chamber-ending bosses.
+- Include boss-tier remains payload/config when adding end bosses or major encounters.
+- Verify remains placement is visible on the gameplay floor, not buried below the control band, and not cleared during payoff cleanup.
+
+### H) Build success is not runtime success
+- `npm run build` only proves compile/assets are sufficient for bundling.
+- Runtime scene flow still requires interactive verification: entry, activation, damage, death payoff, unlock, and return/transition.
+- Final task reports should explicitly separate build verification from runtime verification.
+
