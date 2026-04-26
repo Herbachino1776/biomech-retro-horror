@@ -859,28 +859,25 @@ export class Chamber02Scene extends Phaser.Scene {
 
     const targetAltar = this.currentBossPitAltar;
     this.bossPitTransitionActive = true;
+    const transitionPayload = {
+      fromScene: this.scene.key,
+      returnFromBossPit: false,
+      altarX: targetAltar.x,
+      altarY: targetAltar.y,
+      currentIntegrity: this.player?.health,
+      maxIntegrity: this.player?.maxHealth
+    };
+
     console.info(`[Chamber02Scene] starting immediate ${targetAltar.sceneKey} transition`);
     this.currentBossPitAltar = null;
-    this.mobileControls.setMode('dialogue');
-    this.player.body.setVelocity(0, 0);
-    this.player.body.setEnable(false);
-    this.enemies.forEach((enemy) => enemy.body?.setVelocity(0, 0));
-    this.audioDirector?.stopAmbientLoop();
-    this.hud?.setVisible(false);
-    this.mobileControls.setMode('init');
-    this.uiCamera?.setVisible(false);
     this.bossPitPromptText?.setVisible(false);
     console.info(`[Chamber02Scene] immediate scene.start('${targetAltar.sceneKey}') about to run`);
     try {
-      this.scene.start(targetAltar.sceneKey, {
-        fromScene: this.scene.key,
-        altarX: targetAltar.x,
-        altarY: targetAltar.y
-      });
+      this.scene.start(targetAltar.sceneKey, transitionPayload);
     } catch (error) {
       console.error(`[Chamber02Scene] immediate scene.start('${targetAltar.sceneKey}') failed`, error);
       this.bossPitTransitionActive = false;
-      this.player.body.setEnable(true);
+      this.player?.body?.setEnable(true);
       this.uiCamera?.setVisible(true);
       this.hud?.setVisible(true);
       this.mobileControls?.setMode('gameplay');
