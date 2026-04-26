@@ -364,16 +364,7 @@ export class Chamber02Scene extends Phaser.Scene {
       this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
         this.scale.off('resize', this.applyResponsiveLayout, this);
         this.game.events.off('lore-screen-complete', this.handleLoreScreenComplete, this);
-        this.exitGateUnlockAudioTimer?.remove(false);
-        this.exitGateUnlockAudioTimer = null;
-        console.log('[Chamber02Scene] shutdown event fired');
-        this.audioDirector?.shutdown();
-        this.brutalityMode?.end(this.time.now);
-        this.enemies?.forEach((enemy) => enemy.setBrutalityAggression(false));
-        this.endBoss?.setBrutalityAggression?.(false);
-        this.hud?.setBossBarState({ visible: false });
-        this.majorEncounterResolution?.teardown();
-        this.cleanupSceneUi();
+        this.safeShutdownCleanup();
       });
 
       this.applyResponsiveLayout();
@@ -869,16 +860,6 @@ export class Chamber02Scene extends Phaser.Scene {
     const targetSceneKey = targetAltar.sceneKey;
     const targetAltarId = targetAltar.id;
     const targetCompletionKey = targetAltar.completionKey;
-    const brutalityActive = this.brutalityMode?.isActive?.() ?? false;
-    console.info('[Chamber02 boss-pit transition]', {
-      altarId: targetAltarId,
-      sceneKey: targetSceneKey,
-      completionKey: targetCompletionKey,
-      brutalityActive,
-      step: 'begin'
-    });
-
-    this.bossPitTransitionActive = true;
     const transitionPayload = {
       fromScene: this.scene.key,
       returnFromBossPit: false,
@@ -887,42 +868,27 @@ export class Chamber02Scene extends Phaser.Scene {
       currentIntegrity: this.player?.health,
       maxIntegrity: this.player?.maxHealth
     };
+    this.bossPitTransitionActive = true;
+    console.info('[Chamber02 boss-pit handoff:start]', {
+      altarId: targetAltarId,
+      sceneKey: targetSceneKey,
+      completionKey: targetCompletionKey
+    });
 
     try {
       this.prepareForOutgoingSceneTransition();
     } catch (error) {
-      console.error('[Chamber02 boss-pit transition]', {
-        altarId: targetAltarId,
-        sceneKey: targetSceneKey,
-        completionKey: targetCompletionKey,
-        brutalityActive,
-        step: 'cleanup-failed',
-        error
-      });
+      console.error('[Chamber02 boss-pit handoff:cleanup-failed]', error);
     }
 
-    console.info(`[Chamber02Scene] starting immediate ${targetSceneKey} transition`);
+    console.info('[Chamber02 boss-pit handoff:cleanup-complete]', { sceneKey: targetSceneKey });
     this.currentBossPitAltar = null;
     this.bossPitPromptText?.setVisible(false);
-    console.info('[Chamber02 boss-pit transition]', {
-      altarId: targetAltarId,
-      sceneKey: targetSceneKey,
-      completionKey: targetCompletionKey,
-      brutalityActive,
-      step: 'before-scene-start'
-    });
+    console.info('[Chamber02 boss-pit handoff:scene-start]', { sceneKey: targetSceneKey });
     try {
       this.scene.start(targetSceneKey, transitionPayload);
     } catch (error) {
-      console.error('[Chamber02 boss-pit transition]', {
-        altarId: targetAltarId,
-        sceneKey: targetSceneKey,
-        completionKey: targetCompletionKey,
-        brutalityActive,
-        step: 'scene-start-failed',
-        error
-      });
-      console.error(`[Chamber02Scene] immediate scene.start('${targetSceneKey}') failed`, error);
+      console.error('[Chamber02 boss-pit handoff:scene-start-failed]', error);
       this.bossPitTransitionActive = false;
       this.player?.body?.setEnable(true);
       this.uiCamera?.setVisible(true);
@@ -938,16 +904,51 @@ export class Chamber02Scene extends Phaser.Scene {
 
     this.transitionBrutalityCleanupApplied = true;
     const now = this.time?.now ?? 0;
-    this.brutalityMode?.end(now);
-    this.brutalityMode?.resetStreak?.();
-    this.player?.clearBrutalityMode?.();
-
-    this.enemies?.forEach((enemy) => enemy?.setBrutalityAggression?.(false));
-    this.tollKeepers?.forEach((enemy) => enemy?.setBrutalityAggression?.(false));
-    this.endBoss?.setBrutalityAggression?.(false);
-
-    this.exitGateUnlockAudioTimer?.remove(false);
+    this.safeInvokeCleanupStep('brutalityMode.end', () => this.brutalityMode?.end?.(now));
+    this.safeInvokeCleanupStep('brutalityMode.resetStreak', () => this.brutalityMode?.resetStreak?.());
+    this.safeInvokeCleanupStep('player.clearBrutalityMode', () => this.player?.clearBrutalityMode?.());
+    this.safeInvokeCleanupStep('enemies.clearBrutalityAggression', () => {
+      this.enemies?.forEach((enemy) => enemy?.setBrutalityAggression?.(false));
+    });
+    this.safeInvokeCleanupStep('tollKeepers.clearBrutalityAggression', () => {
+      this.tollKeepers?.forEach((enemy) => enemy?.setBrutalityAggression?.(false));
+    });
+    this.safeInvokeCleanupStep('endBoss.clearBrutalityAggression', () => this.endBoss?.setBrutalityAggression?.(false));
+    this.safeInvokeCleanupStep('hud.hideBossBar', () => this.hud?.setBossBarState?.({ visible: false }));
+    this.safeInvokeCleanupStep('majorEncounterResolution.teardown', () => this.majorEncounterResolution?.teardown?.());
+    this.safeInvokeCleanupStep('cleanupSceneUi', () => this.cleanupSceneUi?.());
+    this.safeInvokeCleanupStep('audioDirector.shutdown', () => this.audioDirector?.shutdown?.());
+    this.safeInvokeCleanupStep('exitGateUnlockAudioTimer.remove', () => this.exitGateUnlockAudioTimer?.remove?.(false));
     this.exitGateUnlockAudioTimer = null;
+    this.safeInvokeCleanupStep('mobileControls.init-mode', () => this.mobileControls?.setMode?.('init'));
+  }
+
+  safeInvokeCleanupStep(step, fn) {
+    try {
+      fn?.();
+    } catch (error) {
+      console.error('[Chamber02 shutdown cleanup failed]', { step, error });
+    }
+  }
+
+  safeShutdownCleanup() {
+    console.log('[Chamber02Scene] shutdown event fired');
+    this.safeInvokeCleanupStep('exitGateUnlockAudioTimer.remove', () => this.exitGateUnlockAudioTimer?.remove?.(false));
+    this.exitGateUnlockAudioTimer = null;
+    this.safeInvokeCleanupStep('audioDirector.shutdown', () => this.audioDirector?.shutdown?.());
+    this.safeInvokeCleanupStep('brutalityMode.end', () => this.brutalityMode?.end?.(this.time?.now ?? 0));
+    this.safeInvokeCleanupStep('brutalityMode.resetStreak', () => this.brutalityMode?.resetStreak?.());
+    this.safeInvokeCleanupStep('player.clearBrutalityMode', () => this.player?.clearBrutalityMode?.());
+    this.safeInvokeCleanupStep('enemies.clearBrutalityAggression', () => {
+      this.enemies?.forEach((enemy) => enemy?.setBrutalityAggression?.(false));
+    });
+    this.safeInvokeCleanupStep('tollKeepers.clearBrutalityAggression', () => {
+      this.tollKeepers?.forEach((enemy) => enemy?.setBrutalityAggression?.(false));
+    });
+    this.safeInvokeCleanupStep('endBoss.clearBrutalityAggression', () => this.endBoss?.setBrutalityAggression?.(false));
+    this.safeInvokeCleanupStep('hud.hideBossBar', () => this.hud?.setBossBarState?.({ visible: false }));
+    this.safeInvokeCleanupStep('majorEncounterResolution.teardown', () => this.majorEncounterResolution?.teardown?.());
+    this.safeInvokeCleanupStep('cleanupSceneUi', () => this.cleanupSceneUi?.());
   }
 
   update(time) {
