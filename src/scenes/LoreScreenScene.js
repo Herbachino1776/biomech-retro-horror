@@ -60,6 +60,9 @@ export class LoreScreenScene extends Phaser.Scene {
     this.isClosing = false;
 
     this.cameras.main.setBackgroundColor('#000000');
+    this.cameras.main.setViewport(0, 0, this.scale.width, this.scale.height);
+    this.cameras.main.setZoom(1);
+    this.cameras.main.centerOn(this.scale.width / 2, this.scale.height / 2);
 
     this.backdrop = this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0x000000, 1).setOrigin(0).setDepth(LORE_DEPTH.backdrop);
 
