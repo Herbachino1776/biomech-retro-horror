@@ -3,6 +3,10 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-04-26)
+- **Chamber02 end-boss death hardlock root cause (confirmed):** `Chamber02Scene.handleEndBossDefeated()` invoked `beginBossDeathPayoffPackage(...)` with an incomplete `victory` payload (missing required `fountainBurst` / `blowoutBurst` objects). The package then dereferenced undefined burst config during `onStart` gore setup, throwing after lethal death audio and leaving major-encounter resolution locked (apparent freeze before gore/remains/exit unlock).
+- **Fix applied:** Chamber02 now routes lethal handoff through dedicated `beginEndBossDeathPayoff(...)` with one-shot guards, finite anchor/floor validation, required burst config parity with known working bosses, compact lethal/payoff instrumentation logs, and a guarded fallback unlock path if payoff begin/execute fails.
+- **Current Chamber02 end-boss progression status:** lore -> reveal/combat -> lethal hit -> payoff gore/remains -> boss bar resolve -> exit unlock -> Chamber03 threshold handoff (with emergency fallback unlock if payoff throws).
+
 - **Chamber02 end boss active-but-invisible regression (post-PR #451) fixed:** the boss visual stack was effectively invalid at runtime because `HalfSkullMiniboss.updateVisuals()` multiplied base scale by undefined `presentation.scaleX/scaleY`, producing non-finite scale and breaking sprite bounds/hurtbox alignment; Chamber02 now also forces explicit reveal-time sprite visibility/alpha/depth and immediate hurtbox resync.
 - **End-boss UI wiring fixed:** Chamber02 now explicitly reveals the boss bar at encounter start in `revealEndBoss()` with name/current/max values (hidden pre-activation remains unchanged).
 - **End-boss player damage wiring fixed:** normal overlap authority remains `player.attackHitbox` vs `endBoss.damageHurtbox ?? endBoss.sprite`; with scale/hurtbox sync repaired and active-state guard retained, player hits now route to `endBoss.takeDamage(...)`, update the bar, and preserve modern payoff/unlock flow.
