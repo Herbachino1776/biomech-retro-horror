@@ -136,6 +136,11 @@ const CHAMBER03_FINALE = {
   holdingStateReason: 'sector-i-complete-holding-threshold'
 };
 
+const CHAMBER03_ARENA_TRANSITION = {
+  fadeOutMs: 360,
+  fallbackStartDelayMs: 520
+};
+
 export class Chamber03BossArenaScene extends Phaser.Scene {
   constructor() {
     super('Chamber03BossArenaScene');
@@ -153,6 +158,10 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossDefeatCeremonyBossBarActive = false;
     this.currentProgressionThresholdZone = null;
     this.integrityRewardTracker = new Set();
+    this.isTransitioningToSectorComplete = false;
+    this.hasStartedSector02Chamber01 = false;
+    this.pendingSector02Payload = null;
+    this.sectorTransitionFallbackTimer = null;
   }
 
   create() {
@@ -525,6 +534,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', this.applyResponsiveLayout, this);
       this.game.events.off('lore-cutscene-complete', this.handleLoreCutsceneComplete, this);
+      this.sectorTransitionFallbackTimer?.remove?.(false);
       this.audioDirector?.shutdown();
       this.majorEncounterResolution?.teardown();
       this.bossDamageHurtbox?.destroy();
@@ -1182,15 +1192,35 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.player.body.setVelocity(0, 0);
     this.player.body.setEnable(false);
     this.audioDirector?.stopAmbientLoop({ fadeOut: false });
+    this.pendingSector02Payload = {
+      enteredFrom: 'chamber03-boss-arena',
+      progressionSource: 'ruptured-threshold-gate',
+      reason: CHAMBER03_FINALE.holdingStateReason
+    };
 
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.start('Sector02Chamber01Scene', {
-        enteredFrom: 'chamber03-boss-arena',
-        progressionSource: 'ruptured-threshold-gate',
-        reason: CHAMBER03_FINALE.holdingStateReason
-      });
-    });
-    this.cameras.main.fadeOut(360, 0, 0, 0);
+    const startSector02Chamber01 = () => {
+      if (this.hasStartedSector02Chamber01) {
+        return;
+      }
+      this.hasStartedSector02Chamber01 = true;
+      this.sectorTransitionFallbackTimer?.remove?.(false);
+      try {
+        this.scene.start('Sector02Chamber01Scene', this.pendingSector02Payload);
+      } catch (error) {
+        this.hasStartedSector02Chamber01 = false;
+        this.isTransitioningToSectorComplete = false;
+        this.player?.body?.setEnable(true);
+        this.mobileControls?.setMode('gameplay');
+        console.error('[Chamber03BossArenaScene] scene.start(Sector02Chamber01Scene) failed', error);
+      }
+    };
+
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, startSector02Chamber01);
+    this.sectorTransitionFallbackTimer = this.time.delayedCall(
+      CHAMBER03_ARENA_TRANSITION.fallbackStartDelayMs,
+      startSector02Chamber01
+    );
+    this.cameras.main.fadeOut(CHAMBER03_ARENA_TRANSITION.fadeOutMs, 0, 0, 0);
   }
 
   updateFinaleGatePulse(time) {

@@ -3,6 +3,29 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-04-26)
+- **Chamber03 modernization/content pass landed (forward-authoring pass, no Chamber02 reopen):**
+  - Chamber03 world-space/procession pacing expanded (`worldWidth` 4800 -> 6200) with stronger wall-module architectural rhythm and clearer authored sequence: entry composition -> repeated wall-module runs -> encounter pockets -> lore/threshold approach -> boss-arena handoff.
+  - Chamber03 processional backdrop now reuses `chamber03BackgroundWallModule` across additional spaced segments to avoid cramped painterly-only reads and keep floor-band readability.
+  - Encounter pockets re-authored for BRUTALITY-era pacing:
+    - 4 pockets (up from 3) with wider spacing and less overlap spam.
+    - basics clustered for 2-kill-in-5s windows.
+    - pre-climax elite/toll-keeper pressure retained as miniboss-style pocket anchor.
+  - Chamber03 BRUTALITY support added using the stable Chamber02 pattern:
+    - trigger: 2 basic kills in 5s
+    - active: 20s
+    - max 2 activations
+    - no extension, no UI/meter
+    - enemy aggression sync while active
+    - clean teardown on SHUTDOWN and outgoing boss-arena transition.
+  - Chamber03 outgoing boss-arena handoff hardened to atomic/non-fatal behavior:
+    - destination payload captured first
+    - outgoing cleanup guarded
+    - fade callback retained but no longer sole start path (fallback timed start included).
+  - Chamber03BossArena outgoing progression handoff to Sector02Chamber01 similarly hardened:
+    - captured payload + fade callback + fallback timed start.
+  - DEV target remains `Chamber03Scene`; START GAME remains `Chamber01Scene`.
+  - Known Chamber03 follow-up: interactive runtime playthrough should still validate exact tuning feel on device (build passes do not substitute for full manual pacing/activation combat feel validation).
+
 - **Chamber03 baseline audit completed (controlled stabilization pass):**
   - Scene registration and boot wiring were already valid (`Chamber03Scene` + `Chamber03BossArenaScene` registered in `main.js`; `Chamber02Scene` exit threshold already handoffs to `Chamber03Scene`; `START GAME` remained `Chamber01Scene`).
   - Chamber02 -> Chamber03 payload contract was already valid (`enteredFrom` / `progressionSource` payload does not break Chamber03 `init/create`; Chamber02 fresh-interact threshold rule remains intact and unchanged).
