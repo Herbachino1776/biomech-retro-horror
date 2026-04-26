@@ -195,12 +195,12 @@ export const LORE_SCREENS = {
     }
   },
   'chamber02-vertebral-threshold': {
-    imageKey: ASSET_KEYS.sector02Chamber02LoreImage,
+    imageKey: ASSET_KEYS.sector02Chamber02PressureDeacon,
     title: 'CHAMBER 02 // VERTEBRAL THRESHOLD',
     body: [
-      'The toll judge chains this corridor to two buried pits and one sworn blade.',
-      'Only after the shrine remembers you does the marrow gate permit witness.',
-      'Step forward, and the chamber demands a verdict in blood.'
+      'Procession bells go silent at the final lock where the Toll Judge keeps the spine ledger.',
+      'No corridor debt is forgiven here: the gate opens only when the judge is struck down and the marrow tally ends.',
+      'Beyond the split door, Chamber 03 waits to weigh what remains of your vessel.'
     ],
     prompt: 'Press [E] / [Enter] or tap to continue',
     presentation: {

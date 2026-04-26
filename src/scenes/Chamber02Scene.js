@@ -199,7 +199,7 @@ const CHAMBER02_END_BOSS = {
   hurtRecoilVelocityX: 120,
   hurtRecoilVelocityY: -56,
   body: { width: 90, height: 134, offsetX: 98, offsetY: 78 },
-  textureKey: ASSET_KEYS.chamber01HalfSkullMiniboss,
+  textureKey: ASSET_KEYS.sector02Chamber02PressureDeacon,
   audioProfile: 'miniboss',
   revealViewportPadding: 80,
   bossBarRevealViewportPadding: 36,
@@ -1129,10 +1129,6 @@ export class Chamber02Scene extends Phaser.Scene {
   shouldStartEndBossEncounter() {
     return !this.endBossEncounterStarted
       && !this.endBossDefeated
-      && this.completedLoreBeats.has('chamber02-vertebral-threshold')
-      && this.hasCompletedBossPitAshLoop
-      && this.hasCompletedBossPitHollowSkyLoop
-      && this.areAllTollKeepersDefeated()
       && this.player.sprite.x >= CHAMBER02_END_BOSS.activationX;
   }
 
@@ -1435,7 +1431,7 @@ export class Chamber02Scene extends Phaser.Scene {
       try {
         this.scene.start('Chamber03Scene', {
           enteredFrom: 'chamber02-physical-threshold',
-          progressionSource: 'toll-keeper-corridor-threshold'
+          progressionSource: 'vertebral-toll-judge-threshold'
         });
       } catch (error) {
         console.error("[Chamber02Scene] scene.start('Chamber03Scene') failed", error);
