@@ -5,7 +5,7 @@ Use this file to start a fresh planning/implementation session from real current
 ## Latest Update (2026-04-26)
 - **Chamber02 modernization:** main chamber has been stretched for wider pacing pockets, prototype boss-pit descend prompt text removed, and gate visuals shifted toward in-world prop/sprite presentation rather than cropped background-style plates.
 - **BRUTALITY support (Chamber02):** Chamber02 now runs BRUTALITY state tracking (2 kills / 5s trigger, 20s duration, max 2 activations), basic kills feed streaks, and enemy/toll-keeper aggression syncs while active with clean teardown on scene shutdown.
-- **Second boss pit standardization:** Hollow Sky pit now follows the S1C2 stable activation-first pattern by activating boss on arrival release while keeping boss-bar reveal view-gated and preserving return-altar unlock/return completion semantics.
+- **Second boss pit hardlock fix:** Hollow Sky pit hardlocked because `chamber02BossPitHollowSkyConfig` relied on the configurable pit default boss path (`PressureDeacon`) instead of the proven S1C2 `HalfSkullMiniboss` path. The fix explicitly sets `bossClass: HalfSkullMiniboss`, keeps activation-on-arrival-release and return-altar flow, and preserves Hollow Sky art/name while restoring stable sprite/hurtbox overlap combat.
 - **Chamber-ending boss:** Chamber02 now includes a main-path end boss near the exit gate (**THE VERTEBRAL TOLL JUDGE**), with normal hurtbox overlap damage flow, delayed reveal/boss-bar behavior, and exit unlock after modern death/payoff resolution.
 - **Current DEV target:** BootScene START GAME remains Chamber01Scene; DEV remains Chamber02Scene for S1C2 modernization validation.
 
