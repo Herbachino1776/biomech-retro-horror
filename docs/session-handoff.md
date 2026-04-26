@@ -3,6 +3,12 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-04-26)
+- **Chamber02 progression authority repaired:** chamber exit progression is now governed by defeating the end boss (**THE VERTEBRAL TOLL JUDGE**) rather than side-encounter completion state; boss-pit loops/toll-keeper cleanup no longer gate end-boss spawn authority.
+- **Chamber02 ending boss identity/path:** end boss remains the Chamber02 `HalfSkullMiniboss` behavior path but now binds to `ASSET_KEYS.sector02Chamber02PressureDeacon` (non-original-HalfSkull visual), preserving overlap-based melee damage and modern death/payoff package.
+- **Chamber02 lore screen repaired:** `chamber02-vertebral-threshold` lore screen now has explicit non-empty text and a guaranteed loaded image (`ASSET_KEYS.sector02Chamber02PressureDeacon`) for a stable non-blank lore beat.
+- **Chamber02 -> Chamber03 status:** exit stays blocked before boss death, unlocks after boss payoff completes, and threshold handoff continues to `Chamber03Scene` with fresh-interact safety preserved.
+- **Current DEV target:** BootScene START GAME remains Chamber01Scene; DEV remains Chamber02Scene for end-lane progression validation.
+
 - **Chamber02 ending repaired:** end corridor blockage/deadlock at the exit lane was corrected by relocating the physical gate barrier to the true threshold side, removing confusing ellipse/post gate dressing at the choke, and keeping only intentional collider geometry on progression blockers.
 - **Chamber02 gate/threshold approach:** end gate now reads as an in-world prop sprite using `sector04Chamber02PropThresholdDoor` art, with collision/transition zones kept separate from decorative visuals.
 - **Chamber02 lore beat restored:** a dedicated end-lane lore shrine trigger (Sector 2 Chamber 2 altar + lore screen image) now fires before the end boss gate flow and returns cleanly back into Chamber02.
