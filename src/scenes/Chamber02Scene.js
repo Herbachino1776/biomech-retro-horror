@@ -823,6 +823,13 @@ export class Chamber02Scene extends Phaser.Scene {
     });
 
     if (this.currentBossPitAltar) {
+      console.info('[Chamber02 boss-pit transition]', {
+        altarId: this.currentBossPitAltar.id,
+        sceneKey: this.currentBossPitAltar.sceneKey,
+        completionKey: this.currentBossPitAltar.completionKey,
+        brutalityActive: this.brutalityMode?.isActive?.() ?? false,
+        step: 'altar-selected'
+      });
       this.bossPitPromptText
         ?.setPosition(this.currentBossPitAltar.x, this.currentBossPitAltar.y + this.currentBossPitAltar.promptOffsetY)
         .setVisible(true);
@@ -859,8 +866,19 @@ export class Chamber02Scene extends Phaser.Scene {
     }
 
     const targetAltar = this.currentBossPitAltar;
+    const targetSceneKey = targetAltar.sceneKey;
+    const targetAltarId = targetAltar.id;
+    const targetCompletionKey = targetAltar.completionKey;
+    const brutalityActive = this.brutalityMode?.isActive?.() ?? false;
+    console.info('[Chamber02 boss-pit transition]', {
+      altarId: targetAltarId,
+      sceneKey: targetSceneKey,
+      completionKey: targetCompletionKey,
+      brutalityActive,
+      step: 'begin'
+    });
+
     this.bossPitTransitionActive = true;
-    this.prepareForOutgoingSceneTransition();
     const transitionPayload = {
       fromScene: this.scene.key,
       returnFromBossPit: false,
@@ -870,14 +888,41 @@ export class Chamber02Scene extends Phaser.Scene {
       maxIntegrity: this.player?.maxHealth
     };
 
-    console.info(`[Chamber02Scene] starting immediate ${targetAltar.sceneKey} transition`);
+    try {
+      this.prepareForOutgoingSceneTransition();
+    } catch (error) {
+      console.error('[Chamber02 boss-pit transition]', {
+        altarId: targetAltarId,
+        sceneKey: targetSceneKey,
+        completionKey: targetCompletionKey,
+        brutalityActive,
+        step: 'cleanup-failed',
+        error
+      });
+    }
+
+    console.info(`[Chamber02Scene] starting immediate ${targetSceneKey} transition`);
     this.currentBossPitAltar = null;
     this.bossPitPromptText?.setVisible(false);
-    console.info(`[Chamber02Scene] immediate scene.start('${targetAltar.sceneKey}') about to run`);
+    console.info('[Chamber02 boss-pit transition]', {
+      altarId: targetAltarId,
+      sceneKey: targetSceneKey,
+      completionKey: targetCompletionKey,
+      brutalityActive,
+      step: 'before-scene-start'
+    });
     try {
-      this.scene.start(targetAltar.sceneKey, transitionPayload);
+      this.scene.start(targetSceneKey, transitionPayload);
     } catch (error) {
-      console.error(`[Chamber02Scene] immediate scene.start('${targetAltar.sceneKey}') failed`, error);
+      console.error('[Chamber02 boss-pit transition]', {
+        altarId: targetAltarId,
+        sceneKey: targetSceneKey,
+        completionKey: targetCompletionKey,
+        brutalityActive,
+        step: 'scene-start-failed',
+        error
+      });
+      console.error(`[Chamber02Scene] immediate scene.start('${targetSceneKey}') failed`, error);
       this.bossPitTransitionActive = false;
       this.player?.body?.setEnable(true);
       this.uiCamera?.setVisible(true);
