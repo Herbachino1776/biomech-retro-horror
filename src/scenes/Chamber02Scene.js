@@ -1099,13 +1099,39 @@ export class Chamber02Scene extends Phaser.Scene {
     }
 
     this.endBoss.lastAttackHitId = this.player.attackId;
-    this.endBoss.takeDamage(1, this.time.now);
+    const now = this.time.now;
+    const deathAnchorSnapshot = {
+      x: this.endBoss?.sprite?.x,
+      y: this.endBoss?.sprite?.y,
+      bodyBottom: this.endBoss?.body?.bottom
+    };
+    console.info('[Chamber02 end boss death]', {
+      step: 'before-lethal-damage',
+      health: this.endBoss?.health,
+      dead: this.endBoss?.dead,
+      x: deathAnchorSnapshot.x,
+      y: deathAnchorSnapshot.y,
+      bodyBottom: deathAnchorSnapshot.bodyBottom,
+      victoryActive: this.endBossVictorySequenceActive,
+      processed: this.hasProcessedEndBossVictory
+    });
+    this.endBoss.takeDamage(1, now);
+    console.info('[Chamber02 end boss death]', {
+      step: 'after-take-damage',
+      health: this.endBoss?.health,
+      dead: this.endBoss?.dead,
+      x: this.endBoss?.sprite?.x,
+      y: this.endBoss?.sprite?.y,
+      bodyBottom: this.endBoss?.body?.bottom,
+      victoryActive: this.endBossVictorySequenceActive,
+      processed: this.hasProcessedEndBossVictory
+    });
     this.audioDirector?.playPlayerHit();
     const knockDirection = Math.sign(this.endBoss.sprite.x - this.player.sprite.x) || this.player.facing;
     this.endBoss.direction = knockDirection;
 
     if (this.endBoss.dead) {
-      this.handleEndBossDefeated();
+      this.handleEndBossDefeated(deathAnchorSnapshot);
     }
   }
 
@@ -1124,13 +1150,73 @@ export class Chamber02Scene extends Phaser.Scene {
     this.player.body.setVelocityY(-220);
   }
 
-  handleEndBossDefeated() {
-    if (this.hasProcessedEndBossVictory || this.majorEncounterResolution?.isResolutionActive('chamber02-end-boss')) {
-      return;
+  resolveFiniteEndBossDeathAnchors(anchorSnapshot = {}) {
+    const fallbackX = CHAMBER02_END_BOSS.spawnX;
+    const fallbackY = WORLD.floorY - 8;
+    const fallbackFloorPlaneY = WORLD.floorY - 8;
+    const bossSprite = this.endBoss?.sprite;
+    const bossBody = this.endBoss?.body;
+    const anchorX = Number.isFinite(anchorSnapshot?.x)
+      ? anchorSnapshot.x
+      : Number.isFinite(bossSprite?.x) ? bossSprite.x : fallbackX;
+    const anchorY = Number.isFinite(anchorSnapshot?.y)
+      ? anchorSnapshot.y
+      : Number.isFinite(bossSprite?.y) ? bossSprite.y : fallbackY;
+    const anchorBodyBottom = Number.isFinite(anchorSnapshot?.bodyBottom)
+      ? anchorSnapshot.bodyBottom
+      : Number.isFinite(bossBody?.bottom) ? bossBody.bottom : fallbackFloorPlaneY;
+    const floorPlaneY = Number.isFinite(anchorBodyBottom) ? anchorBodyBottom : fallbackFloorPlaneY;
+    return {
+      bossX: anchorX,
+      bossY: anchorY,
+      bossGroundY: floorPlaneY,
+      floorPlaneY
+    };
+  }
+
+  applyEndBossVictoryFallback(error, anchors = {}) {
+    console.error('[Chamber02 end boss payoff failed]', error);
+    console.info('[Chamber02 end boss death]', {
+      step: 'payoff-fallback',
+      health: this.endBoss?.health,
+      dead: this.endBoss?.dead,
+      x: this.endBoss?.sprite?.x,
+      y: this.endBoss?.sprite?.y,
+      bodyBottom: this.endBoss?.body?.bottom,
+      victoryActive: this.endBossVictorySequenceActive,
+      processed: this.hasProcessedEndBossVictory,
+      anchors
+    });
+    this.endBossDefeated = true;
+    this.endBossVictorySequenceActive = false;
+    this.endBossBarRevealed = false;
+    this.hud?.setBossBarState({ visible: false });
+    this.endBoss?.setActive?.(false);
+    this.endBoss?.body?.setEnable?.(false);
+    this.endBoss?.sprite?.setVisible(false).setAlpha(0);
+    this.exitThresholdAura?.setVisible(true);
+    this.refreshExitGateState();
+  }
+
+  beginEndBossDeathPayoff(anchorSnapshot = {}) {
+    const anchors = this.resolveFiniteEndBossDeathAnchors(anchorSnapshot);
+    if (this.endBoss?.sprite) {
+      this.endBoss.sprite.setPosition(anchors.bossX, anchors.bossY);
     }
-    this.hasProcessedEndBossVictory = true;
-    this.endBossVictorySequenceActive = true;
-    beginBossDeathPayoffPackage({
+
+    console.info('[Chamber02 end boss death]', {
+      step: 'before-boss-death-payoff-package',
+      health: this.endBoss?.health,
+      dead: this.endBoss?.dead,
+      x: this.endBoss?.sprite?.x,
+      y: this.endBoss?.sprite?.y,
+      bodyBottom: this.endBoss?.body?.bottom,
+      victoryActive: this.endBossVictorySequenceActive,
+      processed: this.hasProcessedEndBossVictory,
+      anchors
+    });
+
+    const didBegin = beginBossDeathPayoffPackage({
       scene: this,
       encounterId: 'chamber02-end-boss',
       majorEncounterResolution: this.majorEncounterResolution,
@@ -1158,12 +1244,13 @@ export class Chamber02Scene extends Phaser.Scene {
         zoomOutDurationMs: 300
       },
       payoffPose: {
-        floorPlaneY: WORLD.floorY - 8,
+        floorPlaneY: anchors.floorPlaneY,
         maxUpwardSnapPx: 8,
         visibleFootOffsetY: this.endBoss.normalizedVisibleFootOffsetY ?? 0
       },
       corpseRemains: {
-        floorPlaneY: WORLD.floorY - 8,
+        floorPlaneY: anchors.floorPlaneY,
+        groundY: anchors.bossGroundY,
         visibleFootOffsetY: this.endBoss.normalizedVisibleFootOffsetY ?? 0,
         size: 'boss'
       },
@@ -1174,15 +1261,92 @@ export class Chamber02Scene extends Phaser.Scene {
         explosionFadeStartDelayMs: 100,
         explosionFadeDurationMs: 320,
         postExplosionDespawnDelayMs: 520,
-        goreFountainCadenceMs: 84
+        goreFountainCadenceMs: 84,
+        fountainBurst: {
+          xJitter: [-58, 58],
+          yFromBottom: [106, 154],
+          depthOffset: 0.38,
+          randomScale: [0.72, 0.92],
+          durationMs: 620,
+          burstCount: 56,
+          sprayCount: 80,
+          mistCount: 8,
+          emberCount: 8,
+          burstRadiusX: 126,
+          burstRadiusY: 166,
+          dropletWidth: [8, 22],
+          dropletHeight: [18, 46],
+          sprayWidth: [4, 11],
+          sprayHeight: [14, 38],
+          splashColor: 0x8b111c,
+          heavyColor: 0x5e0a13,
+          highlightColor: 0xb43645,
+          redSpeckColor: 0xc84a55,
+          mistColor: 0x1d080b
+        },
+        blowoutBurst: {
+          yFromBottom: [96, 138],
+          depthOffset: 0.46,
+          scale: 1.3,
+          durationMs: 820,
+          burstCount: 94,
+          sprayCount: 132,
+          mistCount: 20,
+          emberCount: 18,
+          burstRadiusX: 160,
+          burstRadiusY: 194,
+          dropletWidth: [12, 30],
+          dropletHeight: [22, 56],
+          sprayWidth: [5, 14],
+          sprayHeight: [16, 42],
+          splashColor: 0x8b111c,
+          heavyColor: 0x5e0a13,
+          highlightColor: 0xb43645,
+          redSpeckColor: 0xc84a55,
+          mistColor: 0x1d080b
+        }
       },
       onComplete: () => {
+        console.info('[Chamber02 end boss death]', {
+          step: 'payoff-complete',
+          health: this.endBoss?.health,
+          dead: this.endBoss?.dead,
+          x: this.endBoss?.sprite?.x,
+          y: this.endBoss?.sprite?.y,
+          bodyBottom: this.endBoss?.body?.bottom,
+          victoryActive: this.endBossVictorySequenceActive,
+          processed: this.hasProcessedEndBossVictory
+        });
         this.endBossDefeated = true;
         this.endBossVictorySequenceActive = false;
+        this.endBossBarRevealed = false;
+        this.hud?.setBossBarState({ visible: false });
         this.exitThresholdAura?.setVisible(true);
         this.refreshExitGateState();
       }
     });
+
+    if (!didBegin) {
+      this.applyEndBossVictoryFallback(new Error('beginBossDeathPayoffPackage returned false'), anchors);
+    }
+  }
+
+  handleEndBossDefeated(anchorSnapshot = {}) {
+    if (this.hasProcessedEndBossVictory || this.endBossVictorySequenceActive || this.majorEncounterResolution?.isResolutionActive('chamber02-end-boss')) {
+      return;
+    }
+
+    this.hasProcessedEndBossVictory = true;
+    this.endBossVictorySequenceActive = true;
+    this.endBoss?.setActive?.(false);
+    this.endBoss?.setDamageHurtboxEnabled?.(false);
+    this.endBoss?.body?.setVelocity?.(0, 0);
+    this.endBoss?.body?.setEnable?.(false);
+    try {
+      this.beginEndBossDeathPayoff(anchorSnapshot);
+    } catch (error) {
+      this.applyEndBossVictoryFallback(error, this.resolveFiniteEndBossDeathAnchors(anchorSnapshot));
+    }
   }
 
   isEnemyOverlapTarget(target, enemy) {
