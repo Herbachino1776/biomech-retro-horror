@@ -3,6 +3,19 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-04-26)
+- **Chamber03 sector-boss presentation/payoff modernization landed (Precentor visual retirement):**
+  - Chamber03 boss arena now presents the sector finale with the existing boss-pit-grade sprite `ASSET_KEYS.bossPit20HornedMothJudge` (old Precentor sprite presentation retired from active fight path).
+  - Chamber03 sector-boss combat identity/presentation now reads as **THE HORNED MARROW JUDGE** (boss bar + encounter text updated), while preserving stable Chamber03 boss-arena flow and progression handoff.
+  - Boss sprite grounding/hit contract tuned in-scene (display/origin/body/damage hurtbox) to keep the boss visible, floor-aligned, attack-capable, and damageable via normal overlap authority (`player.attackHitbox` vs damage hurtbox).
+  - Sector-boss lethal sequence now uses modern `beginBossDeathPayoffPackage(...)` with explicit required payload fields (`fountainBurst`, `blowoutBurst`) and stronger-than-boss-pit tuning:
+    - heavier death-camera zoom/focus and longer staged shake
+    - larger gore fountain + blowout burst
+    - boss-tier remains upgraded to supported `bossPitBoss` profile with floor lift for persistent large corpse presence
+    - banishment sting retained in payoff cadence
+  - Added finite-anchor validation before payoff begin and a guarded fallback completion path so payoff exceptions cannot softlock post-boss progression.
+  - Chamber03 post-boss progression contract remains intact: gate reveal -> interact -> Sector02Chamber01 handoff.
+  - DEV target remains `Chamber03Scene`; START GAME remains `Chamber01Scene`.
+
 - **Chamber03 modernization/content pass landed (forward-authoring pass, no Chamber02 reopen):**
   - Chamber03 world-space/procession pacing expanded (`worldWidth` 4800 -> 6200) with stronger wall-module architectural rhythm and clearer authored sequence: entry composition -> repeated wall-module runs -> encounter pockets -> lore/threshold approach -> boss-arena handoff.
   - Chamber03 processional backdrop now reuses `chamber03BackgroundWallModule` across additional spaced segments to avoid cramped painterly-only reads and keep floor-band readability.
