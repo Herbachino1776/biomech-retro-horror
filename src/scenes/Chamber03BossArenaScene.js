@@ -36,10 +36,10 @@ const CHAMBER03_BOSS_ARENA = {
   floorShadowAlpha: 0.34,
   bossAnchorX: 1464,
   bossAnchorY: WORLD.floorY - 10,
-  bossWidth: 364,
-  bossHeight: 418,
-  bossOriginX: 0.5,
-  bossOriginY: 0.98,
+  bossWidth: 432,
+  bossHeight: 448,
+  bossOriginX: 0.52,
+  bossOriginY: 0.986,
   bossPromptOffsetY: -228,
   bossRevealPromptDuration: 1800,
   omenDelayMs: 260,
@@ -54,8 +54,8 @@ const CHAMBER03_BOSS_ARENA = {
 const CHAMBER03_BOSS_OMEN_CUTSCENE_ID = 'chamber03-precentor-threshold';
 
 const CHAMBER03_BOSS_COMBAT = {
-  name: 'THE PRECENTOR OF MARROW',
-  subtitle: 'Choir Hall Adjudicator',
+  name: 'THE HORNED MARROW JUDGE',
+  subtitle: 'Sector I Terminal Adjudicator',
   maxHealth: 15,
   phaseTwoThreshold: 6,
   approachRange: 272,
@@ -95,7 +95,7 @@ const CHAMBER03_BOSS_COMBAT = {
     contactDamage: 1,
     contactDamageCooldownMs: 1200
   },
-  body: { width: 96, height: 230, offsetX: 134, offsetY: 150 },
+  body: { width: 114, height: 212, offsetX: 100, offsetY: 176 },
   hurtFlashMs: 220,
   hitPulseMs: 260,
   hurtRecoverMs: 260,
@@ -112,10 +112,13 @@ const CHAMBER03_BOSS_COMBAT = {
 };
 
 const CHAMBER03_BOSS_DAMAGE_HURTBOX = resolveDamageHurtboxConfig({
-  trimXRatio: 0.015,
-  trimYRatio: 0.015,
-  minWidth: 88,
-  minHeight: 150
+  trimXRatio: 0.08,
+  trimYRatio: 0.08,
+  insetBottomPx: 0,
+  minWidth: 190,
+  minHeight: 250,
+  offsetX: 0,
+  offsetY: -24
 });
 
 const CHAMBER03_BOSS_VISUAL_FLOOR_ALIGN = {
@@ -131,10 +134,12 @@ const CHAMBER03_FINALE = {
   controlReleaseDelayMs: 3720,
   progressionInteractDelayMs: 360,
   progressionPromptText: '',
-  payoffTitle: 'THE PRECENTOR IS SILENCED',
+  payoffTitle: 'THE HORNED JUDGE IS SILENCED',
   payoffBody: 'Sector I stands complete.\nThe marrow route below has opened.',
   holdingStateReason: 'sector-i-complete-holding-threshold'
 };
+
+const CHAMBER03_SECTOR_BOSS_ENCOUNTER_ID = 'chamber03-sector-finale-boss';
 
 const CHAMBER03_ARENA_TRANSITION = {
   fadeOutMs: 360,
@@ -424,9 +429,9 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossArrivalAura = this.add.ellipse(bossX, bossY + 18, 228, 312, COLORS.sickly, 0).setDepth(-4.1);
     this.bossArrivalHalo = this.add.ellipse(bossX, bossY - 16, 170, 244, 0xdcccae, 0).setDepth(-4.05);
 
-    if (this.textures.exists(ASSET_KEYS.chamber03BossPrecentor)) {
+    if (this.textures.exists(ASSET_KEYS.bossPit20HornedMothJudge)) {
       this.bossSprite = this.add
-        .image(bossX, bossY, ASSET_KEYS.chamber03BossPrecentor)
+        .image(bossX, bossY, ASSET_KEYS.bossPit20HornedMothJudge)
         .setDisplaySize(CHAMBER03_BOSS_ARENA.bossWidth, CHAMBER03_BOSS_ARENA.bossHeight)
         .setOrigin(CHAMBER03_BOSS_ARENA.bossOriginX, CHAMBER03_BOSS_ARENA.bossOriginY)
         .setTint(0xd2c1aa)
@@ -442,7 +447,20 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         .setVisible(false);
 
       this.bossFallbackLabel = this.add
-        .text(bossX, bossY - 12, 'PRECENTOR', {
+        .text(bossX, bossY - 12, 'HORNED JUDGE', {
+          fontFamily: 'monospace',
+          fontSize: '16px',
+          color: '#d7c8b2',
+          align: 'center'
+        })
+        .setOrigin(0.5)
+        .setDepth(6.24)
+        .setVisible(false);
+    }
+
+    if (!this.bossFallbackLabel) {
+      this.bossFallbackLabel = this.add
+        .text(bossX, bossY - 12, 'HORNED JUDGE', {
           fontFamily: 'monospace',
           fontSize: '16px',
           color: '#d7c8b2',
@@ -660,7 +678,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossArrivalAura?.setAlpha(usedFallback ? 0.16 : 0.12);
     this.bossArrivalHalo?.setAlpha(usedFallback ? 0.1 : 0.08);
     this.bossStatusPrompt
-      ?.setText(usedFallback ? 'THE PRECENTOR ARRIVES WITHOUT OMEN' : 'THE PRECENTOR STANDS IN JUDGMENT')
+      ?.setText(usedFallback ? 'THE HORNED JUDGE ARRIVES UNBIDDEN' : 'THE HORNED JUDGE STANDS IN VERDICT')
       .setPosition(this.scale.width / 2, this.getBossPromptY())
       .setVisible(true);
 
@@ -841,7 +859,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossCombat.lastAttackAt = time - 520;
     this.bossCombat.attackLabel = 'RUPTURE';
     this.bossStatusPrompt
-      ?.setText('THE PRECENTOR SHREDS ITS LITURGY')
+      ?.setText('THE HORNED JUDGE SHREDS ITS LITURGY')
       .setPosition(this.scale.width / 2, this.getBossPromptY())
       .setVisible(true);
     this.time.delayedCall(1600, () => {
@@ -868,94 +886,109 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
   }
 
   defeatBoss() {
-    if (!this.bossCombat || this.bossCombat.defeated || this.majorEncounterResolution?.isResolutionActive('chamber03-precentor')) {
+    if (
+      !this.bossCombat
+      || this.bossCombat.defeated
+      || this.majorEncounterResolution?.isResolutionActive(CHAMBER03_SECTOR_BOSS_ENCOUNTER_ID)
+    ) {
       return;
     }
 
-    beginBossDeathPayoffPackage({
-      scene: this,
-      encounterId: 'chamber03-precentor',
-      majorEncounterResolution: this.majorEncounterResolution,
-      bossSprite: this.bossSprite,
-      bossBody: this.bossBody,
-      player: this.player,
-      setResolutionLock: (locked) => {
-        this.resolutionLockActive = locked;
-      },
-      followPlayer: {
-        cameraLerp: CHAMBER03_BOSS_ARENA.cameraLerp,
-        followOffsetX: CHAMBER03_BOSS_ARENA.desktopFollowOffsetX,
-        followOffsetY: 0,
-        zoom: this.mobileControls.enabled && this.scale.height >= this.scale.width ? PORTRAIT_LAYOUT.portraitZoom : PORTRAIT_LAYOUT.desktopZoom,
-        onRestored: () => this.applyResponsiveLayout()
-      },
-      deathCamera: {
-        focusLerp: { x: 0.07, y: 0.07 },
-        focusOffsetX: 0,
-        focusOffsetY: -32,
-        zoomScale: 1.2,
-        zoomInDurationMs: 340,
-        zoomOutDurationMs: 360
-      },
-      payoffPose: {
-        floorPlaneY: WORLD.floorY + 2,
-        maxUpwardSnapPx: 42
-      },
-      corpseRemains: {
-        groundY: WORLD.floorY + 2,
-        size: 'large'
-      },
-      victory: {
-        preExplosionShakeMs: CHAMBER03_FINALE.bloodFlashMs,
-        preExplosionShakeIntensity: 0.028,
-        explosionFadeStartDelayMs: 0,
-        explosionFadeDurationMs: CHAMBER03_FINALE.bossBarDropDelayMs,
-        postExplosionDespawnDelayMs: CHAMBER03_FINALE.bossBarDropDelayMs,
-        goreFountainCadenceMs: 86,
-        fountainBurst: {
-          xJitter: [-64, 64],
-          yFromBottom: [96, 156],
-          depthOffset: 0.38,
-          randomScale: [0.84, 1.06],
-          durationMs: 590,
-          burstCount: 64,
-          sprayCount: 88,
-          mistCount: 10,
-          emberCount: 8,
-          burstRadiusX: 136,
-          burstRadiusY: 186,
-          dropletWidth: [8, 24],
-          dropletHeight: [18, 48],
-          sprayWidth: [4, 12],
-          sprayHeight: [14, 38],
-          splashColor: 0x86111b,
-          heavyColor: 0x560b13,
-          highlightColor: 0xa23340,
-          redSpeckColor: 0xc24753,
-          mistColor: 0x1e090d
+    const bossX = this.bossSprite?.x;
+    const bossY = this.bossSprite?.y;
+    const floorPlaneY = WORLD.floorY + 2;
+    const focusY = (Number.isFinite(bossY) ? bossY : CHAMBER03_BOSS_ARENA.bossAnchorY) - 44;
+    const hasFiniteAnchors = [bossX, bossY, floorPlaneY, focusY].every((value) => Number.isFinite(value));
+    if (!hasFiniteAnchors) {
+      this.failSafeCompleteSectorBossDeath('[Chamber03BossArenaScene] invalid sector boss payoff anchors');
+      return;
+    }
+
+    try {
+      const didBegin = beginBossDeathPayoffPackage({
+        scene: this,
+        encounterId: CHAMBER03_SECTOR_BOSS_ENCOUNTER_ID,
+        majorEncounterResolution: this.majorEncounterResolution,
+        bossSprite: this.bossSprite,
+        bossBody: this.bossBody,
+        player: this.player,
+        setResolutionLock: (locked) => {
+          this.resolutionLockActive = locked;
         },
-        blowoutBurst: {
-          yFromBottom: [94, 134],
-          depthOffset: 0.46,
-          scale: 1.46,
-          durationMs: 840,
-          burstCount: 102,
-          sprayCount: 136,
-          mistCount: 22,
-          emberCount: 20,
-          burstRadiusX: 168,
-          burstRadiusY: 204,
-          dropletWidth: [12, 34],
-          dropletHeight: [24, 58],
-          sprayWidth: [6, 15],
-          sprayHeight: [16, 42],
-          splashColor: 0x8b111c,
-          heavyColor: 0x5e0a13,
-          highlightColor: 0xb43645,
-          redSpeckColor: 0xc84a55,
-          mistColor: 0x1d080b
+        followPlayer: {
+          cameraLerp: CHAMBER03_BOSS_ARENA.cameraLerp,
+          followOffsetX: CHAMBER03_BOSS_ARENA.desktopFollowOffsetX,
+          followOffsetY: 0,
+          zoom: this.mobileControls.enabled && this.scale.height >= this.scale.width ? PORTRAIT_LAYOUT.portraitZoom : PORTRAIT_LAYOUT.desktopZoom,
+          onRestored: () => this.applyResponsiveLayout()
         },
-        extraStages: [
+        deathCamera: {
+          focusLerp: { x: 0.06, y: 0.06 },
+          focusOffsetX: 0,
+          focusOffsetY: -44,
+          zoomScale: 1.28,
+          zoomInDurationMs: 380,
+          zoomOutDurationMs: 420
+        },
+        payoffPose: {
+          floorPlaneY,
+          maxUpwardSnapPx: 52
+        },
+        corpseRemains: {
+          floorPlaneY: floorPlaneY - 48,
+          size: 'bossPitBoss'
+        },
+        victory: {
+          preExplosionShakeMs: CHAMBER03_FINALE.bloodFlashMs + 560,
+          preExplosionShakeIntensity: 0.036,
+          explosionFadeStartDelayMs: 0,
+          explosionFadeDurationMs: CHAMBER03_FINALE.bossBarDropDelayMs + 160,
+          postExplosionDespawnDelayMs: CHAMBER03_FINALE.bossBarDropDelayMs + 220,
+          goreFountainCadenceMs: 70,
+          fountainBurst: {
+            xJitter: [-72, 72],
+            yFromBottom: [104, 174],
+            depthOffset: 0.42,
+            randomScale: [0.9, 1.14],
+            durationMs: 680,
+            burstCount: 72,
+            sprayCount: 104,
+            mistCount: 14,
+            emberCount: 12,
+            burstRadiusX: 152,
+            burstRadiusY: 212,
+            dropletWidth: [10, 28],
+            dropletHeight: [20, 56],
+            sprayWidth: [4, 14],
+            sprayHeight: [16, 44],
+            splashColor: 0x86111b,
+            heavyColor: 0x560b13,
+            highlightColor: 0xa23340,
+            redSpeckColor: 0xc24753,
+            mistColor: 0x1e090d
+          },
+          blowoutBurst: {
+            yFromBottom: [98, 146],
+            depthOffset: 0.5,
+            scale: 1.58,
+            durationMs: 980,
+            burstCount: 132,
+            sprayCount: 168,
+            mistCount: 28,
+            emberCount: 28,
+            burstRadiusX: 194,
+            burstRadiusY: 234,
+            dropletWidth: [14, 38],
+            dropletHeight: [28, 68],
+            sprayWidth: [8, 18],
+            sprayHeight: [20, 52],
+            splashColor: 0x8b111c,
+            heavyColor: 0x5e0a13,
+            highlightColor: 0xb43645,
+            redSpeckColor: 0xc84a55,
+            mistColor: 0x1d080b
+          },
+          extraStages: [
           {
             atMs: CHAMBER03_FINALE.payoffRevealDelayMs,
             run: () => this.showSectorPayoffText()
@@ -978,51 +1011,81 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
               this.player.attackHitbox?.body?.setEnable(false);
             }
           }
-        ]
-      },
-      onStart: () => {
-        this.bossCombat.defeated = true;
-        this.bossCombat.state = 'defeated';
-        grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'chamber03-precentor-true-boss');
-        this.cancelBossProjectileTimer();
-        this.clearBossProjectiles();
-        this.tweens.killTweensOf([this.bossSprite, this.bossFallbackLabel, this.bossArrivalAura, this.bossArrivalHalo].filter(Boolean));
-        this.resetBossPresentationState();
-        this.bossBody.enable = false;
-        this.bossBody.setVelocity(0, 0);
-        this.bossDefeatCeremonyBossBarActive = true;
-        this.audioDirector?.playEnemyDeath('miniboss');
-        this.bossStatusPrompt
-          ?.setText(CHAMBER03_FINALE.payoffTitle)
-          .setPosition(this.scale.width / 2, this.getBossPromptY())
-          .setVisible(true);
-        this.sectorPayoffText
-          ?.setText(CHAMBER03_FINALE.payoffBody)
-          .setPosition(this.scale.width / 2, this.getBossPromptY() + 44);
-        this.triggerSectorFinalePayoff();
-        this.tweens.add({
-          targets: this.bossArrivalAura,
-          alpha: 0.06,
-          duration: 860,
-          ease: 'Sine.out'
-        });
-        this.tweens.add({
-          targets: this.bossArrivalHalo,
-          alpha: 0.05,
-          duration: 860,
-          ease: 'Sine.out'
-        });
-      },
-      onDespawn: () => {
-        this.bossFallbackLabel?.setVisible(false).setAlpha(0);
-      },
-      onComplete: () => {
-        this.bossDefeatCeremonyBossBarActive = false;
-        if (this.isSectorFinaleActive) {
-          this.player.attackHitbox?.body?.setEnable(false);
+          ]
+        },
+        onStart: () => {
+          this.bossCombat.defeated = true;
+          this.bossCombat.state = 'defeated';
+          grantMajorEncounterIntegrityReward(this.player, this.integrityRewardTracker, 'chamber03-sector-finale-true-boss');
+          this.cancelBossProjectileTimer();
+          this.clearBossProjectiles();
+          this.tweens.killTweensOf([this.bossSprite, this.bossFallbackLabel, this.bossArrivalAura, this.bossArrivalHalo].filter(Boolean));
+          this.resetBossPresentationState();
+          this.bossBody.enable = false;
+          this.bossBody.setVelocity(0, 0);
+          this.bossDefeatCeremonyBossBarActive = true;
+          this.audioDirector?.playEnemyDeath('miniboss');
+          this.bossStatusPrompt
+            ?.setText('THE HORNED JUDGE IS SILENCED')
+            .setPosition(this.scale.width / 2, this.getBossPromptY())
+            .setVisible(true);
+          this.sectorPayoffText
+            ?.setText(CHAMBER03_FINALE.payoffBody)
+            .setPosition(this.scale.width / 2, this.getBossPromptY() + 44);
+          this.triggerSectorFinalePayoff();
+          this.tweens.add({
+            targets: this.bossArrivalAura,
+            alpha: 0.08,
+            duration: 980,
+            ease: 'Sine.out'
+          });
+          this.tweens.add({
+            targets: this.bossArrivalHalo,
+            alpha: 0.06,
+            duration: 980,
+            ease: 'Sine.out'
+          });
+        },
+        onDespawn: () => {
+          this.bossFallbackLabel?.setVisible(false).setAlpha(0);
+        },
+        onComplete: () => {
+          this.bossDefeatCeremonyBossBarActive = false;
+          if (this.isSectorFinaleActive) {
+            this.player.attackHitbox?.body?.setEnable(false);
+          }
         }
+      });
+
+      if (!didBegin) {
+        this.failSafeCompleteSectorBossDeath('[Chamber03BossArenaScene] sector boss payoff package did not begin');
       }
-    });
+    } catch (error) {
+      console.error('[Chamber03BossArenaScene] sector boss payoff failed; using progression fallback', error);
+      this.failSafeCompleteSectorBossDeath();
+    }
+  }
+
+  failSafeCompleteSectorBossDeath(errorMessage = null) {
+    if (errorMessage) {
+      console.error(errorMessage);
+    }
+    this.bossCombat.defeated = true;
+    this.bossCombat.state = 'defeated-fallback';
+    this.cancelBossProjectileTimer();
+    this.clearBossProjectiles();
+    this.bossBody?.setEnable(false);
+    this.bossSprite?.setVisible(false).setAlpha(0);
+    this.bossFallbackLabel?.setVisible(false).setAlpha(0);
+    this.resolutionLockActive = false;
+    this.bossDefeatCeremonyBossBarActive = false;
+    this.hud?.setBossBarState({ visible: false });
+    this.triggerSectorFinalePayoff();
+    this.revealProgressionGate();
+    this.isSectorFinaleActive = true;
+    this.player?.body?.setEnable(true);
+    this.player?.attackHitbox?.body?.setEnable(false);
+    this.mobileControls?.setMode('gameplay');
   }
 
   triggerSectorFinalePayoff() {
