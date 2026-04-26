@@ -211,11 +211,12 @@ const CHAMBER02_END_BOSS = {
     tint: 0xd7c5ae
   },
   damageHurtbox: {
-    trimXRatio: 0.04,
-    trimYRatio: 0.04,
-    minWidth: 162,
-    minHeight: 214,
-    offsetY: -16
+    trimXRatio: 0.03,
+    trimYRatio: 0.02,
+    minWidth: 182,
+    minHeight: 236,
+    offsetX: 0,
+    offsetY: -12
   }
 };
 
@@ -763,7 +764,11 @@ export class Chamber02Scene extends Phaser.Scene {
       floorPlaneY: WORLD.floorY - 8
     });
     this.endBoss.setActive(false);
-    this.endBoss.sprite.setDepth(6.16).setAlpha(0.94);
+    this.endBoss.sprite
+      .setVisible(true)
+      .setDepth(6.16)
+      .setAlpha(CHAMBER02_END_BOSS.presentation?.alpha ?? 1);
+    this.endBoss.syncDamageHurtbox?.();
     this.endBoss.body?.setEnable?.(false);
     this.physics.add.collider(this.endBoss.getCollisionTarget?.() ?? this.endBoss.sprite, this.platforms);
     this.physics.add.overlap(this.player.attackHitbox, this.endBoss.damageHurtbox ?? this.endBoss.sprite, () => this.handlePlayerHitEndBoss());
@@ -1084,6 +1089,7 @@ export class Chamber02Scene extends Phaser.Scene {
       !this.player.attackActive
       || !this.endBossEncounterStarted
       || !this.endBossRevealTriggered
+      || !this.endBoss?.active
       || this.endBoss.dead
     ) {
       return;
@@ -1302,18 +1308,29 @@ export class Chamber02Scene extends Phaser.Scene {
     this.endBoss.setActive(true);
     this.endBoss.body?.setEnable?.(true);
     this.endBoss.body?.updateFromGameObject?.();
+    this.endBoss.sprite
+      ?.setVisible(true)
+      .setAlpha(CHAMBER02_END_BOSS.presentation?.alpha ?? 1)
+      .setDepth(6.16);
+    this.endBoss.syncVisualFromAnchor?.();
+    this.endBoss.syncDamageHurtbox?.();
     this.endBoss.recordContactDamage?.(time + 300);
+    this.endBossBarRevealed = true;
+    this.hud?.setBossBarState({
+      visible: true,
+      name: CHAMBER02_END_BOSS.name,
+      subtitle: CHAMBER02_END_BOSS.subtitle,
+      current: this.endBoss.health,
+      max: this.endBoss.maxHealth,
+      telegraph: this.endBoss.getTelegraphProgress(time),
+      wounded: time < this.endBoss.hurtUntil
+    });
     this.exitGateArt?.setAlpha(0.56).setTint(0x8e7c66);
     this.exitGateReadyAura?.setVisible(false);
   }
 
   tryRevealEndBossBar() {
     if (!this.endBossRevealTriggered || this.endBossBarRevealed || this.endBoss?.dead) {
-      return;
-    }
-
-    const padding = CHAMBER02_END_BOSS.bossBarRevealViewportPadding ?? 36;
-    if (!this.isBossNearMainCameraView(this.endBoss, padding)) {
       return;
     }
 

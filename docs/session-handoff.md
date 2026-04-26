@@ -3,6 +3,11 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-04-26)
+- **Chamber02 end boss active-but-invisible regression (post-PR #451) fixed:** the boss visual stack was effectively invalid at runtime because `HalfSkullMiniboss.updateVisuals()` multiplied base scale by undefined `presentation.scaleX/scaleY`, producing non-finite scale and breaking sprite bounds/hurtbox alignment; Chamber02 now also forces explicit reveal-time sprite visibility/alpha/depth and immediate hurtbox resync.
+- **End-boss UI wiring fixed:** Chamber02 now explicitly reveals the boss bar at encounter start in `revealEndBoss()` with name/current/max values (hidden pre-activation remains unchanged).
+- **End-boss player damage wiring fixed:** normal overlap authority remains `player.attackHitbox` vs `endBoss.damageHurtbox ?? endBoss.sprite`; with scale/hurtbox sync repaired and active-state guard retained, player hits now route to `endBoss.takeDamage(...)`, update the bar, and preserve modern payoff/unlock flow.
+- **Current Chamber02 end-boss progression status:** lore trigger -> end-boss reveal/combat -> boss death payoff -> `endBossDefeated` true -> exit unlock -> Chamber03 handoff is restored on the main lane.
+
 - **Chamber02 end boss missing/inactive root cause (confirmed):** end-boss reveal/activation was gated by `isEndBossRevealEligible()` (camera view-box check). In portrait gameplay viewport configurations, the boss center frequently never entered the padded reveal rectangle, so reveal never fired; boss remained inactive, non-damaging, and progression appeared stalled.
 - **End boss fix applied:** Chamber02 now activates/reveals the end boss immediately when the player crosses `CHAMBER02_END_BOSS.activationX`; boss body is intentionally disabled at spawn and enabled on reveal so pre-activation collision cannot block lane readability. End boss remains `HalfSkullMiniboss` bound to `ASSET_KEYS.sector02Chamber02PressureDeacon`.
 - **Chamber02 lore black/masked root cause (confirmed):** lore rendering could be visually occluded by chamber viewport/layer ordering conditions during launch from Chamber02 (especially with portrait viewport constraints), producing a black/matte-only presentation.
