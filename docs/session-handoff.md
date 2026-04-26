@@ -3,6 +3,10 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-04-26)
+- **Chamber02 ending repaired:** end corridor blockage/deadlock at the exit lane was corrected by relocating the physical gate barrier to the true threshold side, removing confusing ellipse/post gate dressing at the choke, and keeping only intentional collider geometry on progression blockers.
+- **Chamber02 gate/threshold approach:** end gate now reads as an in-world prop sprite using `sector04Chamber02PropThresholdDoor` art, with collision/transition zones kept separate from decorative visuals.
+- **Chamber02 lore beat restored:** a dedicated end-lane lore shrine trigger (Sector 2 Chamber 2 altar + lore screen image) now fires before the end boss gate flow and returns cleanly back into Chamber02.
+- **Progression status into Chamber03:** final threshold remains boss-gated, now requires fresh interact at the unlocked end threshold, and transitions to `Chamber03Scene` through the existing handoff path.
 - **Chamber02 modernization:** main chamber has been stretched for wider pacing pockets, prototype boss-pit descend prompt text removed, and gate visuals shifted toward in-world prop/sprite presentation rather than cropped background-style plates.
 - **BRUTALITY support (Chamber02):** Chamber02 now runs BRUTALITY state tracking (2 kills / 5s trigger, 20s duration, max 2 activations), basic kills feed streaks, and enemy/toll-keeper aggression syncs while active with clean teardown on scene shutdown.
 - **Second boss pit hardlock fix:** Hollow Sky pit hardlocked because `chamber02BossPitHollowSkyConfig` relied on the configurable pit default boss path (`PressureDeacon`) instead of the proven S1C2 `HalfSkullMiniboss` path. The fix explicitly sets `bossClass: HalfSkullMiniboss`, keeps activation-on-arrival-release and return-altar flow, and preserves Hollow Sky art/name while restoring stable sprite/hurtbox overlap combat.

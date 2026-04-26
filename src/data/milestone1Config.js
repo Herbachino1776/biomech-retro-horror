@@ -193,6 +193,20 @@ export const LORE_SCREENS = {
         height: CONCEPT_PRESENTATION.laughingEngine.crop.height
       }
     }
+  },
+  'chamber02-vertebral-threshold': {
+    imageKey: ASSET_KEYS.sector02Chamber02LoreImage,
+    title: 'CHAMBER 02 // VERTEBRAL THRESHOLD',
+    body: [
+      'The toll judge chains this corridor to two buried pits and one sworn blade.',
+      'Only after the shrine remembers you does the marrow gate permit witness.',
+      'Step forward, and the chamber demands a verdict in blood.'
+    ],
+    prompt: 'Press [E] / [Enter] or tap to continue',
+    presentation: {
+      imageTint: 0xd2c0a8,
+      imageAlpha: 0.94
+    }
   }
 };
 
