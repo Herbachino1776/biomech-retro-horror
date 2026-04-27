@@ -111,7 +111,7 @@ const CHAMBER03_BOSS_COMBAT = {
   arenaPaddingX: 164,
   presentation: {
     normalization: {
-      visibleFootOffsetY: 36
+      visibleFootOffsetY: 72
     }
   }
 };
