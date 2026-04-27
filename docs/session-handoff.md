@@ -2,6 +2,22 @@
 
 Use this file to start a fresh planning/implementation session from real current state.
 
+## Latest Update (2026-04-27)
+- **Sector 1 Chamber 3 finale cleanup pass landed (post-PR #458 refinement):**
+  - Chamber03 sector-finale active boss visual swapped from `ASSET_KEYS.bossPit20HornedMothJudge` to the already-loaded boss-pit sprite `ASSET_KEYS.bossPit19ReliquaryStalker` to reduce overuse of the prior S1C3 visual while keeping the upgraded payoff pipeline.
+  - Sector-boss presentation tuning was kept surgical: boss display size/origin and damage-hurtbox minimums/offsets were retuned for the replacement sprite, while overlap-authority combat and major-encounter resolution remained unchanged.
+  - Chamber03 boss-dais entrance visual no longer uses the old threshold/background-plate look; it now uses a proper in-world altar/gate prop sprite (`ASSET_KEYS.bossPit01AltarSuper`) with interaction zone/collision semantics still separated from art.
+  - Boss-dais helper text was removed (no visible entrance prompt text at the Chamber03 boss threshold).
+  - Sector-finale death ceremony text overlays were suppressed for S1C3 (no visible payoff/body/title text during Chamber03BossArena death sequence); payoff now communicates via camera/audio/gore/remains/gate unlock only.
+  - Chamber03 wall-module modernization and BRUTALITY support remain intact.
+
+- **Sector 1 transition hardlock audit status (current):**
+  - START GAME -> `Chamber01Scene`: unchanged and still authoritative.
+  - DEV -> `Chamber03Scene`: unchanged and still authoritative.
+  - Chamber01 -> Chamber02: hardened to Chamber02-style resilient handoff pattern (capture payload first + fade callback + fallback start timer) so fade-event drift cannot be the only path to `scene.start(...)`.
+  - Chamber02 -> Chamber03, Chamber03 -> Chamber03BossArena, Chamber03BossArena -> Sector02Chamber01: existing atomic/non-fatal handoff hardening remains in place and unchanged this pass.
+  - Chamber02 boss-pit return/handoff logic remains untouched in combat/runtime terms; no Chamber02 combat/boss damage/payoff reopening occurred.
+
 ## Latest Update (2026-04-26)
 - **Chamber03 sector-boss presentation/payoff modernization landed (Precentor visual retirement):**
   - Chamber03 boss arena now presents the sector finale with the existing boss-pit-grade sprite `ASSET_KEYS.bossPit20HornedMothJudge` (old Precentor sprite presentation retired from active fight path).

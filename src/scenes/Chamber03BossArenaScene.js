@@ -36,10 +36,10 @@ const CHAMBER03_BOSS_ARENA = {
   floorShadowAlpha: 0.34,
   bossAnchorX: 1464,
   bossAnchorY: WORLD.floorY - 10,
-  bossWidth: 432,
-  bossHeight: 448,
+  bossWidth: 416,
+  bossHeight: 438,
   bossOriginX: 0.52,
-  bossOriginY: 0.986,
+  bossOriginY: 0.984,
   bossPromptOffsetY: -228,
   bossRevealPromptDuration: 1800,
   omenDelayMs: 260,
@@ -54,8 +54,8 @@ const CHAMBER03_BOSS_ARENA = {
 const CHAMBER03_BOSS_OMEN_CUTSCENE_ID = 'chamber03-precentor-threshold';
 
 const CHAMBER03_BOSS_COMBAT = {
-  name: 'THE HORNED MARROW JUDGE',
-  subtitle: 'Sector I Terminal Adjudicator',
+  name: 'THE RELIQUARY MARROW JUDGE',
+  subtitle: 'Sector I Ossuary Adjudicator',
   maxHealth: 15,
   phaseTwoThreshold: 6,
   approachRange: 272,
@@ -115,10 +115,10 @@ const CHAMBER03_BOSS_DAMAGE_HURTBOX = resolveDamageHurtboxConfig({
   trimXRatio: 0.08,
   trimYRatio: 0.08,
   insetBottomPx: 0,
-  minWidth: 190,
-  minHeight: 250,
+  minWidth: 186,
+  minHeight: 238,
   offsetX: 0,
-  offsetY: -24
+  offsetY: -18
 });
 
 const CHAMBER03_BOSS_VISUAL_FLOOR_ALIGN = {
@@ -134,8 +134,8 @@ const CHAMBER03_FINALE = {
   controlReleaseDelayMs: 3720,
   progressionInteractDelayMs: 360,
   progressionPromptText: '',
-  payoffTitle: 'THE HORNED JUDGE IS SILENCED',
-  payoffBody: 'Sector I stands complete.\nThe marrow route below has opened.',
+  payoffTitle: '',
+  payoffBody: '',
   holdingStateReason: 'sector-i-complete-holding-threshold'
 };
 
@@ -429,9 +429,9 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossArrivalAura = this.add.ellipse(bossX, bossY + 18, 228, 312, COLORS.sickly, 0).setDepth(-4.1);
     this.bossArrivalHalo = this.add.ellipse(bossX, bossY - 16, 170, 244, 0xdcccae, 0).setDepth(-4.05);
 
-    if (this.textures.exists(ASSET_KEYS.bossPit20HornedMothJudge)) {
+    if (this.textures.exists(ASSET_KEYS.bossPit19ReliquaryStalker)) {
       this.bossSprite = this.add
-        .image(bossX, bossY, ASSET_KEYS.bossPit20HornedMothJudge)
+        .image(bossX, bossY, ASSET_KEYS.bossPit19ReliquaryStalker)
         .setDisplaySize(CHAMBER03_BOSS_ARENA.bossWidth, CHAMBER03_BOSS_ARENA.bossHeight)
         .setOrigin(CHAMBER03_BOSS_ARENA.bossOriginX, CHAMBER03_BOSS_ARENA.bossOriginY)
         .setTint(0xd2c1aa)
@@ -447,7 +447,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         .setVisible(false);
 
       this.bossFallbackLabel = this.add
-        .text(bossX, bossY - 12, 'HORNED JUDGE', {
+        .text(bossX, bossY - 12, 'RELIQUARY JUDGE', {
           fontFamily: 'monospace',
           fontSize: '16px',
           color: '#d7c8b2',
@@ -460,7 +460,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
     if (!this.bossFallbackLabel) {
       this.bossFallbackLabel = this.add
-        .text(bossX, bossY - 12, 'HORNED JUDGE', {
+        .text(bossX, bossY - 12, 'RELIQUARY JUDGE', {
           fontFamily: 'monospace',
           fontSize: '16px',
           color: '#d7c8b2',
@@ -678,7 +678,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossArrivalAura?.setAlpha(usedFallback ? 0.16 : 0.12);
     this.bossArrivalHalo?.setAlpha(usedFallback ? 0.1 : 0.08);
     this.bossStatusPrompt
-      ?.setText(usedFallback ? 'THE HORNED JUDGE ARRIVES UNBIDDEN' : 'THE HORNED JUDGE STANDS IN VERDICT')
+      ?.setText(usedFallback ? 'THE RELIQUARY JUDGE ARRIVES UNBIDDEN' : 'THE RELIQUARY JUDGE STANDS IN VERDICT')
       .setPosition(this.scale.width / 2, this.getBossPromptY())
       .setVisible(true);
 
@@ -859,7 +859,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossCombat.lastAttackAt = time - 520;
     this.bossCombat.attackLabel = 'RUPTURE';
     this.bossStatusPrompt
-      ?.setText('THE HORNED JUDGE SHREDS ITS LITURGY')
+      ?.setText('THE RELIQUARY JUDGE SHREDS ITS LITURGY')
       .setPosition(this.scale.width / 2, this.getBossPromptY())
       .setVisible(true);
     this.time.delayedCall(1600, () => {
@@ -990,10 +990,6 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
           },
           extraStages: [
           {
-            atMs: CHAMBER03_FINALE.payoffRevealDelayMs,
-            run: () => this.showSectorPayoffText()
-          },
-          {
             atMs: CHAMBER03_FINALE.bossBarDropDelayMs,
             run: () => {
               this.bossDefeatCeremonyBossBarActive = false;
@@ -1025,13 +1021,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
           this.bossBody.setVelocity(0, 0);
           this.bossDefeatCeremonyBossBarActive = true;
           this.audioDirector?.playEnemyDeath('miniboss');
-          this.bossStatusPrompt
-            ?.setText('THE HORNED JUDGE IS SILENCED')
-            .setPosition(this.scale.width / 2, this.getBossPromptY())
-            .setVisible(true);
-          this.sectorPayoffText
-            ?.setText(CHAMBER03_FINALE.payoffBody)
-            .setPosition(this.scale.width / 2, this.getBossPromptY() + 44);
+          this.bossStatusPrompt?.setVisible(false);
+          this.sectorPayoffText?.setVisible(false).setAlpha(0);
           this.triggerSectorFinalePayoff();
           this.tweens.add({
             targets: this.bossArrivalAura,
