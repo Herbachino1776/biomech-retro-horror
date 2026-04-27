@@ -108,7 +108,12 @@ const CHAMBER03_BOSS_COMBAT = {
   projectileSpawnOffsetX: 118,
   projectileSpawnOffsetY: 26,
   projectilePhaseTwoSpreadY: 28,
-  arenaPaddingX: 164
+  arenaPaddingX: 164,
+  presentation: {
+    normalization: {
+      visibleFootOffsetY: 36
+    }
+  }
 };
 
 const CHAMBER03_BOSS_DAMAGE_HURTBOX = resolveDamageHurtboxConfig({
@@ -446,30 +451,10 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         .setDepth(6.2)
         .setVisible(false);
 
-      this.bossFallbackLabel = this.add
-        .text(bossX, bossY - 12, 'RELIQUARY JUDGE', {
-          fontFamily: 'monospace',
-          fontSize: '16px',
-          color: '#d7c8b2',
-          align: 'center'
-        })
-        .setOrigin(0.5)
-        .setDepth(6.24)
-        .setVisible(false);
+      this.bossFallbackLabel = null;
     }
 
-    if (!this.bossFallbackLabel) {
-      this.bossFallbackLabel = this.add
-        .text(bossX, bossY - 12, 'RELIQUARY JUDGE', {
-          fontFamily: 'monospace',
-          fontSize: '16px',
-          color: '#d7c8b2',
-          align: 'center'
-        })
-        .setOrigin(0.5)
-        .setDepth(6.24)
-        .setVisible(false);
-    }
+    this.bossFallbackLabel = null;
 
     this.bossBaseScaleX = this.bossSprite.scaleX;
     this.bossBaseScaleY = this.bossSprite.scaleY;
@@ -673,12 +658,11 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossBody.enable = true;
     this.bossBody.setVelocity(0, 0);
     this.bossSprite.setVisible(true).setAlpha(1);
-    this.bossFallbackLabel?.setVisible(true).setAlpha(0.8);
     this.bossArrivalShadow?.setAlpha(0.22);
     this.bossArrivalAura?.setAlpha(usedFallback ? 0.16 : 0.12);
     this.bossArrivalHalo?.setAlpha(usedFallback ? 0.1 : 0.08);
     this.bossStatusPrompt
-      ?.setText(usedFallback ? 'THE RELIQUARY JUDGE ARRIVES UNBIDDEN' : 'THE RELIQUARY JUDGE STANDS IN VERDICT')
+      ?.setText(usedFallback ? 'THE VERDICT ARRIVES UNBIDDEN' : 'THE VERDICT STANDS')
       .setPosition(this.scale.width / 2, this.getBossPromptY())
       .setVisible(true);
 
@@ -687,7 +671,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     });
 
     this.tweens.add({
-      targets: [this.bossSprite, this.bossFallbackLabel].filter(Boolean),
+      targets: [this.bossSprite].filter(Boolean),
       alpha: { from: 0, to: 1 },
       duration: 520,
       ease: 'Sine.out'
@@ -800,8 +784,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
     this.hud.setBossBarState({
       visible: this.hasActivatedBoss && !this.bossCombat?.defeated,
-      name: CHAMBER03_BOSS_COMBAT.name,
-      subtitle: this.bossCombat?.phase === 2 ? 'Ruptured Verdict' : CHAMBER03_BOSS_COMBAT.subtitle,
+      name: '',
+      subtitle: '',
       current: this.bossCombat?.health ?? 0,
       max: this.bossCombat?.maxHealth ?? CHAMBER03_BOSS_COMBAT.maxHealth,
       telegraph: this.getBossTelegraphProgress(time),
@@ -859,7 +843,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossCombat.lastAttackAt = time - 520;
     this.bossCombat.attackLabel = 'RUPTURE';
     this.bossStatusPrompt
-      ?.setText('THE RELIQUARY JUDGE SHREDS ITS LITURGY')
+      ?.setText('THE LITURGY SHREDS APART')
       .setPosition(this.scale.width / 2, this.getBossPromptY())
       .setVisible(true);
     this.time.delayedCall(1600, () => {
@@ -897,6 +881,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     const bossX = this.bossSprite?.x;
     const bossY = this.bossSprite?.y;
     const floorPlaneY = WORLD.floorY + 2;
+    const normalizedVisibleFootOffsetY = CHAMBER03_BOSS_COMBAT.presentation?.normalization?.visibleFootOffsetY ?? 0;
     const focusY = (Number.isFinite(bossY) ? bossY : CHAMBER03_BOSS_ARENA.bossAnchorY) - 44;
     const hasFiniteAnchors = [bossX, bossY, floorPlaneY, focusY].every((value) => Number.isFinite(value));
     if (!hasFiniteAnchors) {
@@ -932,10 +917,12 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         },
         payoffPose: {
           floorPlaneY,
+          visibleFootOffsetY: normalizedVisibleFootOffsetY,
           maxUpwardSnapPx: 52
         },
         corpseRemains: {
           floorPlaneY: floorPlaneY - 48,
+          visibleFootOffsetY: normalizedVisibleFootOffsetY,
           size: 'bossPitBoss'
         },
         victory: {
@@ -1545,12 +1532,14 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     }
 
     const bossX = this.bossBody?.enable ? this.bossBody.gameObject.x : this.bossSprite.x;
+    const normalizedVisibleFootOffsetY = CHAMBER03_BOSS_COMBAT.presentation?.normalization?.visibleFootOffsetY ?? 0;
     const baseBossY = this.bossBody?.enable
       ? this.bossBody.bottom + this.bossGroundedBodyOffsetY + floatOffset
       : CHAMBER03_BOSS_ARENA.bossAnchorY + floatOffset;
     this.bossSprite.setScale(scaleX, scaleY);
     const visualBottomAtBaseY = baseBossY + this.bossSprite.displayHeight * (1 - this.bossSprite.originY);
-    const alignedBossY = baseBossY + (CHAMBER03_BOSS_VISUAL_FLOOR_ALIGN.floorLineY - visualBottomAtBaseY);
+    const normalizedFloorLineY = CHAMBER03_BOSS_VISUAL_FLOOR_ALIGN.floorLineY + normalizedVisibleFootOffsetY;
+    const alignedBossY = baseBossY + (normalizedFloorLineY - visualBottomAtBaseY);
     this.bossSprite.setPosition(bossX, alignedBossY);
     this.bossSprite.setAngle(angle);
     if (typeof this.bossSprite.setFlipX === 'function') {

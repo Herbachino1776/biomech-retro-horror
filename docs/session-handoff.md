@@ -3,6 +3,14 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-04-27)
+- **S1C3 finale final cleanup pass landed (boss-name text, dais entrance prop, grounding):**
+  - Chamber03 boss HUD now keeps the boss bar but suppresses boss label/title text locally for this encounter (`name`/`subtitle` passed as empty strings), with no global HUD-system rewrite.
+  - Chamber03 boss visual fallback name label text was removed from active presentation path (no on-screen boss-name text object shown during fight/death sequence).
+  - Chamber03 boss-dais entrance staging no longer renders the background-threshold plate as the door visual; it now places the already-loaded in-world prop sprite `ASSET_KEYS.bossPit01AltarSuper` (fallback: `ASSET_KEYS.bossPit02AltarSuper`) at the entrance gate position/depth while preserving threshold interaction/transition logic.
+  - Chamber03 boss grounding was lowered via boss-local presentation normalization (`CHAMBER03_BOSS_COMBAT.presentation.normalization.visibleFootOffsetY = 36`) rather than shared/global floor rewrites.
+  - Chamber03 boss death payoff grounding now also consumes the same boss-local normalized visible-foot offset through `payoffPose.visibleFootOffsetY` and `corpseRemains.visibleFootOffsetY` for remains/payoff alignment consistency.
+  - DEV target remains `Chamber03Scene`; START GAME remains `Chamber01Scene`.
+
 - **Sector 1 Chamber 3 finale cleanup pass landed (post-PR #458 refinement):**
   - Chamber03 sector-finale active boss visual swapped from `ASSET_KEYS.bossPit20HornedMothJudge` to the already-loaded boss-pit sprite `ASSET_KEYS.bossPit19ReliquaryStalker` to reduce overuse of the prior S1C3 visual while keeping the upgraded payoff pipeline.
   - Sector-boss presentation tuning was kept surgical: boss display size/origin and damage-hurtbox minimums/offsets were retuned for the replacement sprite, while overlap-authority combat and major-encounter resolution remained unchanged.
