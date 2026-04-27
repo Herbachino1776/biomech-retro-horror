@@ -38,14 +38,13 @@ const CHAMBER03_BOOTSTRAP = {
 
 const CHAMBER03_BOSS_THRESHOLD = {
   portalX: 5920,
-  portalY: WORLD.floorY - 112,
-  portalWidth: 236,
-  portalHeight: 292,
+  portalY: WORLD.floorY - 118,
+  portalWidth: 248,
+  portalHeight: 308,
   zoneWidth: 180,
   zoneHeight: 212,
-  promptOffsetY: -162,
-  shellTint: 0xcbb79f,
-  shellAlpha: 0.82,
+  shellTint: 0xd4c2aa,
+  shellAlpha: 0.94,
   auraTint: COLORS.sickly,
   auraAlpha: 0.18,
   fallbackVeinTint: 0xa88e71,
@@ -868,17 +867,11 @@ export class Chamber03Scene extends Phaser.Scene {
   createBossThreshold() {
     const baseX = CHAMBER03_BOSS_THRESHOLD.portalX;
     const baseY = CHAMBER03_BOSS_THRESHOLD.portalY;
-    const hasThresholdArt = this.textures.exists(ASSET_KEYS.chamber03BackgroundThreshold);
-    const hasBossDaisArt = this.textures.exists(ASSET_KEYS.chamber03BackgroundBossDais);
-
-    if (hasBossDaisArt) {
-      this.add
-        .image(baseX - 10, baseY + 32, ASSET_KEYS.chamber03BackgroundBossDais)
-        .setDisplaySize(412, 264)
-        .setTint(0xbdab95)
-        .setAlpha(0.32)
-        .setDepth(-4.48);
-    }
+    const thresholdTextureKey = this.textures.exists(ASSET_KEYS.bossPit01AltarSuper)
+      ? ASSET_KEYS.bossPit01AltarSuper
+      : this.textures.exists(ASSET_KEYS.bossPit02AltarSuper)
+        ? ASSET_KEYS.bossPit02AltarSuper
+        : null;
 
     this.add.ellipse(baseX, WORLD.floorY + 10, 316, 48, 0x050404, 0.34).setDepth(-4.6);
     this.bossThresholdAura = this.add
@@ -888,16 +881,9 @@ export class Chamber03Scene extends Phaser.Scene {
       .ellipse(baseX, baseY + 2, 104, 180, 0xe0d0a2, 0.14)
       .setDepth(-4.45);
 
-    if (hasThresholdArt) {
-      this.add
-        .image(baseX - 6, baseY - 4, ASSET_KEYS.chamber03BackgroundThreshold)
-        .setDisplaySize(438, 332)
-        .setTint(0x9cab90)
-        .setAlpha(0.18)
-        .setDepth(-4.42);
-
+    if (thresholdTextureKey) {
       this.bossThresholdShell = this.add
-        .image(baseX, baseY, ASSET_KEYS.chamber03BackgroundThreshold)
+        .image(baseX, baseY, thresholdTextureKey)
         .setDisplaySize(CHAMBER03_BOSS_THRESHOLD.portalWidth, CHAMBER03_BOSS_THRESHOLD.portalHeight)
         .setTint(CHAMBER03_BOSS_THRESHOLD.shellTint)
         .setAlpha(CHAMBER03_BOSS_THRESHOLD.shellAlpha)
@@ -915,18 +901,7 @@ export class Chamber03Scene extends Phaser.Scene {
       this.add.rectangle(baseX + 44, baseY + 6, 10, 156, 0x2b211d, 0.8).setAngle(8).setDepth(-4.28);
     }
 
-    this.bossThresholdPrompt = this.add
-      .text(baseX, baseY + CHAMBER03_BOSS_THRESHOLD.promptOffsetY, 'CROSS THE DAIS', {
-        fontFamily: 'monospace',
-        fontSize: '15px',
-        color: '#d9cbb8',
-        align: 'center',
-        stroke: '#120d0c',
-        strokeThickness: 4
-      })
-      .setOrigin(0.5)
-      .setDepth(-4.2)
-      .setVisible(false);
+    this.bossThresholdPrompt = null;
 
     this.bossThresholdZone = this.add
       .zone(baseX, WORLD.floorY - 44, CHAMBER03_BOSS_THRESHOLD.zoneWidth, CHAMBER03_BOSS_THRESHOLD.zoneHeight)

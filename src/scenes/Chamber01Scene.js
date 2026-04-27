@@ -231,6 +231,11 @@ const LORE_ENTRY_POSITION_OVERRIDES = {
   'end-deadgod': { x: 2780 }
 };
 
+const CHAMBER01_TRANSITION = {
+  fadeOutMs: 640,
+  fallbackStartDelayMs: 800
+};
+
 export class Chamber01Scene extends Phaser.Scene {
   constructor() {
     super(CHAMBER.sceneKey);
@@ -262,6 +267,9 @@ export class Chamber01Scene extends Phaser.Scene {
     this.nextBossProjectileAt = Number.POSITIVE_INFINITY;
     this.nextBossAoeAt = Number.POSITIVE_INFINITY;
     this.pendingPlayerGroundResyncCall = null;
+    this.hasStartedChamber02 = false;
+    this.pendingChamber02Payload = null;
+    this.chamber02TransitionFallbackTimer = null;
 
     this.createWorld();
     this.createBackdrop();
@@ -293,6 +301,7 @@ export class Chamber01Scene extends Phaser.Scene {
       this.hud?.setBossBarState({ visible: false });
       this.pendingPlayerGroundResyncCall?.remove(false);
       this.pendingPlayerGroundResyncCall = null;
+      this.chamber02TransitionFallbackTimer?.remove?.(false);
       this.brutalityMode?.end(this.time.now);
       this.enemies?.forEach((enemy) => enemy.setBrutalityAggression(false));
       this.boss?.setBrutalityAggression?.(false);
@@ -1120,21 +1129,33 @@ export class Chamber01Scene extends Phaser.Scene {
     this.setEnemyProjectilesPaused(true);
 
     this.audioDirector?.stopAmbientLoop({ fadeOut: false });
+    this.pendingChamber02Payload = {
+      enteredFrom: 'chamber01-ritual-threshold-gate',
+      progressionSource: 'blind-cantor-banished'
+    };
 
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+    const startChamber02 = () => {
+      if (this.hasStartedChamber02) {
+        return;
+      }
+      this.hasStartedChamber02 = true;
+      this.chamber02TransitionFallbackTimer?.remove?.(false);
       this.audioDirector?.shutdown();
       try {
-        this.scene.start('Chamber02Scene', {
-          enteredFrom: 'chamber01-ritual-threshold-gate',
-          progressionSource: 'blind-cantor-banished'
-        });
+        this.scene.start('Chamber02Scene', this.pendingChamber02Payload);
       } catch (error) {
+        this.hasStartedChamber02 = false;
         console.error("[Chamber01->Chamber02] scene.start('Chamber02Scene') failed", error);
         this.isGateTransitionActive = false;
       }
-    });
+    };
 
-    this.cameras.main.fadeOut(640, 0, 0, 0);
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, startChamber02);
+    this.chamber02TransitionFallbackTimer = this.time.delayedCall(
+      CHAMBER01_TRANSITION.fallbackStartDelayMs,
+      startChamber02
+    );
+    this.cameras.main.fadeOut(CHAMBER01_TRANSITION.fadeOutMs, 0, 0, 0);
   }
 
   updateBossArenaFeedback(time) {
