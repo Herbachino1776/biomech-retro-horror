@@ -132,6 +132,7 @@ const CHAMBER03_BOSS_VISUAL_FLOOR_ALIGN = {
 
 const CHAMBER03_FINALE = {
   bloodFlashMs: 860,
+  remainsAftermathDelayMs: 90,
   payoffRevealDelayMs: 880,
   payoffHoldMs: 2100,
   progressionRevealDelayMs: 3260,
@@ -584,13 +585,20 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
 
     this.progressionGate.add([gateShadow, gateAura, gateCore, gateMaw, leftSpine, rightSpine]);
 
-    if (this.textures.exists(ASSET_KEYS.chamber03BackgroundThreshold)) {
-      const thresholdShell = this.add
-        .image(0, 0, ASSET_KEYS.chamber03BackgroundThreshold)
-        .setDisplaySize(236, 304)
-        .setTint(0xc7b197)
-        .setAlpha(0.86);
-      this.progressionGate.add(thresholdShell);
+    const exitGateTextureKey = this.textures.exists(ASSET_KEYS.bossPit05AltarSuper)
+      ? ASSET_KEYS.bossPit05AltarSuper
+      : this.textures.exists(ASSET_KEYS.bossPit02AltarSuper)
+        ? ASSET_KEYS.bossPit02AltarSuper
+        : this.textures.exists(ASSET_KEYS.bossPit01AltarSuper)
+          ? ASSET_KEYS.bossPit01AltarSuper
+          : null;
+    if (exitGateTextureKey) {
+      const exitGateAltar = this.add
+        .image(0, 0, exitGateTextureKey)
+        .setDisplaySize(252, 334)
+        .setTint(0xd9c8b0)
+        .setAlpha(0.9);
+      this.progressionGate.add(exitGateAltar);
     }
 
     this.progressionGatePrompt = null;
@@ -923,7 +931,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         corpseRemains: {
           floorPlaneY: floorPlaneY - 48,
           visibleFootOffsetY: normalizedVisibleFootOffsetY,
-          size: 'bossPitBoss'
+          size: 'bossPitBoss',
+          spawnAtMs: CHAMBER03_FINALE.bloodFlashMs + 560 + CHAMBER03_FINALE.bossBarDropDelayMs + 220
         },
         victory: {
           preExplosionShakeMs: CHAMBER03_FINALE.bloodFlashMs + 560,
@@ -1010,7 +1019,6 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
           this.audioDirector?.playEnemyDeath('miniboss');
           this.bossStatusPrompt?.setVisible(false);
           this.sectorPayoffText?.setVisible(false).setAlpha(0);
-          this.triggerSectorFinalePayoff();
           this.tweens.add({
             targets: this.bossArrivalAura,
             alpha: 0.08,
@@ -1026,6 +1034,11 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         },
         onDespawn: () => {
           this.bossFallbackLabel?.setVisible(false).setAlpha(0);
+          this.triggerSectorFinalePayoff({
+            x: this.bossSprite?.x,
+            floorPlaneY: floorPlaneY - 48,
+            delayMs: CHAMBER03_FINALE.remainsAftermathDelayMs
+          });
         },
         onComplete: () => {
           this.bossDefeatCeremonyBossBarActive = false;
@@ -1066,15 +1079,16 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.mobileControls?.setMode('gameplay');
   }
 
-  triggerSectorFinalePayoff() {
+  triggerSectorFinalePayoff({ x = null, floorPlaneY = WORLD.floorY - 2, delayMs = 90 } = {}) {
     this.isSectorFinaleActive = false;
     this.currentProgressionThresholdZone = null;
     this.player.attackHitbox?.body?.setEnable(false);
     this.cameras.main.shake(920, 0.028, true);
     this.time.delayedCall(150, () => this.cameras.main.shake(680, 0.024, true));
     this.time.delayedCall(330, () => this.cameras.main.shake(560, 0.02, true));
-    this.time.delayedCall(90, () => {
-      this.spawnSectorFinaleAftermath(this.bossSprite.x, WORLD.floorY - 2);
+    this.time.delayedCall(delayMs, () => {
+      const aftermathX = Number.isFinite(x) ? x : this.bossSprite?.x;
+      this.spawnSectorFinaleAftermath(aftermathX, floorPlaneY);
     });
     this.time.delayedCall(220, () => {
       this.audioDirector?.playBanishmentSting();
@@ -1082,10 +1096,12 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
   }
 
   spawnSectorFinaleAftermath(x, y) {
+    const resolvedX = Number.isFinite(x) ? x : CHAMBER03_BOSS_ARENA.bossAnchorX;
+    const resolvedY = Number.isFinite(y) ? y : WORLD.floorY - 2;
     this.bossAftermathPool?.destroy(true);
     this.bossAftermathBurst?.destroy(true);
 
-    const burst = this.add.container(x, y - 116).setDepth(6.12);
+    const burst = this.add.container(resolvedX, resolvedY - 116).setDepth(6.12);
     const splashA = this.add.ellipse(0, 0, 210, 118, 0x561517, 0.82).setAngle(-18);
     const splashB = this.add.ellipse(-52, 8, 132, 80, 0x6e1b1c, 0.72).setAngle(-34);
     const splashC = this.add.ellipse(64, 12, 126, 76, 0x3e1012, 0.68).setAngle(26);
@@ -1112,7 +1128,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       onComplete: () => burst.destroy()
     });
 
-    const pool = this.add.container(x, y).setDepth(1.4);
+    const pool = this.add.container(resolvedX, resolvedY).setDepth(1.4);
     const shadow = this.add.ellipse(0, 10, 324, 64, 0x090505, 0.5);
     const outerPool = this.add.ellipse(0, 0, 294, 66, 0x3a1012, 0.9).setStrokeStyle(5, 0x724746, 0.24);
     const midPool = this.add.ellipse(-18, -2, 236, 48, 0x631719, 0.78);

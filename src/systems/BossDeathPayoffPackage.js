@@ -195,6 +195,15 @@ export function beginBossDeathPayoffPackage({
     onDespawn?.();
   };
 
+  const resolveCorpseRemainsAtMs = () => {
+    const defaultAtMs = victory.preExplosionShakeMs + victory.postExplosionDespawnDelayMs;
+    const configuredAtMs = corpseRemains?.spawnAtMs;
+    if (!Number.isFinite(configuredAtMs)) {
+      return defaultAtMs;
+    }
+    return Math.max(0, configuredAtMs);
+  };
+
   return majorEncounterResolution.begin({
     encounterId,
     freezePlayer: true,
@@ -228,7 +237,7 @@ export function beginBossDeathPayoffPackage({
         }
       },
       {
-        atMs: victory.preExplosionShakeMs + victory.postExplosionDespawnDelayMs,
+        atMs: resolveCorpseRemainsAtMs(),
         run: () => {
           despawnBoss();
         }
