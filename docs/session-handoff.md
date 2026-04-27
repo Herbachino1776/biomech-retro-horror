@@ -3,6 +3,14 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-04-27)
+- **S1C3 sector-boss finale anchor/UI polish pass landed:**
+  - Chamber03 sector-boss death aftermath now resolves a single shared remains anchor midpoint in-scene and uses that same anchor for both the large persistent blood-pool container and boss-tier corpse-remains spawn, eliminating split payoff-site visuals.
+  - Shared anchor is derived from current separate anchors (`pool` vs `corpseRemains`) using midpoint calculation `(pool + remains) / 2` on both axes before payload dispatch.
+  - Existing delayed boss-remains/blood-pool payoff timing remains intact (`corpseRemains.spawnAtMs` unchanged), so the large pool still appears with the remains-eruption beat, not on lethal hit.
+  - Chamber03 sector boss bar now remains hidden until the boss is in/near main camera `worldView` (padded in-view gate), with reveal timing decoupled from internal boss activation.
+  - Chamber03 sector boss bar now suppresses label/name plate rendering locally (`hideName: true` + empty name/subtitle) to avoid obscured/wonky boss-name presentation while preserving bar fill/telegraph.
+  - DEV target remains `Chamber03Scene`; START GAME remains `Chamber01Scene`.
+
 - **S1C3 sector-boss finale timing/exit-door cleanup landed:**
   - Chamber03BossArena sector-boss payoff now delays corpse-remains spawn timing via payload config (`corpseRemains.spawnAtMs`) so the large persistent blood/remains beat lands at the remains-eruption phase instead of the opening lethal-hit/death-audio beat.
   - Chamber03BossArena boss-dais **EXIT** / next-sector door visual no longer uses the background-threshold plate image; it now uses a proper in-world super-altar prop sprite with key `ASSET_KEYS.bossPit05AltarSuper` (fallbacks: `bossPit02AltarSuper`, then `bossPit01AltarSuper`) while keeping transition collision/zone logic separate from art.

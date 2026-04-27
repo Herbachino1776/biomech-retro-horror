@@ -195,10 +195,14 @@ export class HudOverlay {
     this.integrityBarFill.setPosition(x, y).setSize(fillWidth, height);
   }
 
-  setBossBarState({ visible, name = '', subtitle = '', current = 0, max = 1, telegraph = 0, wounded = false } = {}) {
+  setBossBarState({ visible, name = '', subtitle = '', hideName = false, current = 0, max = 1, telegraph = 0, wounded = false } = {}) {
     this.bossBarVisible = Boolean(visible);
-    [this.bossBarFrame, this.bossBarUnderlay, this.bossTelegraph, this.bossBarFill, this.bossNamePlate, this.bossName, this.bossSubtitle].forEach((element) => {
+    [this.bossBarFrame, this.bossBarUnderlay, this.bossTelegraph, this.bossBarFill].forEach((element) => {
       element.setVisible(this.bossBarVisible);
+    });
+    const showNameElements = this.bossBarVisible && !hideName;
+    [this.bossNamePlate, this.bossName, this.bossSubtitle].forEach((element) => {
+      element.setVisible(showNameElements);
     });
 
     if (!this.bossBarVisible) {
