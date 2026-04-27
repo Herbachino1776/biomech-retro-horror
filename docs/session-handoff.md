@@ -3,6 +3,12 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-04-27)
+- **S1C3 sector-boss finale timing/exit-door cleanup landed:**
+  - Chamber03BossArena sector-boss payoff now delays corpse-remains spawn timing via payload config (`corpseRemains.spawnAtMs`) so the large persistent blood/remains beat lands at the remains-eruption phase instead of the opening lethal-hit/death-audio beat.
+  - Chamber03BossArena boss-dais **EXIT** / next-sector door visual no longer uses the background-threshold plate image; it now uses a proper in-world super-altar prop sprite with key `ASSET_KEYS.bossPit05AltarSuper` (fallbacks: `bossPit02AltarSuper`, then `bossPit01AltarSuper`) while keeping transition collision/zone logic separate from art.
+  - Chamber03 boss death sequence remains textless; boss-tier remains stay large/persistent; progression gate unlock flow remains active.
+  - DEV target remains `Chamber03Scene`; START GAME remains `Chamber01Scene`.
+
 - **S1C3 finale final cleanup pass landed (boss-name text, dais entrance prop, grounding):**
   - Chamber03 boss HUD now keeps the boss bar but suppresses boss label/title text locally for this encounter (`name`/`subtitle` passed as empty strings), with no global HUD-system rewrite.
   - Chamber03 boss visual fallback name label text was removed from active presentation path (no on-screen boss-name text object shown during fight/death sequence).
