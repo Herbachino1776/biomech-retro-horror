@@ -77,7 +77,14 @@ const CHAMBER03_THRESHOLD_STAGING = {
   foreArchX: 5892,
   foreArchY: WORLD.floorY - 114,
   foreArchAlpha: 0.26,
-  foreArchTint: 0xb6c19e
+  foreArchTint: 0xb6c19e,
+  gatePropX: 5876,
+  gatePropY: WORLD.floorY - 112,
+  gatePropWidth: 268,
+  gatePropHeight: 346,
+  gatePropTint: 0xd4c2aa,
+  gatePropAlpha: 0.9,
+  gatePropDepth: -4.68
 };
 
 const CHAMBER03_PROCESSION = [
@@ -650,8 +657,12 @@ export class Chamber03Scene extends Phaser.Scene {
     const { endcapCenterX } = CHAMBER03_THRESHOLD_STAGING;
     const hasWallModuleArt = this.textures.exists(ASSET_KEYS.chamber03BackgroundWallModule);
     const hasBossDaisArt = this.textures.exists(ASSET_KEYS.chamber03BackgroundBossDais);
-    const hasThresholdArt = this.textures.exists(ASSET_KEYS.chamber03BackgroundThreshold);
     const hasHornArchArt = this.textures.exists(ASSET_KEYS.chamber02ForegroundHornArch);
+    const thresholdGateTextureKey = this.textures.exists(ASSET_KEYS.bossPit01AltarSuper)
+      ? ASSET_KEYS.bossPit01AltarSuper
+      : this.textures.exists(ASSET_KEYS.bossPit02AltarSuper)
+        ? ASSET_KEYS.bossPit02AltarSuper
+        : null;
 
     this.add
       .ellipse(
@@ -700,13 +711,13 @@ export class Chamber03Scene extends Phaser.Scene {
         .setDepth(-14.5 + index * 0.01);
     });
 
-    if (hasThresholdArt) {
+    if (thresholdGateTextureKey) {
       this.add
-        .image(endcapCenterX + 28, CHAMBER03_THRESHOLD_STAGING.endcapY, ASSET_KEYS.chamber03BackgroundThreshold)
-        .setDisplaySize(CHAMBER03_THRESHOLD_STAGING.endcapWidth, CHAMBER03_THRESHOLD_STAGING.endcapHeight)
-        .setTint(0xc4b198)
-        .setAlpha(0.42)
-        .setDepth(-14.44);
+        .image(CHAMBER03_THRESHOLD_STAGING.gatePropX, CHAMBER03_THRESHOLD_STAGING.gatePropY, thresholdGateTextureKey)
+        .setDisplaySize(CHAMBER03_THRESHOLD_STAGING.gatePropWidth, CHAMBER03_THRESHOLD_STAGING.gatePropHeight)
+        .setTint(CHAMBER03_THRESHOLD_STAGING.gatePropTint)
+        .setAlpha(CHAMBER03_THRESHOLD_STAGING.gatePropAlpha)
+        .setDepth(CHAMBER03_THRESHOLD_STAGING.gatePropDepth);
     }
 
     if (hasHornArchArt) {
