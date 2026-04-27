@@ -173,6 +173,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.hasStartedSector02Chamber01 = false;
     this.pendingSector02Payload = null;
     this.sectorTransitionFallbackTimer = null;
+    this.bossBarRevealed = false;
   }
 
   create() {
@@ -686,6 +687,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     });
 
     this.mobileControls.setMode('gameplay');
+    this.tryRevealSectorBossBarWhenInView();
     this.updateBossHud(this.time.now);
   }
 
@@ -701,6 +703,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         restartRunFromDeath(this);
       }
 
+      this.tryRevealSectorBossBarWhenInView();
       this.updateBossHud(time);
       return;
     }
@@ -709,6 +712,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       this.restartText.setVisible(false);
       this.mobileControls.setMode('init');
       this.player.body.setVelocity(0, 0);
+      this.tryRevealSectorBossBarWhenInView();
       this.updateBossHud(time);
       return;
     }
@@ -730,6 +734,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
       this.tryUseProgressionThreshold(mobileInput);
       this.updateBossHud(time);
       this.updateFinaleGatePulse(time);
+      this.tryRevealSectorBossBarWhenInView();
       return;
     }
 
@@ -753,7 +758,43 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.updateFinaleGatePulse(time);
     this.directionalCameraBias?.update();
     this.hud.update(this.player.health, this.player.maxHealth);
+    this.tryRevealSectorBossBarWhenInView();
     this.updateBossHud(time);
+  }
+
+  isBossInOrNearCameraView(padding = 84) {
+    if (!this.bossSprite?.visible) {
+      return false;
+    }
+
+    const cameraView = this.cameras.main?.worldView;
+    if (!cameraView) {
+      return false;
+    }
+
+    const paddedView = new Phaser.Geom.Rectangle(
+      cameraView.x - padding,
+      cameraView.y - padding,
+      cameraView.width + padding * 2,
+      cameraView.height + padding * 2
+    );
+    const spriteBounds = this.bossSprite.getBounds?.();
+
+    if (spriteBounds?.width > 0 && spriteBounds?.height > 0) {
+      return Phaser.Geom.Intersects.RectangleToRectangle(paddedView, spriteBounds);
+    }
+
+    return paddedView.contains(this.bossSprite.x, this.bossSprite.y);
+  }
+
+  tryRevealSectorBossBarWhenInView() {
+    if (!this.hasActivatedBoss || this.bossCombat?.defeated || this.bossBarRevealed) {
+      return;
+    }
+
+    if (this.isBossInOrNearCameraView(84)) {
+      this.bossBarRevealed = true;
+    }
   }
 
   getBossPhaseConfig() {
@@ -780,8 +821,9 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     if (this.bossDefeatCeremonyBossBarActive) {
       this.hud.setBossBarState({
         visible: true,
-        name: CHAMBER03_BOSS_COMBAT.name,
-        subtitle: 'THRESHOLD VERDICT COLLAPSING',
+        name: '',
+        subtitle: '',
+        hideName: true,
         current: 0,
         max: this.bossCombat?.maxHealth ?? CHAMBER03_BOSS_COMBAT.maxHealth,
         telegraph: 1,
@@ -791,9 +833,10 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     }
 
     this.hud.setBossBarState({
-      visible: this.hasActivatedBoss && !this.bossCombat?.defeated,
+      visible: this.bossBarRevealed && this.hasActivatedBoss && !this.bossCombat?.defeated,
       name: '',
       subtitle: '',
+      hideName: true,
       current: this.bossCombat?.health ?? 0,
       max: this.bossCombat?.maxHealth ?? CHAMBER03_BOSS_COMBAT.maxHealth,
       telegraph: this.getBossTelegraphProgress(time),
@@ -890,8 +933,18 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     const bossY = this.bossSprite?.y;
     const floorPlaneY = WORLD.floorY + 2;
     const normalizedVisibleFootOffsetY = CHAMBER03_BOSS_COMBAT.presentation?.normalization?.visibleFootOffsetY ?? 0;
+    const poolAnchorX = bossX;
+    const poolAnchorY = floorPlaneY - 48;
+    const remainsAnchorX = bossX;
+    const remainsAnchorY = poolAnchorY + normalizedVisibleFootOffsetY;
+    const sharedRemainsAnchor = this.resolveSectorBossSharedRemainsAnchor({
+      poolX: poolAnchorX,
+      poolY: poolAnchorY,
+      remainsX: remainsAnchorX,
+      remainsY: remainsAnchorY
+    });
     const focusY = (Number.isFinite(bossY) ? bossY : CHAMBER03_BOSS_ARENA.bossAnchorY) - 44;
-    const hasFiniteAnchors = [bossX, bossY, floorPlaneY, focusY].every((value) => Number.isFinite(value));
+    const hasFiniteAnchors = [bossX, bossY, floorPlaneY, focusY, sharedRemainsAnchor.x, sharedRemainsAnchor.y].every((value) => Number.isFinite(value));
     if (!hasFiniteAnchors) {
       this.failSafeCompleteSectorBossDeath('[Chamber03BossArenaScene] invalid sector boss payoff anchors');
       return;
@@ -929,8 +982,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
           maxUpwardSnapPx: 52
         },
         corpseRemains: {
-          floorPlaneY: floorPlaneY - 48,
-          visibleFootOffsetY: normalizedVisibleFootOffsetY,
+          floorPlaneY: sharedRemainsAnchor.y,
+          visibleFootOffsetY: 0,
           size: 'bossPitBoss',
           spawnAtMs: CHAMBER03_FINALE.bloodFlashMs + 560 + CHAMBER03_FINALE.bossBarDropDelayMs + 220
         },
@@ -1016,6 +1069,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
           this.bossBody.enable = false;
           this.bossBody.setVelocity(0, 0);
           this.bossDefeatCeremonyBossBarActive = true;
+          this.bossBarRevealed = false;
           this.audioDirector?.playEnemyDeath('miniboss');
           this.bossStatusPrompt?.setVisible(false);
           this.sectorPayoffText?.setVisible(false).setAlpha(0);
@@ -1035,8 +1089,8 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
         onDespawn: () => {
           this.bossFallbackLabel?.setVisible(false).setAlpha(0);
           this.triggerSectorFinalePayoff({
-            x: this.bossSprite?.x,
-            floorPlaneY: floorPlaneY - 48,
+            x: sharedRemainsAnchor.x,
+            floorPlaneY: sharedRemainsAnchor.y,
             delayMs: CHAMBER03_FINALE.remainsAftermathDelayMs
           });
         },
@@ -1070,6 +1124,7 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.bossFallbackLabel?.setVisible(false).setAlpha(0);
     this.resolutionLockActive = false;
     this.bossDefeatCeremonyBossBarActive = false;
+    this.bossBarRevealed = false;
     this.hud?.setBossBarState({ visible: false });
     this.triggerSectorFinalePayoff();
     this.revealProgressionGate();
@@ -1093,6 +1148,20 @@ export class Chamber03BossArenaScene extends Phaser.Scene {
     this.time.delayedCall(220, () => {
       this.audioDirector?.playBanishmentSting();
     });
+  }
+
+  resolveSectorBossSharedRemainsAnchor({ poolX, poolY, remainsX, remainsY } = {}) {
+    const fallbackX = Number.isFinite(poolX) ? poolX : Number.isFinite(remainsX) ? remainsX : CHAMBER03_BOSS_ARENA.bossAnchorX;
+    const fallbackY = Number.isFinite(poolY) ? poolY : Number.isFinite(remainsY) ? remainsY : WORLD.floorY - 46;
+    const resolvedPoolX = Number.isFinite(poolX) ? poolX : fallbackX;
+    const resolvedPoolY = Number.isFinite(poolY) ? poolY : fallbackY;
+    const resolvedRemainsX = Number.isFinite(remainsX) ? remainsX : fallbackX;
+    const resolvedRemainsY = Number.isFinite(remainsY) ? remainsY : fallbackY;
+
+    return {
+      x: (resolvedPoolX + resolvedRemainsX) * 0.5,
+      y: (resolvedPoolY + resolvedRemainsY) * 0.5
+    };
   }
 
   spawnSectorFinaleAftermath(x, y) {

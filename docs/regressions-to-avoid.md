@@ -158,3 +158,8 @@ Known failure patterns and what future tasks must protect.
 **Observed risk:** pre-checking scene runtime status (`STOPPED`/etc.) before `scene.launch(...)` can falsely classify a registered scene as unavailable and silently skip intended lore beats.  
 - Prefer direct `scene.launch(...)` with guarded fallback/logging over status-gating launch attempts.
 - If lore is unexpectedly skipped, verify launch path and error handling first before changing cutscene content/config.
+
+## 21) Boss-Bar Reveal Timing vs Activation
+**Observed risk:** revealing boss UI as soon as boss activation flips can expose bars while the boss is still offscreen and produce unreadable/obscured label presentation.  
+- Keep boss activation and boss-bar reveal as separate states.
+- Default doctrine: reveal boss bar only when boss is in or near camera `worldView` (unless an encounter explicitly overrides).
