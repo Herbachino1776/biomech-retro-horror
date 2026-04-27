@@ -170,13 +170,13 @@ const CHAMBER03_PROCESSION = [
     depth: -14.39
   },
   {
-    key: ASSET_KEYS.chamber03BackgroundThreshold,
+    key: ASSET_KEYS.chamber03BackgroundWallModule,
     width: 860,
     height: 430,
     y: 214,
-    tint: 0xc7b49f,
-    alpha: 0.68,
-    depth: -14.62
+    tint: 0xb9a894,
+    alpha: 0.56,
+    depth: -14.48
   }
 ];
 
