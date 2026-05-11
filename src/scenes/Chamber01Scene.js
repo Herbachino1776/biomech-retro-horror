@@ -191,15 +191,16 @@ const ENEMY_VARIANTS = {
   basic: {
     ...SKITTER,
     awakenPlayerX: undefined,
-    body: { width: 76, height: 44, offsetX: 28, offsetY: 58 },
+    // s1c1_basic_01 frames have heavy alpha padding; body offset is intentionally low in-frame so visible creature sits on gameplay floor.
+    body: { width: 96, height: 64, offsetX: 154, offsetY: 300 },
     damageHurtbox: {
-      trimXRatio: 0.3,
-      trimYRatio: 0.22,
-      insetBottomPx: 8,
-      minWidth: 74,
-      minHeight: 54,
+      trimXRatio: 0.18,
+      trimYRatio: 0.16,
+      insetBottomPx: 18,
+      minWidth: 110,
+      minHeight: 90,
       offsetX: 0,
-      offsetY: -12
+      offsetY: 110
     },
     animationPack: {
       modelKey: 's1c1_basic_01',

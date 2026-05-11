@@ -3,6 +3,17 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-05-11)
+- **Chamber01 `s1c1_basic_01` invisible-but-active grounding regression fixed via body/hurtbox retune:**
+  - Root cause: animated strip runtime and animation-pack wiring were alive, but Chamber01 basic enemy still used legacy contact-body placement tuned for old framing; with new `512x512` padded frames, the body sat too high in-frame, so floor settlement pushed visible creature mass below the gameplay floor/control band.
+  - Chamber01 `ENEMY_VARIANTS.basic` was retuned (no asset or preload changes):
+    - display: `404x404` (unchanged)
+    - origin: `{ x: 0.5, y: 0.94 }` (unchanged)
+    - body: `{ width: 96, height: 64, offsetX: 154, offsetY: 300 }`
+    - damage hurtbox: `{ trimXRatio: 0.18, trimYRatio: 0.16, insetBottomPx: 18, minWidth: 110, minHeight: 90, offsetX: 0, offsetY: 110 }`
+  - `BootScene` strip loading remains `frameWidth: 512`, `frameHeight: 512`, `endFrame: 5`; no further strip resizing/re-slicing.
+  - Scope remained Chamber01 basic-only; Blind Cantor / Chamber02+ / boss systems were untouched.
+
+## Latest Update (2026-05-11)
 - **S1C1 basic enemy strip invisibility regression after runtime-safe slicing fix resolved:**
   - Root cause confirmed in `SkitterServitor`: animated Chamber01 basics correctly entered animation-pack path (`hasAnimationPack === true`), but legacy static skitter crop assumptions could still leak through concept-sprite checks and crop an animated sprite with old static concept-art crop coordinates.
   - `SkitterServitor` now gates default/static crop behavior behind `!hasAnimationPack`, so animation-pack sprites skip the old concept-art crop path entirely unless a future animation-specific crop is explicitly configured.
