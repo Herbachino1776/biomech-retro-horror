@@ -3,6 +3,13 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-05-11)
+- **S1C1 basic enemy strip invisibility regression after runtime-safe slicing fix resolved:**
+  - Root cause confirmed in `SkitterServitor`: animated Chamber01 basics correctly entered animation-pack path (`hasAnimationPack === true`), but legacy static skitter crop assumptions could still leak through concept-sprite checks and crop an animated sprite with old static concept-art crop coordinates.
+  - `SkitterServitor` now gates default/static crop behavior behind `!hasAnimationPack`, so animation-pack sprites skip the old concept-art crop path entirely unless a future animation-specific crop is explicitly configured.
+  - Animation-pack startup now explicitly plays idle once after animation registration (`sprite.play(idle, true)`) to avoid first-frame blank/start timing ambiguity on enemy spawn.
+  - BootScene runtime-safe `512x512` frame slicing for `s1c1_basic_01` strips remains unchanged; no further asset resizing was performed.
+
+## Latest Update (2026-05-11)
 - **S1C1 basic enemy strip runtime black-square fix landed:**
   - Chamber01 `s1c1_basic_01` animated strips previously loaded runtime as `18432x3072` sheets with `3072x3072` per-frame slicing; this exceeded reliable runtime texture/frame behavior on target WebGL/mobile profiles and produced black-square enemy rendering in scene.
   - Runtime strip assets were replaced in-place (same filenames/paths) with runtime-safe transparent strips at `3072x512` total, using `6` horizontal frames at `512x512` each.

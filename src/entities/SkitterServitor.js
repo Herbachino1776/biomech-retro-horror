@@ -67,8 +67,10 @@ export class SkitterServitor {
     this.hasAnimationPack = Boolean(this.animationPack?.idleKey && scene.textures.exists(this.animationPack.idleKey));
     const spritePresentation = this.config.presentation ?? {};
     const defaultPresentation = CONCEPT_PRESENTATION.skitter;
-    const shouldUseDefaultCrop = spriteKey === ASSET_KEYS.skitter;
-    const crop = spritePresentation.crop ?? (shouldUseDefaultCrop ? defaultPresentation.crop : null);
+    const shouldUseDefaultCrop = !this.hasAnimationPack && spriteKey === ASSET_KEYS.skitter;
+    const crop = !this.hasAnimationPack
+      ? (spritePresentation.crop ?? (shouldUseDefaultCrop ? defaultPresentation.crop : null))
+      : null;
     const display = spritePresentation.display ?? defaultPresentation.display;
     const origin = spritePresentation.origin ?? defaultPresentation.origin;
 
@@ -90,7 +92,7 @@ export class SkitterServitor {
         : scene.add.rectangle(x, y, 48, 34, 0x64453a).setOrigin(0.5).setDepth(6);
     scene.physics.add.existing(this.sprite);
 
-    if (this.usingConceptSprite && crop) {
+    if (!this.hasAnimationPack && this.usingConceptSprite && crop) {
       this.sprite.setCrop(crop.x, crop.y, crop.width, crop.height);
     }
 
@@ -122,6 +124,9 @@ export class SkitterServitor {
     this.baseAlpha = spritePresentation.alpha ?? defaultPresentation.alpha ?? 0.92;
     this.stateAlphas = spritePresentation.stateAlpha ?? {};
     this.setupAnimations();
+    if (this.hasAnimationPack && this.animationKeys?.idle) {
+      this.sprite.play(this.animationKeys.idle, true);
+    }
     this.eyeGlow = scene.add
       .ellipse(
         x,
