@@ -2,6 +2,14 @@
 
 Use this file to start a fresh planning/implementation session from real current state.
 
+## Latest Update (2026-05-11)
+- **S1C1 basic enemy strip runtime black-square fix landed:**
+  - Chamber01 `s1c1_basic_01` animated strips previously loaded runtime as `18432x3072` sheets with `3072x3072` per-frame slicing; this exceeded reliable runtime texture/frame behavior on target WebGL/mobile profiles and produced black-square enemy rendering in scene.
+  - Runtime strip assets were replaced in-place (same filenames/paths) with runtime-safe transparent strips at `3072x512` total, using `6` horizontal frames at `512x512` each.
+  - `BootScene` spritesheet preload for `s1c1Basic01IdleStrip`, `s1c1Basic01WalkStrip`, and `s1c1Basic01AttackStrip` now uses `frameWidth: 512`, `frameHeight: 512`, `endFrame: 5`.
+  - Chamber01 basic enemy animation wiring remains animation-pack based (`idle/walk/attack` keys, frames `0..5`) with no static fallback regression required when textures are present.
+  - Chamber01 basic presentation sizing/origin remains tuned at `404x404` and origin `{ x: 0.5, y: 0.94 }` pending runtime visual validation; Blind Cantor/Chamber02+/boss systems unchanged.
+
 ## Latest Update (2026-04-27)
 - **S1C3 sector-boss finale anchor/UI polish pass landed:**
   - Chamber03 sector-boss death aftermath now resolves a single shared remains anchor midpoint in-scene and uses that same anchor for both the large persistent blood-pool container and boss-tier corpse-remains spawn, eliminating split payoff-site visuals.

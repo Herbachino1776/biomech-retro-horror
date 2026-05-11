@@ -203,18 +203,18 @@ export class BootScene extends Phaser.Scene {
       endFrame: 4
     });
     this.load.spritesheet(ASSET_KEYS.s1c1Basic01IdleStrip, ASSET_URLS[ASSET_KEYS.s1c1Basic01IdleStrip], {
-      frameWidth: 3072,
-      frameHeight: 3072,
+      frameWidth: 512,
+      frameHeight: 512,
       endFrame: 5
     });
     this.load.spritesheet(ASSET_KEYS.s1c1Basic01WalkStrip, ASSET_URLS[ASSET_KEYS.s1c1Basic01WalkStrip], {
-      frameWidth: 3072,
-      frameHeight: 3072,
+      frameWidth: 512,
+      frameHeight: 512,
       endFrame: 5
     });
     this.load.spritesheet(ASSET_KEYS.s1c1Basic01AttackStrip, ASSET_URLS[ASSET_KEYS.s1c1Basic01AttackStrip], {
-      frameWidth: 3072,
-      frameHeight: 3072,
+      frameWidth: 512,
+      frameHeight: 512,
       endFrame: 5
     });
     this.load.image(ASSET_KEYS.playerWeaponHammer01, ASSET_URLS[ASSET_KEYS.playerWeaponHammer01]);
