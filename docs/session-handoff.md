@@ -262,3 +262,16 @@ Still available as targeted follow-up:
 3. Keep Milestone 8 carryover consistency aligned during S4 + BRUTALITY sequencing.
 4. Preserve Enemy Class Unification + Grounding/Scale Normalization as a separate milestone after near-term BRUTALITY focus.
 5. Preserve boss package polish + global retrofit as a dedicated separate milestone, not background drift work.
+
+## Chamber01 basic enemy sprite-strip retrofit (s1c1_basic_01)
+- Chamber01 basic `SkitterServitor` enemies now use animated strips from:
+  - `art/raw/enemies/basic/s1c1_basic_01/s1c1_basic_01_idle_strip.png`
+  - `art/raw/enemies/basic/s1c1_basic_01/s1c1_basic_01_walk_strip.png`
+  - `art/raw/enemies/basic/s1c1_basic_01/s1c1_basic_01_attack_strip.png`
+- Strip format wired in preload: 6 horizontal frames, `3072x3072` per frame (`18432x3072` strip), loaded as Phaser spritesheets with `endFrame: 5`.
+- Chamber01 basic presentation tuning currently set to:
+  - display size: `404x404`
+  - origin: `{ x: 0.5, y: 0.94 }`
+  - contact body: `{ width: 76, height: 44, offsetX: 28, offsetY: 58 }`
+  - damage hurtbox config: `{ trimXRatio: 0.3, trimYRatio: 0.22, insetBottomPx: 8, minWidth: 74, minHeight: 54, offsetX: 0, offsetY: -12 }`
+- Scope lock: this pass only replaces Chamber01 **basic** enemies; Blind Cantor / Chamber02+ / boss systems remain unchanged.

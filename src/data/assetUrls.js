@@ -171,6 +171,9 @@ import playerWalkPuppetStrip06Url from '../../art/raw/player/player_walk_puppet_
 import playerIdleBreatheStrip05Url from '../../art/raw/player/player_idle_breathe_strip_05.png';
 import playerBrutalityWalkStrip01Url from '../../art/raw/player/player_brutality_walk_strip_01.png';
 import playerBrutalityIdleStrip01Url from '../../art/raw/player/player_brutality_idle_strip_01.png';
+import s1c1Basic01IdleStripUrl from '../../art/raw/enemies/basic/s1c1_basic_01/s1c1_basic_01_idle_strip.png';
+import s1c1Basic01WalkStripUrl from '../../art/raw/enemies/basic/s1c1_basic_01/s1c1_basic_01_walk_strip.png';
+import s1c1Basic01AttackStripUrl from '../../art/raw/enemies/basic/s1c1_basic_01/s1c1_basic_01_attack_strip.png';
 import playerWeaponHammer01Url from '../../art/raw/player/player_weapon_hammer_01.png';
 import playerWeaponHammerOfBanishment01Url from '../../art/raw/player/player_weapon_hammer_of_banishment_01.png';
 import skitterConceptUrl from '../../assets/concepts/enemy-concept-01-left.png';
@@ -378,6 +381,9 @@ export const ASSET_URLS = {
   [ASSET_KEYS.playerIdle]: playerIdleBreatheStrip05Url,
   [ASSET_KEYS.playerBrutalityWalk]: playerBrutalityWalkStrip01Url,
   [ASSET_KEYS.playerBrutalityIdle]: playerBrutalityIdleStrip01Url,
+  [ASSET_KEYS.s1c1Basic01IdleStrip]: s1c1Basic01IdleStripUrl,
+  [ASSET_KEYS.s1c1Basic01WalkStrip]: s1c1Basic01WalkStripUrl,
+  [ASSET_KEYS.s1c1Basic01AttackStrip]: s1c1Basic01AttackStripUrl,
   [ASSET_KEYS.playerWeaponHammer01]: playerWeaponHammer01Url,
   [ASSET_KEYS.playerWeaponHammerOfBanishment01]: playerWeaponHammerOfBanishment01Url,
   [ASSET_KEYS.skitter]: skitterConceptUrl,
