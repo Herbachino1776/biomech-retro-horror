@@ -63,6 +63,8 @@ export class SkitterServitor {
     this.staggerUntil = -Infinity;
 
     const spriteKey = this.config.textureKey ?? ASSET_KEYS.skitter;
+    this.animationPack = this.config.animationPack ?? null;
+    this.hasAnimationPack = Boolean(this.animationPack?.idleKey && scene.textures.exists(this.animationPack.idleKey));
     const spritePresentation = this.config.presentation ?? {};
     const defaultPresentation = CONCEPT_PRESENTATION.skitter;
     const shouldUseDefaultCrop = spriteKey === ASSET_KEYS.skitter;
@@ -71,14 +73,21 @@ export class SkitterServitor {
     const origin = spritePresentation.origin ?? defaultPresentation.origin;
 
     this.usingConceptSprite = scene.textures.exists(spriteKey);
-    this.sprite = this.usingConceptSprite
+    this.sprite = this.hasAnimationPack
       ? scene.add
-          .image(x, y, spriteKey)
+          .sprite(x, y, this.animationPack.idleKey, 0)
           .setOrigin(origin.x, origin.y)
           .setDisplaySize(display.width, display.height)
           .setAlpha(spritePresentation.alpha ?? defaultPresentation.alpha ?? 1)
           .setDepth(6)
-      : scene.add.rectangle(x, y, 48, 34, 0x64453a).setOrigin(0.5).setDepth(6);
+      : this.usingConceptSprite
+        ? scene.add
+            .image(x, y, spriteKey)
+            .setOrigin(origin.x, origin.y)
+            .setDisplaySize(display.width, display.height)
+            .setAlpha(spritePresentation.alpha ?? defaultPresentation.alpha ?? 1)
+            .setDepth(6)
+        : scene.add.rectangle(x, y, 48, 34, 0x64453a).setOrigin(0.5).setDepth(6);
     scene.physics.add.existing(this.sprite);
 
     if (this.usingConceptSprite && crop) {
@@ -112,6 +121,7 @@ export class SkitterServitor {
     this.baseScaleY = this.sprite.scaleY || 1;
     this.baseAlpha = spritePresentation.alpha ?? defaultPresentation.alpha ?? 0.92;
     this.stateAlphas = spritePresentation.stateAlpha ?? {};
+    this.setupAnimations();
     this.eyeGlow = scene.add
       .ellipse(
         x,
@@ -123,6 +133,50 @@ export class SkitterServitor {
       )
       .setDepth(6.4)
       .setVisible(true);
+  }
+
+  setupAnimations() {
+    if (!this.hasAnimationPack) {
+      return;
+    }
+
+    const {
+      idleKey,
+      walkKey = idleKey,
+      attackKey = idleKey,
+      frameRate = 8,
+      modelKey = 's1c1_basic_01'
+    } = this.animationPack;
+    this.animationKeys = {
+      idle: `${modelKey}_idle`,
+      walk: `${modelKey}_walk`,
+      attack: `${modelKey}_attack`
+    };
+
+    if (!this.scene.anims.exists(this.animationKeys.idle)) {
+      this.scene.anims.create({
+        key: this.animationKeys.idle,
+        frames: this.scene.anims.generateFrameNumbers(idleKey, { start: 0, end: 5 }),
+        frameRate,
+        repeat: -1
+      });
+    }
+    if (!this.scene.anims.exists(this.animationKeys.walk)) {
+      this.scene.anims.create({
+        key: this.animationKeys.walk,
+        frames: this.scene.anims.generateFrameNumbers(walkKey, { start: 0, end: 5 }),
+        frameRate,
+        repeat: -1
+      });
+    }
+    if (!this.scene.anims.exists(this.animationKeys.attack)) {
+      this.scene.anims.create({
+        key: this.animationKeys.attack,
+        frames: this.scene.anims.generateFrameNumbers(attackKey, { start: 0, end: 5 }),
+        frameRate,
+        repeat: -1
+      });
+    }
   }
 
   setActive(isActive = true) {
@@ -534,6 +588,7 @@ export class SkitterServitor {
       this.sprite.setScale(Math.abs(this.baseScaleX) * (this.direction > 0 ? -1 : 1), this.sprite.scaleY);
     }
     this.updateEyeGlow(time);
+    this.updateAnimationState();
 
     if (this.combatState === 'windup') {
       const pulse = 0.82 + Math.sin(time * 0.03) * 0.05;
@@ -575,6 +630,23 @@ export class SkitterServitor {
     }
 
     this.setVisualTint(0x64453a);
+  }
+
+  updateAnimationState() {
+    if (!this.hasAnimationPack || !this.sprite?.anims) {
+      return;
+    }
+
+    const moving = Math.abs(this.body?.velocity?.x ?? 0) > 10;
+    const attackState = this.combatState === 'windup' || this.combatState === 'attack';
+    const nextAnim = attackState
+      ? this.animationKeys.attack
+      : moving
+        ? this.animationKeys.walk
+        : this.animationKeys.idle;
+    if (this.sprite.anims.currentAnim?.key !== nextAnim) {
+      this.sprite.play(nextAnim, true);
+    }
   }
 
   getStateAlpha(state, fallbackAlpha) {

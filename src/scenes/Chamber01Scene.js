@@ -191,10 +191,27 @@ const ENEMY_VARIANTS = {
   basic: {
     ...SKITTER,
     awakenPlayerX: undefined,
+    body: { width: 76, height: 44, offsetX: 28, offsetY: 58 },
+    damageHurtbox: {
+      trimXRatio: 0.3,
+      trimYRatio: 0.22,
+      insetBottomPx: 8,
+      minWidth: 74,
+      minHeight: 54,
+      offsetX: 0,
+      offsetY: -12
+    },
+    animationPack: {
+      modelKey: 's1c1_basic_01',
+      idleKey: ASSET_KEYS.s1c1Basic01IdleStrip,
+      walkKey: ASSET_KEYS.s1c1Basic01WalkStrip,
+      attackKey: ASSET_KEYS.s1c1Basic01AttackStrip,
+      frameRate: 8
+    },
     presentation: {
       alpha: 0.96,
-      display: { width: 168, height: 148 },
-      origin: { x: 0.5, y: 0.93 },
+      display: { width: 404, height: 404 },
+      origin: { x: 0.5, y: 0.94 },
       stateAlpha: { windup: 1, attack: 1, hurt: 0.96, dead: 0.44 }
     }
   },
@@ -419,8 +436,7 @@ export class Chamber01Scene extends Phaser.Scene {
       const enemies = pocketConfig.enemies.map((enemyConfig) => {
         const config = ENEMY_VARIANTS[enemyConfig.variant] ?? ENEMY_VARIANTS.basic;
         const enemy = new SkitterServitor(this, enemyConfig.x, PLAYER.startY, {
-          ...config,
-          textureKey: ASSET_KEYS.skitter
+          ...config
         });
         enemy.awakened = false;
         enemy.pocketWakeAtTime = null;
