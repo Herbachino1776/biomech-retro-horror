@@ -212,7 +212,7 @@ const ENEMY_VARIANTS = {
     presentation: {
       alpha: 0.96,
       display: { width: 404, height: 404 },
-      origin: { x: 0.5, y: 0.94 },
+      origin: { x: 0.5, y: 1.04 },
       stateAlpha: { windup: 1, attack: 1, hurt: 0.96, dead: 0.44 }
     }
   },

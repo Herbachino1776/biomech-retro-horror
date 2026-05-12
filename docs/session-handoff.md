@@ -3,6 +3,16 @@
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-05-11)
+- **Chamber01 `s1c1_basic_01` basic presentation grounding follow-up landed (visual-only):**
+  - Root cause: after the body/hurtbox retune restored visibility and gameplay function, the animated strip frames still carried heavy top padding, so the rendered creature mass sat visually high within the `404x404` display box at origin `y: 0.94` (appearing near player head level despite acceptable collision grounding).
+  - Chamber01 `ENEMY_VARIANTS.basic` presentation was adjusted locally (no preload/asset/body/hurtbox rollback):
+    - display: `404x404` (unchanged)
+    - origin: `{ x: 0.5, y: 1.04 }` (was `{ x: 0.5, y: 0.94 }`)
+    - body: `{ width: 96, height: 64, offsetX: 154, offsetY: 300 }` (unchanged)
+    - damage hurtbox: `{ trimXRatio: 0.18, trimYRatio: 0.16, insetBottomPx: 18, minWidth: 110, minHeight: 90, offsetX: 0, offsetY: 110 }` (unchanged)
+  - Scope remained Chamber01 basic-only; Blind Cantor / Chamber02+ / boss systems remained untouched.
+
+## Latest Update (2026-05-11)
 - **Chamber01 `s1c1_basic_01` invisible-but-active grounding regression fixed via body/hurtbox retune:**
   - Root cause: animated strip runtime and animation-pack wiring were alive, but Chamber01 basic enemy still used legacy contact-body placement tuned for old framing; with new `512x512` padded frames, the body sat too high in-frame, so floor settlement pushed visible creature mass below the gameplay floor/control band.
   - Chamber01 `ENEMY_VARIANTS.basic` was retuned (no asset or preload changes):
