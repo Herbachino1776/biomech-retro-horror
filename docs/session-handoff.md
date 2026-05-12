@@ -1,5 +1,16 @@
 # Session Handoff
 
+## Latest Update (2026-05-12)
+- **Chamber01 `s1c1_basic_01` basic vertical-placement retune landed (body-offset-driven):**
+  - Follow-up diagnosis confirmed the prior origin-only pass was the wrong lever for this issue: with Arcade physics floor contact, grounded visual placement is primarily dictated by contact body geometry/offset on padded frames.
+  - Chamber01 `ENEMY_VARIANTS.basic` was retuned in-scene only (no preload/assets/AI/combat-window changes):
+    - display: `404x404` (unchanged)
+    - origin: `{ x: 0.5, y: 0.94 }` (reverted from `1.04`)
+    - body: `{ width: 96, height: 64, offsetX: 154, offsetY: 245 }` (down from `300`)
+    - damage hurtbox: `{ trimXRatio: 0.18, trimYRatio: 0.16, insetBottomPx: 18, minWidth: 110, minHeight: 90, offsetX: 0, offsetY: 110 }` (unchanged)
+  - For `512x512` padded animation frames, decreasing `body.offsetY` lowered the visible creature while keeping the grounded contact model intact.
+  - Scope stayed Chamber01 basic-only; Blind Cantor / Chamber02+ / boss systems untouched.
+
 Use this file to start a fresh planning/implementation session from real current state.
 
 ## Latest Update (2026-05-11)

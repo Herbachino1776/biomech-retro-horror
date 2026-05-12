@@ -192,7 +192,7 @@ const ENEMY_VARIANTS = {
     ...SKITTER,
     awakenPlayerX: undefined,
     // s1c1_basic_01 frames have heavy alpha padding; body offset is intentionally low in-frame so visible creature sits on gameplay floor.
-    body: { width: 96, height: 64, offsetX: 154, offsetY: 300 },
+    body: { width: 96, height: 64, offsetX: 154, offsetY: 245 },
     damageHurtbox: {
       trimXRatio: 0.18,
       trimYRatio: 0.16,
@@ -212,7 +212,7 @@ const ENEMY_VARIANTS = {
     presentation: {
       alpha: 0.96,
       display: { width: 404, height: 404 },
-      origin: { x: 0.5, y: 1.04 },
+      origin: { x: 0.5, y: 0.94 },
       stateAlpha: { windup: 1, attack: 1, hurt: 0.96, dead: 0.44 }
     }
   },
